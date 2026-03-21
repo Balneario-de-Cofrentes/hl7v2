@@ -60,9 +60,11 @@ defmodule HL7v2 do
   Validates an HL7v2 message.
 
   Returns `:ok` or `{:error, [error]}`.
+
+  Not yet implemented — will be available after Phase 6 (Validation Engine).
   """
   @spec validate(term()) :: :ok | {:error, [map()]}
-  def validate(message) do
-    HL7v2.Validation.validate(message)
+  def validate(_message) do
+    {:error, :not_implemented}
   end
 end
