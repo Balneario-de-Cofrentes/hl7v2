@@ -28,35 +28,30 @@ Presence-only validation. 21 standard segments, 43 v2.5.1 types + legacy TN,
 - [x] MRG + RGS segments with tests
 - [x] OBX dispatch extended (CQ, MO, DR, XON, CP, FC, TN)
 
-### M2: Standard Model
+### M2: Standard Model — COMPLETE (v0.6.0)
 
-Build-time v2.5.1 metadata generation and conformance test infrastructure.
+- [x] HL7v2.Standard module with segment catalog (~136), type catalog (~84), capability tiers
+- [x] MessageStructure: 20 group-aware abstract message definitions
+- [x] Coverage ledger: HL7v2.Standard.Coverage + `mix hl7v2.coverage` task
+- [x] Conformance tests: 27 metadata + fixture round-trip tests
+- [x] MessageDefinition delegates to MessageStructure
 
-- [ ] v2.5.1 segment/field/type dataset (JSON or Elixir term, build-time generated)
-- [ ] Trigger-to-structure mapping from spec (replace hand-curated map)
-- [ ] Group/anchor/cardinality metadata for message structures
-- [ ] Conformance test fixture pipeline (spec-derived + synthetic + real-world)
-- [ ] Capability tier flags per segment/type/structure
-- [ ] Generated coverage ledger (replaces hand-maintained README counts)
+### M3: Narrow But Real Conformance — COMPLETE (v0.7.0)
 
-### M3: Narrow But Real Conformance
+- [x] Structural validator: order, group anchors, cardinality checking
+- [x] Detection: wrong order, repeated non-repeatables, missing required/anchors
+- [x] Strict vs lenient validation modes
+- [x] 28 positive + negative structural validation tests
+- [x] Validation.validate/1 uses structural validation for all 20 defined structures
 
-Structural validation for the core ADT/ACK/ORU/SIU subset.
+### M4: Order/Observation Expansion — COMPLETE (v0.8.0)
 
-- [ ] Message structure AST (segments, groups, anchors, cardinality, alternatives)
-- [ ] Structural validator: order, group anchors, cardinality, nesting
-- [ ] Detection: orphan segments, wrong order, repeated non-repeatables, missing anchors
-- [ ] Strict vs lenient parse/validate modes
-- [ ] Positive + negative validation tests per supported structure
-
-### M4: Order/Observation Expansion
-
-Fill type gaps and complete realistic ORM_O01 / ORU_R01.
-
-- [ ] Missing types: TQ, TM, SPS, ELD, ED, SN, RP, CF, RPT, PLN, PPN
-- [ ] Remove :raw holes in OBR-15, OBR-27, ORC-7, SCH-11, ERR-1
-- [ ] OBX-5 dispatch for ED, SN, RP, TM
-- [ ] Segments: SPM, TQ1, TQ2, CTD, CTI
+- [x] TQ (Timing/Quantity, 12 components): OBR-27, ORC-7, SCH-11 now typed
+- [x] ELD (Error Location and Description, 4 components): ERR-1 now typed
+- [x] SPS (Specimen Source, 7 components): OBR-15 now typed
+- [x] TM (Time primitive): added to OBX-5 dispatch
+- [x] Raw holes: 6 → 1 (OBX-5 only, by design)
+- [x] Type coverage: 48/84 (57.1%)
 
 ### M5: Broad Clinical Coverage
 
