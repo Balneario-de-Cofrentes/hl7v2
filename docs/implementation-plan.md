@@ -1,8 +1,14 @@
-# HL7v2 Implementation Plan
+# HL7v2 Implementation Plan (Historical)
 
-## Status: COMPLETE (2026-03-22)
+> **Note:** This is the original implementation plan, preserved for historical
+> reference. It reflects the initial build scope, not current coverage or
+> capabilities. See README.md for current state.
 
-All 9 phases implemented. 1,382 tests (1,124 unit + 228 doctests + 30 properties), 0 failures.
+## Status: Initial Build Complete (2026-03-22)
+
+Initial 9 phases implemented. Library has since been extended through v0.5.x
+with additional segments, types, conformance fixes, and honest coverage framing.
+See CHANGELOG.md for the full history.
 
 ## Phase Overview
 

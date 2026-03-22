@@ -337,9 +337,13 @@ defmodule HL7v2.Access do
 
   defp resolve_field_with_error({_name, raw_fields}, %{field: field_seq})
        when is_list(raw_fields) do
-    case Enum.at(raw_fields, field_seq - 1) do
-      nil -> {:ok, nil}
-      value -> {:ok, value}
+    if field_seq > length(raw_fields) do
+      {:error, :field_not_found}
+    else
+      case Enum.at(raw_fields, field_seq - 1) do
+        nil -> {:ok, nil}
+        value -> {:ok, value}
+      end
     end
   end
 

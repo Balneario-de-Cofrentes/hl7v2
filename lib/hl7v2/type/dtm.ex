@@ -96,11 +96,14 @@ defmodule HL7v2.Type.DTM do
           ""
 
         {us, precision} ->
+          # HL7 v2.5.1 DTM allows 1-4 fractional digits
+          capped = min(precision, 4)
+
           "." <>
             (us
              |> Integer.to_string()
              |> String.pad_leading(6, "0")
-             |> String.slice(0, precision))
+             |> String.slice(0, capped))
       end
 
     offset = format_utc_offset(dt.utc_offset + dt.std_offset)
@@ -120,9 +123,12 @@ defmodule HL7v2.Type.DTM do
         base
 
       {us, precision} ->
+        # HL7 v2.5.1 DTM allows 1-4 fractional digits
+        capped = min(precision, 4)
+
         base <>
           "." <>
-          (us |> Integer.to_string() |> String.pad_leading(6, "0") |> String.slice(0, precision))
+          (us |> Integer.to_string() |> String.pad_leading(6, "0") |> String.slice(0, capped))
     end
   end
 

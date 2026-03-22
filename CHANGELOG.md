@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.6 — 2026-03-22
+
+### Fixes
+
+- **DTM encode precision** — DateTime/NaiveDateTime encode now caps fractional seconds
+  at 4 digits per HL7 v2.5.1 spec (was emitting up to 6, which the parser couldn't
+  re-parse)
+- **fetch/2 raw tuple bounds** — `fetch(msg, "PR1-99")` on raw tuple segments now
+  returns `{:error, :field_not_found}` instead of `{:ok, nil}` for out-of-range fields
+- **Type count** — README: "43 v2.5.1 types + legacy TN" (TN is deprecated, not in the
+  v2.5.1 data-structure catalog)
+- **Implementation plan** — Marked as historical reference, no longer claims "COMPLETE"
+
 ## v0.5.5 — 2026-03-22
 
 ### Fixes

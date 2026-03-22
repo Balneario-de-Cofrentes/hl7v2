@@ -274,9 +274,9 @@ defmodule HL7v2.Type.DTMTest do
       assert DTM.encode(dt) == "20260322193022+0000"
     end
 
-    test "encodes DateTime with microseconds" do
+    test "encodes DateTime with microseconds (capped at 4 digits per HL7 v2.5.1)" do
       {:ok, dt, _} = DateTime.from_iso8601("2026-03-22T14:30:22.123456Z")
-      assert DTM.encode(dt) == "20260322143022.123456+0000"
+      assert DTM.encode(dt) == "20260322143022.1234+0000"
     end
 
     test "encodes DateTime with zero microseconds omits fraction" do
@@ -290,9 +290,9 @@ defmodule HL7v2.Type.DTMTest do
       assert DTM.encode(ndt) == "20260322143022"
     end
 
-    test "encodes NaiveDateTime with microseconds" do
+    test "encodes NaiveDateTime with microseconds (capped at 4 digits per HL7 v2.5.1)" do
       ndt = ~N[2026-03-22 14:30:22.123456]
-      assert DTM.encode(ndt) == "20260322143022.123456"
+      assert DTM.encode(ndt) == "20260322143022.1234"
     end
 
     test "encodes NaiveDateTime with zero microseconds omits fraction" do
