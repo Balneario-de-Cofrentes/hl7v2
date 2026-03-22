@@ -29,20 +29,13 @@ defmodule HL7v2.Conformance.StructureTest do
     end
 
     test "typed parser registry matches standard catalog" do
-      # TypedParser's @segment_modules should match Standard's typed segments
-      typed_parser_ids =
-        HL7v2.TypedParser.__info__(:attributes)
-        |> Keyword.get(:segment_modules, [%{}])
-        |> List.first()
-        |> Map.keys()
-        |> Enum.sort()
-
-      # Can't access module attribute directly, verify via Standard
-      standard_ids = Standard.typed_segment_ids()
-
-      for id <- standard_ids do
+      for id <- Standard.typed_segment_ids() do
         assert Standard.segment_module(id) != nil,
                "Standard lists #{id} as typed but has no module"
+
+        module = Standard.segment_module(id)
+        assert HL7v2.TypedParser.segment_module(id) == module,
+               "TypedParser missing #{id}"
       end
     end
 

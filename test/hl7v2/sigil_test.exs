@@ -51,7 +51,8 @@ defmodule HL7v2.SigilTest do
     end
 
     test "fetch returns error for missing segment at runtime", %{msg: msg} do
-      assert {:error, :segment_not_found} = HL7v2.fetch(msg, ~h"ZPD")
+      # Use string path (not ~h) to avoid compile-time warning for unknown segment
+      assert {:error, :segment_not_found} = HL7v2.fetch(msg, "ZPD")
     end
 
     test "known segment with valid field compiles" do

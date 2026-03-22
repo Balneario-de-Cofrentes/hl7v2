@@ -184,8 +184,6 @@ end
  Validation  structural (order/groups/cardinality) + opt-in table checking
               20 HL7 tables, 11 coded fields validated
 
- Tests       1,921 (266 doctests + 30 properties + 1,625 tests)
- Coverage    ~93%
  Speed       <1s full suite
 ```
 
