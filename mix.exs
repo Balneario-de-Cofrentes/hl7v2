@@ -53,7 +53,7 @@ defmodule HL7v2.MixProject do
         "Docs" => "https://hexdocs.pm/hl7v2",
         "Changelog" => "#{@source_url}/blob/main/CHANGELOG.md"
       },
-      files: ~w(lib .formatter.exs mix.exs README.md LICENSE CHANGELOG.md)
+      files: ~w(lib .formatter.exs mix.exs README.md LICENSE CHANGELOG.md guides)
     ]
   end
 
