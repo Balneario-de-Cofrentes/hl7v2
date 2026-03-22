@@ -28,8 +28,17 @@ defmodule HL7v2.Type do
       nil -> nil
       "" -> nil
       value when is_binary(value) -> value
+      subs when is_list(subs) -> rejoin_sub_components(subs)
       _other -> nil
     end
+  end
+
+  # When the raw parser has already split sub-components into a list,
+  # rejoin them with the sub-component delimiter so that composite type
+  # parsers (CX, XPN, etc.) can re-split and parse them as expected.
+  defp rejoin_sub_components(subs) do
+    joined = Enum.join(subs, "&")
+    if joined == "", do: nil, else: joined
   end
 
   @doc """

@@ -78,7 +78,7 @@ defmodule HL7v2.EncoderTest do
       assert String.contains?(result, "12345^5^M11^ADT1&MR&HOSP")
     end
 
-    test "trims trailing empty fields" do
+    test "preserves trailing empty fields for lossless round-trip" do
       raw = %RawMessage{
         separators: Separator.default(),
         type: {"ADT", "A01"},
@@ -90,8 +90,8 @@ defmodule HL7v2.EncoderTest do
       }
 
       result = Encoder.encode(raw)
-      # Trailing empty fields after "12345" should be trimmed
-      assert result =~ ~r/PID\|1\|\|12345\r/
+      # Trailing empty fields are preserved for lossless round-trip
+      assert result =~ ~r/PID\|1\|\|12345\|\|\|\|\r/
     end
 
     test "preserves middle empty fields" do
@@ -109,7 +109,7 @@ defmodule HL7v2.EncoderTest do
       assert result =~ ~r/PID\|1\|\|\|\|Smith\^John\r/
     end
 
-    test "trims trailing empty components" do
+    test "preserves trailing empty components for lossless round-trip" do
       raw = %RawMessage{
         separators: Separator.default(),
         type: {"ADT", "A01"},
@@ -121,7 +121,8 @@ defmodule HL7v2.EncoderTest do
       }
 
       result = Encoder.encode(raw)
-      assert result =~ ~r/Smith\^John\r/
+      # Trailing empty components are preserved for lossless round-trip
+      assert result =~ ~r/Smith\^John\^\^\^\r/
     end
 
     test "encodes with custom separators" do

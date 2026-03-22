@@ -3,8 +3,9 @@ defmodule HL7v2.Encoder do
   Serializes HL7v2 messages to wire format.
 
   Reconstructs the HL7v2 wire format from a `RawMessage` struct. The encoder
-  handles the MSH-1/MSH-2 special encoding and trims trailing empty fields
-  and components.
+  handles the MSH-1/MSH-2 special encoding and faithfully reproduces the
+  field structure present in the raw message — no trimming is applied, so
+  `parse(text) |> encode() == text` holds (lossless round-trip).
 
   Uses iodata internally for performance — the final result is converted to
   a binary only at the top level.
@@ -40,8 +41,7 @@ defmodule HL7v2.Encoder do
 
   defp encode_segment({name, fields}, %Separator{} = sep) do
     encoded_fields = Enum.map(fields, &encode_field(&1, sep))
-    trimmed = trim_trailing_empty(encoded_fields)
-    [name | Enum.map(trimmed, &[<<sep.field>>, &1])]
+    [name | Enum.map(encoded_fields, &[<<sep.field>>, &1])]
   end
 
   # MSH encoding is special:
@@ -52,8 +52,7 @@ defmodule HL7v2.Encoder do
     case fields do
       [_msh_1, msh_2 | rest] ->
         encoded_rest = Enum.map(rest, &encode_field(&1, sep))
-        trimmed = trim_trailing_empty(encoded_rest)
-        ["MSH", <<sep.field>>, msh_2 | Enum.map(trimmed, &[<<sep.field>>, &1])]
+        ["MSH", <<sep.field>>, msh_2 | Enum.map(encoded_rest, &[<<sep.field>>, &1])]
 
       [_msh_1] ->
         ["MSH", <<sep.field>>]
@@ -70,8 +69,7 @@ defmodule HL7v2.Encoder do
     if nested_repetitions?(values) do
       # List of repetitions — each element is a component list or string
       encoded = Enum.map(values, &encode_components(&1, sep))
-      trimmed = trim_trailing_empty(encoded)
-      Enum.intersperse(trimmed, <<sep.repetition>>)
+      Enum.intersperse(encoded, <<sep.repetition>>)
     else
       # Single set of components (or sub-components)
       encode_components(values, sep)
@@ -82,15 +80,13 @@ defmodule HL7v2.Encoder do
 
   defp encode_components(components, sep) when is_list(components) do
     encoded = Enum.map(components, &encode_sub_components(&1, sep))
-    trimmed = trim_trailing_empty(encoded)
-    Enum.intersperse(trimmed, <<sep.component>>)
+    Enum.intersperse(encoded, <<sep.component>>)
   end
 
   defp encode_sub_components(value, _sep) when is_binary(value), do: value
 
   defp encode_sub_components(subs, sep) when is_list(subs) do
-    trimmed = trim_trailing_empty(subs)
-    Enum.intersperse(trimmed, <<sep.sub_component>>)
+    Enum.intersperse(subs, <<sep.sub_component>>)
   end
 
   # Detect whether a list represents repetitions (list of component-lists)
@@ -118,16 +114,4 @@ defmodule HL7v2.Encoder do
   defp nested_repetitions?(values) do
     Enum.all?(values, &is_list/1)
   end
-
-  # Trim trailing empty strings/iodata from a list, preserving leading/middle empties.
-  defp trim_trailing_empty(list) do
-    list
-    |> Enum.reverse()
-    |> Enum.drop_while(&iodata_empty?/1)
-    |> Enum.reverse()
-  end
-
-  defp iodata_empty?(""), do: true
-  defp iodata_empty?([]), do: true
-  defp iodata_empty?(_), do: false
 end
