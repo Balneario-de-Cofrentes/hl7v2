@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.0.0 — 2026-03-23
+
+### M6: Conformance Platform
+
+- **HL7 table validation** — 20 coded-value tables from HL7 v2.5.1 (administrative sex,
+  patient class, message type, processing ID, acknowledgment codes, observation status,
+  value types, identifier types, and more). Opt-in via `validate(msg, validate_tables: true)`.
+- **Table-aware field validation** — 11 coded fields checked against their HL7 tables:
+  MSH-9.1, MSH-11.1, MSH-12.1, MSH-15, MSH-16, PID-8, PV1-2, PV1-4, MSA-1, OBX-2, OBX-11
+- **Tables API** — `HL7v2.Standard.Tables.valid?(table_id, code)`, `validate/2`, `get/1`
+- 26 new table validation tests
+
+### Stats
+
+1,921 tests (266 doctests + 30 properties + 1,625 tests), 0 failures
+
 ## v0.9.0 — 2026-03-23
 
 ### M5: Broad Clinical Coverage

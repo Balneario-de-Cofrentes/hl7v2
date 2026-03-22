@@ -1,11 +1,11 @@
 # HL7v2 Conformance Roadmap
 
-## Current State (v0.9.0)
+## Current State (v1.0.0)
 
 Strong raw round-trip core. Typed support for ADT/ORM/ORU/SIU/ACK with structural
-validation (order, groups, cardinality). 29 standard segments, 48 v2.5.1 types,
-20 group-aware message structure definitions, 1 raw hole (OBX-5 dispatch).
-1,893 tests, 0 failures.
+validation (order, groups, cardinality) and opt-in HL7 table checking. 29 standard
+segments, 48 v2.5.1 types, 20 group-aware message structure definitions, 20 coded-value
+tables, 1 raw hole (OBX-5 dispatch). 1,921 tests, 0 failures.
 
 ## Milestones
 
@@ -63,12 +63,13 @@ validation (order, groups, cardinality). 29 standard segments, 48 v2.5.1 types,
 - [x] 647 declared fields, 1 raw hole (OBX-5)
 - [ ] Remaining: ROL, DRG, PDA, IN2, IN3, DSC, BHS, BTS (lower priority)
 
-### M6: Versioned Conformance Platform — IN PROGRESS
+### M6: Conformance Platform — COMPLETE (v1.0.0)
 
-- [ ] HL7 table/coded-value validation (opt-in)
-- [ ] Generated reference docs from coverage ledger
-- [ ] Final README/CHANGELOG accuracy pass
-- [ ] Conformance roadmap finalized
+- [x] HL7 table/coded-value validation (20 tables, opt-in via `validate_tables: true`)
+- [x] 11 coded fields checked against HL7 tables (MSH, PID, PV1, MSA, OBX)
+- [x] Tables API: `HL7v2.Standard.Tables.valid?/2`, `validate/2`, `get/1`
+- [x] Final README/CHANGELOG accuracy pass
+- [x] Conformance roadmap finalized
 - [ ] Version-aware support deferred (v2.3-v2.8.2 deltas — future work)
 
 ## Scope Reality
@@ -79,7 +80,7 @@ validation (order, groups, cardinality). 29 standard segments, 48 v2.5.1 types,
 | M3 | Real structural validation for supported structures | DONE (v0.7.0) |
 | M4 | Strong practical interoperability (no raw holes) | DONE (v0.8.0) |
 | M5 | Broad clinical segment coverage | DONE (v0.9.0) |
-| M6 | Table validation + conformance platform | IN PROGRESS |
+| M6 | Table validation + conformance platform | DONE (v1.0.0) |
 
 ## Execution Order
 

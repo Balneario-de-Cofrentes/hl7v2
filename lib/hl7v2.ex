@@ -116,10 +116,19 @@ defmodule HL7v2 do
   a list of error/warning maps. Requires a `HL7v2.TypedMessage` -- raw messages
   return `{:error, :not_a_typed_message}`.
 
+  ## Options
+
+  - `:mode` -- `:lenient` (default) or `:strict`
+  - `:validate_tables` -- `true` to check coded fields against HL7 tables
+    (default `false`)
+
   ## Examples
 
       {:ok, msg} = HL7v2.parse(text, mode: :typed)
       :ok = HL7v2.validate(msg)
+
+      # With table validation
+      {:error, errors} = HL7v2.validate(msg, validate_tables: true)
 
   """
   @spec validate(term(), keyword()) ::

@@ -43,15 +43,18 @@ defmodule HL7v2.Validation do
   - `:mode` — `:lenient` (default) or `:strict`. In lenient mode, ordering
     and cardinality issues are warnings. In strict mode, all structural
     violations are errors.
+  - `:validate_tables` — `true` to check coded fields against HL7-defined
+    tables. Defaults to `false`.
   """
   @spec validate(TypedMessage.t(), keyword()) :: :ok | {:error, [map()]} | {:ok, [map()]}
   def validate(%TypedMessage{} = msg, opts \\ []) do
     mode = Keyword.get(opts, :mode, :lenient)
+    field_opts = Keyword.take(opts, [:validate_tables])
 
     all =
       MessageRules.check(msg) ++
         structure_errors(msg, mode) ++
-        Enum.flat_map(msg.segments, &FieldRules.check/1)
+        Enum.flat_map(msg.segments, &FieldRules.check(&1, field_opts))
 
     errors = Enum.filter(all, &(&1.level == :error))
     warnings = Enum.filter(all, &(&1.level == :warning))

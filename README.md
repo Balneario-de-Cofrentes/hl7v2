@@ -56,7 +56,7 @@ msg = HL7v2.Message.new("ADT", "A01", sending_application: "PHAOS")
 
 ```elixir
 def deps do
-  [{:hl7v2, "~> 0.5"}]
+  [{:hl7v2, "~> 1.0"}]
 end
 ```
 
@@ -181,8 +181,11 @@ end
  Transport   MLLP framing, Ranch 2.x listener, GenServer client,
               TLS/mTLS, telemetry instrumentation
 
- Tests       1,893 (266 doctests + 30 properties + 1,597 tests)
- Coverage    ~95%
+ Validation  structural (order/groups/cardinality) + opt-in table checking
+              20 HL7 tables, 11 coded fields validated
+
+ Tests       1,921 (266 doctests + 30 properties + 1,625 tests)
+ Coverage    ~93%
  Speed       <1s full suite
 ```
 
