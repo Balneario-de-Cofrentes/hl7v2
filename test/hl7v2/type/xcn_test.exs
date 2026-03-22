@@ -186,10 +186,28 @@ defmodule HL7v2.Type.XCNTest do
 
   describe "field in segment" do
     test "PV1 attending_doctor parses as XCN struct" do
-      raw = Enum.map(0..51, fn
-        6 -> ["1234", "Smith", "John", "", "", "", "", "", "NPI&2.16.840.1.113883.4.6&ISO", "", "", "", "NPI"]
-        _ -> nil
-      end)
+      raw =
+        Enum.map(0..51, fn
+          6 ->
+            [
+              "1234",
+              "Smith",
+              "John",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "NPI&2.16.840.1.113883.4.6&ISO",
+              "",
+              "",
+              "",
+              "NPI"
+            ]
+
+          _ ->
+            nil
+        end)
 
       result = PV1.parse(raw)
 
