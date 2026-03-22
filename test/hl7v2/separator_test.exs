@@ -57,6 +57,49 @@ defmodule HL7v2.SeparatorTest do
     end
   end
 
+  describe "truncation character (v2.7+)" do
+    test "parses MSH with truncation character" do
+      {:ok, sep} = Separator.from_msh("MSH|^~\\&#|SEND|FAC")
+      assert sep.truncation == ?#
+      assert sep.component == ?^
+      assert sep.repetition == ?~
+      assert sep.escape == ?\\
+      assert sep.sub_component == ?&
+      assert sep.field == ?|
+    end
+
+    test "standard MSH has nil truncation" do
+      {:ok, sep} = Separator.from_msh("MSH|^~\\&|SEND|FAC")
+      assert sep.truncation == nil
+    end
+
+    test "minimal MSH with truncation (no trailing fields)" do
+      {:ok, sep} = Separator.from_msh("MSH|^~\\&#")
+      assert sep.truncation == ?#
+    end
+
+    test "truncation char followed by field separator" do
+      {:ok, sep} = Separator.from_msh("MSH|^~\\&#|")
+      assert sep.truncation == ?#
+      assert sep.field == ?|
+    end
+
+    test "custom delimiters with truncation" do
+      {:ok, sep} = Separator.from_msh("MSH!@#$%*!SendApp!")
+      assert sep.field == ?!
+      assert sep.component == ?@
+      assert sep.repetition == ?#
+      assert sep.escape == ?$
+      assert sep.sub_component == ?%
+      assert sep.truncation == ?*
+    end
+
+    test "default/0 has nil truncation" do
+      sep = Separator.default()
+      assert sep.truncation == nil
+    end
+  end
+
   describe "encoding_characters/1" do
     test "returns encoding characters string for default separators" do
       sep = Separator.default()
@@ -66,6 +109,16 @@ defmodule HL7v2.SeparatorTest do
     test "returns encoding characters for custom separators" do
       sep = %Separator{component: ?@, repetition: ?#, escape: ?$, sub_component: ?%}
       assert Separator.encoding_characters(sep) == "@#$%"
+    end
+
+    test "includes truncation character when present" do
+      {:ok, sep} = Separator.from_msh("MSH|^~\\&#|SEND|FAC")
+      assert Separator.encoding_characters(sep) == "^~\\&#"
+    end
+
+    test "omits truncation character when nil" do
+      {:ok, sep} = Separator.from_msh("MSH|^~\\&|SEND|FAC")
+      assert Separator.encoding_characters(sep) == "^~\\&"
     end
   end
 end

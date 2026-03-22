@@ -197,6 +197,35 @@ defmodule HL7v2.ParserTest do
       assert Enum.at(fields, 1) == "@#$%"
       assert Enum.at(fields, 8) == ["ADT", "A01"]
     end
+
+    test "MSH-2 with truncation character (v2.7+)" do
+      msg = "MSH|^~\\&#|S|F||R|20260322||ADT^A01|1|P|2.7\r"
+      assert {:ok, raw} = Parser.parse(msg)
+
+      assert raw.separators.truncation == ?#
+      assert raw.separators.field == ?|
+      assert raw.separators.component == ?^
+
+      [{"MSH", fields}] = raw.segments
+
+      # MSH-1 = field separator
+      assert Enum.at(fields, 0) == "|"
+      # MSH-2 = encoding characters including truncation
+      assert Enum.at(fields, 1) == "^~\\&#"
+      # MSH-3 onwards unaffected
+      assert Enum.at(fields, 2) == "S"
+      assert Enum.at(fields, 3) == "F"
+      assert Enum.at(fields, 8) == ["ADT", "A01"]
+    end
+
+    test "MSH-2 without truncation still works" do
+      msg = "MSH|^~\\&|S|F||R|20260322||ADT^A01|1|P|2.5\r"
+      assert {:ok, raw} = Parser.parse(msg)
+      assert raw.separators.truncation == nil
+
+      [{"MSH", fields}] = raw.segments
+      assert Enum.at(fields, 1) == "^~\\&"
+    end
   end
 
   describe "parse/2 error cases" do

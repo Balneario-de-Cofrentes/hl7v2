@@ -95,6 +95,38 @@ defmodule HL7v2.RealityCheckTest do
       wire = HL7v2.Encoder.encode(raw)
       assert wire == text
     end
+
+    test "round-trip with truncation character (v2.7+)" do
+      text = "MSH|^~\\&#|SEND|FAC||RCV||20260322||ADT^A01|1|P|2.7\r"
+      {:ok, raw} = HL7v2.parse(text)
+      assert raw.separators.truncation == ?#
+      assert HL7v2.Encoder.encode(raw) == text
+    end
+
+    test "round-trip with truncation character and multiple segments" do
+      text =
+        "MSH|^~\\&#|SEND|FAC||RCV||20260322||ADT^A01|1|P|2.7\rPID|1||12345^^^MRN||Smith^John\r"
+
+      {:ok, raw} = HL7v2.parse(text)
+      assert raw.separators.truncation == ?#
+      wire = HL7v2.Encoder.encode(raw)
+      assert wire == text
+    end
+
+    test "round-trip with truncation character and truncated field value" do
+      # The # at the end of "Smith#" is a truncated value marker, NOT a delimiter
+      text =
+        "MSH|^~\\&#|SEND|FAC||RCV||20260322||ADT^A01|1|P|2.7\rPID|1||12345||Smith#^John\r"
+
+      {:ok, raw} = HL7v2.parse(text)
+      assert raw.separators.truncation == ?#
+      wire = HL7v2.Encoder.encode(raw)
+      assert wire == text
+
+      # Verify the truncated value is preserved literally (not split)
+      [_, {"PID", pid_fields}] = raw.segments
+      assert Enum.at(pid_fields, 4) == ["Smith#", "John"]
+    end
   end
 
   # ── 2. Malformed input handling ─────────────────────────────────────
