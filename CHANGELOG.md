@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.6.0 — 2026-03-22
+
+### M2: Standard Model
+
+- **HL7v2.Standard** — Single source of truth for HL7 v2.5.1 metadata: segment catalog
+  (~136 entries), type catalog (~84 entries), capability tiers (`:typed` / `:unsupported`)
+- **MessageStructure** — Group-aware abstract message definitions for 20 structures
+  (ADT A01-A39, ORM_O01, ORU_R01, SIU_S12, ACK). Includes groups, anchors, cardinality
+  and optionality per the HL7 v2.5.1 abstract message definitions.
+- **Coverage ledger** — `HL7v2.Standard.Coverage` computes typed segments, raw holes,
+  unsupported types, and coverage percentages
+- **`mix hl7v2.coverage`** — Prints human-readable coverage report to stdout
+- **Conformance tests** — `test/hl7v2/conformance/` with structure metadata validation
+  (27 tests) and fixture round-trips for ADT_A01, ORU_R01, ORM_O01, SIU_S12, ACK
+- **MessageDefinition** now delegates to MessageStructure for presence validation,
+  extracting required segments from group-aware definitions
+
+### Stats
+
+1,672 tests (241 doctests + 30 properties + 1,401 tests), 0 failures
+
 ## v0.5.6 — 2026-03-22
 
 ### Fixes
