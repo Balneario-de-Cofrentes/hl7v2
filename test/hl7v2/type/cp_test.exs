@@ -25,7 +25,10 @@ defmodule HL7v2.Type.CPTest do
       assert result.price_type == "UP"
       assert result.from_value == "1"
       assert result.to_value == "10"
-      assert %CE{identifier: "day", text: "Day", name_of_coding_system: "UCUM"} = result.range_units
+
+      assert %CE{identifier: "day", text: "Day", name_of_coding_system: "UCUM"} =
+               result.range_units
+
       assert result.range_type == "F"
     end
 

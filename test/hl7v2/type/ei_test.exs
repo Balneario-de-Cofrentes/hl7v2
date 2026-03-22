@@ -38,7 +38,13 @@ defmodule HL7v2.Type.EITest do
     end
 
     test "encodes all four components" do
-      ei = %EI{entity_identifier: "ORD12345", namespace_id: "HOSP", universal_id: "1.2.3", universal_id_type: "ISO"}
+      ei = %EI{
+        entity_identifier: "ORD12345",
+        namespace_id: "HOSP",
+        universal_id: "1.2.3",
+        universal_id_type: "ISO"
+      }
+
       assert EI.encode(ei) == ["ORD12345", "HOSP", "1.2.3", "ISO"]
     end
 
@@ -53,7 +59,13 @@ defmodule HL7v2.Type.EITest do
     end
 
     test "encode round-trip" do
-      original = %EI{entity_identifier: "ORD12345", namespace_id: "HOSP", universal_id: "1.2.3", universal_id_type: "ISO"}
+      original = %EI{
+        entity_identifier: "ORD12345",
+        namespace_id: "HOSP",
+        universal_id: "1.2.3",
+        universal_id_type: "ISO"
+      }
+
       parsed = original |> EI.encode() |> EI.parse()
       assert parsed == original
     end

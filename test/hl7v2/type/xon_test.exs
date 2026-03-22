@@ -114,7 +114,11 @@ defmodule HL7v2.Type.XONTest do
       original = %XON{
         organization_name: "General Hospital",
         organization_name_type_code: "L",
-        assigning_authority: %HD{namespace_id: "HOSP", universal_id: "1.2.3", universal_id_type: "ISO"},
+        assigning_authority: %HD{
+          namespace_id: "HOSP",
+          universal_id: "1.2.3",
+          universal_id_type: "ISO"
+        },
         identifier_type_code: "XX",
         organization_identifier: "GH001"
       }

@@ -68,7 +68,7 @@ defmodule HL7v2.MixProject do
       ],
       source_ref: System.get_env("SOURCE_REF") || "v#{@version}",
       groups_for_modules: [
-        "Core": [
+        Core: [
           HL7v2,
           HL7v2.Parser,
           HL7v2.Encoder,
@@ -82,11 +82,11 @@ defmodule HL7v2.MixProject do
           HL7v2.Message,
           HL7v2.Ack
         ],
-        "Segments": ~r/HL7v2\.Segment\..*/,
+        Segments: ~r/HL7v2\.Segment\..*/,
         "Data Types": ~r/HL7v2\.Type\..*/,
-        "Validation": ~r/HL7v2\.Validation.*/,
+        Validation: ~r/HL7v2\.Validation.*/,
         "MLLP Transport": ~r/HL7v2\.MLLP.*/,
-        "Telemetry": [HL7v2.Telemetry]
+        Telemetry: [HL7v2.Telemetry]
       ],
       groups_for_extras: [
         Guides: ~r/guides\/.*/

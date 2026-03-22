@@ -74,17 +74,6 @@ defmodule HL7v2.Segment.MSH do
         HL7v2.Segment.encode_field_value(value, type, max_reps)
       end)
 
-    trimmed_rest =
-      rest
-      |> Enum.reverse()
-      |> Enum.drop_while(&empty_field?/1)
-      |> Enum.reverse()
-
-    [msh.field_separator, msh.encoding_characters | trimmed_rest]
+    [msh.field_separator, msh.encoding_characters | HL7v2.Segment.trim_trailing(rest)]
   end
-
-  defp empty_field?(""), do: true
-  defp empty_field?(nil), do: true
-  defp empty_field?([]), do: true
-  defp empty_field?(_), do: false
 end

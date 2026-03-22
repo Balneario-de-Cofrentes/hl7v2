@@ -190,7 +190,11 @@ defmodule HL7v2.Type.XCNTest do
         id_number: "12345",
         family_name: %FN{surname: "Smith"},
         given_name: "John",
-        assigning_facility: %HD{namespace_id: "FAC", universal_id: "2.3.4", universal_id_type: "ISO"}
+        assigning_facility: %HD{
+          namespace_id: "FAC",
+          universal_id: "2.3.4",
+          universal_id_type: "ISO"
+        }
       }
 
       encoded = XCN.encode(xcn)
@@ -200,7 +204,11 @@ defmodule HL7v2.Type.XCNTest do
     test "encode with name context CE" do
       xcn = %XCN{
         id_number: "12345",
-        name_context: %CE{identifier: "CTX", text: "Context Text", name_of_coding_system: "99LOCAL"}
+        name_context: %CE{
+          identifier: "CTX",
+          text: "Context Text",
+          name_of_coding_system: "99LOCAL"
+        }
       }
 
       encoded = XCN.encode(xcn)
@@ -254,7 +262,11 @@ defmodule HL7v2.Type.XCNTest do
     test "encode with assigning jurisdiction CWE" do
       xcn = %XCN{
         id_number: "12345",
-        assigning_jurisdiction: %CWE{identifier: "STATE", text: "State Code", name_of_coding_system: "99ST"}
+        assigning_jurisdiction: %CWE{
+          identifier: "STATE",
+          text: "State Code",
+          name_of_coding_system: "99ST"
+        }
       }
 
       encoded = XCN.encode(xcn)
@@ -281,7 +293,11 @@ defmodule HL7v2.Type.XCNTest do
         prefix: "DR",
         degree: "MD",
         source_table: "PHYS",
-        assigning_authority: %HD{namespace_id: "MRN", universal_id: "1.2.3", universal_id_type: "ISO"},
+        assigning_authority: %HD{
+          namespace_id: "MRN",
+          universal_id: "1.2.3",
+          universal_id_type: "ISO"
+        },
         name_type_code: "L",
         identifier_check_digit: "1",
         check_digit_scheme: "M11",

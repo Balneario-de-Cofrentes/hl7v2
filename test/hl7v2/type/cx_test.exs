@@ -77,7 +77,11 @@ defmodule HL7v2.Type.CXTest do
     test "encodes with assigning authority HD" do
       cx = %CX{
         id: "12345",
-        assigning_authority: %HD{namespace_id: "MRN", universal_id: "1.2.3", universal_id_type: "ISO"},
+        assigning_authority: %HD{
+          namespace_id: "MRN",
+          universal_id: "1.2.3",
+          universal_id_type: "ISO"
+        },
         identifier_type_code: "MR"
       }
 
@@ -163,7 +167,11 @@ defmodule HL7v2.Type.CXTest do
         id: "12345",
         check_digit: "5",
         check_digit_scheme: "M11",
-        assigning_authority: %HD{namespace_id: "MRN", universal_id: "1.2.3", universal_id_type: "ISO"},
+        assigning_authority: %HD{
+          namespace_id: "MRN",
+          universal_id: "1.2.3",
+          universal_id_type: "ISO"
+        },
         identifier_type_code: "MR"
       }
 

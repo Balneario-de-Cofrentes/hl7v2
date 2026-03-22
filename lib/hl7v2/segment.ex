@@ -229,7 +229,9 @@ defmodule HL7v2.Segment do
 
   defp all_lists?(list), do: Enum.all?(list, &is_list/1)
 
-  defp trim_trailing(list) do
+  @doc false
+  @spec trim_trailing(list()) :: list()
+  def trim_trailing(list) do
     list
     |> Enum.reverse()
     |> Enum.drop_while(&empty_field?/1)

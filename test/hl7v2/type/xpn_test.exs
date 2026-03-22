@@ -179,7 +179,11 @@ defmodule HL7v2.Type.XPNTest do
       xpn = %XPN{
         family_name: %FN{surname: "Smith"},
         given_name: "John",
-        name_context: %CE{identifier: "CTX", text: "Context Text", name_of_coding_system: "99LOCAL"}
+        name_context: %CE{
+          identifier: "CTX",
+          text: "Context Text",
+          name_of_coding_system: "99LOCAL"
+        }
       }
 
       encoded = XPN.encode(xpn)

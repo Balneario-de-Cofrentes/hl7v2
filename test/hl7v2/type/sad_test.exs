@@ -38,7 +38,12 @@ defmodule HL7v2.Type.SADTest do
     end
 
     test "encodes all three sub-components" do
-      sad = %SAD{street_or_mailing_address: "123 Main St", street_name: "Main St", dwelling_number: "123"}
+      sad = %SAD{
+        street_or_mailing_address: "123 Main St",
+        street_name: "Main St",
+        dwelling_number: "123"
+      }
+
       assert SAD.encode(sad) == ["123 Main St", "Main St", "123"]
     end
 
@@ -48,7 +53,12 @@ defmodule HL7v2.Type.SADTest do
     end
 
     test "encode round-trip" do
-      original = %SAD{street_or_mailing_address: "123 Main St", street_name: "Main St", dwelling_number: "123"}
+      original = %SAD{
+        street_or_mailing_address: "123 Main St",
+        street_name: "Main St",
+        dwelling_number: "123"
+      }
+
       parsed = original |> SAD.encode() |> SAD.parse()
       assert parsed == original
     end

@@ -22,7 +22,9 @@ defmodule HL7v2.Type.FCTest do
     test "parses with sub-component date (degree of precision)" do
       result = FC.parse(["02", "20260322&D"])
       assert result.financial_class_code == "02"
-      assert %TS{time: %DTM{year: 2026, month: 3, day: 22}, degree_of_precision: "D"} = result.effective_date
+
+      assert %TS{time: %DTM{year: 2026, month: 3, day: 22}, degree_of_precision: "D"} =
+               result.effective_date
     end
 
     test "parses empty list" do

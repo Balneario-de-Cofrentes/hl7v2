@@ -19,7 +19,10 @@ defmodule HL7v2.Type.PRLTest do
 
     test "parses identifier only" do
       result = PRL.parse(["85025&CBC&CPT4"])
-      assert %CE{identifier: "85025", text: "CBC", name_of_coding_system: "CPT4"} = result.parent_observation_identifier
+
+      assert %CE{identifier: "85025", text: "CBC", name_of_coding_system: "CPT4"} =
+               result.parent_observation_identifier
+
       assert result.parent_observation_sub_identifier == nil
       assert result.parent_observation_value_descriptor == nil
     end
@@ -42,7 +45,11 @@ defmodule HL7v2.Type.PRLTest do
   describe "encode/1" do
     test "encodes all three components" do
       prl = %PRL{
-        parent_observation_identifier: %CE{identifier: "85025", text: "CBC", name_of_coding_system: "CPT4"},
+        parent_observation_identifier: %CE{
+          identifier: "85025",
+          text: "CBC",
+          name_of_coding_system: "CPT4"
+        },
         parent_observation_sub_identifier: "1",
         parent_observation_value_descriptor: "Hemoglobin"
       }
@@ -52,7 +59,11 @@ defmodule HL7v2.Type.PRLTest do
 
     test "encodes identifier with sub-identifier" do
       prl = %PRL{
-        parent_observation_identifier: %CE{identifier: "85025", text: "CBC", name_of_coding_system: "CPT4"},
+        parent_observation_identifier: %CE{
+          identifier: "85025",
+          text: "CBC",
+          name_of_coding_system: "CPT4"
+        },
         parent_observation_sub_identifier: "1"
       }
 

@@ -10,7 +10,9 @@ defmodule HL7v2.Type.CQTest do
     test "parses quantity with units" do
       result = CQ.parse(["10", "mL&milliliter&UCUM"])
       assert result.quantity == "10"
-      assert %CE{identifier: "mL", text: "milliliter", name_of_coding_system: "UCUM"} = result.units
+
+      assert %CE{identifier: "mL", text: "milliliter", name_of_coding_system: "UCUM"} =
+               result.units
     end
 
     test "parses quantity only" do

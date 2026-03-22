@@ -115,8 +115,7 @@ defmodule HL7v2.MLLP.ConnectionTest do
       assert_receive {^ref, [:hl7v2, :mllp, :message, :start], %{system_time: _},
                       %{message_size: 4}}
 
-      assert_receive {^ref, [:hl7v2, :mllp, :message, :stop], %{duration: _},
-                      %{response_size: 4}}
+      assert_receive {^ref, [:hl7v2, :mllp, :message, :stop], %{duration: _}, %{response_size: 4}}
     end
 
     test "emits message exception event on handler error", %{port: port, ref: ref} do
