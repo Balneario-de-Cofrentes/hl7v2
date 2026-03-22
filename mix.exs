@@ -63,9 +63,40 @@ defmodule HL7v2.MixProject do
       extras: [
         "README.md",
         "CHANGELOG.md",
-        "LICENSE"
+        "LICENSE",
+        "guides/getting-started.md"
       ],
-      source_ref: System.get_env("SOURCE_REF") || "v#{@version}"
+      source_ref: System.get_env("SOURCE_REF") || "v#{@version}",
+      groups_for_modules: [
+        "Core": [
+          HL7v2,
+          HL7v2.Parser,
+          HL7v2.Encoder,
+          HL7v2.Separator,
+          HL7v2.RawMessage,
+          HL7v2.Escape
+        ],
+        "Typed Messages": [
+          HL7v2.TypedMessage,
+          HL7v2.TypedParser,
+          HL7v2.Message,
+          HL7v2.Ack
+        ],
+        "Segments": ~r/HL7v2\.Segment\..*/,
+        "Data Types": ~r/HL7v2\.Type\..*/,
+        "Validation": ~r/HL7v2\.Validation.*/,
+        "MLLP Transport": ~r/HL7v2\.MLLP.*/,
+        "Telemetry": [HL7v2.Telemetry]
+      ],
+      groups_for_extras: [
+        Guides: ~r/guides\/.*/
+      ],
+      nest_modules_by_prefix: [
+        HL7v2.Type,
+        HL7v2.Segment,
+        HL7v2.MLLP,
+        HL7v2.Validation
+      ]
     ]
   end
 end
