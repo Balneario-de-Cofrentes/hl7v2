@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.7.0 — 2026-03-22
+
+### M3: Structural Validation
+
+- **Structural validator** — `HL7v2.Validation.Structural` checks segment ordering,
+  group anchors, and cardinality against group-aware message structure definitions.
+  Replaces presence-only validation for all 20 supported message structures.
+- **Strict/lenient modes** — `HL7v2.validate(msg, mode: :strict)` treats ordering and
+  cardinality violations as errors. Default `:lenient` mode reports them as warnings.
+- **Order checking** — Detects when segments appear in wrong order relative to the
+  abstract message definition (e.g., OBX before OBR in ORU_R01)
+- **Cardinality checking** — Flags non-repeating segments that appear multiple times
+- **28 structural tests** — Positive and negative cases for ADT_A01, ORU_R01, ORM_O01,
+  SIU_S12, ACK, ADT_A39 including missing anchors, wrong order, duplicates, Z-segments
+
+### Stats
+
+1,700 tests (241 doctests + 30 properties + 1,429 tests), 0 failures
+
 ## v0.6.0 — 2026-03-22
 
 ### M2: Standard Model
