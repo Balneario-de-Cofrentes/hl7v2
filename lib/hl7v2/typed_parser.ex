@@ -34,7 +34,8 @@ defmodule HL7v2.TypedParser do
     "SCH" => HL7v2.Segment.SCH,
     "AIS" => HL7v2.Segment.AIS,
     "GT1" => HL7v2.Segment.GT1,
-    "FT1" => HL7v2.Segment.FT1
+    "FT1" => HL7v2.Segment.FT1,
+    "RGS" => HL7v2.Segment.RGS
   }
 
   @doc """

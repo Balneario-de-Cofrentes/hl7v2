@@ -168,20 +168,21 @@ end
 ## Coverage
 
 ```
- Segments    20 typed structs (MSH EVN PID PV1 PV2 NK1 OBR OBX ORC
-              MSA ERR NTE AL1 DG1 IN1 SCH AIS GT1 FT1 ZXX)
+ Segments    21 typed structs (MSH EVN PID PV1 PV2 NK1 OBR OBX ORC
+              MSA ERR NTE AL1 DG1 IN1 SCH AIS RGS GT1 FT1 ZXX)
+              21 of ~151 standard segments + generic Z-segment
 
- Types       36 composite + 8 primitive (44 total) — 97% of segment fields typed
+ Types       36 composite + 8 primitive (44 of ~89 standard types)
 
- Messages    ADT (A01-A04, A08) ORM^O01 ORU^R01 SIU^S12 ACK
-              with structure validation rules
+ Messages    ADT (A01-A04, A08, A12) ORM^O01 ORU^R01 SIU^S12 ACK
+              with required-segment presence validation
 
  Transport   MLLP framing, Ranch 2.x listener, GenServer client,
               TLS/mTLS, telemetry instrumentation
 
- Tests       1,620 (241 doctests + 30 properties + 1,349 tests)
+ Tests       1,630+ (241 doctests + 30 properties + 1,355+ tests)
  Coverage    95%+
- Speed       0.8s full suite
+ Speed       <1s full suite
 ```
 
 ## Scope and Limitations
@@ -191,6 +192,8 @@ This library targets **HL7 v2.5.1** with permissive parsing of adjacent versions
 **What it does well:** delimiter parsing, typed segment/composite structs, canonical
 round-trip encoding, programmatic message building, MLLP transport with TLS, and
 basic validation (required fields, repetition limits, required-segment presence).
+Raw mode is lossless for all valid HL7v2 messages. Typed mode covers a focused
+ADT/ORM/ORU/SIU/ACK subset with extra_fields preservation for unlisted fields.
 
 **What it does not do:**
 
@@ -201,10 +204,10 @@ basic validation (required fields, repetition limits, required-segment presence)
 - Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
   no whitespace normalization)
 
-**Coverage:** 20 of ~120 standard segments (plus generic ZXX) typed. Extra fields beyond
-declared definitions are preserved in `extra_fields` for lossless round-trip. Common message
-families: ADT_A01 ~11/23, ORM_O01 ~12/23, ORU_R01 ~10/18, ACK 3/4, SIU_S12 ~9/15.
-44 type modules (36 composite + 8 primitive).
+**Coverage:** 21 of ~151 standard segments (plus generic ZXX) typed. 44 of ~89 standard
+data types. 20 of ~199 message structures with presence validation definitions. Extra
+fields beyond declared definitions are preserved in `extra_fields` for lossless round-trip.
+OBX exposes 19 of 25 fields; OBR exposes 49 of 50 — unlisted fields survive as extra_fields.
 
 ## Handling Unknown Segments
 

@@ -254,9 +254,9 @@ defmodule HL7v2.MessageDefinitionTest do
       refute "Required segment PID is missing" in messages
     end
 
-    test "ADT^A12 resolves to ADT_A09 and validates" do
+    test "ADT^A12 resolves to ADT_A12 and validates" do
       structure = MessageDefinition.canonical_structure("ADT", "A12")
-      assert structure == "ADT_A09"
+      assert structure == "ADT_A12"
       assert :ok = MessageDefinition.validate_structure(structure, ["MSH", "EVN", "PID", "PV1"])
     end
 
@@ -382,7 +382,7 @@ defmodule HL7v2.MessageDefinitionTest do
       assert MessageDefinition.canonical_structure("ADT", "A09") == "ADT_A09"
       assert MessageDefinition.canonical_structure("ADT", "A10") == "ADT_A09"
       assert MessageDefinition.canonical_structure("ADT", "A11") == "ADT_A09"
-      assert MessageDefinition.canonical_structure("ADT", "A12") == "ADT_A09"
+      assert MessageDefinition.canonical_structure("ADT", "A12") == "ADT_A12"
 
       assert MessageDefinition.canonical_structure("ADT", "A15") == "ADT_A15"
       assert MessageDefinition.canonical_structure("ADT", "A16") == "ADT_A16"

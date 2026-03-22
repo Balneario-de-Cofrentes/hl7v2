@@ -28,7 +28,9 @@ defmodule HL7v2.Validation do
 
   Runs three validation passes:
   1. **Message rules** — MSH presence, required MSH fields
-  2. **Structure rules** — required segments per message definition (MSH-9.3)
+  2. **Presence rules** — required segments per message definition (MSH-9.3).
+     This is presence-only — it does not enforce segment ordering, group
+     structure, or cardinality.
   3. **Field rules** — required fields, max repetitions per segment
 
   Each error map has:

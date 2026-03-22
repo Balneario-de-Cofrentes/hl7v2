@@ -35,7 +35,7 @@ defmodule HL7v2.MessageDefinition do
     {"ADT", "A09"} => "ADT_A09",
     {"ADT", "A10"} => "ADT_A09",
     {"ADT", "A11"} => "ADT_A09",
-    {"ADT", "A12"} => "ADT_A09",
+    {"ADT", "A12"} => "ADT_A12",
     {"ADT", "A15"} => "ADT_A15",
     {"ADT", "A16"} => "ADT_A16",
     {"ADT", "A25"} => "ADT_A21",
@@ -183,6 +183,19 @@ defmodule HL7v2.MessageDefinition do
       name: "ADT_A09",
       description: "Patient Departing — Tracking",
       segments: @adt_tracking_segments
+    },
+    "ADT_A12" => %{
+      name: "ADT_A12",
+      description: "Cancel Transfer",
+      segments: [
+        {:MSH, :required, :once},
+        {:EVN, :required, :once},
+        {:PID, :required, :once},
+        {:PV1, :required, :once},
+        {:PV2, :optional, :once},
+        {:DG1, :optional, :repeating},
+        {:NTE, :optional, :repeating}
+      ]
     },
     "ADT_A15" => %{
       name: "ADT_A15",
@@ -352,11 +365,15 @@ defmodule HL7v2.MessageDefinition do
   end
 
   @doc """
-  Validates segment presence against the message definition.
+  Validates required segment presence against the message definition.
+
+  This is **presence-only validation** — it checks that required segments
+  exist somewhere in the message. It does not enforce segment ordering,
+  group structure, group anchors, or segment cardinality.
 
   Returns `:ok` when all required segments are present, or
   `{:error, errors}` with a list of error maps for each missing
-  required segment. Unknown structures (no definition) pass silently.
+  required segment. Unknown structures (no definition) return a warning.
   """
   @spec validate_structure(binary(), [binary()]) :: :ok | {:error, [map()]}
   def validate_structure(nil, _segment_ids), do: :ok

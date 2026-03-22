@@ -1,7 +1,7 @@
 # HL7 v2.5.1 Message Structure Reference
 
-Comprehensive segment structure definitions for all HL7 v2.5.1 message types
-used by Phaos. Sourced from the HL7 v2.5.1 standard (PS3.2/PS3.3/PS3.4/PS3.7/PS3.10/PS3.12)
+Comprehensive segment structure definitions for the HL7 v2.5.1 message types
+supported by this library. Sourced from the HL7 v2.5.1 standard (Chapters 2-3)
 and verified against [Caristix HL7-Definition](https://hl7-definition.caristix.com/v2/HL7v2.5.1/TriggerEvents).
 
 ## Notation
