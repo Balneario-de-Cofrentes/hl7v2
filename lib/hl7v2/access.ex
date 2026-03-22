@@ -24,7 +24,7 @@ defmodule HL7v2.Access do
 
   """
 
-  alias HL7v2.TypedMessage
+  alias HL7v2.{Path, TypedMessage}
 
   @type path :: %{
           segment: binary(),
@@ -36,11 +36,15 @@ defmodule HL7v2.Access do
   @path_regex ~r/^([A-Z][A-Z0-9]{2})(?:-(\d+)(?:\.(\d+))?(?:\[(\d+)\])?)?$/
 
   @doc """
-  Gets a value from a typed message using a path string.
+  Gets a value from a typed message using a path string or `%Path{}` struct.
 
   Returns `nil` if the path doesn't resolve.
   """
-  @spec get(TypedMessage.t(), binary()) :: term()
+  @spec get(TypedMessage.t(), binary() | Path.t()) :: term()
+  def get(%TypedMessage{} = msg, %Path{} = path) do
+    resolve(msg, path_to_map(path))
+  end
+
   def get(%TypedMessage{} = msg, path) when is_binary(path) do
     case parse_path(path) do
       {:ok, parsed} -> resolve(msg, parsed)
@@ -51,7 +55,14 @@ defmodule HL7v2.Access do
   @doc """
   Gets a value from a typed message with a default.
   """
-  @spec get(TypedMessage.t(), binary(), term()) :: term()
+  @spec get(TypedMessage.t(), binary() | Path.t(), term()) :: term()
+  def get(%TypedMessage{} = msg, %Path{} = path, default) do
+    case fetch(msg, path) do
+      {:ok, value} -> value
+      {:error, _} -> default
+    end
+  end
+
   def get(%TypedMessage{} = msg, path, default) when is_binary(path) do
     case fetch(msg, path) do
       {:ok, value} -> value
@@ -65,6 +76,8 @@ defmodule HL7v2.Access do
   Unlike `get/2`, this function distinguishes between a nil field value and
   a resolution failure (unknown segment, invalid path, unknown field).
 
+  Accepts both string paths and `%HL7v2.Path{}` structs.
+
   ## Examples
 
       {:ok, pid} = HL7v2.Access.fetch(msg, "PID")
@@ -73,12 +86,20 @@ defmodule HL7v2.Access do
       {:error, :field_not_found} = HL7v2.Access.fetch(msg, "PID-99")
 
   """
-  @spec fetch(TypedMessage.t(), binary()) :: {:ok, term()} | {:error, atom()}
+  @spec fetch(TypedMessage.t(), binary() | Path.t()) :: {:ok, term()} | {:error, atom()}
+  def fetch(%TypedMessage{} = msg, %Path{} = path) do
+    resolve_with_error(msg, path_to_map(path))
+  end
+
   def fetch(%TypedMessage{} = msg, path) when is_binary(path) do
     case parse_path(path) do
       {:ok, parsed} -> resolve_with_error(msg, parsed)
       {:error, _} = err -> err
     end
+  end
+
+  defp path_to_map(%Path{segment: seg, field: f, component: c, repetition: r}) do
+    %{segment: seg, field: f, component: c, repetition: r}
   end
 
   # -- Path Parsing --

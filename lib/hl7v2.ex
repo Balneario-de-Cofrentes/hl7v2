@@ -150,16 +150,17 @@ defmodule HL7v2 do
     HL7v2.Message.new(code, event, opts)
   end
 
-  @doc "Gets a value from a typed message using a path string like `\"PID-5\"` or `\"MSH-9.1\"`."
-  @spec get(HL7v2.TypedMessage.t(), binary()) :: term()
+  @doc "Gets a value from a typed message using a path string like `\"PID-5\"` or a `%HL7v2.Path{}` struct."
+  @spec get(HL7v2.TypedMessage.t(), binary() | HL7v2.Path.t()) :: term()
   defdelegate get(msg, path), to: HL7v2.Access
 
   @doc "Gets a value from a typed message with a default."
-  @spec get(HL7v2.TypedMessage.t(), binary(), term()) :: term()
+  @spec get(HL7v2.TypedMessage.t(), binary() | HL7v2.Path.t(), term()) :: term()
   defdelegate get(msg, path, default), to: HL7v2.Access
 
   @doc "Fetches a value, returning `{:ok, value}` or `{:error, reason}`."
-  @spec fetch(HL7v2.TypedMessage.t(), binary()) :: {:ok, term()} | {:error, atom()}
+  @spec fetch(HL7v2.TypedMessage.t(), binary() | HL7v2.Path.t()) ::
+          {:ok, term()} | {:error, atom()}
   defdelegate fetch(msg, path), to: HL7v2.Access
 
   @doc """

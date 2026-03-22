@@ -38,6 +38,12 @@ defmodule HL7v2.TypedParser do
   }
 
   @doc """
+  Returns the segment module for a given segment ID, or nil if unknown.
+  """
+  @spec segment_module(binary()) :: module() | nil
+  def segment_module(seg_id), do: Map.get(@segment_modules, seg_id)
+
+  @doc """
   Converts a `RawMessage` into a `TypedMessage` with parsed segment structs.
 
   Returns `{:ok, typed_message}` on success, or `{:error, reason}` if
