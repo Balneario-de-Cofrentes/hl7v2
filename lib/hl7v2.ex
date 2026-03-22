@@ -42,11 +42,14 @@ defmodule HL7v2 do
 
   - `:mode` — `:raw` (default) or `:typed`
   - `:validate` — `true` to validate after parsing (default `false`)
+  - `:copy` — `true` to copy all parsed binaries (prevents GC reference to original
+    message binary). Use when storing parsed messages long-term. Default `false`.
 
   ## Examples
 
       {:ok, msg} = HL7v2.parse("MSH|^~\\\\&|...")
       {:ok, msg} = HL7v2.parse(text, mode: :typed, validate: true)
+      {:ok, msg} = HL7v2.parse(text, copy: true)
 
   """
   @spec parse(binary(), keyword()) :: {:ok, term()} | {:error, term()}

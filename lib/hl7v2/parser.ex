@@ -34,6 +34,8 @@ defmodule HL7v2.Parser do
   ## Options
 
   - `:mode` — `:raw` (default) or `:typed` for parsed segment structs.
+  - `:copy` — `true` to copy all parsed binaries (prevents GC reference to original
+    message binary). Use when storing parsed messages long-term. Default `false`.
 
   Returns `{:ok, raw_message}` or `{:error, reason}`.
   """
@@ -45,13 +47,17 @@ defmodule HL7v2.Parser do
 
   def parse(text, opts) do
     mode = Keyword.get(opts, :mode, :raw)
+    copy? = Keyword.get(opts, :copy, false)
 
     case mode do
       :raw ->
-        parse_raw(text)
+        with {:ok, raw} <- parse_raw(text) do
+          {:ok, if(copy?, do: deep_copy_binaries(raw), else: raw)}
+        end
 
       :typed ->
         with {:ok, raw} <- parse_raw(text) do
+          raw = if copy?, do: deep_copy_binaries(raw), else: raw
           TypedParser.convert(raw)
         end
 
@@ -59,6 +65,18 @@ defmodule HL7v2.Parser do
         {:error, {:unknown_mode, other}}
     end
   end
+
+  defp deep_copy_binaries(%RawMessage{} = msg) do
+    %{msg | segments: Enum.map(msg.segments, &copy_segment/1)}
+  end
+
+  defp copy_segment({name, fields}) do
+    {:binary.copy(name), Enum.map(fields, &copy_value/1)}
+  end
+
+  defp copy_value(v) when is_binary(v), do: :binary.copy(v)
+  defp copy_value(v) when is_list(v), do: Enum.map(v, &copy_value/1)
+  defp copy_value(v), do: v
 
   defp parse_raw(text) do
     text = normalize_line_endings(text)

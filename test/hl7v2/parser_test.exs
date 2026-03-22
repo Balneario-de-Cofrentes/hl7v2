@@ -310,6 +310,70 @@ defmodule HL7v2.ParserTest do
     end
   end
 
+  describe "copy option" do
+    test "copy: true produces independent binaries" do
+      # Binaries under 64 bytes are heap binaries (always independent),
+      # so we pad to ensure sub-binaries are references into the original.
+      padding = String.duplicate("X", 100)
+
+      text =
+        "MSH|^~\\&|#{padding}|FAC||RCV||20260322||ADT^A01|1|P|2.5\rPID|1||12345^^^MRN||Smith^John\r"
+
+      {:ok, raw} = Parser.parse(text, copy: true)
+      {"MSH", [_sep, _enc | fields]} = hd(raw.segments)
+
+      sending_app = hd(fields)
+      assert :binary.referenced_byte_size(sending_app) == byte_size(sending_app)
+    end
+
+    test "copy: false (default) may reference original binary" do
+      padding = String.duplicate("X", 100)
+
+      text =
+        "MSH|^~\\&|#{padding}|FAC||RCV||20260322||ADT^A01|1|P|2.5\rPID|1||12345^^^MRN||Smith^John\r"
+
+      {:ok, raw} = Parser.parse(text)
+      {"MSH", [_sep, _enc | fields]} = hd(raw.segments)
+
+      sending_app = hd(fields)
+      assert :binary.referenced_byte_size(sending_app) >= byte_size(text)
+    end
+
+    test "copy: true works with typed mode" do
+      padding = String.duplicate("X", 100)
+
+      text =
+        "MSH|^~\\&|#{padding}|FAC||RCV||20260322||ADT^A01|1|P|2.5\rPID|1||12345^^^MRN||Smith^John\r"
+
+      {:ok, typed} = Parser.parse(text, mode: :typed, copy: true)
+      assert %HL7v2.TypedMessage{} = typed
+    end
+
+    test "copy: true copies nested component and sub-component binaries" do
+      padding = String.duplicate("X", 100)
+
+      text =
+        "MSH|^~\\&|#{padding}|FAC||RCV||20260322||ADT^A01|1|P|2.5\r" <>
+          "PID|1||12345^5^M11^ADT1&MR&HOSP||Smith^John\r"
+
+      {:ok, raw} = Parser.parse(text, copy: true)
+      [_, {"PID", pid_fields}] = raw.segments
+
+      # PID-3 has components, component 4 has sub-components
+      pid_3 = Enum.at(pid_fields, 2)
+      ["12345", "5", "M11", [sub1, sub2, sub3]] = pid_3
+
+      # After copy, no binary should reference the original large message.
+      # Small binaries (< 64 bytes) become heap binaries with referenced_byte_size
+      # equal to their internal heap size, not the original message size.
+      original_size = byte_size(text)
+
+      for binary <- ["12345", "5", "M11", sub1, sub2, sub3] do
+        assert :binary.referenced_byte_size(binary) < original_size
+      end
+    end
+  end
+
   defp read_fixture(name) do
     Path.join(@fixtures_dir, name) |> File.read!()
   end
