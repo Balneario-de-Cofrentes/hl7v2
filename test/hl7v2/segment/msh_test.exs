@@ -191,5 +191,104 @@ defmodule HL7v2.Segment.MSHTest do
 
       assert encoded == ["|", "^~\\&"]
     end
+
+    test "encodes with repeating character_set" do
+      msh = %MSH{
+        field_separator: "|",
+        encoding_characters: "^~\\&",
+        message_type: %HL7v2.Type.MSG{message_code: "ADT", trigger_event: "A01"},
+        message_control_id: "123",
+        processing_id: %HL7v2.Type.PT{processing_id: "P"},
+        version_id: %HL7v2.Type.VID{version_id: "2.5.1"},
+        character_set: ["ASCII", "8859/1"]
+      }
+
+      encoded = MSH.encode(msh)
+      # character_set is at MSH-18, which is index 17 (after MSH-1 and MSH-2 as first two)
+      charset_field = Enum.at(encoded, 17)
+      assert charset_field == [["ASCII"], ["8859/1"]]
+    end
+
+    test "encodes with repeating message_profile_identifier" do
+      msh = %MSH{
+        field_separator: "|",
+        encoding_characters: "^~\\&",
+        message_type: %HL7v2.Type.MSG{message_code: "ADT", trigger_event: "A01"},
+        message_control_id: "123",
+        processing_id: %HL7v2.Type.PT{processing_id: "P"},
+        version_id: %HL7v2.Type.VID{version_id: "2.5.1"},
+        message_profile_identifier: [
+          %HL7v2.Type.EI{entity_identifier: "PROF1", namespace_id: "HOSP"},
+          %HL7v2.Type.EI{entity_identifier: "PROF2", namespace_id: "HOSP"}
+        ]
+      }
+
+      encoded = MSH.encode(msh)
+      # message_profile_identifier is at MSH-21, index 20
+      mpi_field = Enum.at(encoded, 20)
+      assert [["PROF1", "HOSP"], ["PROF2", "HOSP"]] = mpi_field
+    end
+
+    test "encodes with all optional fields nil" do
+      msh = %MSH{
+        field_separator: "|",
+        encoding_characters: "^~\\&",
+        message_type: %HL7v2.Type.MSG{message_code: "ACK"},
+        message_control_id: "X",
+        processing_id: %HL7v2.Type.PT{processing_id: "P"},
+        version_id: %HL7v2.Type.VID{version_id: "2.5.1"}
+      }
+
+      encoded = MSH.encode(msh)
+      # Should have at least fields up to version_id
+      assert length(encoded) >= 12
+    end
+  end
+
+  describe "encode/1 trimming edge cases" do
+    test "trims trailing empty list fields" do
+      # Create MSH where some encoded field values are empty lists []
+      # This happens when a repeating field is nil and encode_field_value returns ""
+      # but the key test is the trailing trim of the encode output
+      msh = %MSH{
+        field_separator: "|",
+        encoding_characters: "^~\\&",
+        message_type: %HL7v2.Type.MSG{message_code: "ADT", trigger_event: "A01"},
+        message_control_id: "123",
+        processing_id: %HL7v2.Type.PT{processing_id: "P"},
+        version_id: %HL7v2.Type.VID{version_id: "2.5.1"},
+        # Set a later field so middle fields get exercised through empty_field?
+        principal_language_of_message: %HL7v2.Type.CE{identifier: "en"}
+      }
+
+      encoded = MSH.encode(msh)
+      # principal_language_of_message is MSH-19, so index 18
+      assert Enum.at(encoded, 18) == ["en"]
+    end
+
+    test "encode with non-empty trailing field" do
+      msh = %MSH{
+        field_separator: "|",
+        encoding_characters: "^~\\&",
+        message_type: %HL7v2.Type.MSG{message_code: "ADT", trigger_event: "A01"},
+        message_control_id: "123",
+        processing_id: %HL7v2.Type.PT{processing_id: "P"},
+        version_id: %HL7v2.Type.VID{version_id: "2.5.1"},
+        alternate_character_set_handling_scheme: "2.3"
+      }
+
+      encoded = MSH.encode(msh)
+      # alternate_character_set_handling_scheme is MSH-20, index 19
+      assert Enum.at(encoded, 19) == "2.3"
+    end
+  end
+
+  describe "parse/2 with separators argument" do
+    test "accepts explicit separators argument" do
+      result = MSH.parse(@raw_msh, HL7v2.Separator.default())
+
+      assert result.field_separator == "|"
+      assert result.encoding_characters == "^~\\&"
+    end
   end
 end

@@ -115,6 +115,37 @@ defmodule HL7v2.EscapeTest do
     end
   end
 
+  describe "decode/2 edge cases" do
+    test "decodes hex data with odd-length nibble (trailing ignored)" do
+      # Odd-length hex: last nibble is dropped
+      assert Escape.decode("\\X414\\", @sep) == "A"
+    end
+
+    test "decodes space escape with numeric count" do
+      assert Escape.decode("\\.sp5\\", @sep) == "     "
+    end
+
+    test "decodes space escape with zero count defaults to 1" do
+      assert Escape.decode("\\.sp0\\", @sep) == " "
+    end
+
+    test "decodes space escape with negative count defaults to 1" do
+      assert Escape.decode("\\.sp-1\\", @sep) == " "
+    end
+
+    test "decodes space escape with leading spaces" do
+      assert Escape.decode("\\.sp 2\\", @sep) == "  "
+    end
+
+    test "decodes multiple consecutive escapes" do
+      assert Escape.decode("\\F\\\\S\\\\T\\", @sep) == "|^&"
+    end
+
+    test "decodes empty hex data" do
+      assert Escape.decode("\\X\\", @sep) == ""
+    end
+  end
+
   describe "round-trip" do
     test "decode(encode(text)) preserves delimiter characters" do
       text = "has|pipe^caret~tilde\\backslash&amp"

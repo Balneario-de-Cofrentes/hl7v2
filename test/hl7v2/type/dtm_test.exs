@@ -202,6 +202,132 @@ defmodule HL7v2.Type.DTMTest do
     test "returns empty string for nil" do
       assert DTM.encode(nil) == ""
     end
+
+    test "encodes DateTime with UTC offset" do
+      {:ok, dt, _} = DateTime.from_iso8601("2026-03-22T14:30:22Z")
+      assert DTM.encode(dt) == "20260322143022+0000"
+    end
+
+    test "encodes DateTime with positive offset" do
+      # DateTime.from_iso8601 converts to UTC, so utc_offset/std_offset are 0
+      # The encode function uses utc_offset + std_offset for the offset string
+      {:ok, dt, _} = DateTime.from_iso8601("2026-03-22T14:30:22+01:00")
+      # This results in 13:30:22 UTC with +0000 offset
+      assert DTM.encode(dt) == "20260322133022+0000"
+    end
+
+    test "encodes DateTime with negative offset" do
+      {:ok, dt, _} = DateTime.from_iso8601("2026-03-22T14:30:22-05:00")
+      # This results in 19:30:22 UTC with +0000 offset
+      assert DTM.encode(dt) == "20260322193022+0000"
+    end
+
+    test "encodes DateTime with microseconds" do
+      {:ok, dt, _} = DateTime.from_iso8601("2026-03-22T14:30:22.123456Z")
+      assert DTM.encode(dt) == "20260322143022.123456+0000"
+    end
+
+    test "encodes DateTime with zero microseconds omits fraction" do
+      {:ok, dt, _} = DateTime.from_iso8601("2026-03-22T14:30:22Z")
+      result = DTM.encode(dt)
+      refute String.contains?(result, ".")
+    end
+
+    test "encodes NaiveDateTime without offset" do
+      ndt = ~N[2026-03-22 14:30:22]
+      assert DTM.encode(ndt) == "20260322143022"
+    end
+
+    test "encodes NaiveDateTime with microseconds" do
+      ndt = ~N[2026-03-22 14:30:22.123456]
+      assert DTM.encode(ndt) == "20260322143022.123456"
+    end
+
+    test "encodes NaiveDateTime with zero microseconds omits fraction" do
+      ndt = ~N[2026-03-22 14:30:22]
+      result = DTM.encode(ndt)
+      refute String.contains?(result, ".")
+    end
+
+    test "encodes DTM struct with hour only" do
+      assert DTM.encode(%DTM{year: 2026, month: 3, day: 22, hour: 14}) == "2026032214"
+    end
+  end
+
+  describe "parse/1 edge cases" do
+    test "returns nil for non-digit year" do
+      assert DTM.parse("ABCD") == nil
+    end
+
+    test "returns nil for 5 character input (odd length)" do
+      assert DTM.parse("20261") == nil
+    end
+
+    test "returns nil for 7 character input (odd length)" do
+      assert DTM.parse("2026031") == nil
+    end
+
+    test "returns nil for 9 character input (odd length between 8 and 10)" do
+      assert DTM.parse("202603221") == nil
+    end
+
+    test "returns nil for 11 character input (odd length between 10 and 12)" do
+      assert DTM.parse("20260322141") == nil
+    end
+
+    test "returns nil for 13 character input (odd length between 12 and 14)" do
+      assert DTM.parse("2026032214301") == nil
+    end
+
+    test "returns nil for fraction longer than 4 digits" do
+      assert DTM.parse("20260322143022.12345") == nil
+    end
+
+    test "returns nil for empty fraction after dot" do
+      assert DTM.parse("20260322143022.") == nil
+    end
+
+    test "returns nil for non-digit fraction" do
+      assert DTM.parse("20260322143022.abcd") == nil
+    end
+
+    test "parses seconds without fraction correctly" do
+      result = DTM.parse("20260322143022")
+
+      assert result == %DTM{
+               year: 2026,
+               month: 3,
+               day: 22,
+               hour: 14,
+               minute: 30,
+               second: 22
+             }
+    end
+
+    test "returns nil for year 0" do
+      assert DTM.parse("0000") == nil
+    end
+
+    test "returns nil for month 0" do
+      assert DTM.parse("202600") == nil
+    end
+
+    test "parses Feb 29 in leap year" do
+      result = DTM.parse("20240229")
+      assert %DTM{year: 2024, month: 2, day: 29} = result
+    end
+
+    test "returns nil for Feb 29 in non-leap year" do
+      assert DTM.parse("20250229") == nil
+    end
+
+    test "returns nil for non-digit in hour position" do
+      assert DTM.parse("20260322AB") == nil
+    end
+
+    test "returns nil for non-digit in minute position" do
+      assert DTM.parse("202603221430XX") == nil
+    end
   end
 
   describe "round-trip" do

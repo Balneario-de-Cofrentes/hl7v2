@@ -144,6 +144,64 @@ defmodule HL7v2.EncoderTest do
     end
   end
 
+  describe "encode/1 edge cases" do
+    test "encodes MSH with only field separator (one field)" do
+      raw = %RawMessage{
+        separators: Separator.default(),
+        type: {"ACK", ""},
+        segments: [
+          {"MSH", ["|"]}
+        ]
+      }
+
+      result = Encoder.encode(raw)
+      assert String.starts_with?(result, "MSH|")
+    end
+
+    test "encodes MSH with no fields" do
+      raw = %RawMessage{
+        separators: Separator.default(),
+        type: {"ACK", ""},
+        segments: [
+          {"MSH", []}
+        ]
+      }
+
+      result = Encoder.encode(raw)
+      assert String.starts_with?(result, "MSH|")
+    end
+
+    test "encodes non-MSH segment with no fields" do
+      raw = %RawMessage{
+        separators: Separator.default(),
+        type: {"ADT", "A01"},
+        segments: [
+          {"MSH",
+           ["|", "^~\\&", "S", "F", "", "R", "20240101", "", ["ADT", "A01"], "1", "P", "2.5"]},
+          {"PID", []}
+        ]
+      }
+
+      result = Encoder.encode(raw)
+      assert result =~ ~r/\rPID\r/
+    end
+
+    test "encodes segment with empty string field" do
+      raw = %RawMessage{
+        separators: Separator.default(),
+        type: {"ADT", "A01"},
+        segments: [
+          {"MSH",
+           ["|", "^~\\&", "S", "F", "", "R", "20240101", "", ["ADT", "A01"], "1", "P", "2.5"]},
+          {"PID", ["", "test"]}
+        ]
+      }
+
+      result = Encoder.encode(raw)
+      assert result =~ ~r/PID\|\|test\r/
+    end
+  end
+
   describe "round-trip with parser" do
     test "parse then encode produces identical output for simple message" do
       original = "MSH|^~\\&|SEND|FAC||RCV|20240101||ADT^A01|123|P|2.5\rPID|1||12345||Smith^John\r"

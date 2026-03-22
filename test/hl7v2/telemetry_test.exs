@@ -102,5 +102,69 @@ defmodule HL7v2.TelemetryTest do
 
       :telemetry.detach(handler_id)
     end
+
+    test "emits with default measurements (empty map)", %{ref: ref} do
+      handler_id = "custom-emit-defaults-#{inspect(ref)}"
+
+      :telemetry.attach(
+        handler_id,
+        [:hl7v2, :defaults_test],
+        &Handler.handle_event/4,
+        %{pid: self(), ref: ref}
+      )
+
+      # Call with only event name (defaults for measurements and metadata)
+      HL7v2.Telemetry.emit(:defaults_test)
+
+      assert_receive {^ref, [:hl7v2, :defaults_test], %{}, %{}}
+
+      :telemetry.detach(handler_id)
+    end
+
+    test "emits with default metadata (empty map)", %{ref: ref} do
+      handler_id = "custom-emit-meta-#{inspect(ref)}"
+
+      :telemetry.attach(
+        handler_id,
+        [:hl7v2, :meta_test],
+        &Handler.handle_event/4,
+        %{pid: self(), ref: ref}
+      )
+
+      # Call with event and measurements only (default metadata)
+      HL7v2.Telemetry.emit(:meta_test, %{count: 42})
+
+      assert_receive {^ref, [:hl7v2, :meta_test], %{count: 42}, %{}}
+
+      :telemetry.detach(handler_id)
+    end
+  end
+
+  describe "HL7v2.Telemetry.span/3 exception handling" do
+    test "re-raises and emits exception event", %{ref: ref} do
+      handler_id = "span-exception-#{inspect(ref)}"
+
+      :telemetry.attach_many(
+        handler_id,
+        [
+          [:hl7v2, :test_raise, :start],
+          [:hl7v2, :test_raise, :stop],
+          [:hl7v2, :test_raise, :exception]
+        ],
+        &Handler.handle_event/4,
+        %{pid: self(), ref: ref}
+      )
+
+      assert_raise RuntimeError, "boom", fn ->
+        HL7v2.Telemetry.span(:test_raise, %{op: :test}, fn ->
+          raise "boom"
+        end)
+      end
+
+      assert_receive {^ref, [:hl7v2, :test_raise, :start], _, _}
+      assert_receive {^ref, [:hl7v2, :test_raise, :exception], %{duration: _}, _meta}
+
+      :telemetry.detach(handler_id)
+    end
   end
 end

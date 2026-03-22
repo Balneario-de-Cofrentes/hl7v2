@@ -71,4 +71,52 @@ defmodule HL7v2.MLLP.ClientTest do
 
     Client.close(client)
   end
+
+  test "accepts host as charlist", %{port: port} do
+    {:ok, client} = Client.start_link(host: ~c"127.0.0.1", port: port)
+
+    assert {:ok, "test"} = Client.send_message(client, "test")
+
+    Client.close(client)
+  end
+
+  test "accepts host as atom", %{port: port} do
+    {:ok, client} = Client.start_link(host: :localhost, port: port)
+
+    assert {:ok, "test"} = Client.send_message(client, "test")
+
+    Client.close(client)
+  end
+
+  test "accepts custom timeout option", %{port: port} do
+    {:ok, client} = Client.start_link(host: "127.0.0.1", port: port, timeout: 5_000)
+
+    assert {:ok, "msg"} = Client.send_message(client, "msg")
+
+    Client.close(client)
+  end
+
+  test "recv error when server closes during receive", %{port: _port} do
+    # Start a listener with a very short timeout so it closes connections quickly
+    {:ok, short_listener} =
+      Listener.start_link(
+        port: 0,
+        handler: HL7v2.Test.EchoHandler,
+        timeout: 50
+      )
+
+    short_port = Listener.port(short_listener)
+
+    {:ok, client} = Client.start_link(host: "127.0.0.1", port: short_port)
+
+    # Wait for the server-side timeout to close the connection
+    Process.sleep(100)
+
+    # Sending after server closed should return an error
+    result = Client.send_message(client, "test")
+    assert {:error, _reason} = result
+
+    Client.close(client)
+    Listener.stop(short_listener)
+  end
 end

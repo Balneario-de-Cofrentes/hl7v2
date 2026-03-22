@@ -192,6 +192,53 @@ defmodule HL7v2.SegmentTest do
     end
   end
 
+  describe "encode_field_value/3 with single value in repeating slot" do
+    test "encodes single non-list value in repeating field" do
+      # When a repeating field has a single value (not a list), it should encode it directly
+      result = Segment.encode_field_value("hello", ST, :unbounded)
+
+      assert result == "hello"
+    end
+
+    test "encodes nil composite in single slot" do
+      result = Segment.encode_field_value(nil, CX, 1)
+      assert result == ""
+    end
+  end
+
+  describe "parse_field_value/3 with composite from binary" do
+    test "parses composite from binary string (wraps in list)" do
+      result = Segment.parse_field_value("12345", CX, 1)
+
+      assert %CX{id: "12345"} = result
+    end
+
+    test "parses repeating composite from binary (single element list)" do
+      result = Segment.parse_field_value("code", CE, :unbounded)
+
+      assert [%CE{identifier: "code"}] = result
+    end
+
+    test "parses repeating primitive with list containing list sub-component" do
+      result = Segment.parse_field_value([["x", "y"], "z"], ST, :unbounded)
+
+      # First element is a list (sub-component), treated as parse single
+      assert is_list(result)
+    end
+  end
+
+  describe "do_encode/2 trims trailing empty fields" do
+    test "trims trailing empty fields from segment encode" do
+      msa = %HL7v2.Segment.MSA{
+        acknowledgment_code: "AA",
+        message_control_id: "123"
+      }
+
+      encoded = HL7v2.Segment.MSA.encode(msa)
+      assert encoded == ["AA", "123"]
+    end
+  end
+
   describe "composite_type?/1" do
     test "returns true for known composite types" do
       assert Segment.composite_type?(CX) == true
