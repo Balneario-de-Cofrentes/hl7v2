@@ -35,6 +35,7 @@ defmodule HL7v2.MessageDefinition do
     {"ADT", "A09"} => "ADT_A09",
     {"ADT", "A10"} => "ADT_A09",
     {"ADT", "A11"} => "ADT_A09",
+    {"ADT", "A12"} => "ADT_A09",
     {"ADT", "A15"} => "ADT_A15",
     {"ADT", "A16"} => "ADT_A16",
     {"ADT", "A25"} => "ADT_A21",
@@ -55,6 +56,13 @@ defmodule HL7v2.MessageDefinition do
     {"SIU", "S15"} => "SIU_S12",
     {"SIU", "S16"} => "SIU_S12",
     {"SIU", "S17"} => "SIU_S12",
+    {"SIU", "S18"} => "SIU_S12",
+    {"SIU", "S19"} => "SIU_S12",
+    {"SIU", "S20"} => "SIU_S12",
+    {"SIU", "S21"} => "SIU_S12",
+    {"SIU", "S22"} => "SIU_S12",
+    {"SIU", "S23"} => "SIU_S12",
+    {"SIU", "S24"} => "SIU_S12",
     {"SIU", "S26"} => "SIU_S12"
   }
 
@@ -259,7 +267,7 @@ defmodule HL7v2.MessageDefinition do
       segments: [
         {:MSH, :required, :once},
         {:NTE, :optional, :repeating},
-        {:PID, :required, :once},
+        {:PID, :optional, :once},
         {:PV1, :optional, :once},
         {:IN1, :optional, :repeating},
         {:ORC, :required, :repeating},
@@ -273,7 +281,7 @@ defmodule HL7v2.MessageDefinition do
       description: "Unsolicited Observation Result",
       segments: [
         {:MSH, :required, :once},
-        {:PID, :required, :once},
+        {:PID, :optional, :once},
         {:PV1, :optional, :once},
         {:ORC, :optional, :repeating},
         {:OBR, :required, :repeating},
@@ -288,9 +296,10 @@ defmodule HL7v2.MessageDefinition do
         {:MSH, :required, :once},
         {:SCH, :required, :once},
         {:NTE, :optional, :repeating},
-        {:PID, :required, :once},
+        {:PID, :optional, :once},
         {:PV1, :optional, :once},
-        {:AIS, :required, :repeating},
+        {:RGS, :required, :repeating},
+        {:AIS, :optional, :repeating},
         {:NTE, :optional, :repeating}
       ]
     },

@@ -162,8 +162,22 @@ defmodule HL7v2.Segment do
       components = if is_binary(raw), do: [raw], else: raw
       type.parse(components)
     else
-      value = if is_list(raw), do: List.first(raw) || "", else: raw
-      type.parse(value)
+      case raw do
+        # Primitive with extra components (e.g., "M^EXTRA" on an IS field).
+        # Non-conformant input — preserve the raw component list for lossless
+        # round-trip. The encoder emits lists as component-separated values.
+        [_first | rest] = list when rest != [] ->
+          list
+
+        [first] ->
+          type.parse(first || "")
+
+        value when is_binary(value) ->
+          type.parse(value)
+
+        _ ->
+          type.parse("")
+      end
     end
   end
 
@@ -184,7 +198,8 @@ defmodule HL7v2.Segment do
       # Repeated primitive — each element is a string value
       Enum.map(raw, fn
         v when is_binary(v) -> type.parse(v)
-        v when is_list(v) -> type.parse(List.first(v) || "")
+        [_first | rest] = list when rest != [] -> list
+        [first] -> type.parse(first || "")
         _ -> nil
       end)
     end
@@ -222,6 +237,11 @@ defmodule HL7v2.Segment do
   end
 
   defp encode_single(nil, _type), do: ""
+
+  # Primitive fields with extra components preserved as raw lists (non-conformant input).
+  # Emit as component list for the encoder to rejoin with ^.
+  defp encode_single(value, _type) when is_list(value), do: value
+
   defp encode_single(value, type), do: type.encode(value)
 
   # Ensure repeated values produce list-of-lists for the raw encoder.

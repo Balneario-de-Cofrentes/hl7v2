@@ -168,4 +168,39 @@ defmodule HL7v2.Segment.ExtraFieldsTest do
       assert Enum.at(encoded, 6) == "extra7"
     end
   end
+
+  describe "primitive fields with extra components" do
+    test "PID-8 with extra components (M^EXTRA) preserves through round-trip" do
+      alias HL7v2.Segment.PID
+
+      # PID-8 (administrative_sex) is IS type, but wire has M^EXTRA
+      raw_fields = [
+        "1",           # set_id
+        nil,           # patient_id
+        "12345",       # patient_identifier_list
+        nil,           # alternate_patient_id
+        "Smith^John",  # patient_name
+        nil,           # mother_maiden_name
+        "19800101",    # date_of_birth
+        ["M", "EXTRA"] # administrative_sex with extra component
+      ]
+
+      pid = PID.parse(raw_fields)
+
+      # Value is preserved as list (non-conformant input)
+      assert pid.administrative_sex == ["M", "EXTRA"]
+
+      # Encode preserves it
+      encoded = PID.encode(pid)
+      assert Enum.at(encoded, 7) == ["M", "EXTRA"]
+    end
+
+    test "primitive field without extra components parses normally" do
+      alias HL7v2.Segment.PID
+
+      raw_fields = ["1", nil, "12345", nil, "Smith^John", nil, "19800101", "M"]
+      pid = PID.parse(raw_fields)
+      assert pid.administrative_sex == "M"
+    end
+  end
 end

@@ -225,12 +225,45 @@ defmodule HL7v2.MessageDefinitionTest do
     end
 
     test "validates ORU_R01 required segments" do
+      # PID is optional per spec (patient group is optional)
+      assert :ok = MessageDefinition.validate_structure("ORU_R01", ["MSH", "OBR"])
       assert :ok = MessageDefinition.validate_structure("ORU_R01", ["MSH", "PID", "OBR"])
 
       assert {:error, errors} = MessageDefinition.validate_structure("ORU_R01", ["MSH"])
       messages = Enum.map(errors, & &1.message)
-      assert "Required segment PID is missing" in messages
       assert "Required segment OBR is missing" in messages
+      refute "Required segment PID is missing" in messages
+    end
+
+    test "ORM_O01 does not require PID (patient group is optional)" do
+      assert :ok = MessageDefinition.validate_structure("ORM_O01", ["MSH", "ORC"])
+
+      assert {:error, errors} = MessageDefinition.validate_structure("ORM_O01", ["MSH"])
+      messages = Enum.map(errors, & &1.message)
+      assert "Required segment ORC is missing" in messages
+      refute "Required segment PID is missing" in messages
+    end
+
+    test "SIU_S12 requires RGS (resource group anchor)" do
+      assert :ok =
+               MessageDefinition.validate_structure("SIU_S12", ["MSH", "SCH", "RGS"])
+
+      assert {:error, errors} = MessageDefinition.validate_structure("SIU_S12", ["MSH", "SCH"])
+      messages = Enum.map(errors, & &1.message)
+      assert "Required segment RGS is missing" in messages
+      refute "Required segment PID is missing" in messages
+    end
+
+    test "ADT^A12 resolves to ADT_A09 and validates" do
+      structure = MessageDefinition.canonical_structure("ADT", "A12")
+      assert structure == "ADT_A09"
+      assert :ok = MessageDefinition.validate_structure(structure, ["MSH", "EVN", "PID", "PV1"])
+    end
+
+    test "SIU^S18 resolves to SIU_S12 and validates" do
+      structure = MessageDefinition.canonical_structure("SIU", "S18")
+      assert structure == "SIU_S12"
+      assert :ok = MessageDefinition.validate_structure(structure, ["MSH", "SCH", "RGS"])
     end
 
     test "validates ACK required segments" do
@@ -349,6 +382,7 @@ defmodule HL7v2.MessageDefinitionTest do
       assert MessageDefinition.canonical_structure("ADT", "A09") == "ADT_A09"
       assert MessageDefinition.canonical_structure("ADT", "A10") == "ADT_A09"
       assert MessageDefinition.canonical_structure("ADT", "A11") == "ADT_A09"
+      assert MessageDefinition.canonical_structure("ADT", "A12") == "ADT_A09"
 
       assert MessageDefinition.canonical_structure("ADT", "A15") == "ADT_A15"
       assert MessageDefinition.canonical_structure("ADT", "A16") == "ADT_A16"
@@ -371,7 +405,7 @@ defmodule HL7v2.MessageDefinitionTest do
     end
 
     test "maps aliased SIU trigger events to SIU_S12" do
-      for event <- ~w(S13 S14 S15 S16 S17 S26) do
+      for event <- ~w(S13 S14 S15 S16 S17 S18 S19 S20 S21 S22 S23 S24 S26) do
         assert MessageDefinition.canonical_structure("SIU", event) == "SIU_S12"
       end
     end

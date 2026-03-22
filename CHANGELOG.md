@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.1 — 2026-03-22
+
+### Fixes
+
+- **ORM_O01 / ORU_R01** — PID is now optional (patient group is optional per spec)
+- **SIU_S12** — RGS required as resource group anchor; PID now optional; AIS optional
+  within the resource group
+- **Primitive extra components** — Non-conformant input like `M^EXTRA` on primitive
+  fields now preserved through typed round-trip instead of being silently truncated
+- **Canonical structure mappings** — Added ADT^A12 (→ ADT_A09) and SIU S18-S24
+  (→ SIU_S12) to match the documented reference
+
 ## v0.5.0 — 2026-03-22
 
 ### Conformance Hardening
@@ -19,8 +31,7 @@ All notable changes to this project will be documented in this file.
 - **DTM offset preservation** — Malformed timezone offsets preserved instead of silently
   dropped
 - **Message definition completeness** — Canonical structure mapping moved to single source
-  of truth in `MessageDefinition`; all `@canonical_structures` aliases now resolve correctly
-  for validation
+  of truth in `MessageDefinition`
 
 ### Stats
 
