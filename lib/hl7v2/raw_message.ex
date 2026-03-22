@@ -1,6 +1,6 @@
 defmodule HL7v2.RawMessage do
   @moduledoc """
-  Represents a parsed HL7v2 message in raw (lossless) form.
+  Represents a parsed HL7v2 message in raw form.
 
   The raw message preserves the structure and content of the original message —
   no type coercion, no validation, no data loss. Round-tripping is canonical:

@@ -10,7 +10,7 @@ defmodule HL7v2 do
       # Raw mode — canonical round-trip, delimiter-based
       {:ok, raw} = HL7v2.parse(text)
 
-      # Typed mode — validated structs
+      # Typed mode — segments become structs
       {:ok, msg} = HL7v2.parse(text, mode: :typed)
 
   ## Building

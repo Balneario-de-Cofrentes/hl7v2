@@ -186,10 +186,28 @@ end
  Transport   MLLP framing, Ranch 2.x listener, GenServer client,
               TLS/mTLS, telemetry instrumentation
 
- Tests       1,382 (228 doctests + 30 properties + 1,124 tests)
- Coverage    96.56%
+ Tests       1,390 (228 doctests + 30 properties + 1,132 tests)
+ Coverage    96%+
  Speed       0.5s full suite
 ```
+
+## Scope and Limitations
+
+This library targets **HL7 v2.5.1** with permissive parsing of adjacent versions.
+
+**What it does well:** delimiter parsing, typed segment/composite structs, canonical
+round-trip encoding, programmatic message building, MLLP transport with TLS, and
+field-level validation (required fields, repetition limits, message structure presence).
+
+**What it does not do:** full message profile conformance, HL7 table value validation,
+conditional field logic, enhanced acknowledgment mode, or v2.7+ features (truncation
+character, MSH-22+). The parser ingests more than it semantically validates — unknown
+segments are preserved as raw tuples, not rejected.
+
+Segment coverage is a core subset (20 of ~120 defined in the standard). Coverage
+against common message families: ADT_A01 ~11/23 segments typed, ORM_O01 ~12/23,
+ORU_R01 ~10/18, ACK 3/4, SIU_S12 ~9/15. Segments not typed are preserved losslessly
+in raw form.
 
 ## Documentation
 
