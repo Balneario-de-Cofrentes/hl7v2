@@ -16,7 +16,7 @@ defmodule HL7v2.Segment.ORC do
       {5, :order_status, HL7v2.Type.ID, :o, 1},
       {6, :response_flag, HL7v2.Type.ID, :o, 1},
       {7, :quantity_timing, :raw, :b, :unbounded},
-      {8, :parent, :raw, :o, 1},
+      {8, :parent, HL7v2.Type.EIP, :o, 1},
       {9, :date_time_of_transaction, HL7v2.Type.TS, :o, 1},
       {10, :entered_by, HL7v2.Type.XCN, :o, :unbounded},
       {11, :verified_by, HL7v2.Type.XCN, :o, :unbounded},

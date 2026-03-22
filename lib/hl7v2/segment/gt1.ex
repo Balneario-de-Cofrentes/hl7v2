@@ -35,7 +35,7 @@ defmodule HL7v2.Segment.GT1 do
       {24, :guarantor_death_date_and_time, HL7v2.Type.TS, :o, 1},
       {25, :guarantor_death_flag, HL7v2.Type.ID, :o, 1},
       {26, :guarantor_charge_adjustment_code, HL7v2.Type.CE, :o, 1},
-      {27, :guarantor_household_annual_income, :raw, :o, 1},
+      {27, :guarantor_household_annual_income, HL7v2.Type.MO, :o, 1},
       {28, :guarantor_household_size, HL7v2.Type.NM, :o, 1},
       {29, :guarantor_employer_id_number, HL7v2.Type.CX, :o, :unbounded},
       {30, :guarantor_marital_status_code, HL7v2.Type.CE, :o, 1},
@@ -58,11 +58,11 @@ defmodule HL7v2.Segment.GT1 do
       {47, :contact_reason, HL7v2.Type.CE, :o, 1},
       {48, :contact_relationship, HL7v2.Type.IS, :o, 1},
       {49, :job_title, HL7v2.Type.ST, :o, 1},
-      {50, :job_code_class, :raw, :o, 1},
+      {50, :job_code_class, HL7v2.Type.JCC, :o, 1},
       {51, :guarantor_employers_organization_name, HL7v2.Type.XON, :o, :unbounded},
       {52, :handicap, HL7v2.Type.IS, :o, 1},
       {53, :job_status, HL7v2.Type.IS, :o, 1},
-      {54, :guarantor_financial_class, :raw, :o, 1},
+      {54, :guarantor_financial_class, HL7v2.Type.FC, :o, 1},
       {55, :guarantor_race, HL7v2.Type.CE, :o, :unbounded}
     ]
 end

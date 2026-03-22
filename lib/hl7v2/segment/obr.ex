@@ -17,7 +17,7 @@ defmodule HL7v2.Segment.OBR do
       {6, :requested_date_time, HL7v2.Type.TS, :b, 1},
       {7, :observation_date_time, HL7v2.Type.TS, :c, 1},
       {8, :observation_end_date_time, HL7v2.Type.TS, :o, 1},
-      {9, :collection_volume, :raw, :o, 1},
+      {9, :collection_volume, HL7v2.Type.CQ, :o, 1},
       {10, :collector_identifier, HL7v2.Type.XCN, :o, :unbounded},
       {11, :specimen_action_code, HL7v2.Type.ID, :o, 1},
       {12, :danger_code, HL7v2.Type.CE, :o, 1},

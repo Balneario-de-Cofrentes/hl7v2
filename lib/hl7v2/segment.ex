@@ -39,6 +39,8 @@ defmodule HL7v2.Segment do
   @callback encode(struct()) :: list()
 
   @composite_types MapSet.new([
+                     HL7v2.Type.CP,
+                     HL7v2.Type.CQ,
                      HL7v2.Type.CX,
                      HL7v2.Type.XCN,
                      HL7v2.Type.XPN,
@@ -46,7 +48,11 @@ defmodule HL7v2.Segment do
                      HL7v2.Type.XTN,
                      HL7v2.Type.CE,
                      HL7v2.Type.CWE,
+                     HL7v2.Type.EIP,
+                     HL7v2.Type.FC,
                      HL7v2.Type.HD,
+                     HL7v2.Type.JCC,
+                     HL7v2.Type.MO,
                      HL7v2.Type.PL,
                      HL7v2.Type.EI,
                      HL7v2.Type.MSG,

@@ -18,7 +18,7 @@ defmodule HL7v2.Segment.NK1 do
       {8, :start_date, HL7v2.Type.DT, :o, 1},
       {9, :end_date, HL7v2.Type.DT, :o, 1},
       {10, :next_of_kin_job_title, HL7v2.Type.ST, :o, 1},
-      {11, :next_of_kin_job_code_class, :raw, :o, 1},
+      {11, :next_of_kin_job_code_class, HL7v2.Type.JCC, :o, 1},
       {12, :next_of_kin_employee_number, HL7v2.Type.CX, :o, 1},
       {13, :organization_name, HL7v2.Type.XON, :o, :unbounded},
       {14, :marital_status, HL7v2.Type.CE, :o, 1},

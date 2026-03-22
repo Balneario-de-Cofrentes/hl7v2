@@ -27,7 +27,7 @@ defmodule HL7v2.Segment.PV1 do
       {17, :admitting_doctor, HL7v2.Type.XCN, :o, :unbounded},
       {18, :patient_type, HL7v2.Type.IS, :o, 1},
       {19, :visit_number, HL7v2.Type.CX, :o, 1},
-      {20, :financial_class, :raw, :o, :unbounded},
+      {20, :financial_class, HL7v2.Type.FC, :o, :unbounded},
       {21, :charge_price_indicator, HL7v2.Type.IS, :o, 1},
       {22, :courtesy_code, HL7v2.Type.IS, :o, 1},
       {23, :credit_rating, HL7v2.Type.IS, :o, 1},

@@ -37,8 +37,11 @@ defmodule HL7v2.Type do
   # rejoin them with the sub-component delimiter so that composite type
   # parsers (CX, XPN, etc.) can re-split and parse them as expected.
   defp rejoin_sub_components(subs) do
-    joined = Enum.join(subs, "&")
-    if joined == "", do: nil, else: joined
+    if Enum.all?(subs, &(&1 == "" or is_nil(&1))) do
+      nil
+    else
+      Enum.join(subs, "&")
+    end
   end
 
   @doc """

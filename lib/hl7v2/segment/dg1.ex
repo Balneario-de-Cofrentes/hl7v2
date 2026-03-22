@@ -21,7 +21,7 @@ defmodule HL7v2.Segment.DG1 do
       {10, :drg_grouper_review_code, HL7v2.Type.IS, :b, 1},
       {11, :outlier_type, HL7v2.Type.CE, :b, 1},
       {12, :outlier_days, HL7v2.Type.NM, :b, 1},
-      {13, :outlier_cost, :raw, :b, 1},
+      {13, :outlier_cost, HL7v2.Type.CP, :b, 1},
       {14, :grouper_version_and_type, HL7v2.Type.ST, :b, 1},
       {15, :diagnosis_priority, HL7v2.Type.ID, :o, 1},
       {16, :diagnosing_clinician, HL7v2.Type.XCN, :o, :unbounded},
