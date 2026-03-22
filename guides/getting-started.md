@@ -190,6 +190,36 @@ Both listener and client support TLS:
 )
 ```
 
+## Working with Unknown Segments
+
+Real-world HL7 messages contain segments the library doesn't have typed definitions for.
+These are preserved losslessly — you never lose data:
+
+```elixir
+{:ok, msg} = HL7v2.parse(text, mode: :typed)
+
+Enum.each(msg.segments, fn
+  %HL7v2.Segment.PID{} = pid ->
+    # Typed — access fields by name
+    IO.inspect(pid.patient_name)
+
+  %HL7v2.Segment.ZXX{segment_id: id, raw_fields: fields} ->
+    # Z-segment — preserved with original segment ID
+    IO.puts("Z-segment #{id}: #{inspect(fields)}")
+
+  {name, raw_fields} ->
+    # Unknown segment — preserved as raw tuple
+    IO.puts("Unknown #{name}: #{length(raw_fields)} fields")
+end)
+
+# Path access works on all forms:
+HL7v2.get(msg, "PID-5")   # typed struct field
+HL7v2.get(msg, "ZPD-1")   # ZXX raw field by position
+HL7v2.get(msg, "PR1-3")   # raw tuple field by position
+```
+
+All forms encode back to valid wire format with `HL7v2.encode/1`.
+
 ## Next Steps
 
 - Browse the [API reference](https://hexdocs.pm/hl7v2) for full module documentation

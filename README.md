@@ -197,19 +197,39 @@ basic validation (required fields, repetition limits, required-segment presence)
 - Segment ordering or group/cardinality validation (segments out of order pass validation)
 - HL7 table value-set validation (any string accepted for coded fields)
 - Conditional field logic (fields marked `:c` are not evaluated)
-- OBX-5 type dispatch (observation values stay raw — OBX-2 value type is not used to
-  select a typed parser for OBX-5; this is the VARIES data type problem)
 - Full message profile conformance or v2.7+ features (truncation character, MSH-22+)
 - Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
   no whitespace normalization)
 
-The parser ingests more than it semantically validates — unknown segments are preserved
-as raw tuples, not rejected.
-
 **Coverage:** 19 of ~120 standard segments (plus generic ZXX) typed. Common message families:
 ADT_A01 ~11/23, ORM_O01 ~12/23, ORU_R01 ~10/18, ACK 3/4, SIU_S12 ~9/15.
-42 type modules (34 composite + 8 primitive). Segments not typed are preserved
-in raw form.
+42 type modules (34 composite + 8 primitive).
+
+## Handling Unknown Segments
+
+Real-world HL7 is messy. Messages arrive with vendor-specific Z-segments, obsolete
+segments from older versions, and segments your system doesn't care about. The library
+handles all of them without crashing or losing data:
+
+```elixir
+{:ok, msg} = HL7v2.parse(text, mode: :typed)
+
+# Known segments → typed structs with named fields
+%HL7v2.Segment.PID{patient_name: [%XPN{...}], ...}
+
+# Z-segments → ZXX struct preserving segment ID and all raw fields
+%HL7v2.Segment.ZXX{segment_id: "ZPD", raw_fields: ["custom", "data"]}
+
+# Unknown standard segments → raw tuples, lossless
+{"PR1", ["1", "I10", "99213", ...]}
+```
+
+All three forms encode back to valid HL7 wire format. The typed API (`get/2`, `fetch/2`,
+`~h` sigil) works across all forms — typed segments return struct fields, raw tuples
+return fields by position.
+
+This means you can parse any HL7 message from any source, work with the segments you
+understand, and forward the rest unchanged. No schema registration required.
 
 ## Documentation
 
