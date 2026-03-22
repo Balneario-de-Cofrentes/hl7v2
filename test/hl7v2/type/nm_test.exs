@@ -87,10 +87,10 @@ defmodule HL7v2.Type.NMTest do
       assert NM.parse(".1") == nil
     end
 
-    test "strips whitespace and uses trimmed value as original" do
+    test "preserves raw input with whitespace in original" do
       nm = NM.parse("  123  ")
       assert nm.value == "123"
-      assert nm.original == "123"
+      assert nm.original == "  123  "
     end
   end
 

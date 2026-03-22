@@ -128,7 +128,7 @@ defmodule HL7v2.Message do
   """
   @spec to_raw(t()) :: HL7v2.RawMessage.t()
   def to_raw(%__MODULE__{msh: msh, segments: segments}) do
-    sep = HL7v2.Separator.default()
+    sep = separator_from_msh(msh)
 
     raw_segments = [
       {"MSH", MSH.encode(msh)}
@@ -147,6 +147,16 @@ defmodule HL7v2.Message do
   end
 
   # --- Private ---
+
+  defp separator_from_msh(%MSH{field_separator: fs, encoding_characters: enc})
+       when is_binary(fs) and is_binary(enc) do
+    case HL7v2.Separator.from_msh("MSH" <> fs <> enc <> fs) do
+      {:ok, sep} -> sep
+      _ -> HL7v2.Separator.default()
+    end
+  end
+
+  defp separator_from_msh(_), do: HL7v2.Separator.default()
 
   defp wrap_hd(nil), do: nil
   defp wrap_hd(%HD{} = hd), do: hd

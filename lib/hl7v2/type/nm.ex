@@ -57,7 +57,9 @@ defmodule HL7v2.Type.NM do
     trimmed = String.trim(value)
 
     if Regex.match?(@numeric_pattern, trimmed) do
-      %__MODULE__{value: normalize(trimmed), original: trimmed}
+      # Preserve the raw wire value (with any whitespace) for lossless round-trip.
+      # Normalize only the trimmed form for programmatic access.
+      %__MODULE__{value: normalize(trimmed), original: value}
     else
       nil
     end

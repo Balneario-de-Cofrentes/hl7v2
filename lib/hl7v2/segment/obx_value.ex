@@ -34,7 +34,14 @@ defmodule HL7v2.Segment.OBXValue do
     "CX" => HL7v2.Type.CX,
     "EI" => HL7v2.Type.EI,
     "SI" => HL7v2.Type.SI,
-    "CF" => HL7v2.Type.FT
+    "CF" => HL7v2.Type.FT,
+    "CQ" => HL7v2.Type.CQ,
+    "MO" => HL7v2.Type.MO,
+    "DR" => HL7v2.Type.DR,
+    "XON" => HL7v2.Type.XON,
+    "CP" => HL7v2.Type.CP,
+    "FC" => HL7v2.Type.FC,
+    "TN" => HL7v2.Type.TN
   }
 
   @doc """

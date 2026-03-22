@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.3 — 2026-03-22
+
+### Additions
+
+- **MRG segment** — Merge Patient Information (7 fields), registered in typed parser.
+  ADT^A39-A42 merge workflows now fully typed end-to-end.
+- **OBX dispatch** — Extended value_type_map with CQ, MO, DR, XON, CP, FC, TN. All
+  implemented types now available for OBX-5 dispatch.
+
+### Fixes
+
+- **Builder separator** — `Message.to_raw/1` now derives separators from MSH instead
+  of hardcoding defaults. Custom-delimiter builder messages encode correctly.
+- **NM whitespace** — `original` field now preserves raw wire value including any
+  whitespace for lossless round-trip. `value` field still uses trimmed+normalized form.
+- **README accuracy** — 22 segments (was 21), ~95% coverage (was 95%+), explicit note
+  about raw holes (TQ, SPS, ELD fields)
+
 ## v0.5.2 — 2026-03-22
 
 ### Fixes

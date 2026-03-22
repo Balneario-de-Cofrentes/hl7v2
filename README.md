@@ -168,9 +168,9 @@ end
 ## Coverage
 
 ```
- Segments    21 typed structs (MSH EVN PID PV1 PV2 NK1 OBR OBX ORC
-              MSA ERR NTE AL1 DG1 IN1 SCH AIS RGS GT1 FT1 ZXX)
-              21 of ~151 standard segments + generic Z-segment
+ Segments    22 typed structs (MSH EVN PID PV1 PV2 NK1 OBR OBX ORC
+              MSA ERR NTE AL1 DG1 IN1 SCH AIS RGS MRG GT1 FT1 ZXX)
+              22 of ~151 standard segments + generic Z-segment
 
  Types       36 composite + 8 primitive (44 of ~89 standard types)
 
@@ -181,7 +181,7 @@ end
               TLS/mTLS, telemetry instrumentation
 
  Tests       1,630+ (241 doctests + 30 properties + 1,355+ tests)
- Coverage    95%+
+ Coverage    ~95%
  Speed       <1s full suite
 ```
 
@@ -204,10 +204,12 @@ ADT/ORM/ORU/SIU/ACK subset with extra_fields preservation for unlisted fields.
 - Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
   no whitespace normalization)
 
-**Coverage:** 21 of ~151 standard segments (plus generic ZXX) typed. 44 of ~89 standard
+**Coverage:** 22 of ~151 standard segments (plus generic ZXX) typed. 44 of ~89 standard
 data types. 20 of ~199 message structures with presence validation definitions. Extra
 fields beyond declared definitions are preserved in `extra_fields` for lossless round-trip.
 OBX exposes 19 of 25 fields; OBR exposes 49 of 50 — unlisted fields survive as extra_fields.
+Some typed segment fields fall back to `:raw` where their HL7 data types (TQ, SPS, ELD) are
+not yet implemented — these fields are preserved but not parsed into typed structs.
 
 ## Handling Unknown Segments
 
