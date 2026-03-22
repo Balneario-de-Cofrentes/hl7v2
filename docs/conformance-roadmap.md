@@ -1,10 +1,11 @@
 # HL7v2 Conformance Roadmap
 
-## Current State (v0.5.6)
+## Current State (v0.9.0)
 
-Strong raw round-trip core. Typed support for a focused ADT/ORM/ORU/SIU/ACK subset.
-Presence-only validation. 21 standard segments, 43 v2.5.1 types + legacy TN,
-20 message structure definitions.
+Strong raw round-trip core. Typed support for ADT/ORM/ORU/SIU/ACK with structural
+validation (order, groups, cardinality). 29 standard segments, 48 v2.5.1 types,
+20 group-aware message structure definitions, 1 raw hole (OBX-5 dispatch).
+1,893 tests, 0 failures.
 
 ## Milestones
 
@@ -53,35 +54,37 @@ Presence-only validation. 21 standard segments, 43 v2.5.1 types + legacy TN,
 - [x] Raw holes: 6 → 1 (OBX-5 only, by design)
 - [x] Type coverage: 48/84 (57.1%)
 
-### M5: Broad Clinical Coverage
+### M5: Broad Clinical Coverage — COMPLETE (v0.9.0)
 
-Patient admin, scheduling, insurance, procedure segments.
+- [x] SFT (Software Segment)
+- [x] PD1, DB1, ACC, PR1 (Patient admin / procedures)
+- [x] AIG, AIL, AIP (Scheduling resources)
+- [x] Segment coverage: 29/136 (21.3%)
+- [x] 647 declared fields, 1 raw hole (OBX-5)
+- [ ] Remaining: ROL, DRG, PDA, IN2, IN3, DSC, BHS, BTS (lower priority)
 
-- [ ] Core control: SFT, DSC, BHS, BTS
-- [ ] Patient admin: PD1, ROL, DB1, DRG, ACC, PDA, PR1, IN2, IN3
-- [ ] Scheduling: AIG, AIL, AIP
-- [ ] Order/pharmacy: RQD, RQ1, RXO, ODS, ODT, BLG (if needed)
+### M6: Versioned Conformance Platform — IN PROGRESS
 
-### M6: Versioned Conformance Platform
-
-- [ ] HL7 table/coded-value validation (opt-in, versioned)
-- [ ] Version-aware support (v2.3-v2.8.2 deltas)
-- [ ] Generated reference docs (types, segments, structures, raw holes, validation depth)
-- [ ] Release gates (metadata sync, conformance green, coverage ledger, no asymmetries)
+- [ ] HL7 table/coded-value validation (opt-in)
+- [ ] Generated reference docs from coverage ledger
+- [ ] Final README/CHANGELOG accuracy pass
+- [ ] Conformance roadmap finalized
+- [ ] Version-aware support deferred (v2.3-v2.8.2 deltas — future work)
 
 ## Scope Reality
 
-| Stop at | You get |
-|---------|---------|
-| M1 | Honest, strong raw toolkit with typed subset (current) |
-| M3 | Honest, strong library with real structural validation |
-| M4 | Strong practical interoperability for common HL7 workflows |
-| M6 | Serious HL7 v2 conformance platform |
+| Stop at | You get | Status |
+|---------|---------|--------|
+| M1 | Honest, strong raw toolkit with typed subset | DONE (v0.5.x) |
+| M3 | Real structural validation for supported structures | DONE (v0.7.0) |
+| M4 | Strong practical interoperability (no raw holes) | DONE (v0.8.0) |
+| M5 | Broad clinical segment coverage | DONE (v0.9.0) |
+| M6 | Table validation + conformance platform | IN PROGRESS |
 
 ## Execution Order
 
 1. Contract honesty + correctness fixes (M1 — DONE)
-2. Metadata generation + conformance test harness (M2)
+2. Metadata generation + conformance test harness (M2 — DONE)
 3. Structural validator rewrite (M3)
 4. Datatype expansion (M4)
 5. Segment expansion for ADT/ORU/SIU core (M5)
