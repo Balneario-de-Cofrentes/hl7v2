@@ -9,6 +9,14 @@ defmodule HL7v2.Type do
   Primitive types (ST, NM, DT, etc.) work with binaries.
   Composite types (CX, XPN, HD, etc.) work with lists of component strings
   and return/accept structs.
+
+  ## Sub-Component Separator
+
+  By default, sub-component fields are split/joined with `&`. When a message
+  declares a non-default sub-component separator (e.g., `$` in MSH-2 `^~\\$`),
+  call `with_sub_component_separator/2` to set it for the duration of a
+  parse or encode operation. Composite types read the active separator via
+  `sub_component_separator/0`.
   """
 
   @compile {:inline, get_component: 2, empty_value?: 1}
@@ -18,6 +26,42 @@ defmodule HL7v2.Type do
 
   @doc "Encodes a typed Elixir value back to wire format."
   @callback encode(struct() | binary() | nil) :: list() | binary()
+
+  @sub_component_key :hl7v2_sub_component_sep
+
+  @doc """
+  Returns the active sub-component separator string.
+
+  Defaults to `"&"` when no separator context has been set via
+  `with_sub_component_separator/2`.
+  """
+  @spec sub_component_separator() :: binary()
+  def sub_component_separator do
+    Process.get(@sub_component_key, "&")
+  end
+
+  @doc """
+  Executes `fun` with the given sub-component separator active.
+
+  The separator is stored in the process dictionary for the duration of `fun`
+  and restored to its previous value afterwards. This is used by segment
+  parse/encode to propagate the message's actual sub-component delimiter to
+  all composite type helpers.
+  """
+  @spec with_sub_component_separator(binary(), (-> result)) :: result when result: term()
+  def with_sub_component_separator(sep, fun) when is_binary(sep) and is_function(fun, 0) do
+    previous = Process.get(@sub_component_key)
+    Process.put(@sub_component_key, sep)
+
+    try do
+      fun.()
+    after
+      case previous do
+        nil -> Process.delete(@sub_component_key)
+        val -> Process.put(@sub_component_key, val)
+      end
+    end
+  end
 
   @doc """
   Extracts a string value from a component, returning `nil` for empty/nil inputs.
@@ -42,7 +86,7 @@ defmodule HL7v2.Type do
     if Enum.all?(subs, &(&1 == "" or is_nil(&1))) do
       nil
     else
-      Enum.join(subs, "&")
+      Enum.join(subs, sub_component_separator())
     end
   end
 

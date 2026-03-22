@@ -147,40 +147,46 @@ defmodule HL7v2.Type.XPN do
   defp parse_sub_fn(nil), do: nil
 
   defp parse_sub_fn(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     fn_val = FN.parse(subs)
     if all_nil?(fn_val), do: nil, else: fn_val
   end
 
   defp encode_sub_fn(nil), do: ""
-  defp encode_sub_fn(%FN{} = fn_val), do: fn_val |> FN.encode() |> Enum.join("&")
+
+  defp encode_sub_fn(%FN{} = fn_val),
+    do: fn_val |> FN.encode() |> Enum.join(Type.sub_component_separator())
 
   defp parse_sub_ce(nil), do: nil
 
   defp parse_sub_ce(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     ce_val = CE.parse(subs)
     if all_nil?(ce_val), do: nil, else: ce_val
   end
 
   defp encode_sub_ce(nil), do: ""
-  defp encode_sub_ce(%CE{} = ce), do: ce |> CE.encode() |> Enum.join("&")
+
+  defp encode_sub_ce(%CE{} = ce),
+    do: ce |> CE.encode() |> Enum.join(Type.sub_component_separator())
 
   defp parse_sub_dr(nil), do: nil
 
   defp parse_sub_dr(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     dr_val = DR.parse(subs)
     if all_nil?(dr_val), do: nil, else: dr_val
   end
 
   defp encode_sub_dr(nil), do: ""
-  defp encode_sub_dr(%DR{} = dr), do: dr |> DR.encode() |> Enum.join("&")
+
+  defp encode_sub_dr(%DR{} = dr),
+    do: dr |> DR.encode() |> Enum.join(Type.sub_component_separator())
 
   defp parse_sub_ts(nil), do: nil
 
   defp parse_sub_ts(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     ts_val = TS.parse(subs)
 
     # A TS with no time component is effectively nil
@@ -196,7 +202,7 @@ defmodule HL7v2.Type.XPN do
   defp encode_sub_ts(%TS{} = ts) do
     case TS.encode(ts) do
       [] -> ""
-      parts -> Enum.join(parts, "&")
+      parts -> Enum.join(parts, Type.sub_component_separator())
     end
   end
 

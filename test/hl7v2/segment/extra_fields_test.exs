@@ -175,14 +175,22 @@ defmodule HL7v2.Segment.ExtraFieldsTest do
 
       # PID-8 (administrative_sex) is IS type, but wire has M^EXTRA
       raw_fields = [
-        "1",           # set_id
-        nil,           # patient_id
-        "12345",       # patient_identifier_list
-        nil,           # alternate_patient_id
-        "Smith^John",  # patient_name
-        nil,           # mother_maiden_name
-        "19800101",    # date_of_birth
-        ["M", "EXTRA"] # administrative_sex with extra component
+        # set_id
+        "1",
+        # patient_id
+        nil,
+        # patient_identifier_list
+        "12345",
+        # alternate_patient_id
+        nil,
+        # patient_name
+        "Smith^John",
+        # mother_maiden_name
+        nil,
+        # date_of_birth
+        "19800101",
+        # administrative_sex with extra component
+        ["M", "EXTRA"]
       ]
 
       pid = PID.parse(raw_fields)

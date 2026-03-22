@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.2 — 2026-03-22
+
+### Fixes
+
+- **Subcomponent separator** — Non-default sub-component separators (e.g., `$` in
+  MSH-2 `^~\$`) now preserved through typed round-trip. Previously hardcoded as `&`
+  in 15 composite type modules. Uses process-dictionary-scoped separator context
+  threaded from the Separator struct through segment parse/encode.
+- **RGS typed parsing** — RGS segment now registered in typed parser (was defined
+  but not dispatched, so SIU messages returned raw tuples instead of structs)
+- **ADT_A12** — ADT^A12 (Cancel Transfer) now correctly mapped to ADT_A12, not ADT_A09
+- **Presence validation** — Renamed "structure validation" to "presence validation"
+  throughout docs to honestly describe what it does (no ordering/group/cardinality)
+- **Docs accuracy** — Fixed DICOM PS3.x citation in message-structures.md (was wrong
+  standard), updated README coverage numbers to honest counts
+
 ## v0.5.1 — 2026-03-22
 
 ### Fixes
@@ -11,8 +27,8 @@ All notable changes to this project will be documented in this file.
   within the resource group
 - **Primitive extra components** — Non-conformant input like `M^EXTRA` on primitive
   fields now preserved through typed round-trip instead of being silently truncated
-- **Canonical structure mappings** — Added ADT^A12 (→ ADT_A09) and SIU S18-S24
-  (→ SIU_S12) to match the documented reference
+- **Canonical structure mappings** — Added ADT^A12 and SIU S18-S24 to match the
+  documented reference
 
 ## v0.5.0 — 2026-03-22
 

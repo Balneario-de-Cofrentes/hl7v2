@@ -98,7 +98,7 @@ defmodule HL7v2.Segment do
       @impl HL7v2.Segment
       @spec parse(list(), HL7v2.Separator.t()) :: t()
       def parse(raw_fields, separators \\ HL7v2.Separator.default()) do
-        HL7v2.Segment.do_parse(__MODULE__, @segment_fields, raw_fields)
+        HL7v2.Segment.do_parse(__MODULE__, @segment_fields, raw_fields, separators)
       end
 
       @impl HL7v2.Segment
@@ -114,31 +114,39 @@ defmodule HL7v2.Segment do
   # --- Runtime Parse/Encode Helpers ---
 
   @doc false
-  @spec do_parse(module(), [field_def()], list()) :: struct()
-  def do_parse(module, field_defs, raw_fields) do
-    attrs =
-      Enum.map(field_defs, fn {seq, name, type, _opt, max_reps} ->
-        raw = Enum.at(raw_fields, seq - 1)
-        {name, parse_field_value(raw, type, max_reps)}
-      end)
+  @spec do_parse(module(), [field_def()], list(), HL7v2.Separator.t()) :: struct()
+  def do_parse(module, field_defs, raw_fields, separators \\ HL7v2.Separator.default()) do
+    sep = <<separators.sub_component>>
 
-    max_seq = max_declared_seq(field_defs)
-    extra = Enum.drop(raw_fields, max_seq)
+    ensure_sub_component_separator(sep, fn ->
+      attrs =
+        Enum.map(field_defs, fn {seq, name, type, _opt, max_reps} ->
+          raw = Enum.at(raw_fields, seq - 1)
+          {name, parse_field_value(raw, type, max_reps)}
+        end)
 
-    struct(module, [{:extra_fields, extra} | attrs])
+      max_seq = max_declared_seq(field_defs)
+      extra = Enum.drop(raw_fields, max_seq)
+
+      struct(module, [{:extra_fields, extra} | attrs])
+    end)
   end
 
   @doc false
-  @spec do_encode(struct(), [field_def()]) :: list()
-  def do_encode(segment, field_defs) do
-    declared =
-      Enum.map(field_defs, fn {_seq, name, type, _opt, max_reps} ->
-        value = Map.get(segment, name)
-        encode_field_value(value, type, max_reps)
-      end)
+  @spec do_encode(struct(), [field_def()], HL7v2.Separator.t()) :: list()
+  def do_encode(segment, field_defs, separators \\ HL7v2.Separator.default()) do
+    sep = <<separators.sub_component>>
 
-    extra = Map.get(segment, :extra_fields) || []
-    (declared ++ extra) |> trim_trailing()
+    ensure_sub_component_separator(sep, fn ->
+      declared =
+        Enum.map(field_defs, fn {_seq, name, type, _opt, max_reps} ->
+          value = Map.get(segment, name)
+          encode_field_value(value, type, max_reps)
+        end)
+
+      extra = Map.get(segment, :extra_fields) || []
+      (declared ++ extra) |> trim_trailing()
+    end)
   end
 
   # --- Field-Level Parse ---
@@ -271,6 +279,18 @@ defmodule HL7v2.Segment do
   defp empty_field?(nil), do: true
   defp empty_field?([]), do: true
   defp empty_field?(_), do: false
+
+  # Sets the sub-component separator only if no separator context is already
+  # active (i.e., a caller like TypedParser.to_raw has not already set it).
+  # This prevents do_parse/do_encode from overriding an outer separator context.
+  defp ensure_sub_component_separator(sep, fun) do
+    if Process.get(:hl7v2_sub_component_sep) do
+      # Separator already set by an outer context — don't override
+      fun.()
+    else
+      HL7v2.Type.with_sub_component_separator(sep, fun)
+    end
+  end
 
   @doc false
   @spec max_declared_seq([field_def()]) :: non_neg_integer()

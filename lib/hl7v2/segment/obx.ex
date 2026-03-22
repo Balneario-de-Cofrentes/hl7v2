@@ -38,8 +38,8 @@ defmodule HL7v2.Segment.OBX do
 
   @impl HL7v2.Segment
   @spec parse(list(), HL7v2.Separator.t()) :: t()
-  def parse(raw_fields, _separators \\ HL7v2.Separator.default()) do
-    obx = HL7v2.Segment.do_parse(__MODULE__, @segment_fields, raw_fields)
+  def parse(raw_fields, separators \\ HL7v2.Separator.default()) do
+    obx = HL7v2.Segment.do_parse(__MODULE__, @segment_fields, raw_fields, separators)
 
     case obx.value_type do
       nil ->

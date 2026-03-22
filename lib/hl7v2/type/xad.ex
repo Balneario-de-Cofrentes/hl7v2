@@ -142,29 +142,33 @@ defmodule HL7v2.Type.XAD do
   defp parse_sub_sad(nil), do: nil
 
   defp parse_sub_sad(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     sad_val = SAD.parse(subs)
     if all_nil?(sad_val), do: nil, else: sad_val
   end
 
   defp encode_sub_sad(nil), do: ""
-  defp encode_sub_sad(%SAD{} = sad), do: sad |> SAD.encode() |> Enum.join("&")
+
+  defp encode_sub_sad(%SAD{} = sad),
+    do: sad |> SAD.encode() |> Enum.join(Type.sub_component_separator())
 
   defp parse_sub_dr(nil), do: nil
 
   defp parse_sub_dr(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     dr_val = DR.parse(subs)
     if all_nil?(dr_val), do: nil, else: dr_val
   end
 
   defp encode_sub_dr(nil), do: ""
-  defp encode_sub_dr(%DR{} = dr), do: dr |> DR.encode() |> Enum.join("&")
+
+  defp encode_sub_dr(%DR{} = dr),
+    do: dr |> DR.encode() |> Enum.join(Type.sub_component_separator())
 
   defp parse_sub_ts(nil), do: nil
 
   defp parse_sub_ts(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     ts_val = TS.parse(subs)
 
     if ts_val.time == nil and ts_val.degree_of_precision == nil do
@@ -179,7 +183,7 @@ defmodule HL7v2.Type.XAD do
   defp encode_sub_ts(%TS{} = ts) do
     case TS.encode(ts) do
       [] -> ""
-      parts -> Enum.join(parts, "&")
+      parts -> Enum.join(parts, Type.sub_component_separator())
     end
   end
 

@@ -74,7 +74,7 @@ defmodule HL7v2.Type.VID do
 
   defp parse_sub_ce(value) when is_binary(value) do
     value
-    |> String.split("&", parts: 6)
+    |> String.split(Type.sub_component_separator(), parts: 6)
     |> CE.parse()
   end
 
@@ -83,6 +83,6 @@ defmodule HL7v2.Type.VID do
   defp encode_sub_ce(%CE{} = ce) do
     ce
     |> CE.encode()
-    |> Enum.join("&")
+    |> Enum.join(Type.sub_component_separator())
   end
 end

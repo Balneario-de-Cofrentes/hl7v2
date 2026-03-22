@@ -123,24 +123,28 @@ defmodule HL7v2.Type.PL do
   defp parse_sub_hd(nil), do: nil
 
   defp parse_sub_hd(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     hd_val = HD.parse(subs)
     if all_nil?(hd_val), do: nil, else: hd_val
   end
 
   defp encode_sub_hd(nil), do: ""
-  defp encode_sub_hd(%HD{} = hd_val), do: hd_val |> HD.encode() |> Enum.join("&")
+
+  defp encode_sub_hd(%HD{} = hd_val),
+    do: hd_val |> HD.encode() |> Enum.join(Type.sub_component_separator())
 
   defp parse_sub_ei(nil), do: nil
 
   defp parse_sub_ei(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     ei_val = EI.parse(subs)
     if all_nil?(ei_val), do: nil, else: ei_val
   end
 
   defp encode_sub_ei(nil), do: ""
-  defp encode_sub_ei(%EI{} = ei), do: ei |> EI.encode() |> Enum.join("&")
+
+  defp encode_sub_ei(%EI{} = ei),
+    do: ei |> EI.encode() |> Enum.join(Type.sub_component_separator())
 
   defp all_nil?(struct) do
     struct

@@ -86,7 +86,12 @@ defmodule HL7v2.TypedParser do
   """
   @spec to_raw(TypedMessage.t()) :: RawMessage.t()
   def to_raw(%TypedMessage{separators: separators, type: type, segments: segments}) do
-    raw_segments = Enum.map(segments, &revert_segment/1)
+    sep = <<separators.sub_component>>
+
+    raw_segments =
+      HL7v2.Type.with_sub_component_separator(sep, fn ->
+        Enum.map(segments, &revert_segment/1)
+      end)
 
     %RawMessage{
       separators: separators,

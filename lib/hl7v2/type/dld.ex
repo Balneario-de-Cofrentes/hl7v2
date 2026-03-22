@@ -71,7 +71,7 @@ defmodule HL7v2.Type.DLD do
   defp parse_sub_ts(nil), do: nil
 
   defp parse_sub_ts(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     ts_val = TS.parse(subs)
     if ts_val.time == nil and ts_val.degree_of_precision == nil, do: nil, else: ts_val
   end
@@ -79,6 +79,6 @@ defmodule HL7v2.Type.DLD do
   defp encode_sub_ts(nil), do: ""
 
   defp encode_sub_ts(%TS{} = ts) do
-    ts |> TS.encode() |> Enum.join("&")
+    ts |> TS.encode() |> Enum.join(Type.sub_component_separator())
   end
 end

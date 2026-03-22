@@ -41,26 +41,38 @@ defmodule HL7v2.Segment.MSH do
   """
   @impl HL7v2.Segment
   @spec parse(list(), HL7v2.Separator.t()) :: t()
-  def parse(raw_fields, _separators \\ HL7v2.Separator.default()) do
-    # MSH-1 and MSH-2 are special: store as literal strings
-    base = %__MODULE__{
-      field_separator: Enum.at(raw_fields, 0),
-      encoding_characters: Enum.at(raw_fields, 1)
-    }
+  def parse(raw_fields, separators \\ HL7v2.Separator.default()) do
+    sep = <<separators.sub_component>>
 
-    # Parse remaining fields (MSH-3 onwards) using standard logic
-    remaining_fields = Enum.drop(@segment_fields, 2)
+    ensure_sep = fn fun ->
+      if Process.get(:hl7v2_sub_component_sep) do
+        fun.()
+      else
+        HL7v2.Type.with_sub_component_separator(sep, fun)
+      end
+    end
 
-    attrs =
-      Enum.map(remaining_fields, fn {seq, name, type, _opt, max_reps} ->
-        raw = Enum.at(raw_fields, seq - 1)
-        {name, HL7v2.Segment.parse_field_value(raw, type, max_reps)}
-      end)
+    ensure_sep.(fn ->
+      # MSH-1 and MSH-2 are special: store as literal strings
+      base = %__MODULE__{
+        field_separator: Enum.at(raw_fields, 0),
+        encoding_characters: Enum.at(raw_fields, 1)
+      }
 
-    max_seq = HL7v2.Segment.max_declared_seq(@segment_fields)
-    extra = Enum.drop(raw_fields, max_seq)
+      # Parse remaining fields (MSH-3 onwards) using standard logic
+      remaining_fields = Enum.drop(@segment_fields, 2)
 
-    struct(base, [{:extra_fields, extra} | attrs])
+      attrs =
+        Enum.map(remaining_fields, fn {seq, name, type, _opt, max_reps} ->
+          raw = Enum.at(raw_fields, seq - 1)
+          {name, HL7v2.Segment.parse_field_value(raw, type, max_reps)}
+        end)
+
+      max_seq = HL7v2.Segment.max_declared_seq(@segment_fields)
+      extra = Enum.drop(raw_fields, max_seq)
+
+      struct(base, [{:extra_fields, extra} | attrs])
+    end)
   end
 
   @doc """

@@ -74,7 +74,7 @@ defmodule HL7v2.Type.EIP do
   defp parse_sub_ei(nil), do: nil
 
   defp parse_sub_ei(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     ei_val = EI.parse(subs)
     if all_nil?(ei_val), do: nil, else: ei_val
   end
@@ -82,7 +82,7 @@ defmodule HL7v2.Type.EIP do
   defp encode_sub_ei(nil), do: ""
 
   defp encode_sub_ei(%EI{} = ei) do
-    ei |> EI.encode() |> Enum.join("&")
+    ei |> EI.encode() |> Enum.join(Type.sub_component_separator())
   end
 
   defp all_nil?(struct) do

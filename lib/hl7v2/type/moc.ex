@@ -73,7 +73,7 @@ defmodule HL7v2.Type.MOC do
   defp parse_sub_mo(nil), do: nil
 
   defp parse_sub_mo(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     mo_val = MO.parse(subs)
     if mo_val.quantity == nil and mo_val.denomination == nil, do: nil, else: mo_val
   end
@@ -81,16 +81,20 @@ defmodule HL7v2.Type.MOC do
   defp parse_sub_ce(nil), do: nil
 
   defp parse_sub_ce(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     ce_val = CE.parse(subs)
     if all_nil?(ce_val), do: nil, else: ce_val
   end
 
   defp encode_sub_mo(nil), do: ""
-  defp encode_sub_mo(%MO{} = mo), do: mo |> MO.encode() |> Enum.join("&")
+
+  defp encode_sub_mo(%MO{} = mo),
+    do: mo |> MO.encode() |> Enum.join(Type.sub_component_separator())
 
   defp encode_sub_ce(nil), do: ""
-  defp encode_sub_ce(%CE{} = ce), do: ce |> CE.encode() |> Enum.join("&")
+
+  defp encode_sub_ce(%CE{} = ce),
+    do: ce |> CE.encode() |> Enum.join(Type.sub_component_separator())
 
   defp all_nil?(struct) do
     struct

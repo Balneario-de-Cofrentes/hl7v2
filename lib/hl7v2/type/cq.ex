@@ -73,7 +73,7 @@ defmodule HL7v2.Type.CQ do
   defp parse_sub_ce(nil), do: nil
 
   defp parse_sub_ce(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     ce_val = CE.parse(subs)
     if all_nil?(ce_val), do: nil, else: ce_val
   end
@@ -81,7 +81,7 @@ defmodule HL7v2.Type.CQ do
   defp encode_sub_ce(nil), do: ""
 
   defp encode_sub_ce(%CE{} = ce) do
-    ce |> CE.encode() |> Enum.join("&")
+    ce |> CE.encode() |> Enum.join(Type.sub_component_separator())
   end
 
   defp all_nil?(struct) do

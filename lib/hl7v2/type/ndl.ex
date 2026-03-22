@@ -126,18 +126,20 @@ defmodule HL7v2.Type.NDL do
   defp parse_sub_cnn(nil), do: nil
 
   defp parse_sub_cnn(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     cnn_val = CNN.parse(subs)
     if all_nil?(cnn_val), do: nil, else: cnn_val
   end
 
   defp encode_sub_cnn(nil), do: ""
-  defp encode_sub_cnn(%CNN{} = cnn), do: cnn |> CNN.encode() |> Enum.join("&")
+
+  defp encode_sub_cnn(%CNN{} = cnn),
+    do: cnn |> CNN.encode() |> Enum.join(Type.sub_component_separator())
 
   defp parse_sub_ts(nil), do: nil
 
   defp parse_sub_ts(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     ts_val = TS.parse(subs)
 
     if ts_val.time == nil and ts_val.degree_of_precision == nil do
@@ -152,7 +154,7 @@ defmodule HL7v2.Type.NDL do
   defp encode_sub_ts(%TS{} = ts) do
     case TS.encode(ts) do
       [] -> ""
-      parts -> Enum.join(parts, "&")
+      parts -> Enum.join(parts, Type.sub_component_separator())
     end
   end
 
@@ -163,13 +165,15 @@ defmodule HL7v2.Type.NDL do
   defp parse_sub_hd(nil), do: nil
 
   defp parse_sub_hd(value) when is_binary(value) do
-    subs = String.split(value, "&")
+    subs = String.split(value, Type.sub_component_separator())
     hd_val = HD.parse(subs)
     if all_nil?(hd_val), do: nil, else: hd_val
   end
 
   defp encode_sub_hd(nil), do: ""
-  defp encode_sub_hd(%HD{} = hd_val), do: hd_val |> HD.encode() |> Enum.join("&")
+
+  defp encode_sub_hd(%HD{} = hd_val),
+    do: hd_val |> HD.encode() |> Enum.join(Type.sub_component_separator())
 
   defp all_nil?(struct) do
     struct

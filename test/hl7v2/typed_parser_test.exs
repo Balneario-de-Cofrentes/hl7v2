@@ -176,6 +176,108 @@ defmodule HL7v2.TypedParserTest do
     end
   end
 
+  describe "round-trip with non-default sub-component separator" do
+    test "message with $ as sub-component separator survives typed round-trip" do
+      # MSH-2 = ^~\$ means sub-component separator is $ instead of &
+      msg =
+        "MSH|^~\\$|SEND|FAC|RCV|RFAC|20260322120000||ADT^A01|MSG002|P|2.5.1\r" <>
+          "PID|1||12345^^^MRN^MR||Smith^John||19800101|M\r" <>
+          "PV1|1|I|W^389^1\r"
+
+      {:ok, raw} = Parser.parse(msg)
+      assert raw.separators.sub_component == ?$
+
+      {:ok, typed} = TypedParser.convert(raw)
+
+      # Verify typed parsing worked correctly
+      pid = Enum.at(typed.segments, 1)
+      assert %PID{} = pid
+      [cx | _] = pid.patient_identifier_list
+      assert cx.id == "12345"
+      assert cx.assigning_authority.namespace_id == "MRN"
+      assert cx.identifier_type_code == "MR"
+
+      # Round-trip back
+      raw_again = TypedParser.to_raw(typed)
+      encoded = Encoder.encode(raw_again)
+
+      assert encoded == msg
+    end
+
+    test "CX field with sub-components using $ separator preserves data" do
+      # AUTH$1.2.3$ISO should survive round-trip when $ is the sub-component sep
+      msg =
+        "MSH|^~\\$|SEND|FAC|||20260322120000||ADT^A01|MSG003|P|2.5.1\r" <>
+          "PID|1||99887^^^AUTH$1.2.3$ISO^MR\r"
+
+      {:ok, raw} = Parser.parse(msg)
+      {:ok, typed} = TypedParser.convert(raw)
+
+      pid = Enum.at(typed.segments, 1)
+      [cx | _] = pid.patient_identifier_list
+
+      # Verify the HD sub-components were parsed correctly
+      assert cx.id == "99887"
+      assert cx.assigning_authority.namespace_id == "AUTH"
+      assert cx.assigning_authority.universal_id == "1.2.3"
+      assert cx.assigning_authority.universal_id_type == "ISO"
+      assert cx.identifier_type_code == "MR"
+
+      # Round-trip: typed -> raw -> wire
+      raw_again = TypedParser.to_raw(typed)
+      encoded = Encoder.encode(raw_again)
+
+      assert encoded == msg
+    end
+
+    test "XCN field with sub-components using $ separator preserves data" do
+      msg =
+        "MSH|^~\\$|SEND|FAC|||20260322120000||ORU^R01|MSG004|P|2.5.1\r" <>
+          "OBR|1|||85025^CBC^CPT4|||20260322|||||||||12345^Smith^John^^^^^^NPI$1.2.3$ISO^^^^NPI\r"
+
+      {:ok, raw} = Parser.parse(msg)
+      {:ok, typed} = TypedParser.convert(raw)
+
+      obr = Enum.at(typed.segments, 1)
+      [xcn | _] = obr.ordering_provider
+
+      assert xcn.id_number == "12345"
+      assert xcn.family_name.surname == "Smith"
+      assert xcn.given_name == "John"
+      assert xcn.assigning_authority.namespace_id == "NPI"
+      assert xcn.assigning_authority.universal_id == "1.2.3"
+      assert xcn.assigning_authority.universal_id_type == "ISO"
+      assert xcn.identifier_type_code == "NPI"
+
+      raw_again = TypedParser.to_raw(typed)
+      encoded = Encoder.encode(raw_again)
+
+      assert encoded == msg
+    end
+
+    test "default & separator still works correctly in round-trip" do
+      # Ensure backward compatibility: standard & separator round-trips
+      msg =
+        "MSH|^~\\&|SEND|FAC|||20260322120000||ADT^A01|MSG005|P|2.5.1\r" <>
+          "PID|1||99887^^^AUTH&1.2.3&ISO^MR\r"
+
+      {:ok, raw} = Parser.parse(msg)
+      {:ok, typed} = TypedParser.convert(raw)
+
+      pid = Enum.at(typed.segments, 1)
+      [cx | _] = pid.patient_identifier_list
+
+      assert cx.assigning_authority.namespace_id == "AUTH"
+      assert cx.assigning_authority.universal_id == "1.2.3"
+      assert cx.assigning_authority.universal_id_type == "ISO"
+
+      raw_again = TypedParser.to_raw(typed)
+      encoded = Encoder.encode(raw_again)
+
+      assert encoded == msg
+    end
+  end
+
   describe "parse(text, mode: :typed) end-to-end" do
     test "parses directly into typed message" do
       assert {:ok, %TypedMessage{} = typed} = Parser.parse(@adt_a01, mode: :typed)
