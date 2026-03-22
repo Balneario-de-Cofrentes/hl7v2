@@ -72,9 +72,9 @@ defmodule HL7v2.Type.XON do
       id_number: Type.get_component(components, 2),
       check_digit: Type.get_component(components, 3),
       check_digit_scheme: Type.get_component(components, 4),
-      assigning_authority: parse_sub_hd(Type.get_component(components, 5)),
+      assigning_authority: Type.parse_sub(HD, Type.get_component(components, 5)),
       identifier_type_code: Type.get_component(components, 6),
-      assigning_facility: parse_sub_hd(Type.get_component(components, 7)),
+      assigning_facility: Type.parse_sub(HD, Type.get_component(components, 7)),
       name_representation_code: Type.get_component(components, 8),
       organization_identifier: Type.get_component(components, 9)
     }
@@ -102,32 +102,13 @@ defmodule HL7v2.Type.XON do
       xon.id_number || "",
       xon.check_digit || "",
       xon.check_digit_scheme || "",
-      encode_sub_hd(xon.assigning_authority),
+      Type.encode_sub(HD, xon.assigning_authority),
       xon.identifier_type_code || "",
-      encode_sub_hd(xon.assigning_facility),
+      Type.encode_sub(HD, xon.assigning_facility),
       xon.name_representation_code || "",
       xon.organization_identifier || ""
     ]
     |> Type.trim_trailing()
   end
 
-  defp parse_sub_hd(nil), do: nil
-
-  defp parse_sub_hd(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    hd_val = HD.parse(subs)
-    if all_nil?(hd_val), do: nil, else: hd_val
-  end
-
-  defp encode_sub_hd(nil), do: ""
-
-  defp encode_sub_hd(%HD{} = hd_val),
-    do: hd_val |> HD.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end

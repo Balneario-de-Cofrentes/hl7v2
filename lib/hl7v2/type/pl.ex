@@ -75,14 +75,14 @@ defmodule HL7v2.Type.PL do
       point_of_care: Type.get_component(components, 0),
       room: Type.get_component(components, 1),
       bed: Type.get_component(components, 2),
-      facility: parse_sub_hd(Type.get_component(components, 3)),
+      facility: Type.parse_sub(HD, Type.get_component(components, 3)),
       location_status: Type.get_component(components, 4),
       person_location_type: Type.get_component(components, 5),
       building: Type.get_component(components, 6),
       floor: Type.get_component(components, 7),
       location_description: Type.get_component(components, 8),
-      comprehensive_location_identifier: parse_sub_ei(Type.get_component(components, 9)),
-      assigning_authority_for_location: parse_sub_hd(Type.get_component(components, 10))
+      comprehensive_location_identifier: Type.parse_sub(EI, Type.get_component(components, 9)),
+      assigning_authority_for_location: Type.parse_sub(HD, Type.get_component(components, 10))
     }
   end
 
@@ -106,50 +106,16 @@ defmodule HL7v2.Type.PL do
       pl.point_of_care || "",
       pl.room || "",
       pl.bed || "",
-      encode_sub_hd(pl.facility),
+      Type.encode_sub(HD, pl.facility),
       pl.location_status || "",
       pl.person_location_type || "",
       pl.building || "",
       pl.floor || "",
       pl.location_description || "",
-      encode_sub_ei(pl.comprehensive_location_identifier),
-      encode_sub_hd(pl.assigning_authority_for_location)
+      Type.encode_sub(EI, pl.comprehensive_location_identifier),
+      Type.encode_sub(HD, pl.assigning_authority_for_location)
     ]
     |> Type.trim_trailing()
   end
 
-  # -- Sub-component helpers --
-
-  defp parse_sub_hd(nil), do: nil
-
-  defp parse_sub_hd(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    hd_val = HD.parse(subs)
-    if all_nil?(hd_val), do: nil, else: hd_val
-  end
-
-  defp encode_sub_hd(nil), do: ""
-
-  defp encode_sub_hd(%HD{} = hd_val),
-    do: hd_val |> HD.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp parse_sub_ei(nil), do: nil
-
-  defp parse_sub_ei(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ei_val = EI.parse(subs)
-    if all_nil?(ei_val), do: nil, else: ei_val
-  end
-
-  defp encode_sub_ei(nil), do: ""
-
-  defp encode_sub_ei(%EI{} = ei),
-    do: ei |> EI.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end

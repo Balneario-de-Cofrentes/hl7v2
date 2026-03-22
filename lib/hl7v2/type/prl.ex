@@ -49,7 +49,7 @@ defmodule HL7v2.Type.PRL do
   @spec parse(list()) :: t()
   def parse(components) when is_list(components) do
     %__MODULE__{
-      parent_observation_identifier: parse_sub_ce(Type.get_component(components, 0)),
+      parent_observation_identifier: Type.parse_sub(CE, Type.get_component(components, 0)),
       parent_observation_sub_identifier: Type.get_component(components, 1),
       parent_observation_value_descriptor: Type.get_component(components, 2)
     }
@@ -72,30 +72,11 @@ defmodule HL7v2.Type.PRL do
 
   def encode(%__MODULE__{} = prl) do
     [
-      encode_sub_ce(prl.parent_observation_identifier),
+      Type.encode_sub(CE, prl.parent_observation_identifier),
       prl.parent_observation_sub_identifier || "",
       prl.parent_observation_value_descriptor || ""
     ]
     |> Type.trim_trailing()
   end
 
-  defp parse_sub_ce(nil), do: nil
-
-  defp parse_sub_ce(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ce_val = CE.parse(subs)
-    if all_nil?(ce_val), do: nil, else: ce_val
-  end
-
-  defp encode_sub_ce(nil), do: ""
-
-  defp encode_sub_ce(%CE{} = ce),
-    do: ce |> CE.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end

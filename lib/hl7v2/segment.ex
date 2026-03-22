@@ -198,22 +198,30 @@ defmodule HL7v2.Segment do
 
   defp parse_repeating(raw, type) when is_list(raw) do
     if composite_type?(type) do
-      if all_lists?(raw) do
-        # Multiple repetitions, each a list of components
-        Enum.map(raw, &type.parse/1)
-      else
-        # Single composite value (components), not repeated
-        [type.parse(raw)]
-      end
+      parse_repeating_composite(raw, type)
     else
-      # Repeated primitive — each element is a string value
-      Enum.map(raw, fn
-        v when is_binary(v) -> type.parse(v)
-        [_first | rest] = list when rest != [] -> list
-        [first] -> type.parse(first || "")
-        _ -> nil
-      end)
+      parse_repeating_primitive(raw, type)
     end
+  end
+
+  # Multiple repetitions when each element is already a list of components;
+  # otherwise a single composite value (its components, not repeated).
+  defp parse_repeating_composite(raw, type) do
+    if all_lists?(raw) do
+      Enum.map(raw, &type.parse/1)
+    else
+      [type.parse(raw)]
+    end
+  end
+
+  # Repeated primitive -- each element is a string value.
+  defp parse_repeating_primitive(raw, type) do
+    Enum.map(raw, fn
+      v when is_binary(v) -> type.parse(v)
+      [_first | rest] = list when rest != [] -> list
+      [first] -> type.parse(first || "")
+      _ -> nil
+    end)
   end
 
   # --- Field-Level Encode ---

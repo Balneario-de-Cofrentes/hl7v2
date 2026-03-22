@@ -23,7 +23,7 @@ defmodule HL7v2.Type.TQ do
   @behaviour HL7v2.Type
 
   alias HL7v2.Type
-  alias HL7v2.Type.{CQ, CE, TS, DTM}
+  alias HL7v2.Type.{CQ, CE, TS}
 
   defstruct [
     :quantity,
@@ -78,17 +78,17 @@ defmodule HL7v2.Type.TQ do
   @spec parse(list()) :: t()
   def parse(components) when is_list(components) do
     %__MODULE__{
-      quantity: parse_sub_cq(Type.get_component(components, 0)),
+      quantity: Type.parse_sub(CQ, Type.get_component(components, 0)),
       interval: Type.get_component(components, 1),
       duration: Type.get_component(components, 2),
-      start_date_time: parse_sub_ts(Type.get_component(components, 3)),
-      end_date_time: parse_sub_ts(Type.get_component(components, 4)),
+      start_date_time: Type.parse_sub_ts(Type.get_component(components, 3)),
+      end_date_time: Type.parse_sub_ts(Type.get_component(components, 4)),
       priority: Type.get_component(components, 5),
       condition: Type.get_component(components, 6),
       text: Type.get_component(components, 7),
       conjunction: Type.get_component(components, 8),
       order_sequencing: Type.get_component(components, 9),
-      occurrence_duration: parse_sub_ce(Type.get_component(components, 10)),
+      occurrence_duration: Type.parse_sub(CE, Type.get_component(components, 10)),
       total_occurrences: Type.get_component(components, 11)
     }
   end
@@ -113,82 +113,20 @@ defmodule HL7v2.Type.TQ do
 
   def encode(%__MODULE__{} = tq) do
     [
-      encode_sub_cq(tq.quantity),
+      Type.encode_sub(CQ, tq.quantity),
       tq.interval || "",
       tq.duration || "",
-      encode_sub_ts(tq.start_date_time),
-      encode_sub_ts(tq.end_date_time),
+      Type.encode_sub_ts(tq.start_date_time),
+      Type.encode_sub_ts(tq.end_date_time),
       tq.priority || "",
       tq.condition || "",
       tq.text || "",
       tq.conjunction || "",
       tq.order_sequencing || "",
-      encode_sub_ce(tq.occurrence_duration),
+      Type.encode_sub(CE, tq.occurrence_duration),
       tq.total_occurrences || ""
     ]
     |> Type.trim_trailing()
   end
 
-  # -- Sub-component parsing helpers --
-
-  defp parse_sub_cq(nil), do: nil
-
-  defp parse_sub_cq(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    cq_val = CQ.parse(subs)
-    if all_nil?(cq_val), do: nil, else: cq_val
-  end
-
-  defp encode_sub_cq(nil), do: ""
-
-  defp encode_sub_cq(%CQ{} = cq) do
-    cq |> CQ.encode() |> Enum.join(Type.sub_component_separator())
-  end
-
-  defp parse_sub_ts(nil), do: nil
-
-  defp parse_sub_ts(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ts_val = TS.parse(subs)
-
-    if ts_val.time == nil and ts_val.degree_of_precision == nil do
-      nil
-    else
-      ts_val
-    end
-  end
-
-  defp encode_sub_ts(nil), do: ""
-
-  defp encode_sub_ts(%TS{} = ts) do
-    case TS.encode(ts) do
-      [] -> ""
-      parts -> Enum.join(parts, Type.sub_component_separator())
-    end
-  end
-
-  defp encode_sub_ts(%DTM{} = dtm) do
-    DTM.encode(dtm)
-  end
-
-  defp parse_sub_ce(nil), do: nil
-
-  defp parse_sub_ce(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ce_val = CE.parse(subs)
-    if all_nil?(ce_val), do: nil, else: ce_val
-  end
-
-  defp encode_sub_ce(nil), do: ""
-
-  defp encode_sub_ce(%CE{} = ce) do
-    ce |> CE.encode() |> Enum.join(Type.sub_component_separator())
-  end
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end

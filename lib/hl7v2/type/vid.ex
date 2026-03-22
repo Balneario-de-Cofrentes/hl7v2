@@ -64,8 +64,8 @@ defmodule HL7v2.Type.VID do
   def encode(%__MODULE__{} = vid) do
     [
       vid.version_id || "",
-      encode_sub_ce(vid.internationalization_code),
-      encode_sub_ce(vid.international_version_id)
+      Type.encode_sub(CE, vid.internationalization_code),
+      Type.encode_sub(CE, vid.international_version_id)
     ]
     |> Type.trim_trailing()
   end
@@ -78,11 +78,4 @@ defmodule HL7v2.Type.VID do
     |> CE.parse()
   end
 
-  defp encode_sub_ce(nil), do: ""
-
-  defp encode_sub_ce(%CE{} = ce) do
-    ce
-    |> CE.encode()
-    |> Enum.join(Type.sub_component_separator())
-  end
 end

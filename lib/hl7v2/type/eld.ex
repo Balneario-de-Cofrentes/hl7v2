@@ -57,7 +57,7 @@ defmodule HL7v2.Type.ELD do
       segment_id: Type.get_component(components, 0),
       segment_sequence: Type.get_component(components, 1),
       field_position: Type.get_component(components, 2),
-      code_identifying_error: parse_sub_ce(Type.get_component(components, 3))
+      code_identifying_error: Type.parse_sub(CE, Type.get_component(components, 3))
     }
   end
 
@@ -87,29 +87,9 @@ defmodule HL7v2.Type.ELD do
       eld.segment_id || "",
       eld.segment_sequence || "",
       eld.field_position || "",
-      encode_sub_ce(eld.code_identifying_error)
+      Type.encode_sub(CE, eld.code_identifying_error)
     ]
     |> Type.trim_trailing()
   end
 
-  defp parse_sub_ce(nil), do: nil
-
-  defp parse_sub_ce(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ce_val = CE.parse(subs)
-    if all_nil?(ce_val), do: nil, else: ce_val
-  end
-
-  defp encode_sub_ce(nil), do: ""
-
-  defp encode_sub_ce(%CE{} = ce) do
-    ce |> CE.encode() |> Enum.join(Type.sub_component_separator())
-  end
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end

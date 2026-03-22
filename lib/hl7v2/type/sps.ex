@@ -58,13 +58,13 @@ defmodule HL7v2.Type.SPS do
   @spec parse(list()) :: t()
   def parse(components) when is_list(components) do
     %__MODULE__{
-      specimen_source_name_or_code: parse_sub_cwe(Type.get_component(components, 0)),
-      additives: parse_sub_cwe(Type.get_component(components, 1)),
+      specimen_source_name_or_code: Type.parse_sub(CWE, Type.get_component(components, 0)),
+      additives: Type.parse_sub(CWE, Type.get_component(components, 1)),
       specimen_collection_method: Type.get_component(components, 2),
-      body_site: parse_sub_cwe(Type.get_component(components, 3)),
-      site_modifier: parse_sub_cwe(Type.get_component(components, 4)),
-      collection_method_modifier_code: parse_sub_cwe(Type.get_component(components, 5)),
-      specimen_role: parse_sub_cwe(Type.get_component(components, 6))
+      body_site: Type.parse_sub(CWE, Type.get_component(components, 3)),
+      site_modifier: Type.parse_sub(CWE, Type.get_component(components, 4)),
+      collection_method_modifier_code: Type.parse_sub(CWE, Type.get_component(components, 5)),
+      specimen_role: Type.parse_sub(CWE, Type.get_component(components, 6))
     }
   end
 
@@ -88,35 +88,15 @@ defmodule HL7v2.Type.SPS do
 
   def encode(%__MODULE__{} = sps) do
     [
-      encode_sub_cwe(sps.specimen_source_name_or_code),
-      encode_sub_cwe(sps.additives),
+      Type.encode_sub(CWE, sps.specimen_source_name_or_code),
+      Type.encode_sub(CWE, sps.additives),
       sps.specimen_collection_method || "",
-      encode_sub_cwe(sps.body_site),
-      encode_sub_cwe(sps.site_modifier),
-      encode_sub_cwe(sps.collection_method_modifier_code),
-      encode_sub_cwe(sps.specimen_role)
+      Type.encode_sub(CWE, sps.body_site),
+      Type.encode_sub(CWE, sps.site_modifier),
+      Type.encode_sub(CWE, sps.collection_method_modifier_code),
+      Type.encode_sub(CWE, sps.specimen_role)
     ]
     |> Type.trim_trailing()
   end
 
-  defp parse_sub_cwe(nil), do: nil
-
-  defp parse_sub_cwe(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    cwe_val = CWE.parse(subs)
-    if all_nil?(cwe_val), do: nil, else: cwe_val
-  end
-
-  defp encode_sub_cwe(nil), do: ""
-
-  defp encode_sub_cwe(%CWE{} = cwe) do
-    cwe |> CWE.encode() |> Enum.join(Type.sub_component_separator())
-  end
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end

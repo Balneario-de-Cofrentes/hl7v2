@@ -80,7 +80,7 @@ defmodule HL7v2.Type.XAD do
   @spec parse(list()) :: t()
   def parse(components) when is_list(components) do
     %__MODULE__{
-      street_address: parse_sub_sad(Type.get_component(components, 0)),
+      street_address: Type.parse_sub(SAD, Type.get_component(components, 0)),
       other_designation: Type.get_component(components, 1),
       city: Type.get_component(components, 2),
       state: Type.get_component(components, 3),
@@ -91,9 +91,9 @@ defmodule HL7v2.Type.XAD do
       county_code: Type.get_component(components, 8),
       census_tract: Type.get_component(components, 9),
       address_representation_code: Type.get_component(components, 10),
-      address_validity_range: parse_sub_dr(Type.get_component(components, 11)),
-      effective_date: parse_sub_ts(Type.get_component(components, 12)),
-      expiration_date: parse_sub_ts(Type.get_component(components, 13))
+      address_validity_range: Type.parse_sub(DR, Type.get_component(components, 11)),
+      effective_date: Type.parse_sub_ts(Type.get_component(components, 12)),
+      expiration_date: Type.parse_sub_ts(Type.get_component(components, 13))
     }
   end
 
@@ -119,7 +119,7 @@ defmodule HL7v2.Type.XAD do
 
   def encode(%__MODULE__{} = xad) do
     [
-      encode_sub_sad(xad.street_address),
+      Type.encode_sub(SAD, xad.street_address),
       xad.other_designation || "",
       xad.city || "",
       xad.state || "",
@@ -130,67 +130,11 @@ defmodule HL7v2.Type.XAD do
       xad.county_code || "",
       xad.census_tract || "",
       xad.address_representation_code || "",
-      encode_sub_dr(xad.address_validity_range),
-      encode_sub_ts(xad.effective_date),
-      encode_sub_ts(xad.expiration_date)
+      Type.encode_sub(DR, xad.address_validity_range),
+      Type.encode_sub_ts(xad.effective_date),
+      Type.encode_sub_ts(xad.expiration_date)
     ]
     |> Type.trim_trailing()
   end
 
-  # -- Sub-component helpers --
-
-  defp parse_sub_sad(nil), do: nil
-
-  defp parse_sub_sad(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    sad_val = SAD.parse(subs)
-    if all_nil?(sad_val), do: nil, else: sad_val
-  end
-
-  defp encode_sub_sad(nil), do: ""
-
-  defp encode_sub_sad(%SAD{} = sad),
-    do: sad |> SAD.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp parse_sub_dr(nil), do: nil
-
-  defp parse_sub_dr(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    dr_val = DR.parse(subs)
-    if all_nil?(dr_val), do: nil, else: dr_val
-  end
-
-  defp encode_sub_dr(nil), do: ""
-
-  defp encode_sub_dr(%DR{} = dr),
-    do: dr |> DR.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp parse_sub_ts(nil), do: nil
-
-  defp parse_sub_ts(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ts_val = TS.parse(subs)
-
-    if ts_val.time == nil and ts_val.degree_of_precision == nil do
-      nil
-    else
-      ts_val
-    end
-  end
-
-  defp encode_sub_ts(nil), do: ""
-
-  defp encode_sub_ts(%TS{} = ts) do
-    case TS.encode(ts) do
-      [] -> ""
-      parts -> Enum.join(parts, Type.sub_component_separator())
-    end
-  end
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end

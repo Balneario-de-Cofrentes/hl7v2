@@ -40,7 +40,7 @@ defmodule HL7v2.Type.CQ do
   def parse(components) when is_list(components) do
     %__MODULE__{
       quantity: Type.get_component(components, 0),
-      units: parse_sub_ce(Type.get_component(components, 1))
+      units: Type.parse_sub(CE, Type.get_component(components, 1))
     }
   end
 
@@ -65,29 +65,9 @@ defmodule HL7v2.Type.CQ do
   def encode(%__MODULE__{} = cq) do
     [
       cq.quantity || "",
-      encode_sub_ce(cq.units)
+      Type.encode_sub(CE, cq.units)
     ]
     |> Type.trim_trailing()
   end
 
-  defp parse_sub_ce(nil), do: nil
-
-  defp parse_sub_ce(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ce_val = CE.parse(subs)
-    if all_nil?(ce_val), do: nil, else: ce_val
-  end
-
-  defp encode_sub_ce(nil), do: ""
-
-  defp encode_sub_ce(%CE{} = ce) do
-    ce |> CE.encode() |> Enum.join(Type.sub_component_separator())
-  end
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end

@@ -43,8 +43,8 @@ defmodule HL7v2.Type.EIP do
   @spec parse(list()) :: t()
   def parse(components) when is_list(components) do
     %__MODULE__{
-      placer_assigned_identifier: parse_sub_ei(Type.get_component(components, 0)),
-      filler_assigned_identifier: parse_sub_ei(Type.get_component(components, 1))
+      placer_assigned_identifier: Type.parse_sub(EI, Type.get_component(components, 0)),
+      filler_assigned_identifier: Type.parse_sub(EI, Type.get_component(components, 1))
     }
   end
 
@@ -65,30 +65,10 @@ defmodule HL7v2.Type.EIP do
 
   def encode(%__MODULE__{} = eip) do
     [
-      encode_sub_ei(eip.placer_assigned_identifier),
-      encode_sub_ei(eip.filler_assigned_identifier)
+      Type.encode_sub(EI, eip.placer_assigned_identifier),
+      Type.encode_sub(EI, eip.filler_assigned_identifier)
     ]
     |> Type.trim_trailing()
   end
 
-  defp parse_sub_ei(nil), do: nil
-
-  defp parse_sub_ei(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ei_val = EI.parse(subs)
-    if all_nil?(ei_val), do: nil, else: ei_val
-  end
-
-  defp encode_sub_ei(nil), do: ""
-
-  defp encode_sub_ei(%EI{} = ei) do
-    ei |> EI.encode() |> Enum.join(Type.sub_component_separator())
-  end
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end

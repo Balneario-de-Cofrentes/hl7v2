@@ -40,7 +40,7 @@ defmodule HL7v2.Type.FC do
   def parse(components) when is_list(components) do
     %__MODULE__{
       financial_class_code: Type.get_component(components, 0),
-      effective_date: parse_sub_ts(Type.get_component(components, 1))
+      effective_date: Type.parse_sub_ts(Type.get_component(components, 1))
     }
   end
 
@@ -62,22 +62,9 @@ defmodule HL7v2.Type.FC do
   def encode(%__MODULE__{} = fc) do
     [
       fc.financial_class_code || "",
-      encode_sub_ts(fc.effective_date)
+      Type.encode_sub_ts(fc.effective_date)
     ]
     |> Type.trim_trailing()
   end
 
-  defp parse_sub_ts(nil), do: nil
-
-  defp parse_sub_ts(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ts_val = TS.parse(subs)
-    if ts_val.time == nil and ts_val.degree_of_precision == nil, do: nil, else: ts_val
-  end
-
-  defp encode_sub_ts(nil), do: ""
-
-  defp encode_sub_ts(%TS{} = ts) do
-    ts |> TS.encode() |> Enum.join(Type.sub_component_separator())
-  end
 end

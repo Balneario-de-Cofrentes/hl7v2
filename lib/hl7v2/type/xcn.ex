@@ -34,7 +34,7 @@ defmodule HL7v2.Type.XCN do
   @behaviour HL7v2.Type
 
   alias HL7v2.Type
-  alias HL7v2.Type.{FN, HD, CE, CWE, DR, TS, DTM}
+  alias HL7v2.Type.{FN, HD, CE, CWE, DR, TS}
 
   defstruct [
     :id_number,
@@ -124,28 +124,28 @@ defmodule HL7v2.Type.XCN do
   def parse(components) when is_list(components) do
     %__MODULE__{
       id_number: Type.get_component(components, 0),
-      family_name: parse_sub_fn(Type.get_component(components, 1)),
+      family_name: Type.parse_sub(FN, Type.get_component(components, 1)),
       given_name: Type.get_component(components, 2),
       second_name: Type.get_component(components, 3),
       suffix: Type.get_component(components, 4),
       prefix: Type.get_component(components, 5),
       degree: Type.get_component(components, 6),
       source_table: Type.get_component(components, 7),
-      assigning_authority: parse_sub_hd(Type.get_component(components, 8)),
+      assigning_authority: Type.parse_sub(HD, Type.get_component(components, 8)),
       name_type_code: Type.get_component(components, 9),
       identifier_check_digit: Type.get_component(components, 10),
       check_digit_scheme: Type.get_component(components, 11),
       identifier_type_code: Type.get_component(components, 12),
-      assigning_facility: parse_sub_hd(Type.get_component(components, 13)),
+      assigning_facility: Type.parse_sub(HD, Type.get_component(components, 13)),
       name_representation_code: Type.get_component(components, 14),
-      name_context: parse_sub_ce(Type.get_component(components, 15)),
-      name_validity_range: parse_sub_dr(Type.get_component(components, 16)),
+      name_context: Type.parse_sub(CE, Type.get_component(components, 15)),
+      name_validity_range: Type.parse_sub(DR, Type.get_component(components, 16)),
       name_assembly_order: Type.get_component(components, 17),
-      effective_date: parse_sub_ts(Type.get_component(components, 18)),
-      expiration_date: parse_sub_ts(Type.get_component(components, 19)),
+      effective_date: Type.parse_sub_ts(Type.get_component(components, 18)),
+      expiration_date: Type.parse_sub_ts(Type.get_component(components, 19)),
       professional_suffix: Type.get_component(components, 20),
-      assigning_jurisdiction: parse_sub_cwe(Type.get_component(components, 21)),
-      assigning_agency: parse_sub_cwe(Type.get_component(components, 22))
+      assigning_jurisdiction: Type.parse_sub(CWE, Type.get_component(components, 21)),
+      assigning_agency: Type.parse_sub(CWE, Type.get_component(components, 22))
     }
   end
 
@@ -167,129 +167,30 @@ defmodule HL7v2.Type.XCN do
   def encode(%__MODULE__{} = xcn) do
     [
       xcn.id_number || "",
-      encode_sub_fn(xcn.family_name),
+      Type.encode_sub(FN, xcn.family_name),
       xcn.given_name || "",
       xcn.second_name || "",
       xcn.suffix || "",
       xcn.prefix || "",
       xcn.degree || "",
       xcn.source_table || "",
-      encode_sub_hd(xcn.assigning_authority),
+      Type.encode_sub(HD, xcn.assigning_authority),
       xcn.name_type_code || "",
       xcn.identifier_check_digit || "",
       xcn.check_digit_scheme || "",
       xcn.identifier_type_code || "",
-      encode_sub_hd(xcn.assigning_facility),
+      Type.encode_sub(HD, xcn.assigning_facility),
       xcn.name_representation_code || "",
-      encode_sub_ce(xcn.name_context),
-      encode_sub_dr(xcn.name_validity_range),
+      Type.encode_sub(CE, xcn.name_context),
+      Type.encode_sub(DR, xcn.name_validity_range),
       xcn.name_assembly_order || "",
-      encode_sub_ts(xcn.effective_date),
-      encode_sub_ts(xcn.expiration_date),
+      Type.encode_sub_ts(xcn.effective_date),
+      Type.encode_sub_ts(xcn.expiration_date),
       xcn.professional_suffix || "",
-      encode_sub_cwe(xcn.assigning_jurisdiction),
-      encode_sub_cwe(xcn.assigning_agency)
+      Type.encode_sub(CWE, xcn.assigning_jurisdiction),
+      Type.encode_sub(CWE, xcn.assigning_agency)
     ]
     |> Type.trim_trailing()
   end
 
-  # -- Sub-component parsing helpers --
-
-  defp parse_sub_fn(nil), do: nil
-
-  defp parse_sub_fn(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    fn_val = FN.parse(subs)
-    if all_nil?(fn_val), do: nil, else: fn_val
-  end
-
-  defp encode_sub_fn(nil), do: ""
-
-  defp encode_sub_fn(%FN{} = fn_val),
-    do: fn_val |> FN.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp parse_sub_hd(nil), do: nil
-
-  defp parse_sub_hd(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    hd_val = HD.parse(subs)
-    if all_nil?(hd_val), do: nil, else: hd_val
-  end
-
-  defp encode_sub_hd(nil), do: ""
-
-  defp encode_sub_hd(%HD{} = hd_val),
-    do: hd_val |> HD.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp parse_sub_ce(nil), do: nil
-
-  defp parse_sub_ce(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ce_val = CE.parse(subs)
-    if all_nil?(ce_val), do: nil, else: ce_val
-  end
-
-  defp encode_sub_ce(nil), do: ""
-
-  defp encode_sub_ce(%CE{} = ce),
-    do: ce |> CE.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp parse_sub_cwe(nil), do: nil
-
-  defp parse_sub_cwe(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    cwe_val = CWE.parse(subs)
-    if all_nil?(cwe_val), do: nil, else: cwe_val
-  end
-
-  defp encode_sub_cwe(nil), do: ""
-
-  defp encode_sub_cwe(%CWE{} = cwe),
-    do: cwe |> CWE.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp parse_sub_dr(nil), do: nil
-
-  defp parse_sub_dr(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    dr_val = DR.parse(subs)
-    if all_nil?(dr_val), do: nil, else: dr_val
-  end
-
-  defp encode_sub_dr(nil), do: ""
-
-  defp encode_sub_dr(%DR{} = dr),
-    do: dr |> DR.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp parse_sub_ts(nil), do: nil
-
-  defp parse_sub_ts(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ts_val = TS.parse(subs)
-
-    if ts_val.time == nil and ts_val.degree_of_precision == nil do
-      nil
-    else
-      ts_val
-    end
-  end
-
-  defp encode_sub_ts(nil), do: ""
-
-  defp encode_sub_ts(%TS{} = ts) do
-    case TS.encode(ts) do
-      [] -> ""
-      parts -> Enum.join(parts, Type.sub_component_separator())
-    end
-  end
-
-  defp encode_sub_ts(%DTM{} = dtm) do
-    DTM.encode(dtm)
-  end
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end

@@ -47,11 +47,11 @@ defmodule HL7v2.Type.CP do
   @spec parse(list()) :: t()
   def parse(components) when is_list(components) do
     %__MODULE__{
-      price: parse_sub_mo(Type.get_component(components, 0)),
+      price: Type.parse_sub(MO, Type.get_component(components, 0)),
       price_type: Type.get_component(components, 1),
       from_value: Type.get_component(components, 2),
       to_value: Type.get_component(components, 3),
-      range_units: parse_sub_ce(Type.get_component(components, 4)),
+      range_units: Type.parse_sub(CE, Type.get_component(components, 4)),
       range_type: Type.get_component(components, 5)
     }
   end
@@ -76,48 +76,14 @@ defmodule HL7v2.Type.CP do
 
   def encode(%__MODULE__{} = cp) do
     [
-      encode_sub_mo(cp.price),
+      Type.encode_sub(MO, cp.price),
       cp.price_type || "",
       cp.from_value || "",
       cp.to_value || "",
-      encode_sub_ce(cp.range_units),
+      Type.encode_sub(CE, cp.range_units),
       cp.range_type || ""
     ]
     |> Type.trim_trailing()
   end
 
-  defp parse_sub_mo(nil), do: nil
-
-  defp parse_sub_mo(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    mo_val = MO.parse(subs)
-    if mo_val.quantity == nil and mo_val.denomination == nil, do: nil, else: mo_val
-  end
-
-  defp encode_sub_mo(nil), do: ""
-
-  defp encode_sub_mo(%MO{} = mo) do
-    mo |> MO.encode() |> Enum.join(Type.sub_component_separator())
-  end
-
-  defp parse_sub_ce(nil), do: nil
-
-  defp parse_sub_ce(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ce_val = CE.parse(subs)
-    if all_nil?(ce_val), do: nil, else: ce_val
-  end
-
-  defp encode_sub_ce(nil), do: ""
-
-  defp encode_sub_ce(%CE{} = ce) do
-    ce |> CE.encode() |> Enum.join(Type.sub_component_separator())
-  end
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end

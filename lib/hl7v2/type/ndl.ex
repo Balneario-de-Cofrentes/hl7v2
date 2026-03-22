@@ -22,7 +22,7 @@ defmodule HL7v2.Type.NDL do
   @behaviour HL7v2.Type
 
   alias HL7v2.Type
-  alias HL7v2.Type.{CNN, HD, TS, DTM}
+  alias HL7v2.Type.{CNN, HD, TS}
 
   defstruct [
     :name,
@@ -72,13 +72,13 @@ defmodule HL7v2.Type.NDL do
   @spec parse(list()) :: t()
   def parse(components) when is_list(components) do
     %__MODULE__{
-      name: parse_sub_cnn(Type.get_component(components, 0)),
-      start_date_time: parse_sub_ts(Type.get_component(components, 1)),
-      end_date_time: parse_sub_ts(Type.get_component(components, 2)),
+      name: Type.parse_sub(CNN, Type.get_component(components, 0)),
+      start_date_time: Type.parse_sub_ts(Type.get_component(components, 1)),
+      end_date_time: Type.parse_sub_ts(Type.get_component(components, 2)),
       point_of_care: Type.get_component(components, 3),
       room: Type.get_component(components, 4),
       bed: Type.get_component(components, 5),
-      facility: parse_sub_hd(Type.get_component(components, 6)),
+      facility: Type.parse_sub(HD, Type.get_component(components, 6)),
       location_status: Type.get_component(components, 7),
       patient_location_type: Type.get_component(components, 8),
       building: Type.get_component(components, 9),
@@ -106,13 +106,13 @@ defmodule HL7v2.Type.NDL do
 
   def encode(%__MODULE__{} = ndl) do
     [
-      encode_sub_cnn(ndl.name),
-      encode_sub_ts(ndl.start_date_time),
-      encode_sub_ts(ndl.end_date_time),
+      Type.encode_sub(CNN, ndl.name),
+      Type.encode_sub_ts(ndl.start_date_time),
+      Type.encode_sub_ts(ndl.end_date_time),
       ndl.point_of_care || "",
       ndl.room || "",
       ndl.bed || "",
-      encode_sub_hd(ndl.facility),
+      Type.encode_sub(HD, ndl.facility),
       ndl.location_status || "",
       ndl.patient_location_type || "",
       ndl.building || "",
@@ -121,64 +121,4 @@ defmodule HL7v2.Type.NDL do
     |> Type.trim_trailing()
   end
 
-  # -- Sub-component parsing helpers --
-
-  defp parse_sub_cnn(nil), do: nil
-
-  defp parse_sub_cnn(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    cnn_val = CNN.parse(subs)
-    if all_nil?(cnn_val), do: nil, else: cnn_val
-  end
-
-  defp encode_sub_cnn(nil), do: ""
-
-  defp encode_sub_cnn(%CNN{} = cnn),
-    do: cnn |> CNN.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp parse_sub_ts(nil), do: nil
-
-  defp parse_sub_ts(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    ts_val = TS.parse(subs)
-
-    if ts_val.time == nil and ts_val.degree_of_precision == nil do
-      nil
-    else
-      ts_val
-    end
-  end
-
-  defp encode_sub_ts(nil), do: ""
-
-  defp encode_sub_ts(%TS{} = ts) do
-    case TS.encode(ts) do
-      [] -> ""
-      parts -> Enum.join(parts, Type.sub_component_separator())
-    end
-  end
-
-  defp encode_sub_ts(%DTM{} = dtm) do
-    DTM.encode(dtm)
-  end
-
-  defp parse_sub_hd(nil), do: nil
-
-  defp parse_sub_hd(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    hd_val = HD.parse(subs)
-    if all_nil?(hd_val), do: nil, else: hd_val
-  end
-
-  defp encode_sub_hd(nil), do: ""
-
-  defp encode_sub_hd(%HD{} = hd_val),
-    do: hd_val |> HD.encode() |> Enum.join(Type.sub_component_separator())
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end

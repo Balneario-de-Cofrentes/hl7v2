@@ -76,13 +76,13 @@ defmodule HL7v2.Type.CX do
       id: Type.get_component(components, 0),
       check_digit: Type.get_component(components, 1),
       check_digit_scheme: Type.get_component(components, 2),
-      assigning_authority: parse_sub_hd(Type.get_component(components, 3)),
+      assigning_authority: Type.parse_sub(HD, Type.get_component(components, 3)),
       identifier_type_code: Type.get_component(components, 4),
-      assigning_facility: parse_sub_hd(Type.get_component(components, 5)),
+      assigning_facility: Type.parse_sub(HD, Type.get_component(components, 5)),
       effective_date: components |> Type.get_component(6) |> DT.parse(),
       expiration_date: components |> Type.get_component(7) |> DT.parse(),
-      assigning_jurisdiction: parse_sub_cwe(Type.get_component(components, 8)),
-      assigning_agency: parse_sub_cwe(Type.get_component(components, 9))
+      assigning_jurisdiction: Type.parse_sub(CWE, Type.get_component(components, 8)),
+      assigning_agency: Type.parse_sub(CWE, Type.get_component(components, 9))
     }
   end
 
@@ -106,49 +106,15 @@ defmodule HL7v2.Type.CX do
       cx.id || "",
       cx.check_digit || "",
       cx.check_digit_scheme || "",
-      encode_sub_hd(cx.assigning_authority),
+      Type.encode_sub(HD, cx.assigning_authority),
       cx.identifier_type_code || "",
-      encode_sub_hd(cx.assigning_facility),
+      Type.encode_sub(HD, cx.assigning_facility),
       DT.encode(cx.effective_date),
       DT.encode(cx.expiration_date),
-      encode_sub_cwe(cx.assigning_jurisdiction),
-      encode_sub_cwe(cx.assigning_agency)
+      Type.encode_sub(CWE, cx.assigning_jurisdiction),
+      Type.encode_sub(CWE, cx.assigning_agency)
     ]
     |> Type.trim_trailing()
   end
 
-  defp parse_sub_hd(nil), do: nil
-
-  defp parse_sub_hd(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    hd_val = HD.parse(subs)
-    if all_nil?(hd_val), do: nil, else: hd_val
-  end
-
-  defp encode_sub_hd(nil), do: ""
-
-  defp encode_sub_hd(%HD{} = hd_val) do
-    hd_val |> HD.encode() |> Enum.join(Type.sub_component_separator())
-  end
-
-  defp parse_sub_cwe(nil), do: nil
-
-  defp parse_sub_cwe(value) when is_binary(value) do
-    subs = String.split(value, Type.sub_component_separator())
-    cwe_val = CWE.parse(subs)
-    if all_nil?(cwe_val), do: nil, else: cwe_val
-  end
-
-  defp encode_sub_cwe(nil), do: ""
-
-  defp encode_sub_cwe(%CWE{} = cwe) do
-    cwe |> CWE.encode() |> Enum.join(Type.sub_component_separator())
-  end
-
-  defp all_nil?(struct) do
-    struct
-    |> Map.from_struct()
-    |> Map.values()
-    |> Enum.all?(&is_nil/1)
-  end
 end
