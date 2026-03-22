@@ -11,6 +11,8 @@ defmodule HL7v2.Type do
   and return/accept structs.
   """
 
+  @compile {:inline, get_component: 2, empty_value?: 1}
+
   @doc "Parses a wire-format value into a typed Elixir value."
   @callback parse(list() | binary()) :: struct() | binary() | nil
 

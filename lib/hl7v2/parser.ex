@@ -13,7 +13,7 @@ defmodule HL7v2.Parser do
   delimited fields. The parser handles them as special cases:
 
   - MSH-1 is stored as a single-byte binary (the field separator character)
-  - MSH-2 is stored as a 4-character literal string (encoding characters)
+  - MSH-2 is stored as a 4- or 5-character literal string (encoding characters)
   - Remaining MSH fields start at field index 2 (MSH-3 = index 2)
 
   ## Examples
@@ -27,6 +27,8 @@ defmodule HL7v2.Parser do
   """
 
   alias HL7v2.{RawMessage, Separator, TypedParser}
+
+  @compile {:inline, parse_field: 2, parse_components: 2, parse_sub_components: 2}
 
   @doc """
   Parses an HL7v2 message binary into a `RawMessage` struct.
@@ -134,12 +136,12 @@ defmodule HL7v2.Parser do
   end
 
   # MSH is special: MSH-1 is the field separator itself (not delimited),
-  # MSH-2 is the 4 encoding characters (literal, not delimited).
+  # MSH-2 is the 4 or 5 encoding characters (literal, not delimited).
   defp parse_msh_segment(<<"MSH", field_sep, rest::binary>>, %Separator{} = sep) do
     # MSH-1 = the field separator character
     msh_1 = <<field_sep>>
 
-    # MSH-2 = encoding characters (next 4 bytes, up to the next field separator)
+    # MSH-2 = encoding characters (next 4 or 5 bytes, up to the next field separator)
     {msh_2, remaining} = extract_msh_2(rest, sep)
 
     # Remaining fields are regular delimited fields (MSH-3 onwards)

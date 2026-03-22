@@ -179,6 +179,40 @@ defmodule HL7v2Test do
     end
   end
 
+  describe "String.Chars protocol" do
+    test "to_string/1 works on RawMessage" do
+      text = "MSH|^~\\&|SEND|FAC||RCV|20240101||ADT^A01|1|P|2.5\r"
+      {:ok, raw} = HL7v2.parse(text)
+      assert to_string(raw) == text
+    end
+
+    test "to_string/1 works on TypedMessage" do
+      text = "MSH|^~\\&|SEND|FAC||RCV|20240101||ADT^A01|1|P|2.5\r"
+      {:ok, typed} = HL7v2.parse(text, mode: :typed)
+      assert is_binary(to_string(typed))
+      assert to_string(typed) =~ "MSH|"
+    end
+
+    test "to_string/1 works on Message (builder)" do
+      msg =
+        HL7v2.Message.new("ADT", "A01",
+          sending_application: "TEST",
+          message_control_id: "SC001"
+        )
+
+      wire = to_string(msg)
+      assert wire =~ "MSH|"
+      assert wire =~ "TEST"
+      assert wire =~ "SC001"
+    end
+
+    test "string interpolation works" do
+      text = "MSH|^~\\&|SEND|FAC||RCV|20240101||ADT^A01|1|P|2.5\r"
+      {:ok, raw} = HL7v2.parse(text)
+      assert "Message: #{raw}" =~ "MSH|"
+    end
+  end
+
   describe "parse with validate: true" do
     test "returns errors for invalid typed message" do
       # PID missing required patient_identifier_list and patient_name

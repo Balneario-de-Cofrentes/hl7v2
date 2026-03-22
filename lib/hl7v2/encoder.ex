@@ -21,6 +21,8 @@ defmodule HL7v2.Encoder do
 
   alias HL7v2.{RawMessage, Separator}
 
+  @compile {:inline, encode_field: 2, encode_components: 2, encode_sub_components: 2}
+
   @doc """
   Encodes a `RawMessage` to its HL7v2 wire format binary.
 

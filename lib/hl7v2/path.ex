@@ -11,15 +11,19 @@ defmodule HL7v2.Path do
       "PID-5"        — field 5
       "PID-5.1"      — component 1 of field 5
       "PID-3[2]"     — repetition 2 of field 3
+      "OBX[*]-5"     — field 5 from ALL OBX segments (returns list)
+      "OBX[2]-5"     — field 5 from the 2nd OBX segment
+      "PID-3[*]"     — ALL repetitions of PID-3 (returns list)
 
   """
 
   @enforce_keys [:raw, :segment]
-  defstruct [:raw, :segment, :field, :component, :repetition]
+  defstruct [:raw, :segment, :segment_index, :field, :component, :repetition]
 
   @type t :: %__MODULE__{
           raw: binary(),
           segment: binary(),
+          segment_index: pos_integer() | :all | nil,
           field: pos_integer() | nil,
           component: pos_integer() | nil,
           repetition: pos_integer() | nil
@@ -38,6 +42,7 @@ defmodule HL7v2.Path do
          %__MODULE__{
            raw: path,
            segment: parsed.segment,
+           segment_index: Map.get(parsed, :segment_index),
            field: parsed.field,
            component: parsed.component,
            repetition: parsed.repetition

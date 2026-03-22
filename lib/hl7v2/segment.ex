@@ -38,6 +38,8 @@ defmodule HL7v2.Segment do
   @callback parse(list(), HL7v2.Separator.t()) :: struct()
   @callback encode(struct()) :: list()
 
+  @compile {:inline, parse_field_value: 3, encode_field_value: 3, composite_type?: 1}
+
   @composite_types MapSet.new([
                      HL7v2.Type.AUI,
                      HL7v2.Type.CP,

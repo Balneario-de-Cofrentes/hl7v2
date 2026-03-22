@@ -16,3 +16,11 @@ defmodule HL7v2.TypedMessage do
 
   defstruct [:separators, :type, :segments]
 end
+
+defimpl String.Chars, for: HL7v2.TypedMessage do
+  def to_string(msg) do
+    msg
+    |> HL7v2.TypedParser.to_raw()
+    |> HL7v2.Encoder.encode()
+  end
+end

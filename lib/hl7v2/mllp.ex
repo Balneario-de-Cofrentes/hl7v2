@@ -14,6 +14,8 @@ defmodule HL7v2.MLLP do
   See HL7 Implementation Technology Specification — Minimal Lower Layer Protocol.
   """
 
+  @compile {:inline, frame: 1}
+
   @sb 0x0B
   @eb 0x1C
   @cr 0x0D

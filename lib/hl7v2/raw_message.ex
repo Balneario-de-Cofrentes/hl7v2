@@ -40,3 +40,7 @@ defmodule HL7v2.RawMessage do
 
   defstruct [:separators, :type, :segments]
 end
+
+defimpl String.Chars, for: HL7v2.RawMessage do
+  def to_string(msg), do: HL7v2.Encoder.encode(msg)
+end

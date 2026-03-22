@@ -236,3 +236,7 @@ defmodule HL7v2.Message do
   defp segment_id_for(%ZXX{} = zxx), do: ZXX.segment_name(zxx)
   defp segment_id_for(seg), do: seg.__struct__.segment_id()
 end
+
+defimpl String.Chars, for: HL7v2.Message do
+  def to_string(msg), do: HL7v2.Message.encode(msg)
+end
