@@ -140,6 +140,14 @@ defmodule HL7v2 do
     HL7v2.Message.new(code, event, opts)
   end
 
+  @doc "Gets a value from a typed message using a path string like `\"PID-5\"` or `\"MSH-9.1\"`."
+  @spec get(HL7v2.TypedMessage.t(), binary()) :: term()
+  defdelegate get(msg, path), to: HL7v2.Access
+
+  @doc "Gets a value from a typed message with a default."
+  @spec get(HL7v2.TypedMessage.t(), binary(), term()) :: term()
+  defdelegate get(msg, path, default), to: HL7v2.Access
+
   @doc """
   Builds an ACK (Application Accept) for the given MSH segment.
 

@@ -1,0 +1,166 @@
+defmodule HL7v2.Access do
+  @moduledoc """
+  Path-based access to HL7v2 message fields.
+
+  Provides `get/2` and `get/3` for extracting values from typed messages
+  using path strings like `"PID-5"` or `"MSH-9.1"`.
+
+  ## Path Syntax
+
+      "PID"          — first PID segment struct
+      "PID-5"        — PID field 5 (patient_name)
+      "PID-5.1"      — first component of PID-5
+      "PID-3[2]"     — second repetition of PID-3
+      "MSH-9.1"      — message code from MSH-9
+
+  ## Examples
+
+      {:ok, msg} = HL7v2.parse(text, mode: :typed)
+      patient_name = HL7v2.Access.get(msg, "PID-5")
+      mrn = HL7v2.Access.get(msg, "PID-3.1")
+
+  """
+
+  alias HL7v2.TypedMessage
+
+  @type path :: %{
+          segment: binary(),
+          field: pos_integer() | nil,
+          component: pos_integer() | nil,
+          repetition: pos_integer() | nil
+        }
+
+  @path_regex ~r/^([A-Z][A-Z0-9]{2})(?:-(\d+)(?:\.(\d+))?(?:\[(\d+)\])?)?$/
+
+  @doc """
+  Gets a value from a typed message using a path string.
+
+  Returns `nil` if the path doesn't resolve.
+  """
+  @spec get(TypedMessage.t(), binary()) :: term()
+  def get(%TypedMessage{} = msg, path) when is_binary(path) do
+    case parse_path(path) do
+      {:ok, parsed} -> resolve(msg, parsed)
+      {:error, _} -> nil
+    end
+  end
+
+  @doc """
+  Gets a value from a typed message with a default.
+  """
+  @spec get(TypedMessage.t(), binary(), term()) :: term()
+  def get(%TypedMessage{} = msg, path, default) when is_binary(path) do
+    case get(msg, path) do
+      nil -> default
+      value -> value
+    end
+  end
+
+  # -- Path Parsing --
+
+  @doc false
+  @spec parse_path(binary()) :: {:ok, path()} | {:error, :invalid_path}
+  def parse_path(path) do
+    case Regex.run(@path_regex, path) do
+      [_, segment] ->
+        {:ok, %{segment: segment, field: nil, component: nil, repetition: nil}}
+
+      [_, segment, field] ->
+        {:ok, %{segment: segment, field: to_int(field), component: nil, repetition: nil}}
+
+      [_, segment, field, component] ->
+        {:ok,
+         %{segment: segment, field: to_int(field), component: to_int(component), repetition: nil}}
+
+      [_, segment, field, "", repetition] ->
+        {:ok,
+         %{segment: segment, field: to_int(field), component: nil, repetition: to_int(repetition)}}
+
+      [_, segment, field, component, repetition] ->
+        {:ok,
+         %{
+           segment: segment,
+           field: to_int(field),
+           component: to_int(component),
+           repetition: to_int(repetition)
+         }}
+
+      nil ->
+        {:error, :invalid_path}
+    end
+  end
+
+  defp to_int(s), do: String.to_integer(s)
+
+  # -- Resolution --
+
+  defp resolve(msg, %{segment: seg_id, field: nil}) do
+    find_segment(msg, seg_id)
+  end
+
+  defp resolve(msg, %{segment: seg_id} = path) do
+    case find_segment(msg, seg_id) do
+      nil -> nil
+      segment -> resolve_field(segment, path)
+    end
+  end
+
+  defp find_segment(%TypedMessage{segments: segments}, seg_id) do
+    Enum.find(segments, fn
+      %HL7v2.Segment.ZXX{segment_id: id} -> id == seg_id
+      %{__struct__: module} -> module.segment_id() == seg_id
+      {name, _fields} -> name == seg_id
+      _ -> false
+    end)
+  end
+
+  defp resolve_field(segment, %{field: field_seq} = path) do
+    module = segment.__struct__
+    fields = module.fields()
+
+    case Enum.find(fields, fn {seq, _, _, _, _} -> seq == field_seq end) do
+      {_, field_name, _, _, max_reps} ->
+        value = Map.get(segment, field_name)
+        unwrap_and_select(value, max_reps, path)
+
+      nil ->
+        nil
+    end
+  end
+
+  # Unwrap repeating fields and select component
+  defp unwrap_and_select(nil, _, _), do: nil
+
+  defp unwrap_and_select(value, max_reps, %{repetition: rep, component: comp}) do
+    value = select_repetition(value, max_reps, rep)
+    select_component(value, comp)
+  end
+
+  defp select_repetition(value, 1, _rep), do: value
+
+  defp select_repetition(value, _max_reps, rep) when is_list(value) do
+    if rep != nil do
+      Enum.at(value, rep - 1)
+    else
+      List.first(value)
+    end
+  end
+
+  defp select_repetition(value, _max_reps, _rep), do: value
+
+  defp select_component(nil, _), do: nil
+  defp select_component(value, nil), do: value
+
+  defp select_component(value, comp) when is_struct(value) do
+    ordered_keys =
+      value.__struct__.__info__(:struct)
+      |> Enum.map(& &1.field)
+
+    case Enum.at(ordered_keys, comp - 1) do
+      nil -> nil
+      key -> Map.get(value, key)
+    end
+  end
+
+  defp select_component(value, _comp), do: value
+end
