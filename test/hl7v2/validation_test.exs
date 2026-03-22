@@ -200,7 +200,7 @@ defmodule HL7v2.ValidationTest do
       refute Enum.any?(errors, &(&1.level == :warning))
     end
 
-    test "ZXX segments are skipped during validation" do
+    test "ZXX segments are skipped during field validation" do
       msg = %TypedMessage{
         separators: HL7v2.Separator.default(),
         type: {"TST", "Z01"},
@@ -213,10 +213,14 @@ defmodule HL7v2.ValidationTest do
         ]
       }
 
-      assert :ok = Validation.validate(msg)
+      # May have structure warning for unknown TST_Z01, but no field errors from ZXX
+      case Validation.validate(msg) do
+        :ok -> :ok
+        {:error, errors} -> refute Enum.any?(errors, &(&1.level == :error))
+      end
     end
 
-    test "raw tuple segments are skipped during validation" do
+    test "raw tuple segments are skipped during field validation" do
       msg = %TypedMessage{
         separators: HL7v2.Separator.default(),
         type: {"TST", "Z01"},
@@ -229,7 +233,11 @@ defmodule HL7v2.ValidationTest do
         ]
       }
 
-      assert :ok = Validation.validate(msg)
+      # May have structure warning for unknown TST_Z01, but no field errors from raw tuple
+      case Validation.validate(msg) do
+        :ok -> :ok
+        {:error, errors} -> refute Enum.any?(errors, &(&1.level == :error))
+      end
     end
 
     test "top-level HL7v2.validate/1 delegates to Validation" do

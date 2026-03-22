@@ -160,7 +160,12 @@ defmodule HL7v2.Access do
     end)
   end
 
-  defp resolve_field(segment, %{field: field_seq} = path) do
+  defp resolve_field({_name, raw_fields}, %{field: field_seq}) when is_list(raw_fields) do
+    # Raw tuple segment — return the field by position (1-indexed), no type awareness
+    Enum.at(raw_fields, field_seq - 1)
+  end
+
+  defp resolve_field(segment, %{field: field_seq} = path) when is_struct(segment) do
     module = segment.__struct__
     fields = module.fields()
 
@@ -173,6 +178,8 @@ defmodule HL7v2.Access do
         nil
     end
   end
+
+  defp resolve_field(_, _), do: nil
 
   # Unwrap repeating fields and select component
   defp unwrap_and_select(nil, _, _), do: nil
@@ -226,7 +233,16 @@ defmodule HL7v2.Access do
     end
   end
 
-  defp resolve_field_with_error(segment, %{field: field_seq} = path) do
+  defp resolve_field_with_error({_name, raw_fields}, %{field: field_seq})
+       when is_list(raw_fields) do
+    case Enum.at(raw_fields, field_seq - 1) do
+      nil -> {:ok, nil}
+      value -> {:ok, value}
+    end
+  end
+
+  defp resolve_field_with_error(segment, %{field: field_seq} = path)
+       when is_struct(segment) do
     module = segment.__struct__
     fields = module.fields()
 

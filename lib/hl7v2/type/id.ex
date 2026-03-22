@@ -2,8 +2,9 @@ defmodule HL7v2.Type.ID do
   @moduledoc """
   Coded Value for HL7-Defined Tables (ID) -- HL7v2 primitive data type.
 
-  String values constrained to a specific HL7-defined table.
-  Pass-through storage with optional table reference metadata.
+  Lossless storage: the value is stored and returned as a plain binary string.
+  The HL7 spec constrains ID values to specific HL7-defined tables, but this
+  implementation does not enforce table membership — any string is accepted.
   """
 
   @behaviour HL7v2.Type

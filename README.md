@@ -206,7 +206,7 @@ basic validation (required fields, repetition limits, required-segment presence)
 The parser ingests more than it semantically validates — unknown segments are preserved
 as raw tuples, not rejected.
 
-**Coverage:** 20 of ~120 standard segments typed. Common message families:
+**Coverage:** 19 of ~120 standard segments (plus generic ZXX) typed. Common message families:
 ADT_A01 ~11/23, ORM_O01 ~12/23, ORU_R01 ~10/18, ACK 3/4, SIU_S12 ~9/15.
 42 type modules (34 composite + 8 primitive). Segments not typed are preserved
 in raw form.

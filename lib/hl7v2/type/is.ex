@@ -2,8 +2,9 @@ defmodule HL7v2.Type.IS do
   @moduledoc """
   Coded Value for User-Defined Tables (IS) -- HL7v2 primitive data type.
 
-  String values constrained to a site-defined (user-defined) table.
-  Pass-through storage. Max 20 characters by default.
+  Lossless storage: the value is stored and returned as a plain binary string.
+  The HL7 spec constrains IS values to site-defined (user-defined) tables, but
+  this implementation does not enforce table membership — any string is accepted.
   """
 
   @behaviour HL7v2.Type

@@ -95,9 +95,17 @@ defmodule HL7v2.MessageDefinitionTest do
       assert error.message == "Required segment PV1 is missing"
     end
 
-    test "passes for unknown structures (no definition = no enforcement)" do
-      assert :ok = MessageDefinition.validate_structure("UNKNOWN_X99", [])
-      assert :ok = MessageDefinition.validate_structure("CUSTOM_MSG", ["MSH"])
+    test "returns warning for unknown structures" do
+      assert {:error, [warning]} = MessageDefinition.validate_structure("UNKNOWN_X99", [])
+      assert warning.level == :warning
+      assert warning.message =~ "no validation definition"
+
+      assert {:error, [_]} = MessageDefinition.validate_structure("CUSTOM_MSG", ["MSH"])
+    end
+
+    test "passes for nil/empty structure" do
+      assert :ok = MessageDefinition.validate_structure(nil, [])
+      assert :ok = MessageDefinition.validate_structure("", [])
     end
 
     test "validates ORU_R01 required segments" do

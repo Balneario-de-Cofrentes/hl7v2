@@ -1,10 +1,15 @@
 defmodule HL7v2.MessageDefinition do
   @moduledoc """
-  Defines expected segment structures for common HL7v2 message types.
+  Defines expected segment presence for common HL7v2 message types.
 
   Each definition specifies which segments are required, optional, and
   repeating for a given message type (e.g., ADT_A01, ORM_O01, ORU_R01).
-  Used by the validation engine for message-level structure validation.
+  Used by the validation engine for required-segment presence checking.
+
+  **Limitations:** This is presence-only validation — it checks that required
+  segments exist somewhere in the message. It does not enforce segment ordering,
+  group structure, group anchors, or message-level cardinality rules from the
+  HL7 abstract message definitions.
   """
 
   @type segment_rule :: {atom(), :required | :optional, :once | :repeating}
@@ -141,10 +146,21 @@ defmodule HL7v2.MessageDefinition do
   required segment. Unknown structures (no definition) pass silently.
   """
   @spec validate_structure(binary(), [binary()]) :: :ok | {:error, [map()]}
+  def validate_structure(nil, _segment_ids), do: :ok
+  def validate_structure("", _segment_ids), do: :ok
+
   def validate_structure(structure, segment_ids) do
     case get(structure) do
       nil ->
-        :ok
+        {:error,
+         [
+           %{
+             level: :warning,
+             location: "message",
+             message:
+               "message structure #{structure} has no validation definition — structure not checked"
+           }
+         ]}
 
       definition ->
         case check_required_segments(definition.segments, segment_ids) do
