@@ -18,13 +18,14 @@ defmodule HL7v2.Segment.OBXTest do
 
   describe "parse/1" do
     test "parses OBX with NM value type and numeric observation" do
-      raw = build_obx_fields(%{
-        0 => "1",
-        1 => "NM",
-        2 => ["8480-6", "Systolic BP", "LN"],
-        4 => "120",
-        10 => "F"
-      })
+      raw =
+        build_obx_fields(%{
+          0 => "1",
+          1 => "NM",
+          2 => ["8480-6", "Systolic BP", "LN"],
+          4 => "120",
+          10 => "F"
+        })
 
       result = OBX.parse(raw)
 
@@ -40,13 +41,14 @@ defmodule HL7v2.Segment.OBXTest do
     end
 
     test "parses OBX with ST value type and string observation" do
-      raw = build_obx_fields(%{
-        0 => "2",
-        1 => "ST",
-        2 => ["8462-4", "Diastolic BP", "LN"],
-        4 => "Normal reading",
-        10 => "F"
-      })
+      raw =
+        build_obx_fields(%{
+          0 => "2",
+          1 => "ST",
+          2 => ["8462-4", "Diastolic BP", "LN"],
+          4 => "Normal reading",
+          10 => "F"
+        })
 
       result = OBX.parse(raw)
 
@@ -59,10 +61,11 @@ defmodule HL7v2.Segment.OBXTest do
     test "observation_value is :raw — preserved as-is for list input" do
       complex_value = [["component1", "component2"]]
 
-      raw = build_obx_fields(%{
-        1 => "CWE",
-        4 => complex_value
-      })
+      raw =
+        build_obx_fields(%{
+          1 => "CWE",
+          4 => complex_value
+        })
 
       result = OBX.parse(raw)
 
@@ -70,10 +73,11 @@ defmodule HL7v2.Segment.OBXTest do
     end
 
     test "observation_value is :raw — preserved as-is for string input" do
-      raw = build_obx_fields(%{
-        1 => "TX",
-        4 => "Free text observation"
-      })
+      raw =
+        build_obx_fields(%{
+          1 => "TX",
+          4 => "Free text observation"
+        })
 
       result = OBX.parse(raw)
 
@@ -81,14 +85,15 @@ defmodule HL7v2.Segment.OBXTest do
     end
 
     test "units parsed as CE" do
-      raw = build_obx_fields(%{
-        0 => "1",
-        1 => "NM",
-        2 => ["8480-6", "Systolic BP", "LN"],
-        4 => "120",
-        5 => ["mmHg", "mmHg", "UCUM"],
-        10 => "F"
-      })
+      raw =
+        build_obx_fields(%{
+          0 => "1",
+          1 => "NM",
+          2 => ["8480-6", "Systolic BP", "LN"],
+          4 => "120",
+          5 => ["mmHg", "mmHg", "UCUM"],
+          10 => "F"
+        })
 
       result = OBX.parse(raw)
 
@@ -96,14 +101,15 @@ defmodule HL7v2.Segment.OBXTest do
     end
 
     test "date_time_of_the_observation parsed as TS" do
-      raw = build_obx_fields(%{
-        0 => "1",
-        1 => "NM",
-        2 => ["8480-6", "Systolic BP", "LN"],
-        4 => "120",
-        10 => "F",
-        13 => ["20260322143000"]
-      })
+      raw =
+        build_obx_fields(%{
+          0 => "1",
+          1 => "NM",
+          2 => ["8480-6", "Systolic BP", "LN"],
+          4 => "120",
+          10 => "F",
+          13 => ["20260322143000"]
+        })
 
       result = OBX.parse(raw)
 
@@ -124,13 +130,14 @@ defmodule HL7v2.Segment.OBXTest do
 
   describe "encode/1" do
     test "round-trip: parse then encode preserves data" do
-      raw = build_obx_fields(%{
-        0 => "1",
-        1 => "NM",
-        2 => ["8480-6", "Systolic BP", "LN"],
-        4 => "120",
-        10 => "F"
-      })
+      raw =
+        build_obx_fields(%{
+          0 => "1",
+          1 => "NM",
+          2 => ["8480-6", "Systolic BP", "LN"],
+          4 => "120",
+          10 => "F"
+        })
 
       encoded = raw |> OBX.parse() |> OBX.encode()
 
@@ -143,13 +150,14 @@ defmodule HL7v2.Segment.OBXTest do
     end
 
     test "round-trip with string observation value" do
-      raw = build_obx_fields(%{
-        0 => "1",
-        1 => "ST",
-        2 => ["code", "text", "system"],
-        4 => "some text value",
-        10 => "F"
-      })
+      raw =
+        build_obx_fields(%{
+          0 => "1",
+          1 => "ST",
+          2 => ["code", "text", "system"],
+          4 => "some text value",
+          10 => "F"
+        })
 
       encoded = raw |> OBX.parse() |> OBX.encode()
 

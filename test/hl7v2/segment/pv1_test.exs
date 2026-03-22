@@ -18,11 +18,12 @@ defmodule HL7v2.Segment.PV1Test do
 
   describe "parse/1" do
     test "parses patient_class and assigned_patient_location" do
-      raw = build_pv1_fields(%{
-        0 => "1",
-        1 => "I",
-        2 => ["ICU", "101", "A"]
-      })
+      raw =
+        build_pv1_fields(%{
+          0 => "1",
+          1 => "I",
+          2 => ["ICU", "101", "A"]
+        })
 
       result = PV1.parse(raw)
 
@@ -40,10 +41,11 @@ defmodule HL7v2.Segment.PV1Test do
       attending = [["Smith", "John", "", "", "", "", "", "", "", "NPI"]]
       referring = "DR^Jones"
 
-      raw = build_pv1_fields(%{
-        6 => attending,
-        7 => referring
-      })
+      raw =
+        build_pv1_fields(%{
+          6 => attending,
+          7 => referring
+        })
 
       result = PV1.parse(raw)
 
@@ -52,9 +54,10 @@ defmodule HL7v2.Segment.PV1Test do
     end
 
     test "visit_number parsed as CX" do
-      raw = build_pv1_fields(%{
-        18 => ["V12345", "", "", "HOSP", "VN"]
-      })
+      raw =
+        build_pv1_fields(%{
+          18 => ["V12345", "", "", "HOSP", "VN"]
+        })
 
       result = PV1.parse(raw)
 
@@ -65,9 +68,10 @@ defmodule HL7v2.Segment.PV1Test do
     end
 
     test "admit_date_time parsed as TS" do
-      raw = build_pv1_fields(%{
-        43 => ["20260315120000"]
-      })
+      raw =
+        build_pv1_fields(%{
+          43 => ["20260315120000"]
+        })
 
       result = PV1.parse(raw)
 
@@ -90,11 +94,12 @@ defmodule HL7v2.Segment.PV1Test do
 
   describe "encode/1" do
     test "round-trip: parse then encode preserves data" do
-      raw = build_pv1_fields(%{
-        0 => "1",
-        1 => "I",
-        2 => ["ICU", "101", "A"]
-      })
+      raw =
+        build_pv1_fields(%{
+          0 => "1",
+          1 => "I",
+          2 => ["ICU", "101", "A"]
+        })
 
       encoded = raw |> PV1.parse() |> PV1.encode()
 
@@ -104,10 +109,11 @@ defmodule HL7v2.Segment.PV1Test do
     end
 
     test "round-trip with raw attending_doctor" do
-      raw = build_pv1_fields(%{
-        1 => "I",
-        6 => "Smith^John"
-      })
+      raw =
+        build_pv1_fields(%{
+          1 => "I",
+          6 => "Smith^John"
+        })
 
       encoded = raw |> PV1.parse() |> PV1.encode()
 

@@ -23,7 +23,13 @@ defmodule HL7v2.Segment.IN1Test do
       assert in1.set_id == 1
       assert %CE{identifier: "BCBS", text: "Blue Cross Blue Shield"} = in1.insurance_plan_id
 
-      assert [%CX{id: "INS001", assigning_authority: %HD{namespace_id: "BCBS"}, identifier_type_code: "PI"}] =
+      assert [
+               %CX{
+                 id: "INS001",
+                 assigning_authority: %HD{namespace_id: "BCBS"},
+                 identifier_type_code: "PI"
+               }
+             ] =
                in1.insurance_company_id
     end
 
@@ -74,7 +80,11 @@ defmodule HL7v2.Segment.IN1Test do
         set_id: 1,
         insurance_plan_id: %CE{identifier: "BCBS", text: "Blue Cross Blue Shield"},
         insurance_company_id: [
-          %CX{id: "INS001", assigning_authority: %HD{namespace_id: "BCBS"}, identifier_type_code: "PI"}
+          %CX{
+            id: "INS001",
+            assigning_authority: %HD{namespace_id: "BCBS"},
+            identifier_type_code: "PI"
+          }
         ]
       }
 

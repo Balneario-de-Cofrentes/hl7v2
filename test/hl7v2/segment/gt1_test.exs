@@ -24,12 +24,24 @@ defmodule HL7v2.Segment.GT1Test do
 
       assert gt1.set_id == 1
 
-      assert [%CX{id: "G12345", assigning_authority: %HD{namespace_id: "GID"}, identifier_type_code: "GI"}] =
+      assert [
+               %CX{
+                 id: "G12345",
+                 assigning_authority: %HD{namespace_id: "GID"},
+                 identifier_type_code: "GI"
+               }
+             ] =
                gt1.guarantor_number
 
       assert [%XPN{family_name: %FN{surname: "Smith"}, given_name: "Robert"}] = gt1.guarantor_name
 
-      assert [%XAD{street_address: %SAD{street_or_mailing_address: "456 Oak Ave"}, city: "Chicago", state: "IL"}] =
+      assert [
+               %XAD{
+                 street_address: %SAD{street_or_mailing_address: "456 Oak Ave"},
+                 city: "Chicago",
+                 state: "IL"
+               }
+             ] =
                gt1.guarantor_address
     end
 

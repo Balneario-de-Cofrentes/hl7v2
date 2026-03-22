@@ -27,6 +27,7 @@ defmodule HL7v2.Segment.ERRTest do
       result = ERR.parse(raw)
 
       assert %ERR{} = result
+
       assert %HL7v2.Type.CWE{
                identifier: "207",
                text: "Application internal error",
@@ -38,7 +39,13 @@ defmodule HL7v2.Segment.ERRTest do
 
     test "parses raw fields (error_code_and_location, error_location)" do
       error_location_data = [["PID", "1", "5"]]
-      raw = ["legacy_error_data", error_location_data, ["100", "Segment sequence error", "HL70357"], "W"]
+
+      raw = [
+        "legacy_error_data",
+        error_location_data,
+        ["100", "Segment sequence error", "HL70357"],
+        "W"
+      ]
 
       result = ERR.parse(raw)
 

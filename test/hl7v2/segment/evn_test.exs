@@ -72,7 +72,14 @@ defmodule HL7v2.Segment.EVNTest do
       result = EVN.parse(raw)
 
       assert %HL7v2.Type.TS{
-               time: %HL7v2.Type.DTM{year: 2026, month: 3, day: 22, hour: 11, minute: 55, second: 0}
+               time: %HL7v2.Type.DTM{
+                 year: 2026,
+                 month: 3,
+                 day: 22,
+                 hour: 11,
+                 minute: 55,
+                 second: 0
+               }
              } = result.event_occurred
     end
 

@@ -50,7 +50,12 @@ defmodule HL7v2.Segment.NK1Test do
 
       nk1 = NK1.parse(raw)
 
-      assert [%XAD{street_address: %SAD{street_or_mailing_address: "123 Main St"}, city: "Springfield"}] =
+      assert [
+               %XAD{
+                 street_address: %SAD{street_or_mailing_address: "123 Main St"},
+                 city: "Springfield"
+               }
+             ] =
                nk1.address
     end
 

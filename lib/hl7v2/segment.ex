@@ -39,26 +39,26 @@ defmodule HL7v2.Segment do
   @callback encode(struct()) :: list()
 
   @composite_types MapSet.new([
-    HL7v2.Type.CX,
-    HL7v2.Type.XPN,
-    HL7v2.Type.XAD,
-    HL7v2.Type.XTN,
-    HL7v2.Type.CE,
-    HL7v2.Type.CWE,
-    HL7v2.Type.HD,
-    HL7v2.Type.PL,
-    HL7v2.Type.EI,
-    HL7v2.Type.MSG,
-    HL7v2.Type.PT,
-    HL7v2.Type.VID,
-    HL7v2.Type.CNE,
-    HL7v2.Type.XON,
-    HL7v2.Type.FN,
-    HL7v2.Type.SAD,
-    HL7v2.Type.DR,
-    HL7v2.Type.TS,
-    HL7v2.Type.NR
-  ])
+                     HL7v2.Type.CX,
+                     HL7v2.Type.XPN,
+                     HL7v2.Type.XAD,
+                     HL7v2.Type.XTN,
+                     HL7v2.Type.CE,
+                     HL7v2.Type.CWE,
+                     HL7v2.Type.HD,
+                     HL7v2.Type.PL,
+                     HL7v2.Type.EI,
+                     HL7v2.Type.MSG,
+                     HL7v2.Type.PT,
+                     HL7v2.Type.VID,
+                     HL7v2.Type.CNE,
+                     HL7v2.Type.XON,
+                     HL7v2.Type.FN,
+                     HL7v2.Type.SAD,
+                     HL7v2.Type.DR,
+                     HL7v2.Type.TS,
+                     HL7v2.Type.NR
+                   ])
 
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do

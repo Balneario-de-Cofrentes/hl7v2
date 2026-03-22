@@ -18,13 +18,14 @@ defmodule HL7v2.Segment.PIDTest do
 
   describe "parse/1" do
     test "parses common fields" do
-      raw = build_pid_fields(%{
-        0 => "1",
-        2 => [["12345", "", "", "MRN", "MR"]],
-        4 => [["Smith", "John", "Q"]],
-        6 => ["20190101"],
-        7 => "M"
-      })
+      raw =
+        build_pid_fields(%{
+          0 => "1",
+          2 => [["12345", "", "", "MRN", "MR"]],
+          4 => [["Smith", "John", "Q"]],
+          6 => ["20190101"],
+          7 => "M"
+        })
 
       result = PID.parse(raw)
 
@@ -34,9 +35,10 @@ defmodule HL7v2.Segment.PIDTest do
     end
 
     test "patient_identifier_list: single CX" do
-      raw = build_pid_fields(%{
-        2 => [["12345", "", "", "MRN", "MR"]]
-      })
+      raw =
+        build_pid_fields(%{
+          2 => [["12345", "", "", "MRN", "MR"]]
+        })
 
       result = PID.parse(raw)
 
@@ -47,9 +49,10 @@ defmodule HL7v2.Segment.PIDTest do
     end
 
     test "patient_identifier_list: multiple CX (repeated)" do
-      raw = build_pid_fields(%{
-        2 => [["12345", "", "", "MRN", "MR"], ["67890", "", "", "SSN", "SS"]]
-      })
+      raw =
+        build_pid_fields(%{
+          2 => [["12345", "", "", "MRN", "MR"], ["67890", "", "", "SSN", "SS"]]
+        })
 
       result = PID.parse(raw)
 
@@ -63,9 +66,10 @@ defmodule HL7v2.Segment.PIDTest do
     end
 
     test "patient_name: XPN with family, given, and middle initial" do
-      raw = build_pid_fields(%{
-        4 => [["Smith", "John", "Q"]]
-      })
+      raw =
+        build_pid_fields(%{
+          4 => [["Smith", "John", "Q"]]
+        })
 
       result = PID.parse(raw)
 
@@ -76,9 +80,10 @@ defmodule HL7v2.Segment.PIDTest do
     end
 
     test "date_time_of_birth parsed as TS" do
-      raw = build_pid_fields(%{
-        6 => ["20190101"]
-      })
+      raw =
+        build_pid_fields(%{
+          6 => ["20190101"]
+        })
 
       result = PID.parse(raw)
 
@@ -110,13 +115,14 @@ defmodule HL7v2.Segment.PIDTest do
 
   describe "encode/1" do
     test "round-trip: parse then encode preserves data" do
-      raw = build_pid_fields(%{
-        0 => "1",
-        2 => [["12345", "", "", "MRN", "MR"]],
-        4 => [["Smith", "John", "Q"]],
-        6 => ["20190101"],
-        7 => "M"
-      })
+      raw =
+        build_pid_fields(%{
+          0 => "1",
+          2 => [["12345", "", "", "MRN", "MR"]],
+          4 => [["Smith", "John", "Q"]],
+          6 => ["20190101"],
+          7 => "M"
+        })
 
       encoded = raw |> PID.parse() |> PID.encode()
 
@@ -128,9 +134,10 @@ defmodule HL7v2.Segment.PIDTest do
     end
 
     test "round-trip with multiple patient identifiers" do
-      raw = build_pid_fields(%{
-        2 => [["12345", "", "", "MRN", "MR"], ["67890", "", "", "SSN", "SS"]]
-      })
+      raw =
+        build_pid_fields(%{
+          2 => [["12345", "", "", "MRN", "MR"], ["67890", "", "", "SSN", "SS"]]
+        })
 
       encoded = raw |> PID.parse() |> PID.encode()
 

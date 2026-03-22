@@ -24,7 +24,13 @@ defmodule HL7v2.Segment.DG1Test do
       dg1 = DG1.parse(raw)
 
       assert dg1.set_id == 1
-      assert %CE{identifier: "J18.9", text: "Pneumonia, unspecified", name_of_coding_system: "I10"} = dg1.diagnosis_code
+
+      assert %CE{
+               identifier: "J18.9",
+               text: "Pneumonia, unspecified",
+               name_of_coding_system: "I10"
+             } = dg1.diagnosis_code
+
       assert %TS{time: %DTM{year: 2026, month: 3, day: 15}} = dg1.diagnosis_date_time
       assert dg1.diagnosis_type == "A"
     end
@@ -60,7 +66,11 @@ defmodule HL7v2.Segment.DG1Test do
     test "encodes DG1 with diagnosis info" do
       dg1 = %DG1{
         set_id: 1,
-        diagnosis_code: %CE{identifier: "J18.9", text: "Pneumonia, unspecified", name_of_coding_system: "I10"},
+        diagnosis_code: %CE{
+          identifier: "J18.9",
+          text: "Pneumonia, unspecified",
+          name_of_coding_system: "I10"
+        },
         diagnosis_type: "A"
       }
 

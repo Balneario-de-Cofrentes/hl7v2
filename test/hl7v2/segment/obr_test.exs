@@ -18,12 +18,13 @@ defmodule HL7v2.Segment.OBRTest do
 
   describe "parse/1" do
     test "parses with order info" do
-      raw = build_obr_fields(%{
-        0 => "1",
-        1 => ["ORD001", "PLACER"],
-        2 => ["FILL001", "FILLER"],
-        3 => ["85025", "CBC", "CPT4"]
-      })
+      raw =
+        build_obr_fields(%{
+          0 => "1",
+          1 => ["ORD001", "PLACER"],
+          2 => ["FILL001", "FILLER"],
+          3 => ["85025", "CBC", "CPT4"]
+        })
 
       result = OBR.parse(raw)
 
@@ -41,10 +42,11 @@ defmodule HL7v2.Segment.OBRTest do
     end
 
     test "observation_date_time parsed as TS" do
-      raw = build_obr_fields(%{
-        3 => ["85025", "CBC", "CPT4"],
-        6 => ["20260315083000"]
-      })
+      raw =
+        build_obr_fields(%{
+          3 => ["85025", "CBC", "CPT4"],
+          6 => ["20260315083000"]
+        })
 
       result = OBR.parse(raw)
 
@@ -57,11 +59,12 @@ defmodule HL7v2.Segment.OBRTest do
       provider_raw = "Smith^John^Q"
       collector_raw = [["TECH001", "Jones"]]
 
-      raw = build_obr_fields(%{
-        3 => ["85025", "CBC", "CPT4"],
-        9 => collector_raw,
-        15 => provider_raw
-      })
+      raw =
+        build_obr_fields(%{
+          3 => ["85025", "CBC", "CPT4"],
+          9 => collector_raw,
+          15 => provider_raw
+        })
 
       result = OBR.parse(raw)
 
@@ -70,11 +73,12 @@ defmodule HL7v2.Segment.OBRTest do
     end
 
     test "result_status and diagnostic_serv_sect_id parsed" do
-      raw = build_obr_fields(%{
-        3 => ["85025", "CBC", "CPT4"],
-        23 => "HM",
-        24 => "F"
-      })
+      raw =
+        build_obr_fields(%{
+          3 => ["85025", "CBC", "CPT4"],
+          23 => "HM",
+          24 => "F"
+        })
 
       result = OBR.parse(raw)
 
@@ -96,12 +100,13 @@ defmodule HL7v2.Segment.OBRTest do
 
   describe "encode/1" do
     test "round-trip: parse then encode preserves data" do
-      raw = build_obr_fields(%{
-        0 => "1",
-        1 => ["ORD001", "PLACER"],
-        2 => ["FILL001", "FILLER"],
-        3 => ["85025", "CBC", "CPT4"]
-      })
+      raw =
+        build_obr_fields(%{
+          0 => "1",
+          1 => ["ORD001", "PLACER"],
+          2 => ["FILL001", "FILLER"],
+          3 => ["85025", "CBC", "CPT4"]
+        })
 
       encoded = raw |> OBR.parse() |> OBR.encode()
 
@@ -112,10 +117,11 @@ defmodule HL7v2.Segment.OBRTest do
     end
 
     test "round-trip with raw ordering_provider" do
-      raw = build_obr_fields(%{
-        3 => ["85025", "CBC", "CPT4"],
-        15 => "DrSmith^John"
-      })
+      raw =
+        build_obr_fields(%{
+          3 => ["85025", "CBC", "CPT4"],
+          15 => "DrSmith^John"
+        })
 
       encoded = raw |> OBR.parse() |> OBR.encode()
 

@@ -28,7 +28,9 @@ defmodule HL7v2.Segment.FT1Test do
       assert ft1.transaction_id == "TXN001"
       assert ft1.transaction_batch_id == "BATCH01"
       assert ft1.transaction_type == "CG"
-      assert %CE{identifier: "99213", text: "Office Visit", name_of_coding_system: "CPT4"} = ft1.transaction_code
+
+      assert %CE{identifier: "99213", text: "Office Visit", name_of_coding_system: "CPT4"} =
+               ft1.transaction_code
     end
 
     test "parses transaction_date as DR composite" do
@@ -113,7 +115,11 @@ defmodule HL7v2.Segment.FT1Test do
           range_end: %TS{time: %DTM{year: 2026, month: 3, day: 31}}
         },
         transaction_type: "CG",
-        transaction_code: %CE{identifier: "99213", text: "Office Visit", name_of_coding_system: "CPT4"}
+        transaction_code: %CE{
+          identifier: "99213",
+          text: "Office Visit",
+          name_of_coding_system: "CPT4"
+        }
       }
 
       encoded = FT1.encode(ft1)

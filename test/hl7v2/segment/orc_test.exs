@@ -18,11 +18,12 @@ defmodule HL7v2.Segment.ORCTest do
 
   describe "parse/1" do
     test "parses order_control, placer and filler order numbers" do
-      raw = build_orc_fields(%{
-        0 => "NW",
-        1 => ["ORD001", "PLACER"],
-        2 => ["FILL001", "FILLER"]
-      })
+      raw =
+        build_orc_fields(%{
+          0 => "NW",
+          1 => ["ORD001", "PLACER"],
+          2 => ["FILL001", "FILLER"]
+        })
 
       result = ORC.parse(raw)
 
@@ -37,11 +38,12 @@ defmodule HL7v2.Segment.ORCTest do
     end
 
     test "parses order_status and response_flag" do
-      raw = build_orc_fields(%{
-        0 => "SC",
-        4 => "CM",
-        5 => "D"
-      })
+      raw =
+        build_orc_fields(%{
+          0 => "SC",
+          4 => "CM",
+          5 => "D"
+        })
 
       result = ORC.parse(raw)
 
@@ -54,11 +56,12 @@ defmodule HL7v2.Segment.ORCTest do
       provider_raw = "Smith^John"
       entered_raw = [["Jones", "Mary"]]
 
-      raw = build_orc_fields(%{
-        0 => "NW",
-        9 => entered_raw,
-        11 => provider_raw
-      })
+      raw =
+        build_orc_fields(%{
+          0 => "NW",
+          9 => entered_raw,
+          11 => provider_raw
+        })
 
       result = ORC.parse(raw)
 
@@ -87,11 +90,12 @@ defmodule HL7v2.Segment.ORCTest do
 
   describe "encode/1" do
     test "round-trip: parse then encode preserves data" do
-      raw = build_orc_fields(%{
-        0 => "NW",
-        1 => ["ORD001", "PLACER"],
-        2 => ["FILL001", "FILLER"]
-      })
+      raw =
+        build_orc_fields(%{
+          0 => "NW",
+          1 => ["ORD001", "PLACER"],
+          2 => ["FILL001", "FILLER"]
+        })
 
       encoded = raw |> ORC.parse() |> ORC.encode()
 
@@ -101,11 +105,12 @@ defmodule HL7v2.Segment.ORCTest do
     end
 
     test "round-trip with placer_group_number" do
-      raw = build_orc_fields(%{
-        0 => "NW",
-        1 => ["ORD001"],
-        3 => ["GRP001", "HOSP"]
-      })
+      raw =
+        build_orc_fields(%{
+          0 => "NW",
+          1 => ["ORD001"],
+          3 => ["GRP001", "HOSP"]
+        })
 
       encoded = raw |> ORC.parse() |> ORC.encode()
 
