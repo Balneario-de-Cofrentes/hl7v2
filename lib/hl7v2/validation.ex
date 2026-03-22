@@ -57,12 +57,20 @@ defmodule HL7v2.Validation do
   end
 
   defp structure_errors(%TypedMessage{segments: segments}) do
-    structure = extract_message_structure(segments)
+    structure_name = extract_message_structure(segments)
     segment_ids = extract_segment_ids(segments)
 
-    case MessageDefinition.validate_structure(structure, segment_ids) do
-      :ok -> []
-      {:error, errors} -> errors
+    # Prefer structural validation (order + groups) when definition exists
+    case HL7v2.Standard.MessageStructure.get(structure_name) do
+      %{} = struct_def ->
+        HL7v2.Validation.Structural.validate(struct_def, segment_ids)
+
+      nil ->
+        # Fall back to presence-only validation
+        case MessageDefinition.validate_structure(structure_name, segment_ids) do
+          :ok -> []
+          {:error, errors} -> errors
+        end
     end
   end
 
