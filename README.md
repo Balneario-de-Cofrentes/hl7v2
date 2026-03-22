@@ -175,7 +175,7 @@ end
  Types       36 composite + 7 primitive + legacy TN (43 v2.5.1 types + 1 compat)
 
  Messages    ADT (A01-A04, A08, A12) ORM^O01 ORU^R01 SIU^S12 ACK
-              with required-segment presence validation
+              structural validation (order + groups + cardinality)
 
  Transport   MLLP framing, Ranch 2.x listener, GenServer client,
               TLS/mTLS, telemetry instrumentation
@@ -191,7 +191,9 @@ This library targets **HL7 v2.5.1** with permissive parsing of adjacent versions
 
 **What it does well:** delimiter parsing, typed segment/composite structs, canonical
 round-trip encoding, programmatic message building, MLLP transport with TLS, and
-basic validation (required fields, repetition limits, required-segment presence).
+validation (required fields, repetition limits, structural order/group/cardinality
+checks for supported message types). Lenient mode (default) reports ordering issues
+as warnings; strict mode treats them as errors.
 Raw mode is lossless for all valid HL7v2 messages. Typed mode covers a focused
 ADT/ORM/ORU/SIU/ACK subset with extra_fields preservation for unlisted fields.
 

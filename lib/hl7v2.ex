@@ -122,12 +122,15 @@ defmodule HL7v2 do
       :ok = HL7v2.validate(msg)
 
   """
-  @spec validate(term()) :: :ok | {:ok, [map()]} | {:error, [map()] | :not_a_typed_message}
-  def validate(%HL7v2.TypedMessage{} = message) do
-    HL7v2.Validation.validate(message)
+  @spec validate(term(), keyword()) ::
+          :ok | {:ok, [map()]} | {:error, [map()] | :not_a_typed_message}
+  def validate(message, opts \\ [])
+
+  def validate(%HL7v2.TypedMessage{} = message, opts) do
+    HL7v2.Validation.validate(message, opts)
   end
 
-  def validate(_message) do
+  def validate(_message, _opts) do
     {:error, :not_a_typed_message}
   end
 

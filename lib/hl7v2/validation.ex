@@ -39,11 +39,22 @@ defmodule HL7v2.Validation do
   - `:field` — field name atom or `nil` for structural issues
   - `:message` — human-readable description
   """
-  @spec validate(TypedMessage.t()) :: :ok | {:error, [map()]} | {:ok, [map()]}
-  def validate(%TypedMessage{} = msg) do
+  @doc """
+  Validates a typed message.
+
+  ## Options
+
+  - `:mode` — `:lenient` (default) or `:strict`. In lenient mode, ordering
+    and cardinality issues are warnings. In strict mode, all structural
+    violations are errors.
+  """
+  @spec validate(TypedMessage.t(), keyword()) :: :ok | {:error, [map()]} | {:ok, [map()]}
+  def validate(%TypedMessage{} = msg, opts \\ []) do
+    mode = Keyword.get(opts, :mode, :lenient)
+
     all =
       MessageRules.check(msg) ++
-        structure_errors(msg) ++
+        structure_errors(msg, mode) ++
         Enum.flat_map(msg.segments, &FieldRules.check/1)
 
     errors = Enum.filter(all, &(&1.level == :error))
@@ -56,14 +67,14 @@ defmodule HL7v2.Validation do
     end
   end
 
-  defp structure_errors(%TypedMessage{segments: segments}) do
+  defp structure_errors(%TypedMessage{segments: segments}, mode) do
     structure_name = extract_message_structure(segments)
     segment_ids = extract_segment_ids(segments)
 
     # Prefer structural validation (order + groups) when definition exists
     case HL7v2.Standard.MessageStructure.get(structure_name) do
       %{} = struct_def ->
-        HL7v2.Validation.Structural.validate(struct_def, segment_ids)
+        HL7v2.Validation.Structural.validate(struct_def, segment_ids, mode: mode)
 
       nil ->
         # Fall back to presence-only validation
