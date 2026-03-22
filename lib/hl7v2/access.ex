@@ -15,12 +15,16 @@ defmodule HL7v2.Access do
       "PID-5.1"      — first component of PID-5
       "PID-3[2]"     — second repetition of PID-3
       "MSH-9.1"      — message code from MSH-9
+      "OBX[*]-5"     — field 5 from ALL OBX segments (returns list)
+      "OBX[2]-5"     — field 5 from the 2nd OBX segment
+      "PID-3[*]"     — ALL repetitions of PID-3 (returns list)
 
   ## Examples
 
       {:ok, msg} = HL7v2.parse(text, mode: :typed)
       patient_name = HL7v2.Access.get(msg, "PID-5")
       mrn = HL7v2.Access.get(msg, "PID-3.1")
+      all_obx_values = HL7v2.Access.get(msg, "OBX[*]-5")
 
   """
 
@@ -28,12 +32,19 @@ defmodule HL7v2.Access do
 
   @type path :: %{
           segment: binary(),
+          segment_index: pos_integer() | :all | nil,
           field: pos_integer() | nil,
           component: pos_integer() | nil,
           repetition: pos_integer() | nil
         }
 
-  @path_regex ~r/^([A-Z][A-Z0-9]{2})(?:-(\d+)(?:\.(\d+))?(?:\[(\d+)\])?)?$/
+  # Regex groups:
+  #   1: segment ID  (e.g. "OBX")
+  #   2: segment index  (e.g. "2" or "*")        — optional [N] or [*] after segment
+  #   3: field sequence  (e.g. "5")               — after "-"
+  #   4: component  (e.g. "1")                    — after "."
+  #   5: repetition index  (e.g. "2" or "*")      — trailing [N] or [*]
+  @path_regex ~r/^([A-Z][A-Z0-9]{2})(?:\[(\d+|\*)\])?(?:-(\d+)(?:\.(\d+))?(?:\[(\d+|\*)\])?)?$/
 
   @doc """
   Gets a value from a typed message using a path string or `%Path{}` struct.
@@ -98,8 +109,14 @@ defmodule HL7v2.Access do
     end
   end
 
-  defp path_to_map(%Path{segment: seg, field: f, component: c, repetition: r}) do
-    %{segment: seg, field: f, component: c, repetition: r}
+  defp path_to_map(%Path{} = p) do
+    %{
+      segment: p.segment,
+      segment_index: p.segment_index,
+      field: p.field,
+      component: p.component,
+      repetition: p.repetition
+    }
   end
 
   # -- Path Parsing --
@@ -108,57 +125,93 @@ defmodule HL7v2.Access do
   @spec parse_path(binary()) :: {:ok, path()} | {:error, :invalid_path}
   def parse_path(path) do
     case Regex.run(@path_regex, path) do
-      [_, segment] ->
-        {:ok, %{segment: segment, field: nil, component: nil, repetition: nil}}
-
-      [_, segment, field] ->
-        {:ok, %{segment: segment, field: to_int(field), component: nil, repetition: nil}}
-
-      [_, segment, field, component] ->
-        {:ok,
-         %{segment: segment, field: to_int(field), component: to_int(component), repetition: nil}}
-
-      [_, segment, field, "", repetition] ->
-        {:ok,
-         %{segment: segment, field: to_int(field), component: nil, repetition: to_int(repetition)}}
-
-      [_, segment, field, component, repetition] ->
-        {:ok,
-         %{
-           segment: segment,
-           field: to_int(field),
-           component: to_int(component),
-           repetition: to_int(repetition)
-         }}
-
       nil ->
         {:error, :invalid_path}
+
+      captures ->
+        build_parsed(captures)
     end
   end
 
-  defp to_int(s), do: String.to_integer(s)
+  defp build_parsed(captures) do
+    segment = Enum.at(captures, 1)
+    seg_idx_raw = Enum.at(captures, 2)
+    field_raw = Enum.at(captures, 3)
+    comp_raw = Enum.at(captures, 4)
+    rep_raw = Enum.at(captures, 5)
+
+    {:ok,
+     %{
+       segment: segment,
+       segment_index: parse_index(seg_idx_raw),
+       field: parse_int(field_raw),
+       component: parse_int(comp_raw),
+       repetition: parse_index(rep_raw)
+     }}
+  end
+
+  defp parse_int(nil), do: nil
+  defp parse_int(""), do: nil
+  defp parse_int(s), do: String.to_integer(s)
+
+  defp parse_index(nil), do: nil
+  defp parse_index(""), do: nil
+  defp parse_index("*"), do: :all
+  defp parse_index(s), do: String.to_integer(s)
 
   # -- Resolution --
 
-  defp resolve(msg, %{segment: seg_id, field: nil}) do
-    find_segment(msg, seg_id)
+  # Segment wildcard: OBX[*] (no field)
+  defp resolve(msg, %{segment_index: :all, field: nil} = path) do
+    find_all_segments(msg, path.segment)
   end
 
-  defp resolve(msg, %{segment: seg_id} = path) do
-    case find_segment(msg, seg_id) do
+  # Segment wildcard with field: OBX[*]-5
+  defp resolve(msg, %{segment_index: :all} = path) do
+    msg
+    |> find_all_segments(path.segment)
+    |> Enum.map(&resolve_field(&1, path))
+  end
+
+  # Specific segment index: OBX[2] (no field)
+  defp resolve(msg, %{segment_index: idx, field: nil} = path) when is_integer(idx) do
+    msg
+    |> find_all_segments(path.segment)
+    |> Enum.at(idx - 1)
+  end
+
+  # Specific segment index with field: OBX[2]-5
+  defp resolve(msg, %{segment_index: idx} = path) when is_integer(idx) do
+    case msg |> find_all_segments(path.segment) |> Enum.at(idx - 1) do
+      nil -> nil
+      segment -> resolve_field(segment, path)
+    end
+  end
+
+  # No segment index (nil): first match — backwards compatible
+  defp resolve(msg, %{segment_index: nil, field: nil} = path) do
+    find_segment(msg, path.segment)
+  end
+
+  defp resolve(msg, %{segment_index: nil} = path) do
+    case find_segment(msg, path.segment) do
       nil -> nil
       segment -> resolve_field(segment, path)
     end
   end
 
   defp find_segment(%TypedMessage{segments: segments}, seg_id) do
-    Enum.find(segments, fn
-      %HL7v2.Segment.ZXX{segment_id: id} -> id == seg_id
-      %{__struct__: module} -> module.segment_id() == seg_id
-      {name, _fields} -> name == seg_id
-      _ -> false
-    end)
+    Enum.find(segments, &segment_match?(&1, seg_id))
   end
+
+  defp find_all_segments(%TypedMessage{segments: segments}, seg_id) do
+    Enum.filter(segments, &segment_match?(&1, seg_id))
+  end
+
+  defp segment_match?(%HL7v2.Segment.ZXX{segment_id: id}, seg_id), do: id == seg_id
+  defp segment_match?(%{__struct__: module}, seg_id), do: module.segment_id() == seg_id
+  defp segment_match?({name, _fields}, seg_id), do: name == seg_id
+  defp segment_match?(_, _seg_id), do: false
 
   defp resolve_field({_name, raw_fields}, %{field: field_seq}) when is_list(raw_fields) do
     # Raw tuple segment — return the field by position (1-indexed), no type awareness
@@ -191,6 +244,9 @@ defmodule HL7v2.Access do
 
   defp select_repetition(value, 1, _rep), do: value
 
+  # Repetition wildcard: return all repetitions
+  defp select_repetition(value, _max_reps, :all) when is_list(value), do: value
+
   defp select_repetition(value, _max_reps, rep) when is_list(value) do
     if rep != nil do
       Enum.at(value, rep - 1)
@@ -199,10 +255,15 @@ defmodule HL7v2.Access do
     end
   end
 
+  defp select_repetition(value, _max_reps, :all), do: [value]
   defp select_repetition(value, _max_reps, _rep), do: value
 
   defp select_component(nil, _), do: nil
   defp select_component(value, nil), do: value
+
+  defp select_component(values, comp) when is_list(values) do
+    Enum.map(values, &select_component(&1, comp))
+  end
 
   defp select_component(value, comp) when is_struct(value) do
     ordered_keys =
@@ -219,15 +280,56 @@ defmodule HL7v2.Access do
 
   # -- Error-returning resolution for fetch/2 --
 
-  defp resolve_with_error(msg, %{segment: seg_id, field: nil}) do
-    case find_segment(msg, seg_id) do
+  # Segment wildcard: OBX[*] (no field)
+  defp resolve_with_error(msg, %{segment_index: :all, field: nil} = path) do
+    case find_all_segments(msg, path.segment) do
+      [] -> {:error, :segment_not_found}
+      segments -> {:ok, segments}
+    end
+  end
+
+  # Segment wildcard with field: OBX[*]-5
+  defp resolve_with_error(msg, %{segment_index: :all} = path) do
+    case find_all_segments(msg, path.segment) do
+      [] ->
+        {:error, :segment_not_found}
+
+      segments ->
+        results = Enum.map(segments, &resolve_field_with_error(&1, path))
+
+        case Enum.find(results, &match?({:error, _}, &1)) do
+          {:error, _} = err -> err
+          nil -> {:ok, Enum.map(results, fn {:ok, v} -> v end)}
+        end
+    end
+  end
+
+  # Specific segment index: OBX[2] (no field)
+  defp resolve_with_error(msg, %{segment_index: idx, field: nil} = path) when is_integer(idx) do
+    case msg |> find_all_segments(path.segment) |> Enum.at(idx - 1) do
       nil -> {:error, :segment_not_found}
       seg -> {:ok, seg}
     end
   end
 
-  defp resolve_with_error(msg, %{segment: seg_id} = path) do
-    case find_segment(msg, seg_id) do
+  # Specific segment index with field: OBX[2]-5
+  defp resolve_with_error(msg, %{segment_index: idx} = path) when is_integer(idx) do
+    case msg |> find_all_segments(path.segment) |> Enum.at(idx - 1) do
+      nil -> {:error, :segment_not_found}
+      segment -> resolve_field_with_error(segment, path)
+    end
+  end
+
+  # No segment index: first match — backwards compatible
+  defp resolve_with_error(msg, %{segment_index: nil, field: nil} = path) do
+    case find_segment(msg, path.segment) do
+      nil -> {:error, :segment_not_found}
+      seg -> {:ok, seg}
+    end
+  end
+
+  defp resolve_with_error(msg, %{segment_index: nil} = path) do
+    case find_segment(msg, path.segment) do
       nil -> {:error, :segment_not_found}
       segment -> resolve_field_with_error(segment, path)
     end

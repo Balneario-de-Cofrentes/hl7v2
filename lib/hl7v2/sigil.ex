@@ -22,6 +22,9 @@ defmodule HL7v2.Sigil do
       ~h"PID-5"        — field 5
       ~h"PID-5.1"      — component 1 of field 5
       ~h"PID-3[2]"     — repetition 2 of field 3
+      ~h"OBX[*]-5"     — field 5 from ALL OBX segments
+      ~h"OBX[2]-5"     — field 5 from the 2nd OBX segment
+      ~h"PID-3[*]"     — ALL repetitions of PID-3
 
   """
 
@@ -51,6 +54,7 @@ defmodule HL7v2.Sigil do
         Macro.escape(%Path{
           raw: path_string,
           segment: parsed.segment,
+          segment_index: parsed.segment_index,
           field: parsed.field,
           component: parsed.component,
           repetition: parsed.repetition

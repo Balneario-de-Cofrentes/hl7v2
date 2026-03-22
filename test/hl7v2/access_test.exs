@@ -202,4 +202,148 @@ defmodule HL7v2.AccessTest do
       assert {:error, :segment_not_found} = HL7v2.fetch(msg, "ZZZ")
     end
   end
+
+  # -- Wildcard path support --
+
+  describe "wildcard paths" do
+    @oru_text "MSH|^~\\&|SEND|FAC||RCV||20260322||ORU^R01^ORU_R01|MSG001|P|2.5.1\r" <>
+                "PID|1||12345^^^MRN^MR~67890^^^SSN^SS||Smith^John\r" <>
+                "OBR|1||ORD001|CBC^Complete Blood Count^LN\r" <>
+                "OBX|1|NM|WBC^White Blood Cell^LN||7.5|10*3/uL\r" <>
+                "OBX|2|NM|RBC^Red Blood Cell^LN||4.8|10*6/uL\r" <>
+                "OBX|3|NM|HGB^Hemoglobin^LN||14.2|g/dL\r"
+
+    setup do
+      {:ok, oru} = HL7v2.parse(@oru_text, mode: :typed)
+      %{oru: oru}
+    end
+
+    test "OBX[*]-5 returns list of all observation values", %{oru: oru} do
+      values = Access.get(oru, "OBX[*]-5")
+      assert length(values) == 3
+      assert values == ["7.5", "4.8", "14.2"]
+    end
+
+    test "OBX[*] returns list of all OBX segment structs", %{oru: oru} do
+      segments = Access.get(oru, "OBX[*]")
+      assert length(segments) == 3
+      assert Enum.all?(segments, &is_struct(&1, HL7v2.Segment.OBX))
+    end
+
+    test "OBX[2]-5 returns 2nd OBX observation value", %{oru: oru} do
+      assert Access.get(oru, "OBX[2]-5") == "4.8"
+    end
+
+    test "OBX[1]-5 returns first OBX observation value (same as OBX-5)", %{oru: oru} do
+      assert Access.get(oru, "OBX[1]-5") == Access.get(oru, "OBX-5")
+    end
+
+    test "OBX[3]-5 returns third OBX observation value", %{oru: oru} do
+      assert Access.get(oru, "OBX[3]-5") == "14.2"
+    end
+
+    test "OBX[4]-5 returns nil for out-of-range segment index", %{oru: oru} do
+      assert Access.get(oru, "OBX[4]-5") == nil
+    end
+
+    test "OBX[2] returns 2nd OBX segment struct (no field)", %{oru: oru} do
+      seg = Access.get(oru, "OBX[2]")
+      assert %HL7v2.Segment.OBX{} = seg
+      assert seg.set_id == 2
+    end
+
+    test "PID-3[*] returns all repetitions of PID-3", %{oru: oru} do
+      reps = Access.get(oru, "PID-3[*]")
+      assert length(reps) == 2
+      assert Enum.all?(reps, &is_struct(&1, HL7v2.Type.CX))
+      assert Enum.map(reps, & &1.id) == ["12345", "67890"]
+    end
+
+    test "OBX[*]-3.1 returns identifiers from all OBX segments", %{oru: oru} do
+      ids = Access.get(oru, "OBX[*]-3.1")
+      assert ids == ["WBC", "RBC", "HGB"]
+    end
+
+    test "OBX-5 without wildcard returns first match (backwards compatible)", %{oru: oru} do
+      assert Access.get(oru, "OBX-5") == "7.5"
+    end
+
+    test "fetch OBX[*]-5 returns {:ok, list}", %{oru: oru} do
+      assert {:ok, values} = Access.fetch(oru, "OBX[*]-5")
+      assert length(values) == 3
+      assert values == ["7.5", "4.8", "14.2"]
+    end
+
+    test "fetch OBX[*] returns {:ok, list of segments}", %{oru: oru} do
+      assert {:ok, segments} = Access.fetch(oru, "OBX[*]")
+      assert length(segments) == 3
+    end
+
+    test "fetch ZZZ[*] returns {:error, :segment_not_found}", %{oru: oru} do
+      assert {:error, :segment_not_found} = Access.fetch(oru, "ZZZ[*]")
+    end
+
+    test "fetch ZZZ[*]-1 returns {:error, :segment_not_found}", %{oru: oru} do
+      assert {:error, :segment_not_found} = Access.fetch(oru, "ZZZ[*]-1")
+    end
+
+    test "fetch OBX[4] returns {:error, :segment_not_found}", %{oru: oru} do
+      assert {:error, :segment_not_found} = Access.fetch(oru, "OBX[4]")
+    end
+
+    test "fetch OBX[2]-5 returns {:ok, value}", %{oru: oru} do
+      assert {:ok, "4.8"} = Access.fetch(oru, "OBX[2]-5")
+    end
+
+    test "fetch PID-3[*] returns {:ok, list}", %{oru: oru} do
+      assert {:ok, reps} = Access.fetch(oru, "PID-3[*]")
+      assert length(reps) == 2
+    end
+  end
+
+  describe "wildcard path parsing" do
+    test "OBX[*]-5 parses correctly" do
+      assert {:ok, parsed} = Access.parse_path("OBX[*]-5")
+      assert parsed.segment == "OBX"
+      assert parsed.segment_index == :all
+      assert parsed.field == 5
+      assert parsed.component == nil
+      assert parsed.repetition == nil
+    end
+
+    test "OBX[2]-5 parses segment index as integer" do
+      assert {:ok, parsed} = Access.parse_path("OBX[2]-5")
+      assert parsed.segment == "OBX"
+      assert parsed.segment_index == 2
+      assert parsed.field == 5
+    end
+
+    test "PID-3[*] parses repetition wildcard" do
+      assert {:ok, parsed} = Access.parse_path("PID-3[*]")
+      assert parsed.segment == "PID"
+      assert parsed.segment_index == nil
+      assert parsed.field == 3
+      assert parsed.repetition == :all
+    end
+
+    test "OBX[*] parses segment wildcard without field" do
+      assert {:ok, parsed} = Access.parse_path("OBX[*]")
+      assert parsed.segment == "OBX"
+      assert parsed.segment_index == :all
+      assert parsed.field == nil
+    end
+
+    test "existing paths parse with nil segment_index" do
+      assert {:ok, parsed} = Access.parse_path("PID-5")
+      assert parsed.segment_index == nil
+      assert parsed.field == 5
+
+      assert {:ok, parsed} = Access.parse_path("PID")
+      assert parsed.segment_index == nil
+
+      assert {:ok, parsed} = Access.parse_path("PID-3[2]")
+      assert parsed.segment_index == nil
+      assert parsed.repetition == 2
+    end
+  end
 end
