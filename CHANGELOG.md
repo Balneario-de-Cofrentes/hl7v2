@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.9.0 — 2026-03-23
+
+### M5: Broad Clinical Coverage
+
+- **8 new segments**: SFT (Software), PD1 (Patient Additional Demographic),
+  PR1 (Procedures), AIG/AIL/AIP (Scheduling Resources), DB1 (Disability),
+  ACC (Accident)
+- **Segment coverage**: 29/136 standard segments (21.3%, up from 15.4%)
+- **647 declared fields** across typed segments
+- All segments referenced in ADT/ORU/SIU message structure definitions are now
+  typed (except ROL, DRG, IN2, IN3 which are lower priority)
+- 98 new tests across 8 test files
+
+### Stats
+
+1,893 tests (266 doctests + 30 properties + 1,597 tests), 0 failures
+
 ## v0.8.0 — 2026-03-23
 
 ### M4: Datatype Expansion

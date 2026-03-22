@@ -168,9 +168,10 @@ end
 ## Coverage
 
 ```
- Segments    21 standard + generic ZXX (MSH EVN PID PV1 PV2 NK1 OBR
-              OBX ORC MSA ERR NTE AL1 DG1 IN1 SCH AIS RGS MRG GT1 FT1)
-              21 of ~151 standard segments + generic Z-segment pass-through
+ Segments    29 standard + generic ZXX (MSH EVN PID PD1 PV1 PV2 NK1
+              OBR OBX ORC MSA ERR NTE AL1 DG1 IN1 SCH AIS AIG AIL AIP
+              RGS MRG SFT PR1 DB1 ACC GT1 FT1)
+              29 of ~136 standard segments + generic Z-segment pass-through
 
  Types       36 composite + 7 primitive + legacy TN (43 v2.5.1 types + 1 compat)
 
@@ -180,7 +181,7 @@ end
  Transport   MLLP framing, Ranch 2.x listener, GenServer client,
               TLS/mTLS, telemetry instrumentation
 
- Tests       1,630+ (241 doctests + 30 properties + 1,355+ tests)
+ Tests       1,893 (266 doctests + 30 properties + 1,597 tests)
  Coverage    ~95%
  Speed       <1s full suite
 ```
@@ -206,7 +207,7 @@ ADT/ORM/ORU/SIU/ACK subset with extra_fields preservation for unlisted fields.
 - Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
   no whitespace normalization)
 
-**Coverage:** 21 of ~151 standard segments (plus generic ZXX) typed. 43 of ~89 v2.5.1
+**Coverage:** 29 of ~136 standard segments (plus generic ZXX) typed. 48 of ~84 v2.5.1
 data types. 20 of ~199 message structures with presence validation definitions. Extra
 fields beyond declared definitions are preserved in `extra_fields` for lossless round-trip.
 OBX exposes 19 of 25 fields; OBR exposes 49 of 50 — unlisted fields survive as extra_fields.
