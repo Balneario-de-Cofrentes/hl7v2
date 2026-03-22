@@ -26,18 +26,19 @@ defmodule HL7v2.Parser do
 
   """
 
-  alias HL7v2.{RawMessage, Separator}
+  alias HL7v2.{RawMessage, Separator, TypedParser}
 
   @doc """
   Parses an HL7v2 message binary into a `RawMessage` struct.
 
   ## Options
 
-  - `:mode` — `:raw` (default). `:typed` mode is not yet implemented.
+  - `:mode` — `:raw` (default) or `:typed` for parsed segment structs.
 
   Returns `{:ok, raw_message}` or `{:error, reason}`.
   """
-  @spec parse(binary(), keyword()) :: {:ok, RawMessage.t()} | {:error, term()}
+  @spec parse(binary(), keyword()) ::
+          {:ok, RawMessage.t() | HL7v2.TypedMessage.t()} | {:error, term()}
   def parse(text, opts \\ [])
 
   def parse("", _opts), do: {:error, :empty_message}
@@ -46,9 +47,16 @@ defmodule HL7v2.Parser do
     mode = Keyword.get(opts, :mode, :raw)
 
     case mode do
-      :raw -> parse_raw(text)
-      :typed -> {:error, :typed_mode_not_implemented}
-      other -> {:error, {:unknown_mode, other}}
+      :raw ->
+        parse_raw(text)
+
+      :typed ->
+        with {:ok, raw} <- parse_raw(text) do
+          TypedParser.convert(raw)
+        end
+
+      other ->
+        {:error, {:unknown_mode, other}}
     end
   end
 

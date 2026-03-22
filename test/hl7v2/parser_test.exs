@@ -217,9 +217,9 @@ defmodule HL7v2.ParserTest do
       assert {:error, {:unknown_mode, :invalid}} = Parser.parse(msg, mode: :invalid)
     end
 
-    test "returns error for typed mode (not yet implemented)" do
+    test "typed mode returns a typed message" do
       msg = "MSH|^~\\&|S|F||R|20240101||ADT^A01|1|P|2.5\r"
-      assert {:error, :typed_mode_not_implemented} = Parser.parse(msg, mode: :typed)
+      assert {:ok, %HL7v2.TypedMessage{}} = Parser.parse(msg, mode: :typed)
     end
   end
 
