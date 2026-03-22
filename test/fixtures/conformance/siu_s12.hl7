@@ -1,0 +1,7 @@
+MSH|^~\&|SCH|HOSP|HIS|HOSP|20260322160000||SIU^S12^SIU_S12|MSG004|P|2.5.1
+SCH|1|||||ROUTINE^Routine^HL70276|||30^MIN||Routine^Routine^HL70277|||||1234^Jones^Robert||||1234^Jones^Robert
+PID|1||12345^^^MRN^MR||Smith^John||19800315|M
+PV1|1|O
+RGS|1
+AIS|1||99213^Office Visit^CPT
+NTE|1||Follow-up appointment

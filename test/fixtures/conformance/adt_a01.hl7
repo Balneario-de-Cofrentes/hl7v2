@@ -1,0 +1,11 @@
+MSH|^~\&|ADM|HOSP|LAB|LAB|20260322120000||ADT^A01^ADT_A01|MSG001|P|2.5.1
+EVN|A01|20260322120000
+PID|1||12345^^^MRN^MR~67890^^^SSN^SS||Smith^John^Q||19800315|M|||123 Main St^^Springfield^IL^62704||555-1234
+NK1|1|Smith^Jane|SPO^Spouse
+PV1|1|I|W^389^1^^^N||||1234^Jones^Robert|||MED|||A0||||||1234^Jones^Robert|||||||||||||||||||||||||20260322120000
+PV2||||||||20260329
+AL1|1||PENICILLIN
+DG1|1||I10^Essential Hypertension^I10|||A
+GT1|1||Smith^John^Q||123 Main St^^Springfield^IL^62704
+IN1|1|1|BC^Blue Cross||||||||||20260101
+NTE|1||Admit note text
