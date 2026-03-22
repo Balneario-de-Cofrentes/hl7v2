@@ -108,10 +108,12 @@ defmodule HL7v2.ValidationTest do
         type: {"ADT", "A01"},
         segments: [
           valid_msh(),
+          valid_evn(),
           %HL7v2.Segment.PID{
             patient_identifier_list: nil,
             patient_name: nil
-          }
+          },
+          valid_pv1()
         ]
       }
 
@@ -166,20 +168,20 @@ defmodule HL7v2.ValidationTest do
 
     test "backwards-compat (:b) fields can be nil without error" do
       msg = valid_typed_message()
-      pid = Enum.at(msg.segments, 1)
+      pid = Enum.at(msg.segments, 2)
       # patient_id is :b, patient_alias is :b
       pid = %{pid | patient_id: nil, patient_alias: nil}
-      msg = %{msg | segments: [hd(msg.segments), pid]}
+      msg = %{msg | segments: List.replace_at(msg.segments, 2, pid)}
 
       assert :ok = Validation.validate(msg)
     end
 
     test "conditional (:c) fields can be nil without error" do
       msg = valid_typed_message()
-      pid = Enum.at(msg.segments, 1)
+      pid = Enum.at(msg.segments, 2)
       # species_code and breed_code are :c
       pid = %{pid | species_code: nil, breed_code: nil}
-      msg = %{msg | segments: [hd(msg.segments), pid]}
+      msg = %{msg | segments: List.replace_at(msg.segments, 2, pid)}
 
       assert :ok = Validation.validate(msg)
     end
@@ -201,9 +203,12 @@ defmodule HL7v2.ValidationTest do
     test "ZXX segments are skipped during validation" do
       msg = %TypedMessage{
         separators: HL7v2.Separator.default(),
-        type: {"ADT", "A01"},
+        type: {"TST", "Z01"},
         segments: [
-          valid_msh(),
+          %{
+            valid_msh()
+            | message_type: %HL7v2.Type.MSG{message_code: "TST", trigger_event: "Z01"}
+          },
           %HL7v2.Segment.ZXX{segment_id: "ZPD", raw_fields: ["some", "data"]}
         ]
       }
@@ -214,9 +219,12 @@ defmodule HL7v2.ValidationTest do
     test "raw tuple segments are skipped during validation" do
       msg = %TypedMessage{
         separators: HL7v2.Separator.default(),
-        type: {"ADT", "A01"},
+        type: {"TST", "Z01"},
         segments: [
-          valid_msh(),
+          %{
+            valid_msh()
+            | message_type: %HL7v2.Type.MSG{message_code: "TST", trigger_event: "Z01"}
+          },
           {"XYZ", ["unknown", "segment"]}
         ]
       }
@@ -277,10 +285,9 @@ defmodule HL7v2.ValidationTest do
       type: {"ADT", "A01"},
       segments: [
         valid_msh(),
-        %HL7v2.Segment.PID{
-          patient_identifier_list: [%HL7v2.Type.CX{id: "12345"}],
-          patient_name: [%HL7v2.Type.XPN{family_name: %HL7v2.Type.FN{surname: "Smith"}}]
-        }
+        valid_evn(),
+        valid_pid(),
+        valid_pv1()
       ]
     }
   end
@@ -297,5 +304,24 @@ defmodule HL7v2.ValidationTest do
         time: %HL7v2.Type.DTM{year: 2026, month: 3, day: 22}
       }
     }
+  end
+
+  defp valid_evn do
+    %HL7v2.Segment.EVN{
+      recorded_date_time: %HL7v2.Type.TS{
+        time: %HL7v2.Type.DTM{year: 2026, month: 3, day: 22}
+      }
+    }
+  end
+
+  defp valid_pid do
+    %HL7v2.Segment.PID{
+      patient_identifier_list: [%HL7v2.Type.CX{id: "12345"}],
+      patient_name: [%HL7v2.Type.XPN{family_name: %HL7v2.Type.FN{surname: "Smith"}}]
+    }
+  end
+
+  defp valid_pv1 do
+    %HL7v2.Segment.PV1{patient_class: "I"}
   end
 end

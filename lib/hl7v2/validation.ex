@@ -16,6 +16,7 @@ defmodule HL7v2.Validation do
 
   """
 
+  alias HL7v2.MessageDefinition
   alias HL7v2.TypedMessage
   alias HL7v2.Validation.{MessageRules, FieldRules}
 
@@ -25,9 +26,14 @@ defmodule HL7v2.Validation do
   Returns `:ok` when no errors are found, or `{:error, errors}` with a list
   of error/warning maps.
 
+  Runs three validation passes:
+  1. **Message rules** — MSH presence, required MSH fields
+  2. **Structure rules** — required segments per message definition (MSH-9.3)
+  3. **Field rules** — required fields, max repetitions per segment
+
   Each error map has:
   - `:level` — `:error` or `:warning`
-  - `:location` — segment identifier (e.g., `"MSH"`, `"PID"`)
+  - `:location` — segment identifier (e.g., `"MSH"`, `"PID"`, `"message"`)
   - `:field` — field name atom or `nil` for structural issues
   - `:message` — human-readable description
   """
@@ -35,11 +41,43 @@ defmodule HL7v2.Validation do
   def validate(%TypedMessage{} = msg) do
     errors =
       MessageRules.check(msg) ++
+        structure_errors(msg) ++
         Enum.flat_map(msg.segments, &FieldRules.check/1)
 
     case errors do
       [] -> :ok
       errors -> {:error, errors}
     end
+  end
+
+  defp structure_errors(%TypedMessage{segments: segments}) do
+    structure = extract_message_structure(segments)
+    segment_ids = extract_segment_ids(segments)
+
+    case MessageDefinition.validate_structure(structure, segment_ids) do
+      :ok -> []
+      {:error, errors} -> errors
+    end
+  end
+
+  defp extract_message_structure([%HL7v2.Segment.MSH{message_type: %HL7v2.Type.MSG{} = msg} | _]) do
+    msg.message_structure || infer_structure(msg.message_code, msg.trigger_event)
+  end
+
+  defp extract_message_structure(_), do: nil
+
+  # When MSH-9.3 is absent, infer from message_code + trigger_event (e.g., "ADT" + "A01" -> "ADT_A01")
+  defp infer_structure(code, event) when is_binary(code) and is_binary(event),
+    do: "#{code}_#{event}"
+
+  defp infer_structure(code, _event) when is_binary(code), do: code
+  defp infer_structure(_code, _event), do: nil
+
+  defp extract_segment_ids(segments) do
+    Enum.map(segments, fn
+      %HL7v2.Segment.ZXX{segment_id: id} -> id
+      %{__struct__: module} -> module.segment_id()
+      {name, _fields} when is_binary(name) -> name
+    end)
   end
 end
