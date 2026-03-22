@@ -215,7 +215,11 @@ defmodule HL7v2.Standard do
     "AUI" => %{name: "Authorization Information", category: :composite, tier: :typed},
     "CE" => %{name: "Coded Element", category: :composite, tier: :typed},
     "CNE" => %{name: "Coded with No Exceptions", category: :composite, tier: :typed},
-    "CNN" => %{name: "Composite Number and Name without Authority", category: :composite, tier: :typed},
+    "CNN" => %{
+      name: "Composite Number and Name without Authority",
+      category: :composite,
+      tier: :typed
+    },
     "CP" => %{name: "Composite Price", category: :composite, tier: :typed},
     "CQ" => %{name: "Composite Quantity with Units", category: :composite, tier: :typed},
     "CWE" => %{name: "Coded with Exceptions", category: :composite, tier: :typed},
@@ -243,29 +247,57 @@ defmodule HL7v2.Standard do
     "TS" => %{name: "Time Stamp", category: :composite, tier: :typed},
     "VID" => %{name: "Version Identifier", category: :composite, tier: :typed},
     "XAD" => %{name: "Extended Address", category: :composite, tier: :typed},
-    "XCN" => %{name: "Extended Composite ID Number and Name for Persons", category: :composite, tier: :typed},
-    "XON" => %{name: "Extended Composite Name and ID Number for Organizations", category: :composite, tier: :typed},
+    "XCN" => %{
+      name: "Extended Composite ID Number and Name for Persons",
+      category: :composite,
+      tier: :typed
+    },
+    "XON" => %{
+      name: "Extended Composite Name and ID Number for Organizations",
+      category: :composite,
+      tier: :typed
+    },
     "XPN" => %{name: "Extended Person Name", category: :composite, tier: :typed},
     "XTN" => %{name: "Extended Telecommunication Number", category: :composite, tier: :typed},
     # -- Unsupported v2.5.1 types --
     "AD" => %{name: "Address", category: :composite, tier: :unsupported},
-    "CF" => %{name: "Coded Element with Formatted Values", category: :composite, tier: :unsupported},
+    "CF" => %{
+      name: "Coded Element with Formatted Values",
+      category: :composite,
+      tier: :unsupported
+    },
     "CCD" => %{name: "Charge Code and Date", category: :composite, tier: :unsupported},
     "CSU" => %{name: "Channel Sensitivity and Units", category: :composite, tier: :unsupported},
     "DDI" => %{name: "Daily Deductible Information", category: :composite, tier: :unsupported},
     "DIN" => %{name: "Date and Institution Name", category: :composite, tier: :unsupported},
     "ED" => %{name: "Encapsulated Data", category: :composite, tier: :unsupported},
-    "ELD" => %{name: "Error Location and Description", category: :composite, tier: :unsupported},
+    "ELD" => %{name: "Error Location and Description", category: :composite, tier: :typed},
     "GTS" => %{name: "General Timing Specification", category: :primitive, tier: :unsupported},
-    "LA1" => %{name: "Location with Address Variation 1", category: :composite, tier: :unsupported},
-    "LA2" => %{name: "Location with Address Variation 2", category: :composite, tier: :unsupported},
+    "LA1" => %{
+      name: "Location with Address Variation 1",
+      category: :composite,
+      tier: :unsupported
+    },
+    "LA2" => %{
+      name: "Location with Address Variation 2",
+      category: :composite,
+      tier: :unsupported
+    },
     "MA" => %{name: "Multiplexed Array", category: :composite, tier: :unsupported},
     "NA" => %{name: "Numeric Array", category: :composite, tier: :unsupported},
     "OCD" => %{name: "Occurrence Code and Date", category: :composite, tier: :unsupported},
     "OSD" => %{name: "Order Sequence Definition", category: :composite, tier: :unsupported},
     "OSP" => %{name: "Occurrence Span Code and Date", category: :composite, tier: :unsupported},
-    "PIP" => %{name: "Practitioner Institutional Privileges", category: :composite, tier: :unsupported},
-    "PLN" => %{name: "Practitioner License or Other ID Number", category: :composite, tier: :unsupported},
+    "PIP" => %{
+      name: "Practitioner Institutional Privileges",
+      category: :composite,
+      tier: :unsupported
+    },
+    "PLN" => %{
+      name: "Practitioner License or Other ID Number",
+      category: :composite,
+      tier: :unsupported
+    },
     "PPN" => %{name: "Performing Person Time Stamp", category: :composite, tier: :unsupported},
     "PTA" => %{name: "Policy Type and Amount", category: :composite, tier: :unsupported},
     "QIP" => %{name: "Query Input Parameter List", category: :composite, tier: :unsupported},
@@ -279,10 +311,10 @@ defmodule HL7v2.Standard do
     "SCV" => %{name: "Scheduling Class Value Pair", category: :composite, tier: :unsupported},
     "SN" => %{name: "Structured Numeric", category: :composite, tier: :unsupported},
     "SPD" => %{name: "Specialty Description", category: :composite, tier: :unsupported},
-    "SPS" => %{name: "Specimen Source", category: :composite, tier: :unsupported},
+    "SPS" => %{name: "Specimen Source", category: :composite, tier: :typed},
     "SRT" => %{name: "Sort Order", category: :composite, tier: :unsupported},
-    "TM" => %{name: "Time", category: :primitive, tier: :unsupported},
-    "TQ" => %{name: "Timing/Quantity", category: :composite, tier: :unsupported},
+    "TM" => %{name: "Time", category: :primitive, tier: :typed},
+    "TQ" => %{name: "Timing/Quantity", category: :composite, tier: :typed},
     "UVC" => %{name: "UB Value Code and Amount", category: :composite, tier: :unsupported},
     "VH" => %{name: "Visiting Hours", category: :composite, tier: :unsupported},
     "VR" => %{name: "Value Range", category: :composite, tier: :unsupported},

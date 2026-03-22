@@ -19,7 +19,7 @@ defmodule HL7v2.Segment.SCH do
       {8, :appointment_type, HL7v2.Type.CE, :o, 1},
       {9, :appointment_duration, HL7v2.Type.NM, :o, 1},
       {10, :appointment_duration_units, HL7v2.Type.CE, :o, 1},
-      {11, :appointment_timing_quantity, :raw, :b, :unbounded},
+      {11, :appointment_timing_quantity, HL7v2.Type.TQ, :b, :unbounded},
       {12, :placer_contact_person, HL7v2.Type.XCN, :o, :unbounded},
       {13, :placer_contact_phone_number, HL7v2.Type.XTN, :o, 1},
       {14, :placer_contact_address, HL7v2.Type.XAD, :o, :unbounded},

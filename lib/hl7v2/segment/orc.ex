@@ -15,7 +15,7 @@ defmodule HL7v2.Segment.ORC do
       {4, :placer_group_number, HL7v2.Type.EI, :o, 1},
       {5, :order_status, HL7v2.Type.ID, :o, 1},
       {6, :response_flag, HL7v2.Type.ID, :o, 1},
-      {7, :quantity_timing, :raw, :b, :unbounded},
+      {7, :quantity_timing, HL7v2.Type.TQ, :b, :unbounded},
       {8, :parent, HL7v2.Type.EIP, :o, 1},
       {9, :date_time_of_transaction, HL7v2.Type.TS, :o, 1},
       {10, :entered_by, HL7v2.Type.XCN, :o, :unbounded},

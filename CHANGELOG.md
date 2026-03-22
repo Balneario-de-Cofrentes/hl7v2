@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.8.0 — 2026-03-23
+
+### M4: Datatype Expansion
+
+- **TQ type** — Timing/Quantity (12 components) — closes raw holes in OBR-27, ORC-7, SCH-11
+- **ELD type** — Error Location and Description (4 components) — closes raw hole in ERR-1
+- **SPS type** — Specimen Source (7 components) — closes raw hole in OBR-15
+- **TM type** — Time primitive (HH[MM[SS[.SSSS]]][+/-ZZZZ]) — added to OBX-5 dispatch
+- **Raw holes**: 6 → 1 (only OBX-5 remains, by design — uses dispatch)
+- **Type coverage**: 48/84 standard types (57.1%, up from 52.4%)
+- 56 new tests + 25 new doctests
+
+### Stats
+
+1,795 tests (266 doctests + 30 properties + 1,499 tests), 0 failures
+
 ## v0.7.0 — 2026-03-22
 
 ### M3: Structural Validation

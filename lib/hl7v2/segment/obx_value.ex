@@ -41,6 +41,7 @@ defmodule HL7v2.Segment.OBXValue do
     "XON" => HL7v2.Type.XON,
     "CP" => HL7v2.Type.CP,
     "FC" => HL7v2.Type.FC,
+    "TM" => HL7v2.Type.TM,
     "TN" => HL7v2.Type.TN
   }
 

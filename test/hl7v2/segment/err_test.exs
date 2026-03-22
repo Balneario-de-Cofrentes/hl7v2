@@ -37,11 +37,11 @@ defmodule HL7v2.Segment.ERRTest do
       assert result.severity == "E"
     end
 
-    test "parses error_code_and_location as raw and error_location as ERL" do
+    test "parses error_code_and_location as ELD and error_location as ERL" do
       error_location_data = [["PID", "1", "5"]]
 
       raw = [
-        "legacy_error_data",
+        ["PID", "1", "3", "101&Required field missing&HL70357"],
         error_location_data,
         ["100", "Segment sequence error", "HL70357"],
         "W"
@@ -49,7 +49,18 @@ defmodule HL7v2.Segment.ERRTest do
 
       result = ERR.parse(raw)
 
-      assert result.error_code_and_location == "legacy_error_data"
+      assert [
+               %HL7v2.Type.ELD{
+                 segment_id: "PID",
+                 segment_sequence: "1",
+                 field_position: "3",
+                 code_identifying_error: %HL7v2.Type.CE{
+                   identifier: "101",
+                   text: "Required field missing",
+                   name_of_coding_system: "HL70357"
+                 }
+               }
+             ] = result.error_code_and_location
 
       assert [
                %HL7v2.Type.ERL{
