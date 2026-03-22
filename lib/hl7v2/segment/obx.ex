@@ -1,9 +1,13 @@
 defmodule HL7v2.Segment.OBX do
   @moduledoc """
-  Observation/Result (OBX) segment — HL7v2 v2.5.1.
+  Observation/Result (OBX) segment -- HL7v2 v2.5.1.
 
   Carries a single observation value. OBX-5 type varies based on OBX-2 (Value Type).
   19 fields per HL7 v2.5.1 specification.
+
+  After base parsing, OBX-5 (observation_value) is re-parsed through
+  `HL7v2.Segment.OBXValue` using the data type declared in OBX-2 (value_type).
+  Unknown or complex types (ED, SN, RP) are preserved as raw values.
   """
 
   use HL7v2.Segment,
@@ -29,4 +33,38 @@ defmodule HL7v2.Segment.OBX do
       {18, :equipment_instance_identifier, HL7v2.Type.EI, :o, :unbounded},
       {19, :date_time_of_the_analysis, HL7v2.Type.TS, :o, 1}
     ]
+
+  alias HL7v2.Segment.OBXValue
+
+  @impl HL7v2.Segment
+  @spec parse(list(), HL7v2.Separator.t()) :: t()
+  def parse(raw_fields, _separators \\ HL7v2.Separator.default()) do
+    obx = HL7v2.Segment.do_parse(__MODULE__, @segment_fields, raw_fields)
+
+    case obx.value_type do
+      nil ->
+        obx
+
+      vt ->
+        parsed = OBXValue.parse(obx.observation_value, vt)
+        %{obx | observation_value: parsed}
+    end
+  end
+
+  @impl HL7v2.Segment
+  @spec encode(t()) :: list()
+  def encode(%__MODULE__{} = obx) do
+    # Convert typed observation_value back to raw before base encode
+    raw_obx =
+      case obx.value_type do
+        nil ->
+          obx
+
+        vt ->
+          raw_value = OBXValue.encode(obx.observation_value, vt)
+          %{obx | observation_value: raw_value}
+      end
+
+    HL7v2.Segment.do_encode(raw_obx, @segment_fields)
+  end
 end

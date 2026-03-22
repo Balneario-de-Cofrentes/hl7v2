@@ -2,7 +2,7 @@ defmodule HL7v2.Segment.OBXTest do
   use ExUnit.Case, async: true
 
   alias HL7v2.Segment.OBX
-  alias HL7v2.Type.{CE, TS, DTM}
+  alias HL7v2.Type.{CE, CWE, TS, DTM}
 
   describe "fields/0" do
     test "returns 19 field definitions" do
@@ -36,6 +36,7 @@ defmodule HL7v2.Segment.OBXTest do
       assert %CE{identifier: "8480-6", text: "Systolic BP", name_of_coding_system: "LN"} =
                result.observation_identifier
 
+      # NM type normalizes numeric strings
       assert result.observation_value == "120"
       assert result.observation_result_status == "F"
     end
@@ -58,21 +59,19 @@ defmodule HL7v2.Segment.OBXTest do
       assert result.observation_result_status == "F"
     end
 
-    test "observation_value is :raw — preserved as-is for list input" do
-      complex_value = [["component1", "component2"]]
-
+    test "CWE value type dispatches to typed CWE struct" do
       raw =
         build_obx_fields(%{
           1 => "CWE",
-          4 => complex_value
+          4 => [["component1", "component2"]]
         })
 
       result = OBX.parse(raw)
 
-      assert result.observation_value == complex_value
+      assert [%CWE{identifier: "component1", text: "component2"}] = result.observation_value
     end
 
-    test "observation_value is :raw — preserved as-is for string input" do
+    test "TX value type dispatches to typed text" do
       raw =
         build_obx_fields(%{
           1 => "TX",
@@ -82,6 +81,26 @@ defmodule HL7v2.Segment.OBXTest do
       result = OBX.parse(raw)
 
       assert result.observation_value == "Free text observation"
+    end
+
+    test "nil value_type preserves observation_value as raw" do
+      raw = build_obx_fields(%{4 => "some raw value"})
+
+      result = OBX.parse(raw)
+
+      assert result.observation_value == "some raw value"
+    end
+
+    test "unknown value_type preserves observation_value as raw" do
+      raw =
+        build_obx_fields(%{
+          1 => "ED",
+          4 => "encapsulated data"
+        })
+
+      result = OBX.parse(raw)
+
+      assert result.observation_value == "encapsulated data"
     end
 
     test "units parsed as CE" do
@@ -162,6 +181,21 @@ defmodule HL7v2.Segment.OBXTest do
       encoded = raw |> OBX.parse() |> OBX.encode()
 
       assert Enum.at(encoded, 4) == "some text value"
+    end
+
+    test "round-trip with CWE observation value" do
+      raw =
+        build_obx_fields(%{
+          0 => "1",
+          1 => "CWE",
+          2 => ["code", "text", "system"],
+          4 => ["I48.0", "Paroxysmal AFib", "I10"],
+          10 => "F"
+        })
+
+      encoded = raw |> OBX.parse() |> OBX.encode()
+
+      assert Enum.at(encoded, 4) == ["I48.0", "Paroxysmal AFib", "I10"]
     end
 
     test "trailing nil fields are trimmed" do
