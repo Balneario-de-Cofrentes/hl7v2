@@ -7,7 +7,7 @@ defmodule HL7v2 do
 
   ## Parsing
 
-      # Raw mode — lossless, delimiter-based
+      # Raw mode — canonical round-trip, delimiter-based
       {:ok, raw} = HL7v2.parse(text)
 
       # Typed mode — validated structs
@@ -52,9 +52,19 @@ defmodule HL7v2 do
   @spec parse(binary(), keyword()) :: {:ok, term()} | {:error, term()}
   def parse(text, opts \\ []) do
     mode = Keyword.get(opts, :mode, :raw)
+    validate? = Keyword.get(opts, :validate, false)
 
     Telemetry.span(:parse, %{mode: mode}, fn ->
-      Parser.parse(text, opts)
+      with {:ok, msg} <- Parser.parse(text, opts) do
+        if validate? and mode == :typed do
+          case HL7v2.Validation.validate(msg) do
+            :ok -> {:ok, msg}
+            {:error, _} = err -> err
+          end
+        else
+          {:ok, msg}
+        end
+      end
     end)
   end
 

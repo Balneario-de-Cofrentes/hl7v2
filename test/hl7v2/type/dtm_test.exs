@@ -136,6 +136,30 @@ defmodule HL7v2.Type.DTMTest do
       assert DTM.parse("202") == nil
     end
 
+    test "rejects malformed timezone offset (non-numeric)" do
+      result = DTM.parse("202603221430+ABCD")
+      # Should parse the datetime but discard the malformed offset
+      assert result.year == 2026
+      assert result.offset == nil
+    end
+
+    test "rejects timezone offset with out-of-range hours" do
+      result = DTM.parse("202603221430+2500")
+      assert result.offset == nil
+    end
+
+    test "rejects timezone offset with out-of-range minutes" do
+      result = DTM.parse("202603221430+0160")
+      assert result.offset == nil
+    end
+
+    test "accepts valid timezone offsets" do
+      assert DTM.parse("202603221430+0000").offset == "+0000"
+      assert DTM.parse("202603221430-0500").offset == "-0500"
+      assert DTM.parse("202603221430+1200").offset == "+1200"
+      assert DTM.parse("202603221430+2359").offset == "+2359"
+    end
+
     test "returns nil for invalid month" do
       assert DTM.parse("202613") == nil
     end

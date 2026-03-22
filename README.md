@@ -50,7 +50,7 @@ msg = HL7v2.Message.new("ADT", "A01", sending_application: "PHAOS")
 |---|---|---|
 | Data model | Sparse maps, integer keys | **Typed structs, named fields** |
 | Building messages | Not supported | **`Message.new` + `add_segment`** |
-| Validation | None (by design) | **Opt-in, per HL7 v2.5.1** |
+| Validation | None (by design) | **Opt-in field + structure checks** |
 | Transport | Separate package (mllp) | **Integrated MLLP** |
 | Ranch | 1.8 | **2.x** |
 | Parse + type | Two steps | **`mode: :typed` in one call** |
@@ -72,7 +72,7 @@ end
 ### Parse
 
 ```elixir
-# Raw mode — lossless, zero allocation overhead
+# Raw mode — canonical round-trip, zero allocation overhead
 {:ok, raw} = HL7v2.parse(text)
 raw.type  #=> {"ADT", "A01"}
 

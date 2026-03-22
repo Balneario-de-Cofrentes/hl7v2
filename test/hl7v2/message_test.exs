@@ -74,6 +74,32 @@ defmodule HL7v2.MessageTest do
       msg = Message.new("ADT", "A01")
       assert msg.segments == []
     end
+
+    test "uses canonical structure for shared-structure events" do
+      # ADT^A08 uses ADT_A01 structure, NOT ADT_A08
+      msg = Message.new("ADT", "A08")
+      assert msg.msh.message_type.message_structure == "ADT_A01"
+
+      # ADT^A31 uses ADT_A05
+      msg = Message.new("ADT", "A31")
+      assert msg.msh.message_type.message_structure == "ADT_A05"
+
+      # ADT^A40 uses ADT_A39
+      msg = Message.new("ADT", "A40")
+      assert msg.msh.message_type.message_structure == "ADT_A39"
+
+      # SIU^S14 uses SIU_S12
+      msg = Message.new("SIU", "S14")
+      assert msg.msh.message_type.message_structure == "SIU_S12"
+
+      # ADT^A01 is its own canonical (no mapping needed)
+      msg = Message.new("ADT", "A01")
+      assert msg.msh.message_type.message_structure == "ADT_A01"
+
+      # Unknown events fall back to CODE_EVENT
+      msg = Message.new("ZZZ", "Z01")
+      assert msg.msh.message_type.message_structure == "ZZZ_Z01"
+    end
   end
 
   describe "add_segment/2" do

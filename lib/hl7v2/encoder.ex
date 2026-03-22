@@ -4,8 +4,9 @@ defmodule HL7v2.Encoder do
 
   Reconstructs the HL7v2 wire format from a `RawMessage` struct. The encoder
   handles the MSH-1/MSH-2 special encoding and faithfully reproduces the
-  field structure present in the raw message — no trimming is applied, so
-  `parse(text) |> encode() == text` holds (lossless round-trip).
+  field structure present in the raw message. Round-tripping is canonical:
+  the parser normalizes line endings to CR and the encoder always appends a
+  trailing CR, so `parse(text) |> encode()` produces canonical wire form.
 
   Uses iodata internally for performance — the final result is converted to
   a binary only at the top level.

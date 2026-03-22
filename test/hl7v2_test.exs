@@ -178,4 +178,37 @@ defmodule HL7v2Test do
       assert wire1 == wire2
     end
   end
+
+  describe "parse with validate: true" do
+    test "returns errors for invalid typed message" do
+      # PID missing required patient_identifier_list and patient_name
+      wire =
+        "MSH|^~\\&|S|F||R|20260322||ADT^A01^ADT_A01|1|P|2.5.1\r" <>
+          "EVN|A01|20260322\r" <>
+          "PID|1\r" <>
+          "PV1|1|I\r"
+
+      assert {:error, errors} = HL7v2.parse(wire, mode: :typed, validate: true)
+      assert is_list(errors)
+      assert length(errors) > 0
+
+      locations = Enum.map(errors, & &1.field)
+      assert :patient_identifier_list in locations or :patient_name in locations
+    end
+
+    test "returns ok for valid typed message" do
+      wire =
+        "MSH|^~\\&|S|F||R|20260322||ADT^A01^ADT_A01|1|P|2.5.1\r" <>
+          "EVN|A01|20260322\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|I\r"
+
+      assert {:ok, %HL7v2.TypedMessage{}} = HL7v2.parse(wire, mode: :typed, validate: true)
+    end
+
+    test "validate: true is ignored for raw mode" do
+      wire = "MSH|^~\\&|S|F||R||20260322||ADT^A01|1|P|2.5\r"
+      assert {:ok, %HL7v2.RawMessage{}} = HL7v2.parse(wire, validate: true)
+    end
+  end
 end

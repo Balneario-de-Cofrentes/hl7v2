@@ -26,6 +26,45 @@ defmodule HL7v2.Message do
   alias HL7v2.Segment.ZXX
   alias HL7v2.Type.{HD, MSG, PT, VID, TS, DTM}
 
+  # HL7 v2.5.1 canonical message structure map.
+  # Many trigger events share the same abstract message definition.
+  # If a {code, event} pair is not listed, the structure defaults to "CODE_EVENT".
+  @canonical_structures %{
+    {"ADT", "A04"} => "ADT_A01",
+    {"ADT", "A08"} => "ADT_A01",
+    {"ADT", "A13"} => "ADT_A01",
+    {"ADT", "A05"} => "ADT_A05",
+    {"ADT", "A14"} => "ADT_A05",
+    {"ADT", "A28"} => "ADT_A05",
+    {"ADT", "A31"} => "ADT_A05",
+    {"ADT", "A06"} => "ADT_A06",
+    {"ADT", "A07"} => "ADT_A06",
+    {"ADT", "A09"} => "ADT_A09",
+    {"ADT", "A10"} => "ADT_A09",
+    {"ADT", "A11"} => "ADT_A09",
+    {"ADT", "A15"} => "ADT_A15",
+    {"ADT", "A16"} => "ADT_A16",
+    {"ADT", "A25"} => "ADT_A21",
+    {"ADT", "A26"} => "ADT_A21",
+    {"ADT", "A27"} => "ADT_A21",
+    {"ADT", "A21"} => "ADT_A21",
+    {"ADT", "A22"} => "ADT_A21",
+    {"ADT", "A23"} => "ADT_A21",
+    {"ADT", "A24"} => "ADT_A24",
+    {"ADT", "A37"} => "ADT_A37",
+    {"ADT", "A38"} => "ADT_A38",
+    {"ADT", "A39"} => "ADT_A39",
+    {"ADT", "A40"} => "ADT_A39",
+    {"ADT", "A41"} => "ADT_A39",
+    {"ADT", "A42"} => "ADT_A39",
+    {"SIU", "S13"} => "SIU_S12",
+    {"SIU", "S14"} => "SIU_S12",
+    {"SIU", "S15"} => "SIU_S12",
+    {"SIU", "S16"} => "SIU_S12",
+    {"SIU", "S17"} => "SIU_S12",
+    {"SIU", "S26"} => "SIU_S12"
+  }
+
   defstruct [:msh, segments: []]
 
   @type t :: %__MODULE__{
@@ -61,7 +100,7 @@ defmodule HL7v2.Message do
       message_type: %MSG{
         message_code: message_code,
         trigger_event: trigger_event,
-        message_structure: "#{message_code}_#{trigger_event}"
+        message_structure: canonical_structure(message_code, trigger_event)
       },
       message_control_id: opts[:message_control_id] || generate_control_id(),
       processing_id: %PT{processing_id: opts[:processing_id] || "P"},
@@ -174,6 +213,10 @@ defmodule HL7v2.Message do
     timestamp = :os.system_time(:microsecond) |> Integer.to_string()
     random = :crypto.strong_rand_bytes(4) |> Base.encode16(case: :lower)
     "#{timestamp}_#{random}"
+  end
+
+  defp canonical_structure(code, event) do
+    Map.get(@canonical_structures, {code, event}, "#{code}_#{event}")
   end
 
   defp extract_type(%MSH{message_type: %MSG{} = msg}) do

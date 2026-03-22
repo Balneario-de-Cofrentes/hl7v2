@@ -16,7 +16,7 @@ Then run `mix deps.get`.
 
 ## Parsing
 
-HL7v2 supports two parsing modes: **raw** (lossless, delimiter-based) and **typed** (validated structs with named fields).
+HL7v2 supports two parsing modes: **raw** (canonical round-trip, delimiter-based) and **typed** (structs with named fields).
 
 ### Raw mode
 

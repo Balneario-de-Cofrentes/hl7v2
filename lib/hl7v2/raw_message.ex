@@ -2,9 +2,11 @@ defmodule HL7v2.RawMessage do
   @moduledoc """
   Represents a parsed HL7v2 message in raw (lossless) form.
 
-  The raw message preserves every byte of the original message — no type coercion,
-  no validation, no data loss. This is the foundation for lossless round-tripping:
-  `parse(text) |> encode() == text`.
+  The raw message preserves the structure and content of the original message —
+  no type coercion, no validation, no data loss. Round-tripping is canonical:
+  line endings are normalized to CR and a trailing CR is always present, so
+  `parse(text) |> encode()` produces the canonical wire form, which may differ
+  from the input only in line-ending normalization.
 
   ## Structure
 
