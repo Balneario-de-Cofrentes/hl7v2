@@ -16,10 +16,16 @@ defmodule HL7v2 do
   ## Building
 
       msg =
-        HL7v2.Message.new("ADT", "A01", sending_application: "PHAOS")
+        HL7v2.new("ADT", "A01", sending_application: "PHAOS")
         |> HL7v2.Message.add_segment(%HL7v2.Segment.PID{...})
 
       text = HL7v2.encode(msg)
+
+  ## Acknowledgments
+
+      {:ok, typed} = HL7v2.parse(wire, mode: :typed)
+      msh = hd(typed.segments)
+      {ack_msh, msa} = HL7v2.ack(msh)
 
   ## MLLP Transport
 
@@ -27,7 +33,7 @@ defmodule HL7v2 do
 
   """
 
-  alias HL7v2.Parser
+  alias HL7v2.{Parser, Telemetry}
 
   @doc """
   Parses an HL7v2 message from a binary string.
@@ -45,26 +51,112 @@ defmodule HL7v2 do
   """
   @spec parse(binary(), keyword()) :: {:ok, term()} | {:error, term()}
   def parse(text, opts \\ []) do
-    Parser.parse(text, opts)
+    mode = Keyword.get(opts, :mode, :raw)
+
+    Telemetry.span(:parse, %{mode: mode}, fn ->
+      Parser.parse(text, opts)
+    end)
   end
 
   @doc """
   Encodes an HL7v2 message to wire format.
+
+  Accepts:
+
+  - `%HL7v2.RawMessage{}` — encodes directly
+  - `%HL7v2.Message{}` — converts to raw via `Message.encode/1`
+  - `%HL7v2.TypedMessage{}` — converts to raw via `TypedParser.to_raw/1`, then encodes
+
+  ## Examples
+
+      wire = HL7v2.encode(raw_message)
+      wire = HL7v2.encode(builder_message)
+      wire = HL7v2.encode(typed_message)
+
   """
-  @spec encode(term()) :: binary()
-  def encode(message) do
-    HL7v2.Encoder.encode(message)
+  @spec encode(HL7v2.RawMessage.t() | HL7v2.Message.t() | HL7v2.TypedMessage.t()) :: binary()
+  def encode(%HL7v2.RawMessage{} = message) do
+    Telemetry.span(:encode, %{type: :raw}, fn ->
+      HL7v2.Encoder.encode(message)
+    end)
+  end
+
+  def encode(%HL7v2.Message{} = message) do
+    Telemetry.span(:encode, %{type: :message}, fn ->
+      HL7v2.Message.encode(message)
+    end)
+  end
+
+  def encode(%HL7v2.TypedMessage{} = message) do
+    Telemetry.span(:encode, %{type: :typed}, fn ->
+      message
+      |> HL7v2.TypedParser.to_raw()
+      |> HL7v2.Encoder.encode()
+    end)
   end
 
   @doc """
-  Validates an HL7v2 message.
+  Validates an HL7v2 typed message.
 
-  Returns `:ok` or `{:error, [error]}`.
+  Returns `:ok` when all validation rules pass, or `{:error, errors}` with
+  a list of error/warning maps. Requires a `HL7v2.TypedMessage` -- raw messages
+  return `{:error, :not_a_typed_message}`.
 
-  Not yet implemented — will be available after Phase 6 (Validation Engine).
+  ## Examples
+
+      {:ok, msg} = HL7v2.parse(text, mode: :typed)
+      :ok = HL7v2.validate(msg)
+
   """
-  @spec validate(term()) :: :ok | {:error, [map()]}
+  @spec validate(term()) :: :ok | {:error, [map()] | :not_a_typed_message}
+  def validate(%HL7v2.TypedMessage{} = message) do
+    HL7v2.Validation.validate(message)
+  end
+
   def validate(_message) do
-    {:error, :not_implemented}
+    {:error, :not_a_typed_message}
+  end
+
+  @doc """
+  Builds a new HL7v2 message. Shortcut for `HL7v2.Message.new/3`.
+
+  ## Options
+
+    * `:sending_application` — string or `%HD{}`
+    * `:sending_facility` — string or `%HD{}`
+    * `:receiving_application` — string or `%HD{}`
+    * `:receiving_facility` — string or `%HD{}`
+    * `:message_control_id` — string (default: auto-generated)
+    * `:processing_id` — string (default: `"P"`)
+    * `:version_id` — string (default: `"2.5.1"`)
+
+  ## Examples
+
+      msg = HL7v2.new("ADT", "A01", sending_application: "PHAOS")
+
+  """
+  @spec new(binary(), binary(), keyword()) :: HL7v2.Message.t()
+  def new(code, event, opts \\ []) do
+    HL7v2.Message.new(code, event, opts)
+  end
+
+  @doc """
+  Builds an ACK (Application Accept) for the given MSH segment.
+
+  Shortcut for `HL7v2.Ack.accept/2`.
+
+  ## Options
+
+    * `:text` — optional text message for MSA-3
+    * `:message_control_id` — override the generated ACK message control ID
+
+  ## Examples
+
+      {ack_msh, msa} = HL7v2.ack(original_msh)
+
+  """
+  @spec ack(HL7v2.Segment.MSH.t(), keyword()) :: {HL7v2.Segment.MSH.t(), HL7v2.Segment.MSA.t()}
+  def ack(msh, opts \\ []) do
+    HL7v2.Ack.accept(msh, opts)
   end
 end
