@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.5 — 2026-03-22
+
+### Fixes
+
+- **fetch/2 component bounds** — `fetch(msg, "PID-5.99")` now returns
+  `{:error, :component_not_found}` instead of `{:ok, nil}` for out-of-range
+  component indices on typed fields
+- **MRG/RGS tests** — Added parse/encode/round-trip tests for both segments
+  (were at 0% coverage). Added SIU^S12 integration test with RGS.
+- **Parser docs** — Changed "preserves the original wire format exactly" to
+  "canonical round-trip fidelity" (line endings are normalized to CR)
+
 ## v0.5.4 — 2026-03-22
 
 ### Fixes

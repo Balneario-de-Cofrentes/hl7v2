@@ -351,7 +351,14 @@ defmodule HL7v2.Access do
     case Enum.find(fields, fn {seq, _, _, _, _} -> seq == field_seq end) do
       {_, field_name, _, _, max_reps} ->
         value = Map.get(segment, field_name)
-        {:ok, unwrap_and_select(value, max_reps, path)}
+        result = unwrap_and_select(value, max_reps, path)
+
+        # Distinguish nil-from-absent-data vs nil-from-out-of-range component
+        if result == nil and path.component != nil and value != nil do
+          {:error, :component_not_found}
+        else
+          {:ok, result}
+        end
 
       nil ->
         {:error, :field_not_found}

@@ -1,11 +1,13 @@
 defmodule HL7v2.Parser do
   @moduledoc """
-  Parses HL7v2 messages into raw (lossless) representation.
+  Parses HL7v2 messages into raw representation with canonical round-trip fidelity.
 
   The parser splits the message into segments, fields, repetitions, components,
   and sub-components using the delimiters declared in the MSH segment header.
-  No type coercion or validation is performed — the output preserves the original
-  wire format exactly.
+  No type coercion or validation is performed. Line endings are normalized to CR
+  and a trailing CR is always present, so `parse(text) |> encode()` produces the
+  canonical wire form (which may differ from the input only in line-ending
+  normalization).
 
   ## MSH-1/MSH-2 Special Handling
 
