@@ -37,7 +37,7 @@ defmodule HL7v2.Segment.ERRTest do
       assert result.severity == "E"
     end
 
-    test "parses raw fields (error_code_and_location, error_location)" do
+    test "parses error_code_and_location as raw and error_location as ERL" do
       error_location_data = [["PID", "1", "5"]]
 
       raw = [
@@ -50,7 +50,15 @@ defmodule HL7v2.Segment.ERRTest do
       result = ERR.parse(raw)
 
       assert result.error_code_and_location == "legacy_error_data"
-      assert result.error_location == error_location_data
+
+      assert [
+               %HL7v2.Type.ERL{
+                 segment_id: "PID",
+                 segment_sequence: "1",
+                 field_position: "5"
+               }
+             ] = result.error_location
+
       assert result.severity == "W"
     end
 

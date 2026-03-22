@@ -9,7 +9,7 @@ defmodule HL7v2.Segment.ERR do
     id: "ERR",
     fields: [
       {1, :error_code_and_location, :raw, :b, :unbounded},
-      {2, :error_location, :raw, :o, :unbounded},
+      {2, :error_location, HL7v2.Type.ERL, :o, :unbounded},
       {3, :hl7_error_code, HL7v2.Type.CWE, :r, 1},
       {4, :severity, HL7v2.Type.ID, :r, 1},
       {5, :application_error_code, HL7v2.Type.CWE, :o, 1},

@@ -27,7 +27,7 @@ defmodule HL7v2.Segment.PID do
       {17, :religion, HL7v2.Type.CE, :o, 1},
       {18, :patient_account_number, HL7v2.Type.CX, :o, 1},
       {19, :ssn_number, HL7v2.Type.ST, :b, 1},
-      {20, :drivers_license_number, :raw, :b, 1},
+      {20, :drivers_license_number, HL7v2.Type.DLN, :b, 1},
       {21, :mothers_identifier, HL7v2.Type.CX, :o, :unbounded},
       {22, :ethnic_group, HL7v2.Type.CE, :o, :unbounded},
       {23, :birth_place, HL7v2.Type.ST, :o, 1},

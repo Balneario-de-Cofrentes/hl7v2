@@ -22,7 +22,7 @@ defmodule HL7v2.Segment.IN1 do
       {11, :insureds_group_emp_name, HL7v2.Type.XON, :o, :unbounded},
       {12, :plan_effective_date, HL7v2.Type.DT, :o, 1},
       {13, :plan_expiration_date, HL7v2.Type.DT, :o, 1},
-      {14, :authorization_information, :raw, :o, 1},
+      {14, :authorization_information, HL7v2.Type.AUI, :o, 1},
       {15, :plan_type, HL7v2.Type.IS, :o, 1},
       {16, :name_of_insured, HL7v2.Type.XPN, :o, :unbounded},
       {17, :insureds_relationship_to_patient, HL7v2.Type.CE, :o, 1},

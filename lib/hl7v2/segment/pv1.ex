@@ -44,7 +44,7 @@ defmodule HL7v2.Segment.PV1 do
       {34, :delete_account_indicator, HL7v2.Type.IS, :o, 1},
       {35, :delete_account_date, HL7v2.Type.DT, :o, 1},
       {36, :discharge_disposition, HL7v2.Type.IS, :o, 1},
-      {37, :discharged_to_location, :raw, :o, 1},
+      {37, :discharged_to_location, HL7v2.Type.DLD, :o, 1},
       {38, :diet_type, HL7v2.Type.CE, :o, 1},
       {39, :servicing_facility, HL7v2.Type.IS, :o, 1},
       {40, :bed_status, HL7v2.Type.IS, :b, 1},
