@@ -173,7 +173,7 @@ end
               RGS MRG SFT PR1 DB1 ACC GT1 FT1)
               29 of ~136 standard segments + generic Z-segment pass-through
 
- Types       36 composite + 7 primitive + legacy TN (43 v2.5.1 types + 1 compat)
+ Types       40 composite + 8 primitive (48 v2.5.1 types including legacy TN)
 
  Messages    ADT (A01-A04, A08, A12) ORM^O01 ORU^R01 SIU^S12 ACK
               structural validation (order + groups + cardinality)
@@ -203,15 +203,15 @@ ADT/ORM/ORU/SIU/ACK subset with extra_fields preservation for unlisted fields.
 
 **What it does not do:**
 
-- Segment ordering or group/cardinality validation (segments out of order pass validation)
-- HL7 table value-set validation (any string accepted for coded fields)
+- Full abstract-message-definition validation (group nesting depth, alternatives)
 - Conditional field logic (fields marked `:c` are not evaluated)
-- Full message profile conformance (truncation character is supported; MSH-22+ is not)
+- Full message profile conformance (MSH-22+ not supported)
 - Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
   no whitespace normalization)
 
 **Coverage:** 29 of ~136 standard segments (plus generic ZXX) typed. 48 of ~84 v2.5.1
-data types. 20 of ~199 message structures with presence validation definitions. Extra
+data types. 20 group-aware message structure definitions with structural validation
+(ordering, cardinality, orphan detection). Opt-in table validation for 20 HL7 tables. Extra
 fields beyond declared definitions are preserved in `extra_fields` for lossless round-trip.
 OBX exposes 19 of 25 fields; OBR exposes 49 of 50 — unlisted fields survive as extra_fields.
 Some typed segment fields fall back to `:raw` where their HL7 data types (TQ, SPS, ELD) are
@@ -233,7 +233,7 @@ handles all of them without crashing or losing data:
 %HL7v2.Segment.ZXX{segment_id: "ZPD", raw_fields: ["custom", "data"]}
 
 # Unknown standard segments → raw tuples, lossless
-{"PR1", ["1", "I10", "99213", ...]}
+{"ROL", ["1", "AD", "CP", ...]}
 ```
 
 All three forms encode back to valid HL7 wire format. The typed API (`get/2`, `fetch/2`,

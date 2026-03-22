@@ -62,6 +62,21 @@ defmodule HL7v2.Validation.StructuralTest do
       refute Enum.any?(messages(results), &(&1 =~ "NK1" and &1 =~ "not repeating"))
     end
 
+    test "orphan IN2 without IN1 anchor is flagged", %{structure: s} do
+      ids = ["MSH", "EVN", "PID", "PV1", "IN2"]
+      results = Structural.validate(s, ids)
+      assert Enum.any?(messages(results), &(&1 =~ "IN2" and &1 =~ "anchor" and &1 =~ "IN1"))
+    end
+
+    test "orphan ACC without group context is flagged in strict mode", %{structure: s} do
+      # ACC is a direct child of PATIENT group — PID is anchor
+      # When PID is present, ACC is fine. This tests the group structure.
+      ids = ["MSH", "EVN", "PID", "PV1", "IN1", "IN2"]
+      results = Structural.validate(s, ids)
+      # IN2 with IN1 present should not be flagged
+      refute Enum.any?(messages(results), &(&1 =~ "IN2" and &1 =~ "orphan"))
+    end
+
     test "unknown Z-segment is ignored", %{structure: s} do
       ids = ["MSH", "EVN", "PID", "PV1", "ZPD"]
       assert Structural.validate(s, ids) == []

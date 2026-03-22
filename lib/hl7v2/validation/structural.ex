@@ -56,7 +56,10 @@ defmodule HL7v2.Validation.Structural do
     # Check 3: Cardinality (non-repeating segments appearing multiple times)
     cardinality_errors = check_cardinality(nodes, segment_ids, name, mode)
 
-    missing_errors ++ order_errors ++ cardinality_errors
+    # Check 4: Orphan detection — grouped segments without their anchor
+    orphan_errors = check_orphans(nodes, segment_ids, name, mode)
+
+    missing_errors ++ order_errors ++ cardinality_errors ++ orphan_errors
   end
 
   # --- Required segment presence ---
@@ -174,6 +177,97 @@ defmodule HL7v2.Validation.Structural do
       {:segment, id, _optionality} -> [id]
       {:group, _name, _, children} -> collect_non_repeating_segments(children)
       {:group, _name, _, :repeating, _children} -> []
+    end)
+    |> Enum.uniq()
+  end
+
+  # --- Orphan Detection ---
+  #
+  # For each group in the structure: if child segments appear in the message
+  # but the group's anchor (first segment in the group) is absent, those
+  # children are orphans.
+
+  defp check_orphans(nodes, segment_ids, structure_name, mode) do
+    segment_id_set = MapSet.new(segment_ids)
+
+    collect_groups(nodes)
+    |> Enum.flat_map(fn {group_name, anchor, children_ids} ->
+      anchor_present? = MapSet.member?(segment_id_set, Atom.to_string(anchor))
+
+      if anchor_present? do
+        []
+      else
+        # Check if any non-anchor children appear without the anchor
+        orphans =
+          children_ids
+          |> Enum.filter(&MapSet.member?(segment_id_set, Atom.to_string(&1)))
+
+        Enum.map(orphans, fn orphan_id ->
+          level = if mode == :strict, do: :error, else: :warning
+
+          %{
+            level: level,
+            location: structure_name,
+            field: nil,
+            message:
+              "Segment #{orphan_id} appears without group anchor #{anchor} " <>
+                "(expected in #{group_name} group)"
+          }
+        end)
+      end
+    end)
+  end
+
+  # Walk the AST to collect groups with their anchor segment and child segment IDs.
+  # The anchor is the first segment (required or optional) defined in the group.
+  defp collect_groups(nodes) do
+    Enum.flat_map(nodes, fn
+      {:group, name, _opt, children} ->
+        group_info(name, children) ++ collect_groups(children)
+
+      {:group, name, _opt, :repeating, children} ->
+        group_info(name, children) ++ collect_groups(children)
+
+      _ ->
+        []
+    end)
+  end
+
+  defp group_info(name, children) do
+    case find_anchor(children) do
+      nil ->
+        []
+
+      anchor ->
+        child_ids =
+          children
+          |> collect_all_segment_ids()
+          |> Enum.reject(&(&1 == anchor))
+
+        if child_ids == [] do
+          []
+        else
+          [{name, anchor, child_ids}]
+        end
+    end
+  end
+
+  # The anchor is the first REQUIRED direct segment child of the group.
+  # Optional-first segments (like ORC in ORDER_OBSERVATION) are not anchors.
+  # If no required direct segment exists, orphan detection is skipped.
+  defp find_anchor([{:segment, id, :required} | _]), do: id
+  defp find_anchor([{:segment, id, :required, :repeating} | _]), do: id
+  defp find_anchor([{:segment, _, :optional} | rest]), do: find_anchor(rest)
+  defp find_anchor([{:segment, _, :optional, :repeating} | rest]), do: find_anchor(rest)
+  defp find_anchor(_), do: nil
+
+  # Collect all segment IDs from a node list (flattened)
+  defp collect_all_segment_ids(nodes) do
+    Enum.flat_map(nodes, fn
+      {:segment, id, _} -> [id]
+      {:segment, id, _, :repeating} -> [id]
+      {:group, _, _, children} -> collect_all_segment_ids(children)
+      {:group, _, _, :repeating, children} -> collect_all_segment_ids(children)
     end)
     |> Enum.uniq()
   end
