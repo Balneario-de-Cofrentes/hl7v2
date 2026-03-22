@@ -1,0 +1,61 @@
+defmodule HL7v2.Segment.PV2 do
+  @moduledoc """
+  Patient Visit — Additional Information (PV2) segment — HL7v2 v2.5.1.
+
+  Extended visit/encounter information. 49 fields per HL7 v2.5.1 specification.
+  """
+
+  use HL7v2.Segment,
+    id: "PV2",
+    fields: [
+      {1, :prior_pending_location, HL7v2.Type.PL, :c, 1},
+      {2, :accommodation_code, HL7v2.Type.CE, :o, 1},
+      {3, :admit_reason, HL7v2.Type.CE, :o, 1},
+      {4, :transfer_reason, HL7v2.Type.CE, :o, 1},
+      {5, :patient_valuables, HL7v2.Type.ST, :o, :unbounded},
+      {6, :patient_valuables_location, HL7v2.Type.ST, :o, 1},
+      {7, :visit_user_code, HL7v2.Type.IS, :o, :unbounded},
+      {8, :expected_admit_date_time, HL7v2.Type.TS, :o, 1},
+      {9, :expected_discharge_date_time, HL7v2.Type.TS, :o, 1},
+      {10, :estimated_length_of_inpatient_stay, HL7v2.Type.NM, :o, 1},
+      {11, :actual_length_of_inpatient_stay, HL7v2.Type.NM, :o, 1},
+      {12, :visit_description, HL7v2.Type.ST, :o, 1},
+      {13, :referral_source_code, :raw, :o, :unbounded},
+      {14, :previous_service_date, HL7v2.Type.DT, :o, 1},
+      {15, :employment_illness_related_indicator, HL7v2.Type.ID, :o, 1},
+      {16, :purge_status_code, HL7v2.Type.IS, :o, 1},
+      {17, :purge_status_date, HL7v2.Type.DT, :o, 1},
+      {18, :special_program_code, HL7v2.Type.IS, :o, 1},
+      {19, :retention_indicator, HL7v2.Type.ID, :o, 1},
+      {20, :expected_number_of_insurance_plans, HL7v2.Type.NM, :o, 1},
+      {21, :visit_publicity_code, HL7v2.Type.IS, :o, 1},
+      {22, :visit_protection_indicator, HL7v2.Type.ID, :o, 1},
+      {23, :clinic_organization_name, HL7v2.Type.XON, :o, :unbounded},
+      {24, :patient_status_code, HL7v2.Type.IS, :o, 1},
+      {25, :visit_priority_code, HL7v2.Type.IS, :o, 1},
+      {26, :previous_treatment_date, HL7v2.Type.DT, :o, 1},
+      {27, :expected_discharge_disposition, HL7v2.Type.IS, :o, 1},
+      {28, :signature_on_file_date, HL7v2.Type.DT, :o, 1},
+      {29, :first_similar_illness_date, HL7v2.Type.DT, :o, 1},
+      {30, :patient_charge_adjustment_code, HL7v2.Type.CE, :o, 1},
+      {31, :recurring_service_code, HL7v2.Type.IS, :o, 1},
+      {32, :billing_media_code, HL7v2.Type.ID, :o, 1},
+      {33, :expected_surgery_date_and_time, HL7v2.Type.TS, :o, 1},
+      {34, :military_partnership_code, HL7v2.Type.ID, :o, 1},
+      {35, :military_non_availability_code, HL7v2.Type.ID, :o, 1},
+      {36, :newborn_baby_indicator, HL7v2.Type.ID, :o, 1},
+      {37, :baby_detained_indicator, HL7v2.Type.ID, :o, 1},
+      {38, :mode_of_arrival_code, HL7v2.Type.CE, :o, 1},
+      {39, :recreational_drug_use_code, HL7v2.Type.CE, :o, :unbounded},
+      {40, :admission_level_of_care_code, HL7v2.Type.CE, :o, 1},
+      {41, :precaution_code, HL7v2.Type.CE, :o, :unbounded},
+      {42, :patient_condition_code, HL7v2.Type.CE, :o, 1},
+      {43, :living_will_code, HL7v2.Type.IS, :o, 1},
+      {44, :organ_donor_code, HL7v2.Type.IS, :o, 1},
+      {45, :advance_directive_code, HL7v2.Type.CE, :o, :unbounded},
+      {46, :patient_status_effective_date, HL7v2.Type.DT, :o, 1},
+      {47, :expected_loa_return_date_time, HL7v2.Type.TS, :o, 1},
+      {48, :expected_pre_admission_testing_date_time, HL7v2.Type.TS, :o, 1},
+      {49, :notify_clergy_code, HL7v2.Type.IS, :o, :unbounded}
+    ]
+end

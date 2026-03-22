@@ -1,0 +1,68 @@
+defmodule HL7v2.Segment.GT1 do
+  @moduledoc """
+  Guarantor (GT1) segment — HL7v2 v2.5.1.
+
+  Contains guarantor (financially responsible party) information.
+  55 fields per HL7 v2.5.1 specification.
+  """
+
+  use HL7v2.Segment,
+    id: "GT1",
+    fields: [
+      {1, :set_id, HL7v2.Type.SI, :r, 1},
+      {2, :guarantor_number, HL7v2.Type.CX, :o, :unbounded},
+      {3, :guarantor_name, HL7v2.Type.XPN, :r, :unbounded},
+      {4, :guarantor_spouse_name, HL7v2.Type.XPN, :o, :unbounded},
+      {5, :guarantor_address, HL7v2.Type.XAD, :o, :unbounded},
+      {6, :guarantor_ph_num_home, HL7v2.Type.XTN, :o, :unbounded},
+      {7, :guarantor_ph_num_business, HL7v2.Type.XTN, :o, :unbounded},
+      {8, :guarantor_date_time_of_birth, HL7v2.Type.TS, :o, 1},
+      {9, :guarantor_administrative_sex, HL7v2.Type.IS, :o, 1},
+      {10, :guarantor_type, HL7v2.Type.IS, :o, 1},
+      {11, :guarantor_relationship, HL7v2.Type.CE, :o, 1},
+      {12, :guarantor_ssn, HL7v2.Type.ST, :o, 1},
+      {13, :guarantor_date_begin, HL7v2.Type.DT, :o, 1},
+      {14, :guarantor_date_end, HL7v2.Type.DT, :o, 1},
+      {15, :guarantor_priority, HL7v2.Type.NM, :o, 1},
+      {16, :guarantor_employer_name, HL7v2.Type.XPN, :o, :unbounded},
+      {17, :guarantor_employer_address, HL7v2.Type.XAD, :o, :unbounded},
+      {18, :guarantor_employer_phone_number, HL7v2.Type.XTN, :o, :unbounded},
+      {19, :guarantor_employee_id_number, HL7v2.Type.CX, :o, :unbounded},
+      {20, :guarantor_employment_status, HL7v2.Type.IS, :o, 1},
+      {21, :guarantor_organization_name, HL7v2.Type.XON, :o, :unbounded},
+      {22, :guarantor_billing_hold_flag, HL7v2.Type.ID, :o, 1},
+      {23, :guarantor_credit_rating_code, HL7v2.Type.CE, :o, 1},
+      {24, :guarantor_death_date_and_time, HL7v2.Type.TS, :o, 1},
+      {25, :guarantor_death_flag, HL7v2.Type.ID, :o, 1},
+      {26, :guarantor_charge_adjustment_code, HL7v2.Type.CE, :o, 1},
+      {27, :guarantor_household_annual_income, :raw, :o, 1},
+      {28, :guarantor_household_size, HL7v2.Type.NM, :o, 1},
+      {29, :guarantor_employer_id_number, HL7v2.Type.CX, :o, :unbounded},
+      {30, :guarantor_marital_status_code, HL7v2.Type.CE, :o, 1},
+      {31, :guarantor_hire_effective_date, HL7v2.Type.DT, :o, 1},
+      {32, :employment_stop_date, HL7v2.Type.DT, :o, 1},
+      {33, :living_dependency, HL7v2.Type.IS, :o, 1},
+      {34, :ambulatory_status, HL7v2.Type.IS, :o, :unbounded},
+      {35, :citizenship, HL7v2.Type.CE, :o, :unbounded},
+      {36, :primary_language, HL7v2.Type.CE, :o, 1},
+      {37, :living_arrangement, HL7v2.Type.IS, :o, 1},
+      {38, :publicity_code, HL7v2.Type.CE, :o, 1},
+      {39, :protection_indicator, HL7v2.Type.ID, :o, 1},
+      {40, :student_indicator, HL7v2.Type.IS, :o, 1},
+      {41, :religion, HL7v2.Type.CE, :o, 1},
+      {42, :mothers_maiden_name, HL7v2.Type.XPN, :o, :unbounded},
+      {43, :nationality, HL7v2.Type.CE, :o, 1},
+      {44, :ethnic_group, HL7v2.Type.CE, :o, :unbounded},
+      {45, :contact_persons_name, HL7v2.Type.XPN, :o, :unbounded},
+      {46, :contact_persons_telephone_number, HL7v2.Type.XTN, :o, :unbounded},
+      {47, :contact_reason, HL7v2.Type.CE, :o, 1},
+      {48, :contact_relationship, HL7v2.Type.IS, :o, 1},
+      {49, :job_title, HL7v2.Type.ST, :o, 1},
+      {50, :job_code_class, :raw, :o, 1},
+      {51, :guarantor_employers_organization_name, HL7v2.Type.XON, :o, :unbounded},
+      {52, :handicap, HL7v2.Type.IS, :o, 1},
+      {53, :job_status, HL7v2.Type.IS, :o, 1},
+      {54, :guarantor_financial_class, :raw, :o, 1},
+      {55, :guarantor_race, HL7v2.Type.CE, :o, :unbounded}
+    ]
+end

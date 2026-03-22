@@ -1,0 +1,66 @@
+defmodule HL7v2.Segment.IN1 do
+  @moduledoc """
+  Insurance (IN1) segment — HL7v2 v2.5.1.
+
+  Contains insurance coverage information.
+  53 fields per HL7 v2.5.1 specification.
+  """
+
+  use HL7v2.Segment,
+    id: "IN1",
+    fields: [
+      {1, :set_id, HL7v2.Type.SI, :r, 1},
+      {2, :insurance_plan_id, HL7v2.Type.CE, :r, 1},
+      {3, :insurance_company_id, HL7v2.Type.CX, :r, :unbounded},
+      {4, :insurance_company_name, HL7v2.Type.XON, :o, :unbounded},
+      {5, :insurance_company_address, HL7v2.Type.XAD, :o, :unbounded},
+      {6, :insurance_co_contact_person, HL7v2.Type.XPN, :o, :unbounded},
+      {7, :insurance_co_phone_number, HL7v2.Type.XTN, :o, :unbounded},
+      {8, :group_number, HL7v2.Type.ST, :o, 1},
+      {9, :group_name, HL7v2.Type.XON, :o, :unbounded},
+      {10, :insureds_group_emp_id, HL7v2.Type.CX, :o, :unbounded},
+      {11, :insureds_group_emp_name, HL7v2.Type.XON, :o, :unbounded},
+      {12, :plan_effective_date, HL7v2.Type.DT, :o, 1},
+      {13, :plan_expiration_date, HL7v2.Type.DT, :o, 1},
+      {14, :authorization_information, :raw, :o, 1},
+      {15, :plan_type, HL7v2.Type.IS, :o, 1},
+      {16, :name_of_insured, HL7v2.Type.XPN, :o, :unbounded},
+      {17, :insureds_relationship_to_patient, HL7v2.Type.CE, :o, 1},
+      {18, :insureds_date_of_birth, HL7v2.Type.TS, :o, 1},
+      {19, :insureds_address, HL7v2.Type.XAD, :o, :unbounded},
+      {20, :assignment_of_benefits, HL7v2.Type.IS, :o, 1},
+      {21, :coordination_of_benefits, HL7v2.Type.IS, :o, 1},
+      {22, :coord_of_ben_priority, HL7v2.Type.ST, :o, 1},
+      {23, :notice_of_admission_flag, HL7v2.Type.ID, :o, 1},
+      {24, :notice_of_admission_date, HL7v2.Type.DT, :o, 1},
+      {25, :report_of_eligibility_flag, HL7v2.Type.ID, :o, 1},
+      {26, :report_of_eligibility_date, HL7v2.Type.DT, :o, 1},
+      {27, :release_information_code, HL7v2.Type.IS, :o, 1},
+      {28, :pre_admit_cert, HL7v2.Type.ST, :o, 1},
+      {29, :verification_date_time, HL7v2.Type.TS, :o, 1},
+      {30, :verification_by, :raw, :o, :unbounded},
+      {31, :type_of_agreement_code, HL7v2.Type.IS, :o, 1},
+      {32, :billing_status, HL7v2.Type.IS, :o, 1},
+      {33, :lifetime_reserve_days, HL7v2.Type.NM, :o, 1},
+      {34, :delay_before_lr_day, HL7v2.Type.NM, :o, 1},
+      {35, :company_plan_code, HL7v2.Type.IS, :o, 1},
+      {36, :policy_number, HL7v2.Type.ST, :o, 1},
+      {37, :policy_deductible, :raw, :o, 1},
+      {38, :policy_limit_amount, :raw, :b, 1},
+      {39, :policy_limit_days, HL7v2.Type.NM, :o, 1},
+      {40, :room_rate_semi_private, :raw, :b, 1},
+      {41, :room_rate_private, :raw, :b, 1},
+      {42, :insureds_employment_status, HL7v2.Type.CE, :o, 1},
+      {43, :insureds_administrative_sex, HL7v2.Type.IS, :o, 1},
+      {44, :insureds_employers_address, HL7v2.Type.XAD, :o, :unbounded},
+      {45, :verification_status, HL7v2.Type.ST, :o, 1},
+      {46, :prior_insurance_plan_id, HL7v2.Type.IS, :o, 1},
+      {47, :coverage_type, HL7v2.Type.IS, :o, 1},
+      {48, :handicap, HL7v2.Type.IS, :o, 1},
+      {49, :insureds_id_number, HL7v2.Type.CX, :o, :unbounded},
+      {50, :signature_code, HL7v2.Type.IS, :o, 1},
+      {51, :signature_code_date, HL7v2.Type.DT, :o, 1},
+      {52, :insureds_birth_place, HL7v2.Type.ST, :o, 1},
+      {53, :vip_indicator, HL7v2.Type.IS, :o, 1}
+    ]
+end
