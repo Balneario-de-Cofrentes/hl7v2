@@ -213,9 +213,10 @@ defmodule HL7v2.ValidationTest do
         ]
       }
 
-      # May have structure warning for unknown TST_Z01, but no field errors from ZXX
+      # Structure warning for unknown TST_Z01, but no field errors from ZXX
       case Validation.validate(msg) do
         :ok -> :ok
+        {:ok, warnings} -> assert Enum.all?(warnings, &(&1.level == :warning))
         {:error, errors} -> refute Enum.any?(errors, &(&1.level == :error))
       end
     end
@@ -233,9 +234,10 @@ defmodule HL7v2.ValidationTest do
         ]
       }
 
-      # May have structure warning for unknown TST_Z01, but no field errors from raw tuple
+      # Structure warning for unknown TST_Z01, but no field errors from raw tuple
       case Validation.validate(msg) do
         :ok -> :ok
+        {:ok, warnings} -> assert Enum.all?(warnings, &(&1.level == :warning))
         {:error, errors} -> refute Enum.any?(errors, &(&1.level == :error))
       end
     end

@@ -62,6 +62,7 @@ defmodule HL7v2 do
         if validate? and mode == :typed do
           case HL7v2.Validation.validate(msg) do
             :ok -> {:ok, msg}
+            {:ok, _warnings} -> {:ok, msg}
             {:error, _} = err -> err
           end
         else
@@ -121,7 +122,7 @@ defmodule HL7v2 do
       :ok = HL7v2.validate(msg)
 
   """
-  @spec validate(term()) :: :ok | {:error, [map()] | :not_a_typed_message}
+  @spec validate(term()) :: :ok | {:ok, [map()]} | {:error, [map()] | :not_a_typed_message}
   def validate(%HL7v2.TypedMessage{} = message) do
     HL7v2.Validation.validate(message)
   end

@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.4 — 2026-03-22
+
+### Fixes
+
+- **Validation return shape** — `validate/1` now returns `{:ok, warnings}` when only
+  warnings are present, instead of treating warnings as errors. Warnings-only results
+  no longer block `parse(..., validate: true)`.
+- **Install snippet** — README updated from `~> 0.1` to `~> 0.5`
+- **Segment count** — README now says "21 standard segments + generic ZXX" (was counting
+  ZXX as a standard segment)
+- **Raw tuple access** — README now documents that component/repetition selectors are not
+  applied to raw tuples (only typed segments get full descent)
+- **Segment reference** — docs/reference/segments.md now says "13 of 21" segments
+  documented (was claiming all 22)
+
 ## v0.5.3 — 2026-03-22
 
 ### Additions

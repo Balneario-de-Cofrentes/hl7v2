@@ -56,7 +56,7 @@ msg = HL7v2.Message.new("ADT", "A01", sending_application: "PHAOS")
 
 ```elixir
 def deps do
-  [{:hl7v2, "~> 0.1"}]
+  [{:hl7v2, "~> 0.5"}]
 end
 ```
 
@@ -168,9 +168,9 @@ end
 ## Coverage
 
 ```
- Segments    22 typed structs (MSH EVN PID PV1 PV2 NK1 OBR OBX ORC
-              MSA ERR NTE AL1 DG1 IN1 SCH AIS RGS MRG GT1 FT1 ZXX)
-              22 of ~151 standard segments + generic Z-segment
+ Segments    21 standard + generic ZXX (MSH EVN PID PV1 PV2 NK1 OBR
+              OBX ORC MSA ERR NTE AL1 DG1 IN1 SCH AIS RGS MRG GT1 FT1)
+              21 of ~151 standard segments + generic Z-segment pass-through
 
  Types       36 composite + 8 primitive (44 of ~89 standard types)
 
@@ -204,7 +204,7 @@ ADT/ORM/ORU/SIU/ACK subset with extra_fields preservation for unlisted fields.
 - Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
   no whitespace normalization)
 
-**Coverage:** 22 of ~151 standard segments (plus generic ZXX) typed. 44 of ~89 standard
+**Coverage:** 21 of ~151 standard segments (plus generic ZXX) typed. 44 of ~89 standard
 data types. 20 of ~199 message structures with presence validation definitions. Extra
 fields beyond declared definitions are preserved in `extra_fields` for lossless round-trip.
 OBX exposes 19 of 25 fields; OBR exposes 49 of 50 — unlisted fields survive as extra_fields.
@@ -231,8 +231,9 @@ handles all of them without crashing or losing data:
 ```
 
 All three forms encode back to valid HL7 wire format. The typed API (`get/2`, `fetch/2`,
-`~h` sigil) works across all forms — typed segments return struct fields, raw tuples
-return fields by position.
+`~h` sigil) works across all forms — typed segments return struct fields with component
+and repetition selection, raw tuples return whole fields by position (component/repetition
+selectors are not applied to raw tuples).
 
 This means you can parse any HL7 message from any source, work with the segments you
 understand, and forward the rest unchanged. No schema registration required.

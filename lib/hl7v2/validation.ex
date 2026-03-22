@@ -23,8 +23,8 @@ defmodule HL7v2.Validation do
   @doc """
   Validates a typed message.
 
-  Returns `:ok` when no errors are found, or `{:error, errors}` with a list
-  of error/warning maps.
+  Returns `:ok` when no issues are found, `{:ok, warnings}` when only
+  warnings are present (non-fatal), or `{:error, errors}` when errors exist.
 
   Runs three validation passes:
   1. **Message rules** — MSH presence, required MSH fields
@@ -39,16 +39,20 @@ defmodule HL7v2.Validation do
   - `:field` — field name atom or `nil` for structural issues
   - `:message` — human-readable description
   """
-  @spec validate(TypedMessage.t()) :: :ok | {:error, [map()]}
+  @spec validate(TypedMessage.t()) :: :ok | {:error, [map()]} | {:ok, [map()]}
   def validate(%TypedMessage{} = msg) do
-    errors =
+    all =
       MessageRules.check(msg) ++
         structure_errors(msg) ++
         Enum.flat_map(msg.segments, &FieldRules.check/1)
 
-    case errors do
-      [] -> :ok
-      errors -> {:error, errors}
+    errors = Enum.filter(all, &(&1.level == :error))
+    warnings = Enum.filter(all, &(&1.level == :warning))
+
+    case {errors, warnings} do
+      {[], []} -> :ok
+      {[], warnings} -> {:ok, warnings}
+      {errors, warnings} -> {:error, errors ++ warnings}
     end
   end
 

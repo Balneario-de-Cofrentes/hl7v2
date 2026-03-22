@@ -1,6 +1,6 @@
 # HL7 v2.5.1 Segment Definitions Reference
 
-Complete field-by-field definitions for the 22 HL7 v2.5.1 segments used in Phaos
+Field-by-field definitions for 13 of the 21 standard HL7 v2.5.1 segments implemented in
 HL7v2 integration. Source: HL7 v2.5.1 standard via Caristix HL7-Definition.
 
 **Usage codes:** R = Required, O = Optional, C = Conditional, B = Backward compatible (retained for backward compatibility), W = Withdrawn, X = Not used
