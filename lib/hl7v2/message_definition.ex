@@ -380,24 +380,47 @@ defmodule HL7v2.MessageDefinition do
   def validate_structure("", _segment_ids), do: :ok
 
   def validate_structure(structure, segment_ids) do
-    case get(structure) do
-      nil ->
-        {:error,
-         [
-           %{
-             level: :warning,
-             location: "message",
-             message:
-               "message structure #{structure} has no validation definition — structure not checked"
-           }
-         ]}
+    # Prefer group-aware structure definitions from MessageStructure
+    case HL7v2.Standard.MessageStructure.get(structure) do
+      %{} = struct_def ->
+        required = HL7v2.Standard.MessageStructure.required_segments(struct_def)
+        missing = Enum.reject(required, &(Atom.to_string(&1) in segment_ids))
 
-      definition ->
-        case check_required_segments(definition.segments, segment_ids) do
+        case missing do
           [] -> :ok
-          errors -> {:error, errors}
+          segs -> {:error, Enum.map(segs, &missing_segment_error/1)}
+        end
+
+      nil ->
+        # Fall back to legacy flat definitions
+        case get(structure) do
+          nil ->
+            {:error,
+             [
+               %{
+                 level: :warning,
+                 location: "message",
+                 message:
+                   "message structure #{structure} has no validation definition — structure not checked"
+               }
+             ]}
+
+          definition ->
+            case check_required_segments(definition.segments, segment_ids) do
+              [] -> :ok
+              errors -> {:error, errors}
+            end
         end
     end
+  end
+
+  defp missing_segment_error(seg) do
+    %{
+      level: :error,
+      location: "message",
+      field: nil,
+      message: "Required segment #{seg} is missing"
+    }
   end
 
   defp check_required_segments(rules, segment_ids) do
