@@ -29,10 +29,10 @@ defmodule HL7v2.Type.ERL do
 
   @type t :: %__MODULE__{
           segment_id: binary() | nil,
-          segment_sequence: binary() | nil,
-          field_position: binary() | nil,
-          component_number: binary() | nil,
-          sub_component_number: binary() | nil,
+          segment_sequence: NM.t() | nil,
+          field_position: NM.t() | nil,
+          component_number: NM.t() | nil,
+          sub_component_number: NM.t() | nil,
           source_table: binary() | nil
         }
 
@@ -42,10 +42,10 @@ defmodule HL7v2.Type.ERL do
   ## Examples
 
       iex> HL7v2.Type.ERL.parse(["PID", "1", "5", "2", "1", "HL70001"])
-      %HL7v2.Type.ERL{segment_id: "PID", segment_sequence: "1", field_position: "5", component_number: "2", sub_component_number: "1", source_table: "HL70001"}
+      %HL7v2.Type.ERL{segment_id: "PID", segment_sequence: %HL7v2.Type.NM{value: "1", original: "1"}, field_position: %HL7v2.Type.NM{value: "5", original: "5"}, component_number: %HL7v2.Type.NM{value: "2", original: "2"}, sub_component_number: %HL7v2.Type.NM{value: "1", original: "1"}, source_table: "HL70001"}
 
       iex> HL7v2.Type.ERL.parse(["PID", "1", "5"])
-      %HL7v2.Type.ERL{segment_id: "PID", segment_sequence: "1", field_position: "5"}
+      %HL7v2.Type.ERL{segment_id: "PID", segment_sequence: %HL7v2.Type.NM{value: "1", original: "1"}, field_position: %HL7v2.Type.NM{value: "5", original: "5"}}
 
       iex> HL7v2.Type.ERL.parse([])
       %HL7v2.Type.ERL{}

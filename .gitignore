@@ -21,3 +21,7 @@ hl7v2-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# AI tooling state
+/.claude/
+/.superset/

@@ -58,7 +58,7 @@ defmodule HL7v2.Segment.AISTest do
 
       result = AIS.parse(raw)
 
-      assert result.duration == "30"
+      assert %HL7v2.Type.NM{value: "30", original: "30"} = result.duration
     end
 
     test "parses duration_units as CE" do

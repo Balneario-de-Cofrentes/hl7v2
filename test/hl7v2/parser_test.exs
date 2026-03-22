@@ -241,6 +241,21 @@ defmodule HL7v2.ParserTest do
       assert {:error, :insufficient_encoding_characters} = Parser.parse("MSH|^~\r")
     end
 
+    test "returns error for 3-char MSH-2 (field separator in encoding position)" do
+      msg = "MSH|^~\\|SEND|FAC||RCV||20240101||ADT^A01|123|P|2.5\r"
+      assert {:error, :invalid_encoding_characters} = Parser.parse(msg)
+    end
+
+    test "returns error for overlong MSH-2 (6+ encoding characters)" do
+      msg = "MSH|^~\\&XY|SEND|FAC||RCV||20240101||ADT^A01|123|P|2.5\r"
+      assert {:error, :invalid_encoding_characters} = Parser.parse(msg)
+    end
+
+    test "returns error for duplicate delimiters in MSH-2" do
+      msg = "MSH|^^^^|SEND|FAC||RCV||20240101||ADT^A01|123|P|2.5\r"
+      assert {:error, :duplicate_delimiters} = Parser.parse(msg)
+    end
+
     test "returns error for unknown mode" do
       msg = "MSH|^~\\&|S|F||R|20240101||ADT^A01|1|P|2.5\r"
       assert {:error, {:unknown_mode, :invalid}} = Parser.parse(msg, mode: :invalid)

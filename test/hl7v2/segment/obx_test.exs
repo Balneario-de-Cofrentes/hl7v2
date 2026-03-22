@@ -36,8 +36,8 @@ defmodule HL7v2.Segment.OBXTest do
       assert %CE{identifier: "8480-6", text: "Systolic BP", name_of_coding_system: "LN"} =
                result.observation_identifier
 
-      # NM type normalizes numeric strings
-      assert result.observation_value == "120"
+      # NM type returns struct preserving original wire value
+      assert %HL7v2.Type.NM{value: "120", original: "120"} = result.observation_value
       assert result.observation_result_status == "F"
     end
 

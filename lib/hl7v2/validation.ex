@@ -66,9 +66,10 @@ defmodule HL7v2.Validation do
 
   defp extract_message_structure(_), do: nil
 
-  # When MSH-9.3 is absent, infer from message_code + trigger_event (e.g., "ADT" + "A01" -> "ADT_A01")
+  # When MSH-9.3 is absent, infer from message_code + trigger_event using canonical
+  # structure resolution (e.g., "ADT" + "A28" -> "ADT_A05", not "ADT_A28").
   defp infer_structure(code, event) when is_binary(code) and is_binary(event),
-    do: "#{code}_#{event}"
+    do: MessageDefinition.canonical_structure(code, event)
 
   defp infer_structure(code, _event) when is_binary(code), do: code
   defp infer_structure(_code, _event), do: nil

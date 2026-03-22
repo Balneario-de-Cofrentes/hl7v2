@@ -19,6 +19,45 @@ defmodule HL7v2.MessageDefinition do
           segments: [segment_rule()]
         }
 
+  # HL7 v2.5.1 canonical message structure map.
+  # Many trigger events share the same abstract message definition.
+  # If a {code, event} pair is not listed, the structure defaults to "CODE_EVENT".
+  @canonical_structures %{
+    {"ADT", "A04"} => "ADT_A01",
+    {"ADT", "A08"} => "ADT_A01",
+    {"ADT", "A13"} => "ADT_A01",
+    {"ADT", "A05"} => "ADT_A05",
+    {"ADT", "A14"} => "ADT_A05",
+    {"ADT", "A28"} => "ADT_A05",
+    {"ADT", "A31"} => "ADT_A05",
+    {"ADT", "A06"} => "ADT_A06",
+    {"ADT", "A07"} => "ADT_A06",
+    {"ADT", "A09"} => "ADT_A09",
+    {"ADT", "A10"} => "ADT_A09",
+    {"ADT", "A11"} => "ADT_A09",
+    {"ADT", "A15"} => "ADT_A15",
+    {"ADT", "A16"} => "ADT_A16",
+    {"ADT", "A25"} => "ADT_A21",
+    {"ADT", "A26"} => "ADT_A21",
+    {"ADT", "A27"} => "ADT_A21",
+    {"ADT", "A21"} => "ADT_A21",
+    {"ADT", "A22"} => "ADT_A21",
+    {"ADT", "A23"} => "ADT_A21",
+    {"ADT", "A24"} => "ADT_A24",
+    {"ADT", "A37"} => "ADT_A37",
+    {"ADT", "A38"} => "ADT_A38",
+    {"ADT", "A39"} => "ADT_A39",
+    {"ADT", "A40"} => "ADT_A39",
+    {"ADT", "A41"} => "ADT_A39",
+    {"ADT", "A42"} => "ADT_A39",
+    {"SIU", "S13"} => "SIU_S12",
+    {"SIU", "S14"} => "SIU_S12",
+    {"SIU", "S15"} => "SIU_S12",
+    {"SIU", "S16"} => "SIU_S12",
+    {"SIU", "S17"} => "SIU_S12",
+    {"SIU", "S26"} => "SIU_S12"
+  }
+
   @adt_admit_segments [
     {:MSH, :required, :once},
     {:EVN, :required, :once},
@@ -30,6 +69,41 @@ defmodule HL7v2.MessageDefinition do
     {:DG1, :optional, :repeating},
     {:GT1, :optional, :repeating},
     {:IN1, :optional, :repeating},
+    {:NTE, :optional, :repeating}
+  ]
+
+  # ADT_A05: Pre-admit a Patient (also A14 pending admit, A28 add person, A31 update person)
+  @adt_preadmit_segments [
+    {:MSH, :required, :once},
+    {:EVN, :required, :once},
+    {:PID, :required, :once},
+    {:PV1, :required, :once},
+    {:PV2, :optional, :once},
+    {:NK1, :optional, :repeating},
+    {:AL1, :optional, :repeating},
+    {:DG1, :optional, :repeating},
+    {:GT1, :optional, :repeating},
+    {:IN1, :optional, :repeating},
+    {:NTE, :optional, :repeating}
+  ]
+
+  # ADT_A09: Patient departing/tracking (also A10, A11)
+  @adt_tracking_segments [
+    {:MSH, :required, :once},
+    {:EVN, :required, :once},
+    {:PID, :required, :once},
+    {:PV1, :required, :once},
+    {:PV2, :optional, :once},
+    {:NTE, :optional, :repeating}
+  ]
+
+  # ADT_A21: Patient goes on leave of absence (also A22-A27)
+  @adt_leave_segments [
+    {:MSH, :required, :once},
+    {:EVN, :required, :once},
+    {:PID, :required, :once},
+    {:PV1, :required, :once},
+    {:PV2, :optional, :once},
     {:NTE, :optional, :repeating}
   ]
 
@@ -69,10 +143,115 @@ defmodule HL7v2.MessageDefinition do
       description: "Register a Patient",
       segments: @adt_admit_segments
     },
+    "ADT_A05" => %{
+      name: "ADT_A05",
+      description: "Pre-admit a Patient",
+      segments: @adt_preadmit_segments
+    },
+    "ADT_A06" => %{
+      name: "ADT_A06",
+      description: "Change an Outpatient to an Inpatient",
+      segments: [
+        {:MSH, :required, :once},
+        {:EVN, :required, :once},
+        {:PID, :required, :once},
+        {:PV1, :required, :once},
+        {:PV2, :optional, :once},
+        {:MRG, :optional, :once},
+        {:NK1, :optional, :repeating},
+        {:AL1, :optional, :repeating},
+        {:DG1, :optional, :repeating},
+        {:GT1, :optional, :repeating},
+        {:IN1, :optional, :repeating},
+        {:NTE, :optional, :repeating}
+      ]
+    },
     "ADT_A08" => %{
       name: "ADT_A08",
       description: "Update Patient Information",
       segments: @adt_admit_segments
+    },
+    "ADT_A09" => %{
+      name: "ADT_A09",
+      description: "Patient Departing — Tracking",
+      segments: @adt_tracking_segments
+    },
+    "ADT_A15" => %{
+      name: "ADT_A15",
+      description: "Pending Transfer",
+      segments: [
+        {:MSH, :required, :once},
+        {:EVN, :required, :once},
+        {:PID, :required, :once},
+        {:PV1, :required, :once},
+        {:PV2, :optional, :once},
+        {:NTE, :optional, :repeating}
+      ]
+    },
+    "ADT_A16" => %{
+      name: "ADT_A16",
+      description: "Pending Discharge",
+      segments: [
+        {:MSH, :required, :once},
+        {:EVN, :required, :once},
+        {:PID, :required, :once},
+        {:PV1, :required, :once},
+        {:PV2, :optional, :once},
+        {:DG1, :optional, :repeating},
+        {:NTE, :optional, :repeating}
+      ]
+    },
+    "ADT_A21" => %{
+      name: "ADT_A21",
+      description: "Patient Goes on a Leave of Absence",
+      segments: @adt_leave_segments
+    },
+    "ADT_A24" => %{
+      name: "ADT_A24",
+      description: "Link Patient Information",
+      segments: [
+        {:MSH, :required, :once},
+        {:EVN, :required, :once},
+        {:PID, :required, :repeating},
+        {:PV1, :optional, :repeating},
+        {:NTE, :optional, :repeating}
+      ]
+    },
+    "ADT_A37" => %{
+      name: "ADT_A37",
+      description: "Unlink Patient Information",
+      segments: [
+        {:MSH, :required, :once},
+        {:EVN, :required, :once},
+        {:PID, :required, :repeating},
+        {:PV1, :optional, :repeating},
+        {:NTE, :optional, :repeating}
+      ]
+    },
+    "ADT_A38" => %{
+      name: "ADT_A38",
+      description: "Cancel Pre-admit",
+      segments: [
+        {:MSH, :required, :once},
+        {:EVN, :required, :once},
+        {:PID, :required, :once},
+        {:PV1, :required, :once},
+        {:PV2, :optional, :once},
+        {:DG1, :optional, :repeating},
+        {:NTE, :optional, :repeating}
+      ]
+    },
+    "ADT_A39" => %{
+      name: "ADT_A39",
+      description: "Merge Patient — Patient ID",
+      segments: [
+        {:MSH, :required, :once},
+        {:EVN, :required, :once},
+        {:PID, :required, :repeating},
+        {:MRG, :required, :repeating},
+        {:PV1, :optional, :repeating},
+        {:NTE, :optional, :repeating}
+      ]
     },
     "ORM_O01" => %{
       name: "ORM_O01",
@@ -137,6 +316,31 @@ defmodule HL7v2.MessageDefinition do
   @doc "Returns the list of defined message structure names."
   @spec names() :: [binary()]
   def names, do: Map.keys(@definitions)
+
+  @doc """
+  Returns the canonical message structure for a message code and trigger event.
+
+  Many HL7v2 trigger events share the same abstract message definition. For
+  example, ADT^A04, ADT^A08, and ADT^A13 all use the ADT_A01 structure.
+
+  Falls back to `"CODE_EVENT"` when no canonical mapping exists.
+
+  ## Examples
+
+      iex> HL7v2.MessageDefinition.canonical_structure("ADT", "A28")
+      "ADT_A05"
+
+      iex> HL7v2.MessageDefinition.canonical_structure("ADT", "A01")
+      "ADT_A01"
+
+      iex> HL7v2.MessageDefinition.canonical_structure("ZZZ", "Z01")
+      "ZZZ_Z01"
+
+  """
+  @spec canonical_structure(binary(), binary()) :: binary()
+  def canonical_structure(code, event) do
+    Map.get(@canonical_structures, {code, event}, "#{code}_#{event}")
+  end
 
   @doc """
   Validates segment presence against the message definition.

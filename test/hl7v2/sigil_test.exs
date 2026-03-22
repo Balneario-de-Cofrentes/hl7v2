@@ -149,11 +149,11 @@ defmodule HL7v2.SigilTest do
     test "~h OBX[*]-5 resolves with HL7v2.get/2", %{oru: oru} do
       values = HL7v2.get(oru, ~h"OBX[*]-5")
       assert length(values) == 3
-      assert values == ["7.5", "4.8", "14.2"]
+      assert Enum.map(values, & &1.value) == ["7.5", "4.8", "14.2"]
     end
 
     test "~h OBX[2]-5 resolves indexed segment", %{oru: oru} do
-      assert HL7v2.get(oru, ~h"OBX[2]-5") == "4.8"
+      assert %HL7v2.Type.NM{value: "4.8"} = HL7v2.get(oru, ~h"OBX[2]-5")
     end
 
     test "~h PID-3[*] resolves all repetitions", %{oru: oru} do

@@ -55,6 +55,31 @@ defmodule HL7v2.SeparatorTest do
       assert {:error, :insufficient_encoding_characters} = Separator.from_msh("MSH|^~")
       assert {:error, :insufficient_encoding_characters} = Separator.from_msh("MSH|")
     end
+
+    test "rejects 3-char MSH-2 (sub_component collides with field separator)" do
+      # MSH|^~\| — only 3 encoding chars; the 4th byte is the field separator
+      assert {:error, :invalid_encoding_characters} =
+               Separator.from_msh("MSH|^~\\|SEND|FAC||RCV||20240101||ADT^A01|123|P|2.5")
+    end
+
+    test "rejects overlong MSH-2 (6+ encoding characters)" do
+      assert {:error, :invalid_encoding_characters} =
+               Separator.from_msh("MSH|^~\\&XY|SEND|FAC")
+    end
+
+    test "rejects duplicate delimiters in encoding characters" do
+      # All four encoding chars are ^, creating duplicates
+      assert {:error, :duplicate_delimiters} = Separator.from_msh("MSH|^^^^|SEND|FAC")
+    end
+
+    test "rejects duplicate between encoding characters (component == repetition)" do
+      assert {:error, :duplicate_delimiters} = Separator.from_msh("MSH|^^\\&|SEND|FAC")
+    end
+
+    test "rejects truncation char that duplicates an encoding character" do
+      # Truncation char # duplicates the repetition char (both ~)
+      assert {:error, :duplicate_delimiters} = Separator.from_msh("MSH|^~\\&~|SEND|FAC")
+    end
   end
 
   describe "truncation character (v2.7+)" do

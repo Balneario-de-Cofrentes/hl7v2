@@ -45,7 +45,7 @@ defmodule HL7v2.Segment.MSATest do
       assert result.acknowledgment_code == "AE"
       assert result.message_control_id == "CTRL-999"
       assert result.text_message == "Application error"
-      assert result.expected_sequence_number == "42"
+      assert %HL7v2.Type.NM{value: "42", original: "42"} = result.expected_sequence_number
       assert result.delayed_acknowledgment_type == "D"
 
       assert %HL7v2.Type.CE{identifier: "207", text: "Application internal error"} =

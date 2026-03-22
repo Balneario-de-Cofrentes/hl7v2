@@ -221,7 +221,7 @@ defmodule HL7v2.AccessTest do
     test "OBX[*]-5 returns list of all observation values", %{oru: oru} do
       values = Access.get(oru, "OBX[*]-5")
       assert length(values) == 3
-      assert values == ["7.5", "4.8", "14.2"]
+      assert Enum.map(values, & &1.value) == ["7.5", "4.8", "14.2"]
     end
 
     test "OBX[*] returns list of all OBX segment structs", %{oru: oru} do
@@ -231,7 +231,7 @@ defmodule HL7v2.AccessTest do
     end
 
     test "OBX[2]-5 returns 2nd OBX observation value", %{oru: oru} do
-      assert Access.get(oru, "OBX[2]-5") == "4.8"
+      assert %HL7v2.Type.NM{value: "4.8"} = Access.get(oru, "OBX[2]-5")
     end
 
     test "OBX[1]-5 returns first OBX observation value (same as OBX-5)", %{oru: oru} do
@@ -239,7 +239,7 @@ defmodule HL7v2.AccessTest do
     end
 
     test "OBX[3]-5 returns third OBX observation value", %{oru: oru} do
-      assert Access.get(oru, "OBX[3]-5") == "14.2"
+      assert %HL7v2.Type.NM{value: "14.2"} = Access.get(oru, "OBX[3]-5")
     end
 
     test "OBX[4]-5 returns nil for out-of-range segment index", %{oru: oru} do
@@ -265,13 +265,13 @@ defmodule HL7v2.AccessTest do
     end
 
     test "OBX-5 without wildcard returns first match (backwards compatible)", %{oru: oru} do
-      assert Access.get(oru, "OBX-5") == "7.5"
+      assert %HL7v2.Type.NM{value: "7.5"} = Access.get(oru, "OBX-5")
     end
 
     test "fetch OBX[*]-5 returns {:ok, list}", %{oru: oru} do
       assert {:ok, values} = Access.fetch(oru, "OBX[*]-5")
       assert length(values) == 3
-      assert values == ["7.5", "4.8", "14.2"]
+      assert Enum.map(values, & &1.value) == ["7.5", "4.8", "14.2"]
     end
 
     test "fetch OBX[*] returns {:ok, list of segments}", %{oru: oru} do
@@ -292,7 +292,7 @@ defmodule HL7v2.AccessTest do
     end
 
     test "fetch OBX[2]-5 returns {:ok, value}", %{oru: oru} do
-      assert {:ok, "4.8"} = Access.fetch(oru, "OBX[2]-5")
+      assert {:ok, %HL7v2.Type.NM{value: "4.8"}} = Access.fetch(oru, "OBX[2]-5")
     end
 
     test "fetch PID-3[*] returns {:ok, list}", %{oru: oru} do

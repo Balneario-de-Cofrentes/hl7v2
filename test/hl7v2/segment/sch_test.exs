@@ -44,7 +44,7 @@ defmodule HL7v2.Segment.SCHTest do
 
       sch = SCH.parse(raw)
 
-      assert sch.appointment_duration == "30"
+      assert %HL7v2.Type.NM{value: "30", original: "30"} = sch.appointment_duration
       assert %CE{identifier: "MIN", text: "Minutes"} = sch.appointment_duration_units
       assert %CE{identifier: "CHECKUP", text: "Annual Checkup"} = sch.appointment_reason
       assert %CE{identifier: "FOLLOW", text: "Follow-up"} = sch.appointment_type

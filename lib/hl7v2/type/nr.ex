@@ -14,8 +14,8 @@ defmodule HL7v2.Type.NR do
   defstruct [:low, :high]
 
   @type t :: %__MODULE__{
-          low: binary() | nil,
-          high: binary() | nil
+          low: NM.t() | nil,
+          high: NM.t() | nil
         }
 
   @doc """
@@ -24,10 +24,10 @@ defmodule HL7v2.Type.NR do
   ## Examples
 
       iex> HL7v2.Type.NR.parse(["2.5", "10.0"])
-      %HL7v2.Type.NR{low: "2.5", high: "10"}
+      %HL7v2.Type.NR{low: %HL7v2.Type.NM{value: "2.5", original: "2.5"}, high: %HL7v2.Type.NM{value: "10", original: "10.0"}}
 
       iex> HL7v2.Type.NR.parse(["", "100"])
-      %HL7v2.Type.NR{low: nil, high: "100"}
+      %HL7v2.Type.NR{low: nil, high: %HL7v2.Type.NM{value: "100", original: "100"}}
 
       iex> HL7v2.Type.NR.parse([])
       %HL7v2.Type.NR{}

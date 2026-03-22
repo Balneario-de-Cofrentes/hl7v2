@@ -42,11 +42,13 @@ defmodule HL7v2.Segment do
 
   @composite_types MapSet.new([
                      HL7v2.Type.AUI,
+                     HL7v2.Type.CNN,
                      HL7v2.Type.CP,
                      HL7v2.Type.CQ,
                      HL7v2.Type.CX,
                      HL7v2.Type.DLD,
                      HL7v2.Type.DLN,
+                     HL7v2.Type.NDL,
                      HL7v2.Type.XCN,
                      HL7v2.Type.XPN,
                      HL7v2.Type.XAD,
@@ -83,7 +85,7 @@ defmodule HL7v2.Segment do
       @segment_fields Keyword.fetch!(opts, :fields)
 
       @struct_keys Enum.map(@segment_fields, fn {_seq, name, _type, _opt, _reps} -> name end)
-      defstruct @struct_keys
+      defstruct @struct_keys ++ [extra_fields: []]
 
       @type t :: %__MODULE__{}
 
@@ -120,18 +122,23 @@ defmodule HL7v2.Segment do
         {name, parse_field_value(raw, type, max_reps)}
       end)
 
-    struct(module, attrs)
+    max_seq = max_declared_seq(field_defs)
+    extra = Enum.drop(raw_fields, max_seq)
+
+    struct(module, [{:extra_fields, extra} | attrs])
   end
 
   @doc false
   @spec do_encode(struct(), [field_def()]) :: list()
   def do_encode(segment, field_defs) do
-    field_defs
-    |> Enum.map(fn {_seq, name, type, _opt, max_reps} ->
-      value = Map.get(segment, name)
-      encode_field_value(value, type, max_reps)
-    end)
-    |> trim_trailing()
+    declared =
+      Enum.map(field_defs, fn {_seq, name, type, _opt, max_reps} ->
+        value = Map.get(segment, name)
+        encode_field_value(value, type, max_reps)
+      end)
+
+    extra = Map.get(segment, :extra_fields) || []
+    (declared ++ extra) |> trim_trailing()
   end
 
   # --- Field-Level Parse ---
@@ -244,4 +251,14 @@ defmodule HL7v2.Segment do
   defp empty_field?(nil), do: true
   defp empty_field?([]), do: true
   defp empty_field?(_), do: false
+
+  @doc false
+  @spec max_declared_seq([field_def()]) :: non_neg_integer()
+  def max_declared_seq([]), do: 0
+
+  def max_declared_seq(field_defs) do
+    field_defs
+    |> Enum.map(fn {seq, _, _, _, _} -> seq end)
+    |> Enum.max()
+  end
 end

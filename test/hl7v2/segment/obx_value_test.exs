@@ -3,15 +3,15 @@ defmodule HL7v2.Segment.OBXValueTest do
 
   alias HL7v2.Segment.OBX
   alias HL7v2.Segment.OBXValue
-  alias HL7v2.Type.{CE, CWE, CNE, TS, DTM, NR, HD, CX, EI, XCN, XAD, XPN, XTN, SAD}
+  alias HL7v2.Type.{CE, CWE, CNE, NM, TS, DTM, NR, HD, CX, EI, XCN, XAD, XPN, XTN, SAD}
 
   describe "parse/2" do
-    test "NM value type returns parsed numeric string" do
-      assert OBXValue.parse("120", "NM") == "120"
+    test "NM value type returns parsed NM struct" do
+      assert %HL7v2.Type.NM{value: "120", original: "120"} = OBXValue.parse("120", "NM")
     end
 
     test "NM normalizes numeric value" do
-      assert OBXValue.parse("+01.20", "NM") == "1.2"
+      assert %HL7v2.Type.NM{value: "1.2", original: "+01.20"} = OBXValue.parse("+01.20", "NM")
     end
 
     test "ST value type returns string" do
@@ -75,7 +75,7 @@ defmodule HL7v2.Segment.OBXValueTest do
 
     test "NR value type returns NR struct from component list" do
       result = OBXValue.parse(["2.5", "10"], "NR")
-      assert %NR{low: "2.5", high: "10"} = result
+      assert %NR{low: %NM{value: "2.5"}, high: %NM{value: "10"}} = result
     end
 
     test "HD value type returns HD struct from component list" do
@@ -155,7 +155,7 @@ defmodule HL7v2.Segment.OBXValueTest do
       reps = ["100", "200", "300"]
       result = OBXValue.parse(reps, "NM")
 
-      assert result == ["100", "200", "300"]
+      assert [%NM{value: "100"}, %NM{value: "200"}, %NM{value: "300"}] = result
     end
   end
 
@@ -251,7 +251,7 @@ defmodule HL7v2.Segment.OBXValueTest do
       obx = OBX.parse(raw)
 
       assert obx.value_type == "NM"
-      assert obx.observation_value == "14.2"
+      assert %NM{value: "14.2"} = obx.observation_value
     end
 
     test "OBX with CWE value type produces CWE struct" do
@@ -318,7 +318,7 @@ defmodule HL7v2.Segment.OBXValueTest do
       encoded = OBX.encode(obx)
       obx2 = OBX.parse(encoded)
 
-      assert obx2.observation_value == "120"
+      assert %NM{value: "120"} = obx2.observation_value
       assert obx2.value_type == "NM"
     end
 

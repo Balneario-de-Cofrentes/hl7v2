@@ -3,31 +3,44 @@ defmodule HL7v2.Type.NM do
   Numeric (NM) -- HL7v2 primitive data type.
 
   Format: `[+|-]digits[.digits]`. Max 16 characters.
-  Parses to a `Decimal` (kept as string internally to preserve precision),
-  encodes back to a canonical numeric string.
+
+  Parses to a `%NM{}` struct that holds both a normalized `value` (for
+  computation) and the `original` wire string (for lossless round-trip).
+  `encode/1` emits `original` when present so that parse-then-encode
+  preserves the exact wire format.  Programmatically-built structs
+  (where `original` is nil) fall back to emitting `value`.
   """
 
   @behaviour HL7v2.Type
+
+  defstruct [:value, :original]
+
+  @type t :: %__MODULE__{
+          value: binary(),
+          original: binary() | nil
+        }
 
   # Pattern: optional sign, at least one digit before optional decimal point
   @numeric_pattern ~r/\A[+-]?\d+(\.\d+)?\z/
 
   @doc """
-  Parses a numeric string into a normalized numeric string.
+  Parses a numeric string into a `%NM{}` struct.
 
   Returns `nil` for empty/nil input. Leading/trailing whitespace is stripped.
-  Leading zeros and trailing decimal zeros are normalized.
+  The `value` field holds the normalized form (leading zeros, trailing decimal
+  zeros and bare `+` stripped). The `original` field preserves the raw input
+  for lossless round-trip encoding.
 
   ## Examples
 
       iex> HL7v2.Type.NM.parse("123")
-      "123"
+      %HL7v2.Type.NM{value: "123", original: "123"}
 
       iex> HL7v2.Type.NM.parse("-45.67")
-      "-45.67"
+      %HL7v2.Type.NM{value: "-45.67", original: "-45.67"}
 
       iex> HL7v2.Type.NM.parse("+01.20")
-      "1.2"
+      %HL7v2.Type.NM{value: "1.2", original: "+01.20"}
 
       iex> HL7v2.Type.NM.parse("")
       nil
@@ -36,7 +49,7 @@ defmodule HL7v2.Type.NM do
       nil
 
   """
-  @spec parse(binary() | nil) :: binary() | nil
+  @spec parse(binary() | nil) :: t() | nil
   def parse(nil), do: nil
   def parse(""), do: nil
 
@@ -44,7 +57,7 @@ defmodule HL7v2.Type.NM do
     trimmed = String.trim(value)
 
     if Regex.match?(@numeric_pattern, trimmed) do
-      normalize(trimmed)
+      %__MODULE__{value: normalize(trimmed), original: trimmed}
     else
       nil
     end
@@ -53,9 +66,19 @@ defmodule HL7v2.Type.NM do
   @doc """
   Encodes a numeric value back to a string.
 
-  Accepts strings and numbers. Returns empty string for nil.
+  For `%NM{}` structs, emits `original` when present (preserving the wire
+  format), falling back to `value` when `original` is nil (programmatically
+  built values).
+
+  Also accepts plain strings and numbers for backward compatibility.
 
   ## Examples
+
+      iex> HL7v2.Type.NM.encode(%HL7v2.Type.NM{value: "1.2", original: "+01.20"})
+      "+01.20"
+
+      iex> HL7v2.Type.NM.encode(%HL7v2.Type.NM{value: "42"})
+      "42"
 
       iex> HL7v2.Type.NM.encode("123")
       "123"
@@ -64,8 +87,9 @@ defmodule HL7v2.Type.NM do
       ""
 
   """
-  @spec encode(binary() | number() | nil) :: binary()
+  @spec encode(t() | binary() | number() | nil) :: binary()
   def encode(nil), do: ""
+  def encode(%__MODULE__{original: original, value: value}), do: original || value
   def encode(value) when is_binary(value), do: value
   def encode(value) when is_integer(value), do: Integer.to_string(value)
   def encode(value) when is_float(value), do: normalize(Float.to_string(value))

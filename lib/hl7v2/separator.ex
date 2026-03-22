@@ -79,31 +79,36 @@ defmodule HL7v2.Separator do
 
   # Extended: 5 encoding chars with truncation character (v2.7+).
   # The 5th byte after MSH-1 is a truncation char if it is NOT the field separator.
-  def from_msh(<<"MSH", field, c, r, e, s, t, _rest::binary>>) when t != field do
-    {:ok,
-     %__MODULE__{
-       field: field,
-       component: c,
-       repetition: r,
-       escape: e,
-       sub_component: s,
-       truncation: t,
-       segment: ?\r
-     }}
+  # The byte after the truncation char must be the field separator or end of input.
+  def from_msh(<<"MSH", field, c, r, e, s, t, rest::binary>>) when t != field do
+    case rest do
+      <<next, _::binary>> when next != field ->
+        # 6+ encoding characters — overlong, reject
+        {:error, :invalid_encoding_characters}
+
+      _ ->
+        build_separator(field, c, r, e, s, t)
+    end
   end
 
-  # Standard: 4 encoding chars (MSH-2). The next byte is the field separator
+  # Standard: 4 encoding chars (MSH-2). The next byte must be the field separator
   # or the message ends right after the encoding characters.
-  def from_msh(<<"MSH", field, c, r, e, s, _rest::binary>>) do
-    {:ok,
-     %__MODULE__{
-       field: field,
-       component: c,
-       repetition: r,
-       escape: e,
-       sub_component: s,
-       segment: ?\r
-     }}
+  def from_msh(<<"MSH", field, c, r, e, s, rest::binary>>) do
+    case rest do
+      "" ->
+        build_separator(field, c, r, e, s, nil)
+
+      <<^field, _::binary>> ->
+        build_separator(field, c, r, e, s, nil)
+
+      _ ->
+        # Next byte is not the field separator and was not caught by the
+        # truncation clause above — means it equals the field separator in
+        # a duplicate-delimiter scenario, or something else is wrong.
+        # This case is unreachable in practice because the truncation clause
+        # above handles t != field, but we keep it for safety.
+        {:error, :invalid_encoding_characters}
+    end
   end
 
   def from_msh(<<"MSH", _::binary>>) do
@@ -112,6 +117,32 @@ defmodule HL7v2.Separator do
 
   def from_msh(_) do
     {:error, :not_msh}
+  end
+
+  defp build_separator(field, c, r, e, s, t) do
+    encoding = [c, r, e, s | if(t, do: [t], else: [])]
+
+    cond do
+      field in encoding ->
+        # An encoding character equals the field separator — this means
+        # the MSH-2 declaration is effectively too short or malformed.
+        {:error, :invalid_encoding_characters}
+
+      length(encoding) != length(Enum.uniq(encoding)) ->
+        {:error, :duplicate_delimiters}
+
+      true ->
+        {:ok,
+         %__MODULE__{
+           field: field,
+           component: c,
+           repetition: r,
+           escape: e,
+           sub_component: s,
+           truncation: t,
+           segment: ?\r
+         }}
+    end
   end
 
   @doc """

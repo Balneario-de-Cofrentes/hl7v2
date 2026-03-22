@@ -57,7 +57,10 @@ defmodule HL7v2.Segment.MSH do
         {name, HL7v2.Segment.parse_field_value(raw, type, max_reps)}
       end)
 
-    struct(base, attrs)
+    max_seq = HL7v2.Segment.max_declared_seq(@segment_fields)
+    extra = Enum.drop(raw_fields, max_seq)
+
+    struct(base, [{:extra_fields, extra} | attrs])
   end
 
   @doc """
@@ -74,6 +77,7 @@ defmodule HL7v2.Segment.MSH do
         HL7v2.Segment.encode_field_value(value, type, max_reps)
       end)
 
-    [msh.field_separator, msh.encoding_characters | HL7v2.Segment.trim_trailing(rest)]
+    extra = msh.extra_fields || []
+    [msh.field_separator, msh.encoding_characters | HL7v2.Segment.trim_trailing(rest ++ extra)]
   end
 end

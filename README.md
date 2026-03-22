@@ -171,7 +171,7 @@ end
  Segments    20 typed structs (MSH EVN PID PV1 PV2 NK1 OBR OBX ORC
               MSA ERR NTE AL1 DG1 IN1 SCH AIS GT1 FT1 ZXX)
 
- Types       34 composite + 8 primitive (42 total) — 97% of segment fields typed
+ Types       36 composite + 8 primitive (44 total) — 97% of segment fields typed
 
  Messages    ADT (A01-A04, A08) ORM^O01 ORU^R01 SIU^S12 ACK
               with structure validation rules
@@ -179,9 +179,9 @@ end
  Transport   MLLP framing, Ranch 2.x listener, GenServer client,
               TLS/mTLS, telemetry instrumentation
 
- Tests       1,390 (228 doctests + 30 properties + 1,132 tests)
- Coverage    96%+
- Speed       0.5s full suite
+ Tests       1,620 (241 doctests + 30 properties + 1,349 tests)
+ Coverage    95%+
+ Speed       0.8s full suite
 ```
 
 ## Scope and Limitations
@@ -197,13 +197,14 @@ basic validation (required fields, repetition limits, required-segment presence)
 - Segment ordering or group/cardinality validation (segments out of order pass validation)
 - HL7 table value-set validation (any string accepted for coded fields)
 - Conditional field logic (fields marked `:c` are not evaluated)
-- Full message profile conformance or v2.7+ features (truncation character, MSH-22+)
+- Full message profile conformance (truncation character is supported; MSH-22+ is not)
 - Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
   no whitespace normalization)
 
-**Coverage:** 19 of ~120 standard segments (plus generic ZXX) typed. Common message families:
-ADT_A01 ~11/23, ORM_O01 ~12/23, ORU_R01 ~10/18, ACK 3/4, SIU_S12 ~9/15.
-42 type modules (34 composite + 8 primitive).
+**Coverage:** 20 of ~120 standard segments (plus generic ZXX) typed. Extra fields beyond
+declared definitions are preserved in `extra_fields` for lossless round-trip. Common message
+families: ADT_A01 ~11/23, ORM_O01 ~12/23, ORU_R01 ~10/18, ACK 3/4, SIU_S12 ~9/15.
+44 type modules (36 composite + 8 primitive).
 
 ## Handling Unknown Segments
 

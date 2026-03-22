@@ -161,6 +161,24 @@ defmodule HL7v2 do
   @spec get(HL7v2.TypedMessage.t(), binary() | HL7v2.Path.t(), term()) :: term()
   defdelegate get(msg, path, default), to: HL7v2.Access
 
+  @doc """
+  Converts a `%HL7v2.RawMessage{}` to a `%HL7v2.TypedMessage{}`.
+
+  Shortcut for `HL7v2.TypedParser.convert/1` that unwraps the ok tuple.
+  Raises on conversion errors.
+
+  ## Examples
+
+      {:ok, raw} = HL7v2.parse(wire)
+      typed = HL7v2.type(raw)
+
+  """
+  @spec type(HL7v2.RawMessage.t()) :: HL7v2.TypedMessage.t()
+  def type(%HL7v2.RawMessage{} = raw) do
+    {:ok, typed} = HL7v2.TypedParser.convert(raw)
+    typed
+  end
+
   @doc "Fetches a value, returning `{:ok, value}` or `{:error, reason}`."
   @spec fetch(HL7v2.TypedMessage.t(), binary() | HL7v2.Path.t()) ::
           {:ok, term()} | {:error, atom()}

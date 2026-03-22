@@ -136,21 +136,49 @@ defmodule HL7v2.Type.DTMTest do
       assert DTM.parse("202") == nil
     end
 
-    test "rejects malformed timezone offset (non-numeric)" do
+    test "preserves malformed timezone offset for lossless round-trip" do
       result = DTM.parse("202603221430+ABCD")
-      # Should parse the datetime but discard the malformed offset
-      assert result.year == 2026
-      assert result.offset == nil
+
+      assert result == %DTM{
+               year: 2026,
+               month: 3,
+               day: 22,
+               hour: 14,
+               minute: 30,
+               offset: "+ABCD"
+             }
+
+      assert DTM.encode(result) == "202603221430+ABCD"
     end
 
-    test "rejects timezone offset with out-of-range hours" do
+    test "preserves out-of-range hours in timezone offset" do
       result = DTM.parse("202603221430+2500")
-      assert result.offset == nil
+
+      assert result == %DTM{
+               year: 2026,
+               month: 3,
+               day: 22,
+               hour: 14,
+               minute: 30,
+               offset: "+2500"
+             }
+
+      assert DTM.encode(result) == "202603221430+2500"
     end
 
-    test "rejects timezone offset with out-of-range minutes" do
+    test "preserves out-of-range minutes in timezone offset" do
       result = DTM.parse("202603221430+0160")
-      assert result.offset == nil
+
+      assert result == %DTM{
+               year: 2026,
+               month: 3,
+               day: 22,
+               hour: 14,
+               minute: 30,
+               offset: "+0160"
+             }
+
+      assert DTM.encode(result) == "202603221430+0160"
     end
 
     test "accepts valid timezone offsets" do
@@ -374,6 +402,12 @@ defmodule HL7v2.Type.DTMTest do
 
     test "with negative offset round-trip" do
       assert "202603221430-0500" |> DTM.parse() |> DTM.encode() == "202603221430-0500"
+    end
+
+    test "malformed offset round-trip preserves wire format" do
+      assert "202603221430+ABCD" |> DTM.parse() |> DTM.encode() == "202603221430+ABCD"
+      assert "202603221430+2500" |> DTM.parse() |> DTM.encode() == "202603221430+2500"
+      assert "202603221430-9999" |> DTM.parse() |> DTM.encode() == "202603221430-9999"
     end
   end
 end

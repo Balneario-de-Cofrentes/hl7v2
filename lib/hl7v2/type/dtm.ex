@@ -4,10 +4,9 @@ defmodule HL7v2.Type.DTM do
 
   Format: `YYYY[MM[DD[HH[MM[SS[.S[S[S[S]]]]]]]]][+/-ZZZZ]`
 
-  Parses to the most appropriate Elixir type:
-  - `DateTime` when timezone offset is present and precision >= minute
-  - `NaiveDateTime` when full datetime without timezone
-  - `%HL7v2.Type.DTM{}` struct for partial values
+  Parses to a `%DTM{}` struct preserving all fields for lossless round-trip
+  encoding. Timezone offsets (including malformed ones) are stored verbatim
+  in the `offset` field so that `encode/1` reproduces the exact wire format.
 
   Encodes back to the canonical HL7v2 format.
   """
@@ -162,12 +161,10 @@ defmodule HL7v2.Type.DTM do
         offset_str = binary_part(value, len - 5, 5)
         datetime_str = binary_part(value, 0, len - 5)
 
-        if valid_offset?(offset_str) do
-          {datetime_str, offset_str}
-        else
-          # Malformed offset — split it off but discard (don't poison the datetime)
-          {datetime_str, nil}
-        end
+        # Store the raw offset as-is for lossless round-trip.
+        # Malformed offsets (non-numeric digits, out-of-range hours/minutes)
+        # are preserved verbatim so that encode/1 reproduces the wire format.
+        {datetime_str, offset_str}
       else
         {value, nil}
       end
@@ -175,18 +172,6 @@ defmodule HL7v2.Type.DTM do
       {value, nil}
     end
   end
-
-  # Validates offset matches [+-]\d{4} with hours 00-23 and minutes 00-59
-  defp valid_offset?(<<sign, h1, h2, m1, m2>>)
-       when sign in [?+, ?-] and
-              h1 in ?0..?9 and h2 in ?0..?9 and
-              m1 in ?0..?9 and m2 in ?0..?9 do
-    hours = (h1 - ?0) * 10 + (h2 - ?0)
-    minutes = (m1 - ?0) * 10 + (m2 - ?0)
-    hours <= 23 and minutes <= 59
-  end
-
-  defp valid_offset?(_), do: false
 
   defp parse_datetime(str, offset) do
     case byte_size(str) do

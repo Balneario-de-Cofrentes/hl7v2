@@ -54,8 +54,8 @@ defmodule HL7v2.Segment.ERRTest do
       assert [
                %HL7v2.Type.ERL{
                  segment_id: "PID",
-                 segment_sequence: "1",
-                 field_position: "5"
+                 segment_sequence: %HL7v2.Type.NM{value: "1"},
+                 field_position: %HL7v2.Type.NM{value: "5"}
                }
              ] = result.error_location
 

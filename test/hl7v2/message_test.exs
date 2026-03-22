@@ -229,6 +229,68 @@ defmodule HL7v2.MessageTest do
     end
   end
 
+  describe "builder validates with canonical structure definitions" do
+    test "ADT^A28 (add person) validates without warnings via ADT_A05" do
+      msg =
+        Message.new("ADT", "A28", message_control_id: "A28_001")
+        |> Message.add_segment(%HL7v2.Segment.EVN{
+          recorded_date_time: %TS{time: %DTM{year: 2026, month: 3, day: 22}}
+        })
+        |> Message.add_segment(%PID{
+          patient_identifier_list: [%CX{id: "MRN999"}],
+          patient_name: [%XPN{family_name: %FN{surname: "Garcia"}, given_name: "Maria"}]
+        })
+        |> Message.add_segment(%PV1{patient_class: "O"})
+
+      assert msg.msh.message_type.message_structure == "ADT_A05"
+
+      wire = Message.encode(msg)
+      {:ok, parsed} = HL7v2.parse(wire)
+      typed = HL7v2.type(parsed)
+      assert :ok = HL7v2.Validation.validate(typed)
+    end
+
+    test "ADT^A40 (merge patient) validates via ADT_A39 and detects missing MRG" do
+      msg =
+        Message.new("ADT", "A40", message_control_id: "A40_001")
+        |> Message.add_segment(%HL7v2.Segment.EVN{
+          recorded_date_time: %TS{time: %DTM{year: 2026, month: 3, day: 22}}
+        })
+        |> Message.add_segment(%PID{
+          patient_identifier_list: [%CX{id: "MRN123"}],
+          patient_name: [%XPN{family_name: %FN{surname: "Doe"}}]
+        })
+
+      assert msg.msh.message_type.message_structure == "ADT_A39"
+
+      wire = Message.encode(msg)
+      {:ok, parsed} = HL7v2.parse(wire)
+      typed = HL7v2.type(parsed)
+      assert {:error, errors} = HL7v2.Validation.validate(typed)
+      assert Enum.any?(errors, &(&1.message == "Required segment MRG is missing"))
+    end
+
+    test "ADT^A11 (cancel admit) validates via ADT_A09" do
+      msg =
+        Message.new("ADT", "A11", message_control_id: "A11_001")
+        |> Message.add_segment(%HL7v2.Segment.EVN{
+          recorded_date_time: %TS{time: %DTM{year: 2026, month: 3, day: 22}}
+        })
+        |> Message.add_segment(%PID{
+          patient_identifier_list: [%CX{id: "MRN555"}],
+          patient_name: [%XPN{family_name: %FN{surname: "Lopez"}}]
+        })
+        |> Message.add_segment(%PV1{patient_class: "I"})
+
+      assert msg.msh.message_type.message_structure == "ADT_A09"
+
+      wire = Message.encode(msg)
+      {:ok, parsed} = HL7v2.parse(wire)
+      typed = HL7v2.type(parsed)
+      assert :ok = HL7v2.Validation.validate(typed)
+    end
+  end
+
   describe "to_raw/1" do
     test "produces valid RawMessage" do
       msg = Message.new("ACK", "A01", message_control_id: "RAW001")
