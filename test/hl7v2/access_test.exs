@@ -171,4 +171,35 @@ defmodule HL7v2.AccessTest do
       assert Access.get(msg, "PID-") == nil
     end
   end
+
+  describe "fetch/2" do
+    test "returns {:ok, value} for valid path", %{msg: msg} do
+      assert {:ok, %HL7v2.Segment.PID{}} = Access.fetch(msg, "PID")
+      assert {:ok, 1} = Access.fetch(msg, "PID-1")
+    end
+
+    test "returns {:error, :segment_not_found} for unknown segment", %{msg: msg} do
+      assert {:error, :segment_not_found} = Access.fetch(msg, "ZZZ")
+      assert {:error, :segment_not_found} = Access.fetch(msg, "ZZZ-1")
+    end
+
+    test "returns {:error, :field_not_found} for unknown field", %{msg: msg} do
+      assert {:error, :field_not_found} = Access.fetch(msg, "PID-99")
+    end
+
+    test "returns {:error, :invalid_path} for malformed path", %{msg: msg} do
+      assert {:error, :invalid_path} = Access.fetch(msg, "invalid")
+      assert {:error, :invalid_path} = Access.fetch(msg, "")
+    end
+
+    test "returns {:ok, nil} for valid path with nil value", %{msg: msg} do
+      # PID-23 (birth_place) is not set in our test message
+      assert {:ok, nil} = Access.fetch(msg, "PID-23")
+    end
+
+    test "HL7v2.fetch/2 delegation works", %{msg: msg} do
+      assert {:ok, _} = HL7v2.fetch(msg, "PID")
+      assert {:error, :segment_not_found} = HL7v2.fetch(msg, "ZZZ")
+    end
+  end
 end

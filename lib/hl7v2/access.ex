@@ -2,8 +2,11 @@ defmodule HL7v2.Access do
   @moduledoc """
   Path-based access to HL7v2 message fields.
 
-  Provides `get/2` and `get/3` for extracting values from typed messages
-  using path strings like `"PID-5"` or `"MSH-9.1"`.
+  Provides `get/2`, `get/3`, and `fetch/2` for extracting values from typed
+  messages using path strings like `"PID-5"` or `"MSH-9.1"`.
+
+  `get/2` returns nil on any resolution failure (silent). `fetch/2` returns
+  `{:ok, value}` or `{:error, reason}` for explicit error handling.
 
   ## Path Syntax
 
@@ -50,9 +53,31 @@ defmodule HL7v2.Access do
   """
   @spec get(TypedMessage.t(), binary(), term()) :: term()
   def get(%TypedMessage{} = msg, path, default) when is_binary(path) do
-    case get(msg, path) do
-      nil -> default
-      value -> value
+    case fetch(msg, path) do
+      {:ok, value} -> value
+      {:error, _} -> default
+    end
+  end
+
+  @doc """
+  Fetches a value from a typed message, returning `{:ok, value}` or `{:error, reason}`.
+
+  Unlike `get/2`, this function distinguishes between a nil field value and
+  a resolution failure (unknown segment, invalid path, unknown field).
+
+  ## Examples
+
+      {:ok, pid} = HL7v2.Access.fetch(msg, "PID")
+      {:error, :segment_not_found} = HL7v2.Access.fetch(msg, "ZZZ")
+      {:error, :invalid_path} = HL7v2.Access.fetch(msg, "not a path")
+      {:error, :field_not_found} = HL7v2.Access.fetch(msg, "PID-99")
+
+  """
+  @spec fetch(TypedMessage.t(), binary()) :: {:ok, term()} | {:error, atom()}
+  def fetch(%TypedMessage{} = msg, path) when is_binary(path) do
+    case parse_path(path) do
+      {:ok, parsed} -> resolve_with_error(msg, parsed)
+      {:error, _} = err -> err
     end
   end
 
@@ -163,4 +188,34 @@ defmodule HL7v2.Access do
   end
 
   defp select_component(value, _comp), do: value
+
+  # -- Error-returning resolution for fetch/2 --
+
+  defp resolve_with_error(msg, %{segment: seg_id, field: nil}) do
+    case find_segment(msg, seg_id) do
+      nil -> {:error, :segment_not_found}
+      seg -> {:ok, seg}
+    end
+  end
+
+  defp resolve_with_error(msg, %{segment: seg_id} = path) do
+    case find_segment(msg, seg_id) do
+      nil -> {:error, :segment_not_found}
+      segment -> resolve_field_with_error(segment, path)
+    end
+  end
+
+  defp resolve_field_with_error(segment, %{field: field_seq} = path) do
+    module = segment.__struct__
+    fields = module.fields()
+
+    case Enum.find(fields, fn {seq, _, _, _, _} -> seq == field_seq end) do
+      {_, field_name, _, _, max_reps} ->
+        value = Map.get(segment, field_name)
+        {:ok, unwrap_and_select(value, max_reps, path)}
+
+      nil ->
+        {:error, :field_not_found}
+    end
+  end
 end

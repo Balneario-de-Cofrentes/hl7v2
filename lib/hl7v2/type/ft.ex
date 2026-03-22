@@ -2,9 +2,11 @@ defmodule HL7v2.Type.FT do
   @moduledoc """
   Formatted Text Data (FT) -- HL7v2 primitive data type.
 
-  Like TX but supports embedded formatting commands enclosed in escape
-  characters (e.g., `\\.sp\\` for vertical spacing). Max 65536 characters.
-  Pass-through storage; formatting is interpreted by the receiving system.
+  Lossless storage: the value is stored and returned as a plain binary string.
+  The HL7 spec says FT supports embedded formatting commands (e.g., `\\.sp\\`
+  for vertical spacing), but this implementation preserves all input bytes
+  for round-trip fidelity. No formatting interpretation, escape processing,
+  or length enforcement is performed.
   """
 
   @behaviour HL7v2.Type

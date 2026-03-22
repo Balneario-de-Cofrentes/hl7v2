@@ -158,6 +158,10 @@ defmodule HL7v2 do
   @spec get(HL7v2.TypedMessage.t(), binary(), term()) :: term()
   defdelegate get(msg, path, default), to: HL7v2.Access
 
+  @doc "Fetches a value, returning `{:ok, value}` or `{:error, reason}`."
+  @spec fetch(HL7v2.TypedMessage.t(), binary()) :: {:ok, term()} | {:error, atom()}
+  defdelegate fetch(msg, path), to: HL7v2.Access
+
   @doc """
   Builds an ACK (Application Accept) for the given MSH segment.
 

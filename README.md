@@ -8,7 +8,7 @@
    |_| |_|____|_/   \_/ |_____|
 
    Pure Elixir HL7 v2.x Toolkit
-   Schema-driven. Type-safe. Production-ready.
+   Schema-driven parsing, building, and MLLP transport.
 ```
 
 [![Hex.pm](https://img.shields.io/hexpm/v/hl7v2.svg)](https://hex.pm/packages/hl7v2)
@@ -18,26 +18,19 @@
 The HL7v2 library that treats clinical messages as first-class data structures,
 not bags of strings.
 
-## The Problem
+## The Difference
 
-Every Elixir HL7v2 library today gives you this:
-
-```elixir
-# elixir_hl7 — string maps, integer keys, no types
-patient_name = HL7.get(msg, ~p"PID-5")    # => "Smith^John"
-mrn = HL7.get(msg, ~p"PID-3[1].1")        # => "12345"
-# Typo in "PID-55"? Silent nil. Wrong field? Silent nil. No compiler help.
-```
-
-We give you this:
+Other Elixir HL7v2 libraries give you string maps. We give you structs:
 
 ```elixir
-# hl7v2 — typed structs, named fields, compiler-checked
-pid = HL7v2.get(msg, "PID-5")
-pid.family_name.surname  # => "Smith"
-pid.given_name           # => "John"
+# elixir_hl7 — strings all the way down
+HL7.get(msg, ~p"PID-5")  # => "Smith^John"
 
-# Or build from scratch — no other Elixir library can do this:
+# hl7v2 — typed structs with named fields
+pid = Enum.find(typed.segments, &is_struct(&1, HL7v2.Segment.PID))
+pid.patient_name  # => [%XPN{family_name: %FN{surname: "Smith"}, given_name: "John"}]
+
+# Build messages programmatically — no other Elixir library does this:
 msg = HL7v2.Message.new("ADT", "A01", sending_application: "PHAOS")
       |> HL7v2.Message.add_segment(%HL7v2.Segment.PID{
            patient_name: [%XPN{family_name: %FN{surname: "Smith"}, given_name: "John"}]
@@ -50,13 +43,13 @@ msg = HL7v2.Message.new("ADT", "A01", sending_application: "PHAOS")
 |---|---|---|
 | Data model | Sparse maps, integer keys | **Typed structs, named fields** |
 | Building messages | Not supported | **`Message.new` + `add_segment`** |
-| Validation | None (by design) | **Opt-in field + structure checks** |
+| Validation | None (by design) | **Opt-in required-field + segment-presence checks** |
 | Transport | Separate package (mllp) | **Integrated MLLP** |
 | Ranch | 1.8 | **2.x** |
 | Parse + type | Two steps | **`mode: :typed` in one call** |
 | ACK/NAK | Manual | **`Ack.accept/error/reject`** |
 | TLS | Separate config | **Built-in mTLS helpers** |
-| Path access | `~p"PID-5"` sigil | **`get(msg, "PID-5.1[2]")`** |
+| Path access | `~p"PID-5"` sigil | **`get/2` + `fetch/2` with error tuples** |
 | Telemetry | No | **`:telemetry` spans on all ops** |
 
 ## Installation
@@ -178,7 +171,7 @@ end
  Segments    20 typed structs (MSH EVN PID PV1 PV2 NK1 OBR OBX ORC
               MSA ERR NTE AL1 DG1 IN1 SCH AIS GT1 FT1 ZXX)
 
- Types       39 composites + 12 primitives — 97% of segment fields typed
+ Types       34 composite + 8 primitive (42 total) — 97% of segment fields typed
 
  Messages    ADT (A01-A04, A08) ORM^O01 ORU^R01 SIU^S12 ACK
               with structure validation rules
@@ -197,16 +190,25 @@ This library targets **HL7 v2.5.1** with permissive parsing of adjacent versions
 
 **What it does well:** delimiter parsing, typed segment/composite structs, canonical
 round-trip encoding, programmatic message building, MLLP transport with TLS, and
-field-level validation (required fields, repetition limits, message structure presence).
+basic validation (required fields, repetition limits, required-segment presence).
 
-**What it does not do:** full message profile conformance, HL7 table value validation,
-conditional field logic, enhanced acknowledgment mode, or v2.7+ features (truncation
-character, MSH-22+). The parser ingests more than it semantically validates — unknown
-segments are preserved as raw tuples, not rejected.
+**What it does not do:**
 
-Segment coverage is a core subset (20 of ~120 defined in the standard). Coverage
-against common message families: ADT_A01 ~11/23 segments typed, ORM_O01 ~12/23,
-ORU_R01 ~10/18, ACK 3/4, SIU_S12 ~9/15. Segments not typed are preserved losslessly
+- Segment ordering or group/cardinality validation (segments out of order pass validation)
+- HL7 table value-set validation (any string accepted for coded fields)
+- Conditional field logic (fields marked `:c` are not evaluated)
+- OBX-5 type dispatch (observation values stay raw — OBX-2 value type is not used to
+  select a typed parser for OBX-5; this is the VARIES data type problem)
+- Full message profile conformance or v2.7+ features (truncation character, MSH-22+)
+- Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
+  no whitespace normalization)
+
+The parser ingests more than it semantically validates — unknown segments are preserved
+as raw tuples, not rejected.
+
+**Coverage:** 20 of ~120 standard segments typed. Common message families:
+ADT_A01 ~11/23, ORM_O01 ~12/23, ORU_R01 ~10/18, ACK 3/4, SIU_S12 ~9/15.
+42 type modules (34 composite + 8 primitive). Segments not typed are preserved
 in raw form.
 
 ## Documentation

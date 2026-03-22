@@ -2,8 +2,10 @@ defmodule HL7v2.Type.ST do
   @moduledoc """
   String Data (ST) -- HL7v2 primitive data type.
 
-  Printable characters, left-justified, max 199 characters by default.
-  Pass-through: the value is stored and returned as a plain binary string.
+  Lossless storage: the value is stored and returned as a plain binary string.
+  No delimiter rejection, length enforcement, or charset validation is performed.
+  The HL7 spec limits ST to 199 printable characters excluding delimiters, but
+  this implementation preserves all input bytes for round-trip fidelity.
   """
 
   @behaviour HL7v2.Type

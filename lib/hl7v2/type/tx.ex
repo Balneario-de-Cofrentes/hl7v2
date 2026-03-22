@@ -2,9 +2,11 @@ defmodule HL7v2.Type.TX do
   @moduledoc """
   Text Data (TX) -- HL7v2 primitive data type.
 
-  Display-oriented narrative text. Leading spaces ARE significant and must be
-  preserved (unlike ST). Trailing spaces are removed. Supports escape
-  sequences for display control. No intrinsic length limit.
+  Lossless storage: the value is stored and returned as a plain binary string.
+  The HL7 spec says TX is display-oriented narrative text where leading spaces
+  are significant and trailing spaces should be removed, but this implementation
+  preserves all input bytes for round-trip fidelity. No whitespace normalization,
+  escape sequence processing, or charset validation is performed.
   """
 
   @behaviour HL7v2.Type
