@@ -38,7 +38,7 @@ defmodule HL7v2.Segment.IN1 do
       {27, :release_information_code, HL7v2.Type.IS, :o, 1},
       {28, :pre_admit_cert, HL7v2.Type.ST, :o, 1},
       {29, :verification_date_time, HL7v2.Type.TS, :o, 1},
-      {30, :verification_by, :raw, :o, :unbounded},
+      {30, :verification_by, HL7v2.Type.XCN, :o, :unbounded},
       {31, :type_of_agreement_code, HL7v2.Type.IS, :o, 1},
       {32, :billing_status, HL7v2.Type.IS, :o, 1},
       {33, :lifetime_reserve_days, HL7v2.Type.NM, :o, 1},

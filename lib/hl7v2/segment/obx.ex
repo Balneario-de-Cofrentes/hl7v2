@@ -24,7 +24,7 @@ defmodule HL7v2.Segment.OBX do
       {13, :user_defined_access_checks, HL7v2.Type.ST, :o, 1},
       {14, :date_time_of_the_observation, HL7v2.Type.TS, :o, 1},
       {15, :producers_id, HL7v2.Type.CE, :o, 1},
-      {16, :responsible_observer, :raw, :o, :unbounded},
+      {16, :responsible_observer, HL7v2.Type.XCN, :o, :unbounded},
       {17, :observation_method, HL7v2.Type.CE, :o, :unbounded},
       {18, :equipment_instance_identifier, HL7v2.Type.EI, :o, :unbounded},
       {19, :date_time_of_the_analysis, HL7v2.Type.TS, :o, 1}

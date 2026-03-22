@@ -195,6 +195,7 @@ defmodule HL7v2.SegmentTest do
   describe "composite_type?/1" do
     test "returns true for known composite types" do
       assert Segment.composite_type?(CX) == true
+      assert Segment.composite_type?(HL7v2.Type.XCN) == true
       assert Segment.composite_type?(XPN) == true
       assert Segment.composite_type?(CE) == true
       assert Segment.composite_type?(HL7v2.Type.PL) == true

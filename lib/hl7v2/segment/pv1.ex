@@ -14,9 +14,9 @@ defmodule HL7v2.Segment.PV1 do
       {4, :admission_type, HL7v2.Type.IS, :o, 1},
       {5, :preadmit_number, HL7v2.Type.CX, :o, 1},
       {6, :prior_patient_location, HL7v2.Type.PL, :o, 1},
-      {7, :attending_doctor, :raw, :o, :unbounded},
-      {8, :referring_doctor, :raw, :o, :unbounded},
-      {9, :consulting_doctor, :raw, :o, :unbounded},
+      {7, :attending_doctor, HL7v2.Type.XCN, :o, :unbounded},
+      {8, :referring_doctor, HL7v2.Type.XCN, :o, :unbounded},
+      {9, :consulting_doctor, HL7v2.Type.XCN, :o, :unbounded},
       {10, :hospital_service, HL7v2.Type.IS, :o, 1},
       {11, :temporary_location, HL7v2.Type.PL, :o, 1},
       {12, :preadmit_test_indicator, HL7v2.Type.IS, :o, 1},
@@ -24,7 +24,7 @@ defmodule HL7v2.Segment.PV1 do
       {14, :admit_source, HL7v2.Type.IS, :o, 1},
       {15, :ambulatory_status, HL7v2.Type.IS, :o, :unbounded},
       {16, :vip_indicator, HL7v2.Type.IS, :o, 1},
-      {17, :admitting_doctor, :raw, :o, :unbounded},
+      {17, :admitting_doctor, HL7v2.Type.XCN, :o, :unbounded},
       {18, :patient_type, HL7v2.Type.IS, :o, 1},
       {19, :visit_number, HL7v2.Type.CX, :o, 1},
       {20, :financial_class, :raw, :o, :unbounded},
@@ -59,6 +59,6 @@ defmodule HL7v2.Segment.PV1 do
       {49, :total_payments, HL7v2.Type.NM, :o, 1},
       {50, :alternate_visit_id, HL7v2.Type.CX, :o, 1},
       {51, :visit_indicator, HL7v2.Type.IS, :o, 1},
-      {52, :other_healthcare_provider, :raw, :b, :unbounded}
+      {52, :other_healthcare_provider, HL7v2.Type.XCN, :b, :unbounded}
     ]
 end

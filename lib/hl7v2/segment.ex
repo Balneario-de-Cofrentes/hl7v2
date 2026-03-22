@@ -40,6 +40,7 @@ defmodule HL7v2.Segment do
 
   @composite_types MapSet.new([
                      HL7v2.Type.CX,
+                     HL7v2.Type.XCN,
                      HL7v2.Type.XPN,
                      HL7v2.Type.XAD,
                      HL7v2.Type.XTN,

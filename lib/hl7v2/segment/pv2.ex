@@ -20,7 +20,7 @@ defmodule HL7v2.Segment.PV2 do
       {10, :estimated_length_of_inpatient_stay, HL7v2.Type.NM, :o, 1},
       {11, :actual_length_of_inpatient_stay, HL7v2.Type.NM, :o, 1},
       {12, :visit_description, HL7v2.Type.ST, :o, 1},
-      {13, :referral_source_code, :raw, :o, :unbounded},
+      {13, :referral_source_code, HL7v2.Type.XCN, :o, :unbounded},
       {14, :previous_service_date, HL7v2.Type.DT, :o, 1},
       {15, :employment_illness_related_indicator, HL7v2.Type.ID, :o, 1},
       {16, :purge_status_code, HL7v2.Type.IS, :o, 1},

@@ -2,7 +2,7 @@ defmodule HL7v2.Segment.ORCTest do
   use ExUnit.Case, async: true
 
   alias HL7v2.Segment.ORC
-  alias HL7v2.Type.EI
+  alias HL7v2.Type.{EI, XCN, FN}
 
   describe "fields/0" do
     test "returns 31 field definitions" do
@@ -52,21 +52,22 @@ defmodule HL7v2.Segment.ORCTest do
       assert result.response_flag == "D"
     end
 
-    test "raw fields (ordering_provider, entered_by) preserved as-is" do
-      provider_raw = "Smith^John"
+    test "ordering_provider and entered_by parsed as XCN" do
       entered_raw = [["Jones", "Mary"]]
 
       raw =
         build_orc_fields(%{
           0 => "NW",
           9 => entered_raw,
-          11 => provider_raw
+          11 => ["Smith", "John"]
         })
 
       result = ORC.parse(raw)
 
-      assert result.entered_by == entered_raw
-      assert result.ordering_provider == provider_raw
+      assert [%XCN{id_number: "Jones", family_name: %FN{surname: "Mary"}}] = result.entered_by
+
+      assert [%XCN{id_number: "Smith", family_name: %FN{surname: "John"}}] =
+               result.ordering_provider
     end
 
     test "parses empty list — all fields nil" do

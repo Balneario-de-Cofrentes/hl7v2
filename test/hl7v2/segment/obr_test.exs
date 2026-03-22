@@ -2,7 +2,7 @@ defmodule HL7v2.Segment.OBRTest do
   use ExUnit.Case, async: true
 
   alias HL7v2.Segment.OBR
-  alias HL7v2.Type.{CE, EI, TS, DTM}
+  alias HL7v2.Type.{CE, EI, XCN, FN, TS, DTM}
 
   describe "fields/0" do
     test "returns 49 field definitions" do
@@ -55,21 +55,23 @@ defmodule HL7v2.Segment.OBRTest do
              } = result.observation_date_time
     end
 
-    test "raw fields preserved (ordering_provider, collector_identifier)" do
-      provider_raw = "Smith^John^Q"
+    test "ordering_provider and collector_identifier parsed as XCN" do
       collector_raw = [["TECH001", "Jones"]]
 
       raw =
         build_obr_fields(%{
           3 => ["85025", "CBC", "CPT4"],
           9 => collector_raw,
-          15 => provider_raw
+          15 => ["Smith", "John", "Q"]
         })
 
       result = OBR.parse(raw)
 
-      assert result.collector_identifier == collector_raw
-      assert result.ordering_provider == provider_raw
+      assert [%XCN{id_number: "TECH001", family_name: %FN{surname: "Jones"}}] =
+               result.collector_identifier
+
+      assert [%XCN{id_number: "Smith", family_name: %FN{surname: "John"}, given_name: "Q"}] =
+               result.ordering_provider
     end
 
     test "result_status and diagnostic_serv_sect_id parsed" do
@@ -116,16 +118,16 @@ defmodule HL7v2.Segment.OBRTest do
       assert Enum.at(encoded, 3) == ["85025", "CBC", "CPT4"]
     end
 
-    test "round-trip with raw ordering_provider" do
+    test "round-trip with ordering_provider XCN" do
       raw =
         build_obr_fields(%{
           3 => ["85025", "CBC", "CPT4"],
-          15 => "DrSmith^John"
+          15 => ["DrSmith", "John"]
         })
 
       encoded = raw |> OBR.parse() |> OBR.encode()
 
-      assert Enum.at(encoded, 15) == "DrSmith^John"
+      assert Enum.at(encoded, 15) == ["DrSmith", "John"]
     end
 
     test "trailing nil fields are trimmed" do

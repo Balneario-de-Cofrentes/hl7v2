@@ -24,7 +24,7 @@ defmodule HL7v2.Segment.DG1 do
       {13, :outlier_cost, :raw, :b, 1},
       {14, :grouper_version_and_type, HL7v2.Type.ST, :b, 1},
       {15, :diagnosis_priority, HL7v2.Type.ID, :o, 1},
-      {16, :diagnosing_clinician, :raw, :o, :unbounded},
+      {16, :diagnosing_clinician, HL7v2.Type.XCN, :o, :unbounded},
       {17, :diagnosis_classification, HL7v2.Type.IS, :o, 1},
       {18, :confidential_indicator, HL7v2.Type.ID, :o, 1},
       {19, :attestation_date_time, HL7v2.Type.TS, :o, 1},

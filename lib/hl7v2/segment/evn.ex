@@ -12,7 +12,7 @@ defmodule HL7v2.Segment.EVN do
       {2, :recorded_date_time, HL7v2.Type.TS, :r, 1},
       {3, :date_time_planned_event, HL7v2.Type.TS, :o, 1},
       {4, :event_reason_code, HL7v2.Type.IS, :o, 1},
-      {5, :operator_id, :raw, :o, :unbounded},
+      {5, :operator_id, HL7v2.Type.XCN, :o, :unbounded},
       {6, :event_occurred, HL7v2.Type.TS, :o, 1},
       {7, :event_facility, HL7v2.Type.HD, :o, 1}
     ]

@@ -57,13 +57,14 @@ defmodule HL7v2.Segment.EVNTest do
              } = result.event_facility
     end
 
-    test "operator_id (raw type) is preserved as-is" do
+    test "operator_id parsed as XCN" do
       operator_data = [["SMITH", "JOHN"]]
       raw = ["", ["20260322120000"], "", "", operator_data]
 
       result = EVN.parse(raw)
 
-      assert result.operator_id == operator_data
+      assert [%HL7v2.Type.XCN{id_number: "SMITH", family_name: %HL7v2.Type.FN{surname: "JOHN"}}] =
+               result.operator_id
     end
 
     test "parses event_occurred as TS" do
@@ -116,13 +117,12 @@ defmodule HL7v2.Segment.EVNTest do
       assert List.last(encoded) == ["HOSP", "2.16.840.1.113883", "ISO"]
     end
 
-    test "raw operator_id survives round-trip" do
-      operator_data = "SMITH"
-      raw = ["", ["20260322120000"], "", "", operator_data]
+    test "operator_id XCN survives round-trip" do
+      raw = ["", ["20260322120000"], "", "", "SMITH"]
 
       encoded = raw |> EVN.parse() |> EVN.encode()
 
-      assert Enum.at(encoded, 4) == operator_data
+      assert Enum.at(encoded, 4) == ["SMITH"]
     end
 
     test "trailing nil fields trimmed" do

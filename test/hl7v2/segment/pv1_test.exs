@@ -2,7 +2,7 @@ defmodule HL7v2.Segment.PV1Test do
   use ExUnit.Case, async: true
 
   alias HL7v2.Segment.PV1
-  alias HL7v2.Type.{PL, CX, HD, TS, DTM}
+  alias HL7v2.Type.{PL, CX, XCN, FN, HD, TS, DTM}
 
   describe "fields/0" do
     test "returns 52 field definitions" do
@@ -37,7 +37,7 @@ defmodule HL7v2.Segment.PV1Test do
       assert result.assigned_patient_location.bed == "A"
     end
 
-    test "raw fields (attending_doctor, referring_doctor) preserved as-is" do
+    test "attending_doctor and referring_doctor parsed as XCN" do
       attending = [["Smith", "John", "", "", "", "", "", "", "", "NPI"]]
       referring = "DR^Jones"
 
@@ -49,8 +49,11 @@ defmodule HL7v2.Segment.PV1Test do
 
       result = PV1.parse(raw)
 
-      assert result.attending_doctor == attending
-      assert result.referring_doctor == referring
+      assert [%XCN{id_number: "Smith", family_name: %FN{surname: "John"}, name_type_code: "NPI"}] =
+               result.attending_doctor
+
+      # String input "DR^Jones" is treated as a single-component composite
+      assert [%XCN{id_number: "DR^Jones"}] = result.referring_doctor
     end
 
     test "visit_number parsed as CX" do
@@ -108,17 +111,17 @@ defmodule HL7v2.Segment.PV1Test do
       assert Enum.at(encoded, 2) == ["ICU", "101", "A"]
     end
 
-    test "round-trip with raw attending_doctor" do
+    test "round-trip with attending_doctor XCN" do
       raw =
         build_pv1_fields(%{
           1 => "I",
-          6 => "Smith^John"
+          6 => ["1234", "Smith", "John"]
         })
 
       encoded = raw |> PV1.parse() |> PV1.encode()
 
       assert Enum.at(encoded, 1) == "I"
-      assert Enum.at(encoded, 6) == "Smith^John"
+      assert Enum.at(encoded, 6) == ["1234", "Smith", "John"]
     end
 
     test "trailing nil fields are trimmed" do
