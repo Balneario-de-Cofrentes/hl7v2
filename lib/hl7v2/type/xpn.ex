@@ -141,5 +141,4 @@ defmodule HL7v2.Type.XPN do
     ]
     |> Type.trim_trailing()
   end
-
 end

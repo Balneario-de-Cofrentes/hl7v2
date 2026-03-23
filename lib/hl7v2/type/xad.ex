@@ -136,5 +136,4 @@ defmodule HL7v2.Type.XAD do
     ]
     |> Type.trim_trailing()
   end
-
 end

@@ -29,7 +29,12 @@ defmodule HL7v2.Segment.PR1Test do
 
       assert %PR1{} = result
       assert result.set_id == 1
-      assert %HL7v2.Type.CE{identifier: "99213", text: "Office Visit", name_of_coding_system: "CPT"} =
+
+      assert %HL7v2.Type.CE{
+               identifier: "99213",
+               text: "Office Visit",
+               name_of_coding_system: "CPT"
+             } =
                result.procedure_code
 
       assert %HL7v2.Type.TS{

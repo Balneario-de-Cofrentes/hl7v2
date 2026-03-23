@@ -72,7 +72,10 @@ defmodule HL7v2.MessageDefinitionTest do
 
     test "validates ADT_A39 requires MRG" do
       assert :ok = MessageDefinition.validate_structure("ADT_A39", ["MSH", "EVN", "PID", "MRG"])
-      assert {:error, errors} = MessageDefinition.validate_structure("ADT_A39", ["MSH", "EVN", "PID"])
+
+      assert {:error, errors} =
+               MessageDefinition.validate_structure("ADT_A39", ["MSH", "EVN", "PID"])
+
       assert Enum.any?(errors, &(&1.message =~ "MRG"))
     end
   end

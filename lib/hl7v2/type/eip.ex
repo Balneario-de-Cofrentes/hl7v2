@@ -70,5 +70,4 @@ defmodule HL7v2.Type.EIP do
     ]
     |> Type.trim_trailing()
   end
-
 end

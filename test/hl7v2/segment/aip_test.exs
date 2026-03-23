@@ -44,8 +44,16 @@ defmodule HL7v2.Segment.AIPTest do
 
     test "parses duration and start_date_time" do
       raw = [
-        "1", "", "", "", "",
-        ["20260401090000"], "", "", "60", ["min", "minutes"]
+        "1",
+        "",
+        "",
+        "",
+        "",
+        ["20260401090000"],
+        "",
+        "",
+        "60",
+        ["min", "minutes"]
       ]
 
       result = AIP.parse(raw)

@@ -78,5 +78,4 @@ defmodule HL7v2.Type.PRL do
     ]
     |> Type.trim_trailing()
   end
-
 end

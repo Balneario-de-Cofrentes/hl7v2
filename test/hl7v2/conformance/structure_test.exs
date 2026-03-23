@@ -34,6 +34,7 @@ defmodule HL7v2.Conformance.StructureTest do
                "Standard lists #{id} as typed but has no module"
 
         module = Standard.segment_module(id)
+
         assert HL7v2.TypedParser.segment_module(id) == module,
                "TypedParser missing #{id}"
       end
@@ -177,7 +178,7 @@ defmodule HL7v2.Conformance.StructureTest do
 
     test "unsupported segments exist" do
       unsupported = Coverage.unsupported_segments()
-      assert length(unsupported) > 100
+      assert length(unsupported) > 90
     end
   end
 end

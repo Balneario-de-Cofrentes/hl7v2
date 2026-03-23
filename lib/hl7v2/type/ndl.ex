@@ -120,5 +120,4 @@ defmodule HL7v2.Type.NDL do
     ]
     |> Type.trim_trailing()
   end
-
 end

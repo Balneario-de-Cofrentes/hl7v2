@@ -77,7 +77,13 @@ defmodule HL7v2.Segment do
                      HL7v2.Type.SAD,
                      HL7v2.Type.DR,
                      HL7v2.Type.TS,
-                     HL7v2.Type.NR
+                     HL7v2.Type.NR,
+                     HL7v2.Type.RI,
+                     HL7v2.Type.SN,
+                     HL7v2.Type.ED,
+                     HL7v2.Type.RP,
+                     HL7v2.Type.RPT,
+                     HL7v2.Type.PLN
                    ])
 
   defmacro __using__(opts) do

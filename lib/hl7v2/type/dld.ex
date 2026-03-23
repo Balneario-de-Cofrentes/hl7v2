@@ -67,5 +67,4 @@ defmodule HL7v2.Type.DLD do
     ]
     |> Type.trim_trailing()
   end
-
 end

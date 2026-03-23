@@ -24,11 +24,14 @@ defmodule HL7v2.TypedParser do
     "AL1" => HL7v2.Segment.AL1,
     "DB1" => HL7v2.Segment.DB1,
     "DG1" => HL7v2.Segment.DG1,
+    "DRG" => HL7v2.Segment.DRG,
     "ERR" => HL7v2.Segment.ERR,
     "EVN" => HL7v2.Segment.EVN,
     "FT1" => HL7v2.Segment.FT1,
     "GT1" => HL7v2.Segment.GT1,
     "IN1" => HL7v2.Segment.IN1,
+    "IN2" => HL7v2.Segment.IN2,
+    "IN3" => HL7v2.Segment.IN3,
     "MRG" => HL7v2.Segment.MRG,
     "MSA" => HL7v2.Segment.MSA,
     "MSH" => HL7v2.Segment.MSH,
@@ -38,13 +41,18 @@ defmodule HL7v2.TypedParser do
     "OBX" => HL7v2.Segment.OBX,
     "ORC" => HL7v2.Segment.ORC,
     "PD1" => HL7v2.Segment.PD1,
+    "PDA" => HL7v2.Segment.PDA,
     "PID" => HL7v2.Segment.PID,
     "PR1" => HL7v2.Segment.PR1,
     "PV1" => HL7v2.Segment.PV1,
     "PV2" => HL7v2.Segment.PV2,
     "RGS" => HL7v2.Segment.RGS,
+    "ROL" => HL7v2.Segment.ROL,
     "SCH" => HL7v2.Segment.SCH,
-    "SFT" => HL7v2.Segment.SFT
+    "SFT" => HL7v2.Segment.SFT,
+    "SPM" => HL7v2.Segment.SPM,
+    "TQ1" => HL7v2.Segment.TQ1,
+    "TQ2" => HL7v2.Segment.TQ2
   }
 
   @doc """

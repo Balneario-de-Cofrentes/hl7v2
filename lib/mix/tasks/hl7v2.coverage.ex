@@ -37,7 +37,10 @@ defmodule Mix.Tasks.Hl7v2.Coverage do
       Mix.shell().info("")
     end
 
-    Mix.shell().info("  Typed Segments: #{Enum.join(HL7v2.Standard.Coverage.typed_segments(), ", ")}")
+    Mix.shell().info(
+      "  Typed Segments: #{Enum.join(HL7v2.Standard.Coverage.typed_segments(), ", ")}"
+    )
+
     Mix.shell().info("")
 
     unsupported = HL7v2.Standard.Coverage.unsupported_types()

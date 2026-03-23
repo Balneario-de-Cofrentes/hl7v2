@@ -85,5 +85,4 @@ defmodule HL7v2.Type.CP do
     ]
     |> Type.trim_trailing()
   end
-
 end

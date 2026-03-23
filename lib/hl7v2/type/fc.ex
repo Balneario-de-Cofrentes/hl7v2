@@ -66,5 +66,4 @@ defmodule HL7v2.Type.FC do
     ]
     |> Type.trim_trailing()
   end
-
 end

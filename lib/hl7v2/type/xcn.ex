@@ -192,5 +192,4 @@ defmodule HL7v2.Type.XCN do
     ]
     |> Type.trim_trailing()
   end
-
 end

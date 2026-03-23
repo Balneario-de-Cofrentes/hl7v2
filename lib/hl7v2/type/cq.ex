@@ -69,5 +69,4 @@ defmodule HL7v2.Type.CQ do
     ]
     |> Type.trim_trailing()
   end
-
 end

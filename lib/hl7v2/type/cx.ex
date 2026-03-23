@@ -116,5 +116,4 @@ defmodule HL7v2.Type.CX do
     ]
     |> Type.trim_trailing()
   end
-
 end

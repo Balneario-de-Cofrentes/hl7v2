@@ -46,8 +46,18 @@ defmodule HL7v2.Segment.AIGTest do
 
     test "parses duration and start_date_time" do
       raw = [
-        "1", "", "", ["EQUIP", "Equipment"], "", "", "",
-        ["20260401090000"], "", "", "60", ["min", "minutes"]
+        "1",
+        "",
+        "",
+        ["EQUIP", "Equipment"],
+        "",
+        "",
+        "",
+        ["20260401090000"],
+        "",
+        "",
+        "60",
+        ["min", "minutes"]
       ]
 
       result = AIG.parse(raw)

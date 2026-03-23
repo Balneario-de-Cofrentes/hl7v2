@@ -27,7 +27,10 @@ defmodule HL7v2.Segment.SFTTest do
       result = SFT.parse(raw)
 
       assert %SFT{} = result
-      assert %HL7v2.Type.XON{organization_name: "Acme Medical"} = result.software_vendor_organization
+
+      assert %HL7v2.Type.XON{organization_name: "Acme Medical"} =
+               result.software_vendor_organization
+
       assert result.software_certified_version_or_release_number == "1.2.3"
       assert result.software_product_name == "MedViewer"
       assert result.software_binary_id == "BIN-42"

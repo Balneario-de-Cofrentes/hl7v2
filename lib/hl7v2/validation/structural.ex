@@ -83,7 +83,13 @@ defmodule HL7v2.Validation.Structural do
 
           if MapSet.member?(leftover_ids, seg_name) do
             level = if mode == :strict, do: :error, else: :warning
-            upgraded = %{error | level: level, message: "Required segment #{seg_name} is present but out of order"}
+
+            upgraded = %{
+              error
+              | level: level,
+                message: "Required segment #{seg_name} is present but out of order"
+            }
+
             {upgraded, MapSet.put(acc, seg_name)}
           else
             {error, acc}

@@ -69,5 +69,4 @@ defmodule HL7v2.Type.MOC do
     ]
     |> Type.trim_trailing()
   end
-
 end

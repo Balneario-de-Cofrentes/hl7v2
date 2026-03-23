@@ -94,7 +94,7 @@ defmodule HL7v2.Segment.OBXTest do
     test "unknown value_type preserves observation_value as raw" do
       raw =
         build_obx_fields(%{
-          1 => "ED",
+          1 => "FAKE",
           4 => "encapsulated data"
         })
 

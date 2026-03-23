@@ -91,5 +91,4 @@ defmodule HL7v2.Type.ELD do
     ]
     |> Type.trim_trailing()
   end
-
 end

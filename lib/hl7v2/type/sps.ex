@@ -98,5 +98,4 @@ defmodule HL7v2.Type.SPS do
     ]
     |> Type.trim_trailing()
   end
-
 end

@@ -31,7 +31,10 @@ defmodule HL7v2.Segment.PD1Test do
 
       result = PD1.parse(raw)
 
-      assert [%HL7v2.Type.XON{organization_name: "Hospital A"}, %HL7v2.Type.XON{organization_name: "Hospital B"}] =
+      assert [
+               %HL7v2.Type.XON{organization_name: "Hospital A"},
+               %HL7v2.Type.XON{organization_name: "Hospital B"}
+             ] =
                result.patient_primary_facility
     end
 

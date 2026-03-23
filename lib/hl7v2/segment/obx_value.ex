@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.OBXValue do
   Dispatches OBX-5 (observation_value) parsing based on OBX-2 (value_type).
 
   When OBX-2 declares a known data type, the observation value is parsed into
-  the corresponding typed struct. Unknown or complex types (ED, SN, RP) are
-  preserved as raw values.
+  the corresponding typed struct. Unknown types are preserved as raw values.
 
   Per the HL7 v2.5.1 specification (Section 7.4.2), the data type of OBX-5
   varies at runtime based on the value of OBX-2.
@@ -42,7 +41,10 @@ defmodule HL7v2.Segment.OBXValue do
     "CP" => HL7v2.Type.CP,
     "FC" => HL7v2.Type.FC,
     "TM" => HL7v2.Type.TM,
-    "TN" => HL7v2.Type.TN
+    "TN" => HL7v2.Type.TN,
+    "SN" => HL7v2.Type.SN,
+    "ED" => HL7v2.Type.ED,
+    "RP" => HL7v2.Type.RP
   }
 
   @doc """

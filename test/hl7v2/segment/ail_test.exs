@@ -44,8 +44,16 @@ defmodule HL7v2.Segment.AILTest do
 
     test "parses duration and start_date_time" do
       raw = [
-        "1", "", "", "", "",
-        ["20260401090000"], "", "", "30", ["min", "minutes"]
+        "1",
+        "",
+        "",
+        "",
+        "",
+        ["20260401090000"],
+        "",
+        "",
+        "30",
+        ["min", "minutes"]
       ]
 
       result = AIL.parse(raw)

@@ -77,5 +77,4 @@ defmodule HL7v2.Type.VID do
     |> String.split(Type.sub_component_separator(), parts: 6)
     |> CE.parse()
   end
-
 end

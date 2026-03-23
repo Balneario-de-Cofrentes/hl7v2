@@ -110,5 +110,4 @@ defmodule HL7v2.Type.XON do
     ]
     |> Type.trim_trailing()
   end
-
 end

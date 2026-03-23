@@ -126,9 +126,23 @@ defmodule HL7v2.Segment.OBXValueTest do
     end
 
     test "unknown value_type preserves raw value" do
-      assert OBXValue.parse("encapsulated", "ED") == "encapsulated"
-      assert OBXValue.parse("structured", "SN") == "structured"
-      assert OBXValue.parse("reference", "RP") == "reference"
+      assert OBXValue.parse("some data", "FAKE") == "some data"
+    end
+
+    test "SN value type returns SN struct from component list" do
+      result = OBXValue.parse([">", "100"], "SN")
+      assert %HL7v2.Type.SN{comparator: ">"} = result
+      assert %HL7v2.Type.NM{value: "100"} = result.num1
+    end
+
+    test "ED value type returns ED struct from component list" do
+      result = OBXValue.parse(["", "Application", "PDF", "Base64", "JVBER..."], "ED")
+      assert %HL7v2.Type.ED{type_of_data: "Application", data_subtype: "PDF"} = result
+    end
+
+    test "RP value type returns RP struct from component list" do
+      result = OBXValue.parse(["/reports/12345.pdf", "", "Application", "PDF"], "RP")
+      assert %HL7v2.Type.RP{pointer: "/reports/12345.pdf", type_of_data: "Application"} = result
     end
 
     test "nil raw_value returns nil regardless of type" do
@@ -193,7 +207,7 @@ defmodule HL7v2.Segment.OBXValueTest do
     end
 
     test "unknown value_type returns value as-is" do
-      assert OBXValue.encode("encapsulated", "ED") == "encapsulated"
+      assert OBXValue.encode("some data", "FAKE") == "some data"
     end
 
     test "encodes list of typed values" do
@@ -218,10 +232,13 @@ defmodule HL7v2.Segment.OBXValueTest do
       assert OBXValue.type_for("XCN") == HL7v2.Type.XCN
     end
 
+    test "returns module for SN, ED, RP types" do
+      assert OBXValue.type_for("SN") == HL7v2.Type.SN
+      assert OBXValue.type_for("ED") == HL7v2.Type.ED
+      assert OBXValue.type_for("RP") == HL7v2.Type.RP
+    end
+
     test "returns nil for unknown types" do
-      assert OBXValue.type_for("ED") == nil
-      assert OBXValue.type_for("SN") == nil
-      assert OBXValue.type_for("RP") == nil
       assert OBXValue.type_for("FAKE") == nil
     end
   end
@@ -237,11 +254,16 @@ defmodule HL7v2.Segment.OBXValueTest do
       assert "TS" in types
     end
 
+    test "includes SN, ED, and RP types" do
+      types = OBXValue.known_types()
+      assert "SN" in types
+      assert "ED" in types
+      assert "RP" in types
+    end
+
     test "does not include unknown types" do
       types = OBXValue.known_types()
-      refute "ED" in types
-      refute "SN" in types
-      refute "RP" in types
+      refute "FAKE" in types
     end
   end
 
@@ -304,7 +326,7 @@ defmodule HL7v2.Segment.OBXValueTest do
     end
 
     test "OBX with unknown value_type keeps observation raw" do
-      raw = build_obx_fields(%{0 => "1", 1 => "ED", 4 => "binary blob", 10 => "F"})
+      raw = build_obx_fields(%{0 => "1", 1 => "FAKE", 4 => "binary blob", 10 => "F"})
       obx = OBX.parse(raw)
 
       assert obx.observation_value == "binary blob"
