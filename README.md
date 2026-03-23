@@ -168,8 +168,8 @@ end
 ## Coverage
 
 ```
- Segments    37 standard + generic ZXX
-              37 of 136 standard segments + generic Z-segment pass-through
+ Segments    43 standard + generic ZXX
+              43 of 136 standard segments + generic Z-segment pass-through
               Run `mix hl7v2.coverage` for the full list
 
  Types       54 of 89 v2.5.1 data types (60.7%)
