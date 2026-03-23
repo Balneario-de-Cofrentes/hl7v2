@@ -37,9 +37,13 @@ defmodule HL7v2.Standard do
     "AIP" => HL7v2.Segment.AIP,
     "AIS" => HL7v2.Segment.AIS,
     "AL1" => HL7v2.Segment.AL1,
+    "BLG" => HL7v2.Segment.BLG,
+    "CTD" => HL7v2.Segment.CTD,
+    "CTI" => HL7v2.Segment.CTI,
     "DB1" => HL7v2.Segment.DB1,
     "DG1" => HL7v2.Segment.DG1,
     "DRG" => HL7v2.Segment.DRG,
+    "DSC" => HL7v2.Segment.DSC,
     "ERR" => HL7v2.Segment.ERR,
     "EVN" => HL7v2.Segment.EVN,
     "FT1" => HL7v2.Segment.FT1,
@@ -67,7 +71,9 @@ defmodule HL7v2.Standard do
     "SFT" => HL7v2.Segment.SFT,
     "SPM" => HL7v2.Segment.SPM,
     "TQ1" => HL7v2.Segment.TQ1,
-    "TQ2" => HL7v2.Segment.TQ2
+    "TQ2" => HL7v2.Segment.TQ2,
+    "UB1" => HL7v2.Segment.UB1,
+    "UB2" => HL7v2.Segment.UB2
   }
 
   @segment_catalog %{
@@ -108,7 +114,7 @@ defmodule HL7v2.Standard do
     "AUT" => %{name: "Authorization Information", tier: :unsupported},
     "BHS" => %{name: "Batch Header", tier: :unsupported},
     "BLC" => %{name: "Blood Code", tier: :unsupported},
-    "BLG" => %{name: "Billing", tier: :unsupported},
+    "BLG" => %{name: "Billing", tier: :typed},
     "BPO" => %{name: "Blood Product Order", tier: :unsupported},
     "BPX" => %{name: "Blood Product Dispense Status", tier: :unsupported},
     "BTS" => %{name: "Batch Trailer", tier: :unsupported},
@@ -122,10 +128,10 @@ defmodule HL7v2.Standard do
     "CSP" => %{name: "Clinical Study Phase", tier: :unsupported},
     "CSR" => %{name: "Clinical Study Registration", tier: :unsupported},
     "CSS" => %{name: "Clinical Study Data Schedule Segment", tier: :unsupported},
-    "CTD" => %{name: "Contact Data", tier: :unsupported},
-    "CTI" => %{name: "Clinical Trial Identification", tier: :unsupported},
+    "CTD" => %{name: "Contact Data", tier: :typed},
+    "CTI" => %{name: "Clinical Trial Identification", tier: :typed},
     "DRG" => %{name: "Diagnosis Related Group", tier: :typed},
-    "DSC" => %{name: "Continuation Pointer", tier: :unsupported},
+    "DSC" => %{name: "Continuation Pointer", tier: :typed},
     "DSP" => %{name: "Display Data", tier: :unsupported},
     "ECD" => %{name: "Equipment Command", tier: :unsupported},
     "ECR" => %{name: "Equipment Command Response", tier: :unsupported},
@@ -204,8 +210,8 @@ defmodule HL7v2.Standard do
     "TQ1" => %{name: "Timing/Quantity", tier: :typed},
     "TQ2" => %{name: "Timing/Quantity Relationship", tier: :typed},
     "TXA" => %{name: "Transcription Document Header", tier: :unsupported},
-    "UB1" => %{name: "UB82", tier: :unsupported},
-    "UB2" => %{name: "UB92 Data", tier: :unsupported},
+    "UB1" => %{name: "UB82", tier: :typed},
+    "UB2" => %{name: "UB92 Data", tier: :typed},
     "URD" => %{name: "Results/Update Definition", tier: :unsupported},
     "URS" => %{name: "Unsolicited Selection", tier: :unsupported},
     "VAR" => %{name: "Variance", tier: :unsupported}

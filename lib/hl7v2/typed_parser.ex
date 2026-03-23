@@ -22,9 +22,13 @@ defmodule HL7v2.TypedParser do
     "AIP" => HL7v2.Segment.AIP,
     "AIS" => HL7v2.Segment.AIS,
     "AL1" => HL7v2.Segment.AL1,
+    "BLG" => HL7v2.Segment.BLG,
+    "CTD" => HL7v2.Segment.CTD,
+    "CTI" => HL7v2.Segment.CTI,
     "DB1" => HL7v2.Segment.DB1,
     "DG1" => HL7v2.Segment.DG1,
     "DRG" => HL7v2.Segment.DRG,
+    "DSC" => HL7v2.Segment.DSC,
     "ERR" => HL7v2.Segment.ERR,
     "EVN" => HL7v2.Segment.EVN,
     "FT1" => HL7v2.Segment.FT1,
@@ -52,7 +56,9 @@ defmodule HL7v2.TypedParser do
     "SFT" => HL7v2.Segment.SFT,
     "SPM" => HL7v2.Segment.SPM,
     "TQ1" => HL7v2.Segment.TQ1,
-    "TQ2" => HL7v2.Segment.TQ2
+    "TQ2" => HL7v2.Segment.TQ2,
+    "UB1" => HL7v2.Segment.UB1,
+    "UB2" => HL7v2.Segment.UB2
   }
 
   @doc """
