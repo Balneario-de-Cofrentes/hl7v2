@@ -92,28 +92,15 @@ defmodule HL7v2.Encoder do
     Enum.intersperse(subs, <<sep.sub_component>>)
   end
 
-  # Detect whether a list represents repetitions (list of component-lists)
-  # vs a single set of components (list of strings/sub-component-lists).
+  # Detect whether a list represents repetitions vs components.
   #
-  # Repetitions: [[c1, c2], [c3, c4]] — outer list of inner lists
-  # Components: [c1, c2, c3] — flat list of strings
-  # Sub-components within components: ["a", ["x", "y"]] — mixed
+  # The parser normalizes repetitions so every element is always a list
+  # (plain-string reps are wrapped as ["value"]).  This makes the check
+  # unambiguous:
   #
-  # A field has repetitions when it's a list where at least one element is itself a list.
-  # But we also need to distinguish from sub-components.
-  # The key insight: repetitions contain component-level lists, while components
-  # contain sub-component lists. The ambiguity only arises at the field level.
-  #
-  # Heuristic: if every element is either a list or a binary, and at least one
-  # is a list, check if those inner lists could be component sets.
-  # Actually, the parser produces unambiguous structures:
-  # - No repetitions, no components: "value"
-  # - Components only: ["a", "b", "c"]
-  # - Repetitions (each with components): [["a", "b"], ["c", "d"]]
-  # - Sub-components: ["a", ["x", "y"]] — component list with one sub-component element
-  #
-  # So: if every element is a list, it's repetitions.
-  # If elements are mixed (some lists, some strings), it's components with sub-components.
+  #   Repetitions: [["a"], ["b", "c"]]  — all lists
+  #   Components:  ["a", "b", "c"]      — flat strings
+  #   Sub-comps:   ["a", ["x", "y"]]    — mixed (string + list)
   defp nested_repetitions?(values) do
     Enum.all?(values, &is_list/1)
   end

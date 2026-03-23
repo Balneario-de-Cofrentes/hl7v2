@@ -86,7 +86,7 @@ defmodule HL7v2.Standard do
   }
 
   @segment_catalog %{
-    # -- Typed segments (37) --
+    # -- Typed segments (see @typed_segment_modules for authoritative count) --
     "ACC" => %{name: "Accident", tier: :typed},
     "AIG" => %{name: "Appointment Information — General Resource", tier: :typed},
     "AIL" => %{name: "Appointment Information — Location Resource", tier: :typed},

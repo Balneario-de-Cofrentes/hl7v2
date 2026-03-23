@@ -96,6 +96,44 @@ defmodule HL7v2.RealityCheckTest do
       assert wire == text
     end
 
+    test "mixed-structure repetitions: simple ~ composite round-trips" do
+      # Regression: a~b^c must NOT become a^b&c
+      text =
+        "MSH|^~\\&|S|F||R|20260322||ADT^A01|1|P|2.5\rPID|1||a~b^c||Smith^John\r"
+
+      {:ok, raw} = HL7v2.parse(text)
+      wire = HL7v2.Encoder.encode(raw)
+      assert wire == text
+    end
+
+    test "simple string repetitions round-trip" do
+      # Regression: id1~id2 must NOT become id1^id2
+      text =
+        "MSH|^~\\&|S|F||R|20260322||ADT^A01|1|P|2.5\rPID|1||id1~id2||Smith^John\r"
+
+      {:ok, raw} = HL7v2.parse(text)
+      wire = HL7v2.Encoder.encode(raw)
+      assert wire == text
+    end
+
+    test "three simple repetitions round-trip" do
+      text =
+        "MSH|^~\\&|S|F||R|20260322||ADT^A01|1|P|2.5\rPID|1||a~b~c||Smith^John\r"
+
+      {:ok, raw} = HL7v2.parse(text)
+      wire = HL7v2.Encoder.encode(raw)
+      assert wire == text
+    end
+
+    test "repetition with one simple and two composite values round-trips" do
+      text =
+        "MSH|^~\\&|S|F||R|20260322||ADT^A01|1|P|2.5\rPID|1||simple~a^b~c^d^e\r"
+
+      {:ok, raw} = HL7v2.parse(text)
+      wire = HL7v2.Encoder.encode(raw)
+      assert wire == text
+    end
+
     test "round-trip with truncation character (v2.7+)" do
       text = "MSH|^~\\&#|SEND|FAC||RCV||20260322||ADT^A01|1|P|2.7\r"
       {:ok, raw} = HL7v2.parse(text)
@@ -355,6 +393,34 @@ defmodule HL7v2.RealityCheckTest do
       assert pv1.assigned_patient_location.facility.universal_id == "1.2.3"
       assert pv1.assigned_patient_location.facility.universal_id_type == "ISO"
       assert pv1.assigned_patient_location.person_location_type == "N"
+    end
+
+    test "typed: mixed-structure repetitions produce correct count" do
+      # Regression: 12345~67890^^^SS must produce 2 CX values, not 1 garbled one
+      text =
+        "MSH|^~\\&|S|F||R|20260322||ADT^A01|1|P|2.5\rPID|1||12345~67890^^^^SS||Smith^John\r"
+
+      {:ok, typed} = HL7v2.parse(text, mode: :typed)
+      pid = Enum.at(typed.segments, 1)
+
+      assert length(pid.patient_identifier_list) == 2
+      assert hd(pid.patient_identifier_list).id == "12345"
+      assert Enum.at(pid.patient_identifier_list, 1).id == "67890"
+      assert Enum.at(pid.patient_identifier_list, 1).identifier_type_code == "SS"
+    end
+
+    test "typed: mixed-structure repetitions round-trip through encode" do
+      text =
+        "MSH|^~\\&|S|F||R|20260322||ADT^A01|1|P|2.5\rPID|1||12345~67890^^^^SS||Smith^John\r"
+
+      {:ok, typed} = HL7v2.parse(text, mode: :typed)
+      wire = HL7v2.encode(typed)
+      {:ok, typed2} = HL7v2.parse(wire, mode: :typed)
+      pid2 = Enum.at(typed2.segments, 1)
+
+      assert length(pid2.patient_identifier_list) == 2
+      assert hd(pid2.patient_identifier_list).id == "12345"
+      assert Enum.at(pid2.patient_identifier_list, 1).id == "67890"
     end
 
     test "real-world message typed round-trip" do

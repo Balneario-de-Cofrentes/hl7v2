@@ -246,7 +246,7 @@ defmodule HL7v2.MessageTest do
 
       wire = Message.encode(msg)
       {:ok, parsed} = HL7v2.parse(wire)
-      typed = HL7v2.type(parsed)
+      {:ok, typed} = HL7v2.type(parsed)
       assert :ok = HL7v2.Validation.validate(typed)
     end
 
@@ -265,7 +265,7 @@ defmodule HL7v2.MessageTest do
 
       wire = Message.encode(msg)
       {:ok, parsed} = HL7v2.parse(wire)
-      typed = HL7v2.type(parsed)
+      {:ok, typed} = HL7v2.type(parsed)
       assert {:error, errors} = HL7v2.Validation.validate(typed)
       assert Enum.any?(errors, &(&1.message == "Required segment MRG is missing"))
     end
@@ -286,7 +286,7 @@ defmodule HL7v2.MessageTest do
 
       wire = Message.encode(msg)
       {:ok, parsed} = HL7v2.parse(wire)
-      typed = HL7v2.type(parsed)
+      {:ok, typed} = HL7v2.type(parsed)
       assert :ok = HL7v2.Validation.validate(typed)
     end
   end

@@ -56,7 +56,7 @@ msg = HL7v2.Message.new("ADT", "A01", sending_application: "PHAOS")
 
 ```elixir
 def deps do
-  [{:hl7v2, "~> 1.0"}]
+  [{:hl7v2, "~> 1.4"}]
 end
 ```
 
@@ -168,14 +168,14 @@ end
 ## Coverage
 
 ```
- Segments    43 standard + generic ZXX
-              43 of 136 standard segments + generic Z-segment pass-through
+ Segments    52 standard + generic ZXX
+              52 of 136 standard segments (38.2%) + generic Z-segment pass-through
               Run `mix hl7v2.coverage` for the full list
 
  Types       54 of 89 v2.5.1 data types (60.7%)
 
- Messages    ADT (A01-A04, A08, A12) ORM^O01 ORU^R01 SIU^S12 ACK
-              structural validation (order + groups + cardinality)
+ Messages    ADT (A01-A04, A08, A12) ORM^O01 ORU^R01 SIU^S12 RDE^O11
+              RDS^O13 MDM^T02 ACK — structural validation (order + groups + cardinality)
 
  Transport   MLLP framing, Ranch 2.x listener, GenServer client,
               TLS/mTLS, telemetry instrumentation
@@ -195,8 +195,8 @@ round-trip encoding, programmatic message building, MLLP transport with TLS, and
 validation (required fields, repetition limits, structural order/group/cardinality
 checks for supported message types). Lenient mode (default) reports ordering issues
 as warnings; strict mode treats them as errors.
-Raw mode is lossless for all valid HL7v2 messages. Typed mode covers a focused
-ADT/ORM/ORU/SIU/ACK subset with extra_fields preservation for unlisted fields.
+Raw mode is lossless for all valid HL7v2 messages. Typed mode covers
+ADT/ORM/ORU/SIU/RDE/RDS/MDM/ACK with extra_fields preservation for unlisted fields.
 
 **What it does not do:**
 
@@ -206,13 +206,15 @@ ADT/ORM/ORU/SIU/ACK subset with extra_fields preservation for unlisted fields.
 - Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
   no whitespace normalization)
 
-**Coverage:** 37 of 136 standard segments (plus generic ZXX) typed. 54 of 89 v2.5.1
-data types (60.7%). 20 group-aware message structure definitions with positional
+**Coverage:** 52 of 136 standard segments (38.2%, plus generic ZXX) typed. 54 of 89 v2.5.1
+data types (60.7%). 23 group-aware message structure definitions with positional
 structural validation. Opt-in table validation for 20 HL7 tables. Extra
 fields beyond declared definitions are preserved in `extra_fields` for lossless round-trip.
 OBX exposes 19 of 25 fields; OBR exposes 49 of 50 — unlisted fields survive as extra_fields.
-Some typed segment fields fall back to `:raw` where their HL7 data types (TQ, SPS, ELD) are
-not yet implemented — these fields are preserved but not parsed into typed structs.
+UB1 and UB2 are typed shells (most fields are `:raw`) included for structural completeness.
+Some typed segment fields fall back to `:raw` where their HL7 data types are
+not yet implemented — 67 raw holes total, preserved but not parsed into typed structs.
+Run `mix hl7v2.coverage` for the full list.
 
 ## Handling Unknown Segments
 
@@ -230,7 +232,7 @@ handles all of them without crashing or losing data:
 %HL7v2.Segment.ZXX{segment_id: "ZPD", raw_fields: ["custom", "data"]}
 
 # Unknown standard segments → raw tuples, lossless
-{"ROL", ["1", "AD", "CP", ...]}
+{"ARQ", ["1", "REQ001", ...]}
 ```
 
 All three forms encode back to valid HL7 wire format. The typed API (`get/2`, `fetch/2`,

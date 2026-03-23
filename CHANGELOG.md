@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.4.1 — 2026-03-23
+
+### Fixes
+
+- **Raw parser/encoder round-trip data corruption** — fields with mixed-structure
+  repetitions (e.g., `a~b^c`) were silently corrupted: the encoder misidentified
+  repetitions as components, encoding `a~b^c` as `a^b&c`. The parser now normalizes
+  each repetition to a list, making the representation unambiguous. This also fixes
+  the same ambiguity in the typed parser (mixed repetitions were collapsed into a
+  single garbled composite value).
+- **`HL7v2.type/1`** — now returns `{:ok, typed}` instead of raising `MatchError`
+  on conversion failure. Aligns with the library's error-tuple convention.
+- **README/CHANGELOG accuracy** — stale segment counts, stale ROL example (was shown
+  as raw tuple but is typed since v1.2.0), missing changelog entries, honest UB1/UB2
+  disclosure (mostly raw shells).
+
+### Stats
+
+2,376 tests (303 doctests + 30 properties + 2,043 tests), 0 failures
+
+## v1.4.0 — 2026-03-23
+
+### Pharmacy, Documents & Adverse Reactions
+
+- **9 new segments**: RXO (Order, 25 fields), RXE (Encoded Order, 44 fields),
+  RXD (Dispense, 33 fields), RXA (Administration, 26 fields), RXR (Route, 6 fields),
+  RXG (Give, 27 fields), RXC (Component, 9 fields), TXA (Transcription Document Header,
+  23 fields), IAM (Patient Adverse Reaction, 20 fields)
+- **3 new message structures**: RDE_O11 (Pharmacy Encoded Order), RDS_O13 (Pharmacy
+  Dispense), MDM_T02 (Document Notification and Content)
+- **Segment coverage**: 52/136 (38.2%, up from 31.6%)
+
+### Fixes
+
+- **Atom leak in structural validator** — segment IDs from untrusted input were
+  converted to atoms via `String.to_atom/1`. Now uses string-based MapSet comparison.
+- **Strict mode field cardinality** — field cardinality overflow escalated to `:error`
+  in strict mode (was always `:warning` regardless of mode).
+
+### Stats
+
+2,370 tests (303 doctests + 30 properties + 2,037 tests), 0 failures
+
+## v1.3.0 — 2026-03-23
+
+### Standards Expansion
+
+- **6 new segments**: UB1 (UB82), UB2 (UB92 Data), CTD (Contact Data),
+  CTI (Clinical Trial Identification), BLG (Billing), DSC (Continuation Pointer)
+- **Segment coverage**: 43/136 (31.6%, up from 27.2%)
+
+### Stats
+
+2,126 tests (303 doctests + 30 properties + 1,793 tests), 0 failures
+
 ## v1.2.0 — 2026-03-23
 
 ### Standards Expansion

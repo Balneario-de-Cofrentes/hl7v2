@@ -177,19 +177,17 @@ defmodule HL7v2 do
   @doc """
   Converts a `%HL7v2.RawMessage{}` to a `%HL7v2.TypedMessage{}`.
 
-  Shortcut for `HL7v2.TypedParser.convert/1` that unwraps the ok tuple.
-  Raises on conversion errors.
+  Shortcut for `HL7v2.TypedParser.convert/1`.
 
   ## Examples
 
       {:ok, raw} = HL7v2.parse(wire)
-      typed = HL7v2.type(raw)
+      {:ok, typed} = HL7v2.type(raw)
 
   """
-  @spec type(HL7v2.RawMessage.t()) :: HL7v2.TypedMessage.t()
+  @spec type(HL7v2.RawMessage.t()) :: {:ok, HL7v2.TypedMessage.t()} | {:error, term()}
   def type(%HL7v2.RawMessage{} = raw) do
-    {:ok, typed} = HL7v2.TypedParser.convert(raw)
-    typed
+    HL7v2.TypedParser.convert(raw)
   end
 
   @doc "Fetches a value, returning `{:ok, value}` or `{:error, reason}`."

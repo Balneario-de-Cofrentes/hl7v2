@@ -179,8 +179,17 @@ defmodule HL7v2.Parser do
         parse_components(single, sep)
 
       multiple ->
-        # Has repetitions — each repetition gets component parsing
-        Enum.map(multiple, &parse_components(&1, sep))
+        # Has repetitions — each repetition gets component parsing.
+        # Normalize: wrap plain-string results in [value] so that every
+        # repetition is a list.  This removes the structural ambiguity
+        # between "repetitions of simple values" and "a single set of
+        # components" — the encoder relies on all-lists to detect reps.
+        Enum.map(multiple, fn rep ->
+          case parse_components(rep, sep) do
+            result when is_binary(result) -> [result]
+            result -> result
+          end
+        end)
     end
   end
 
