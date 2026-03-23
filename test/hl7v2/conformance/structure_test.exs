@@ -178,7 +178,7 @@ defmodule HL7v2.Conformance.StructureTest do
 
     test "unsupported segments exist" do
       unsupported = Coverage.unsupported_segments()
-      assert length(unsupported) > 90
+      assert length(unsupported) > 80
     end
   end
 end

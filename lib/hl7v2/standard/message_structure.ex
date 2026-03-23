@@ -513,6 +513,125 @@ defmodule HL7v2.Standard.MessageStructure do
     ]
   }
 
+  # ---------------------------------------------------------------------------
+  # RDE / RDS Structures (Pharmacy)
+  # ---------------------------------------------------------------------------
+
+  @rde_o11 %{
+    name: "RDE_O11",
+    description: "Pharmacy/Treatment Encoded Order",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :PATIENT, :optional,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :PATIENT_VISIT, :optional,
+          [
+            {:segment, :PV1, :required},
+            {:segment, :PV2, :optional}
+          ]},
+         {:group, :INSURANCE, :optional, :repeating,
+          [
+            {:segment, :IN1, :required},
+            {:segment, :IN2, :optional},
+            {:segment, :IN3, :optional}
+          ]}
+       ]},
+      {:group, :ORDER, :required, :repeating,
+       [
+         {:segment, :ORC, :required},
+         {:group, :TIMING_ENCODED, :optional, :repeating,
+          [
+            {:segment, :TQ1, :required},
+            {:segment, :TQ2, :optional, :repeating}
+          ]},
+         {:segment, :RXE, :required},
+         {:segment, :NTE, :optional, :repeating},
+         {:segment, :RXR, :required, :repeating},
+         {:segment, :RXC, :optional, :repeating},
+         {:group, :OBSERVATION, :optional, :repeating,
+          [
+            {:segment, :OBX, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:segment, :FT1, :optional, :repeating},
+         {:segment, :CTI, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  @rds_o13 %{
+    name: "RDS_O13",
+    description: "Pharmacy/Treatment Dispense",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :PATIENT, :optional,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :PATIENT_VISIT, :optional,
+          [
+            {:segment, :PV1, :required},
+            {:segment, :PV2, :optional}
+          ]},
+         {:group, :INSURANCE, :optional, :repeating,
+          [
+            {:segment, :IN1, :required},
+            {:segment, :IN2, :optional},
+            {:segment, :IN3, :optional}
+          ]}
+       ]},
+      {:group, :ORDER, :required, :repeating,
+       [
+         {:segment, :ORC, :required},
+         {:group, :TIMING, :optional, :repeating,
+          [
+            {:segment, :TQ1, :required},
+            {:segment, :TQ2, :optional, :repeating}
+          ]},
+         {:segment, :RXD, :required},
+         {:segment, :NTE, :optional, :repeating},
+         {:segment, :RXR, :required, :repeating},
+         {:segment, :RXC, :optional, :repeating},
+         {:group, :OBSERVATION, :optional, :repeating,
+          [
+            {:segment, :OBX, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:segment, :FT1, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # MDM Structures (Medical Document Management)
+  # ---------------------------------------------------------------------------
+
+  @mdm_t02 %{
+    name: "MDM_T02",
+    description: "Original Document Notification and Content",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :EVN, :required},
+      {:segment, :PID, :required},
+      {:segment, :PV1, :required},
+      {:segment, :TXA, :required},
+      {:group, :OBSERVATION, :required, :repeating,
+       [
+         {:segment, :OBX, :required},
+         {:segment, :NTE, :optional, :repeating}
+       ]}
+    ]
+  }
+
   @structures %{
     "ADT_A01" => @adt_a01,
     "ADT_A02" => @adt_a02,
@@ -530,8 +649,11 @@ defmodule HL7v2.Standard.MessageStructure do
     "ADT_A37" => @adt_a37,
     "ADT_A38" => @adt_a38,
     "ADT_A39" => @adt_a39,
+    "MDM_T02" => @mdm_t02,
     "ORM_O01" => @orm_o01,
     "ORU_R01" => @oru_r01,
+    "RDE_O11" => @rde_o11,
+    "RDS_O13" => @rds_o13,
     "SIU_S12" => @siu_s12,
     "ACK" => @ack
   }

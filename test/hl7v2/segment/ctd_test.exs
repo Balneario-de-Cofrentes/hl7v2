@@ -95,6 +95,7 @@ defmodule HL7v2.Segment.CTDTest do
       reparsed = CTD.parse(encoded)
 
       assert [%HL7v2.Type.CE{identifier: "RP"}] = reparsed.contact_role
+
       assert [%HL7v2.Type.XPN{family_name: %HL7v2.Type.FN{surname: "Smith"}}] =
                reparsed.contact_name
     end
