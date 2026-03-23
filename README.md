@@ -168,12 +168,11 @@ end
 ## Coverage
 
 ```
- Segments    29 standard + generic ZXX (MSH EVN PID PD1 PV1 PV2 NK1
-              OBR OBX ORC MSA ERR NTE AL1 DG1 IN1 SCH AIS AIG AIL AIP
-              RGS MRG SFT PR1 DB1 ACC GT1 FT1)
-              29 of ~136 standard segments + generic Z-segment pass-through
+ Segments    37 standard + generic ZXX
+              37 of 136 standard segments + generic Z-segment pass-through
+              Run `mix hl7v2.coverage` for the full list
 
- Types       38 composite + 10 primitive (48 v2.5.1 types including legacy TN)
+ Types       54 of 89 v2.5.1 data types (60.7%)
 
  Messages    ADT (A01-A04, A08, A12) ORM^O01 ORU^R01 SIU^S12 ACK
               structural validation (order + groups + cardinality)
@@ -207,9 +206,9 @@ ADT/ORM/ORU/SIU/ACK subset with extra_fields preservation for unlisted fields.
 - Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
   no whitespace normalization)
 
-**Coverage:** 29 of ~136 standard segments (plus generic ZXX) typed. 48 of 89 v2.5.1
-data types. 20 group-aware message structure definitions with positional structural
-validation (ordering, cardinality, group awareness). Opt-in table validation for 20 HL7 tables. Extra
+**Coverage:** 37 of 136 standard segments (plus generic ZXX) typed. 54 of 89 v2.5.1
+data types (60.7%). 20 group-aware message structure definitions with positional
+structural validation. Opt-in table validation for 20 HL7 tables. Extra
 fields beyond declared definitions are preserved in `extra_fields` for lossless round-trip.
 OBX exposes 19 of 25 fields; OBR exposes 49 of 50 — unlisted fields survive as extra_fields.
 Some typed segment fields fall back to `:raw` where their HL7 data types (TQ, SPS, ELD) are
