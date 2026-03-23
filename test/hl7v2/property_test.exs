@@ -80,6 +80,94 @@ defmodule HL7v2.PropertyTest do
     end
   end
 
+  # A field component: plain string (no delimiters)
+  defp gen_component do
+    gen_safe_string(min_length: 1, max_length: 10)
+  end
+
+  # A set of components joined by ^
+  defp gen_components do
+    gen all(parts <- list_of(gen_component(), min_length: 1, max_length: 4)) do
+      Enum.join(parts, "^")
+    end
+  end
+
+  # A set of sub-components joined by &
+  defp gen_sub_components do
+    gen all(parts <- list_of(gen_component(), min_length: 2, max_length: 3)) do
+      Enum.join(parts, "&")
+    end
+  end
+
+  # A field with possible repetitions (~), components (^), and sub-components (&)
+  defp gen_hl7_field do
+    gen all(
+          kind <-
+            member_of([
+              :simple,
+              :components,
+              :repetitions,
+              :mixed_repetitions,
+              :sub_components
+            ]),
+          field <- gen_hl7_field_by_kind(kind)
+        ) do
+      field
+    end
+  end
+
+  defp gen_hl7_field_by_kind(:simple), do: gen_safe_string(min_length: 1, max_length: 15)
+  defp gen_hl7_field_by_kind(:components), do: gen_components()
+
+  defp gen_hl7_field_by_kind(:repetitions) do
+    gen all(reps <- list_of(gen_component(), min_length: 2, max_length: 4)) do
+      Enum.join(reps, "~")
+    end
+  end
+
+  defp gen_hl7_field_by_kind(:mixed_repetitions) do
+    gen all(reps <- list_of(gen_components(), min_length: 2, max_length: 3)) do
+      Enum.join(reps, "~")
+    end
+  end
+
+  defp gen_hl7_field_by_kind(:sub_components) do
+    gen all(
+          before <- gen_component(),
+          sub <- gen_sub_components()
+        ) do
+      before <> "^" <> sub
+    end
+  end
+
+  # A segment with HL7-structured fields (repetitions, components, sub-components)
+  defp gen_structured_segment do
+    gen all(
+          seg_id <- member_of(["PID", "PV1", "OBR", "OBX", "NTE", "NK1", "EVN", "AL1", "DG1"]),
+          fields <- list_of(gen_hl7_field(), min_length: 1, max_length: 6)
+        ) do
+      seg_id <> "|" <> Enum.join(fields, "|")
+    end
+  end
+
+  # Full HL7 message with structured fields
+  defp gen_structured_hl7_message do
+    gen all(
+          sending_app <- gen_identifier(),
+          sending_fac <- gen_identifier(),
+          control_id <- gen_control_id(),
+          msg_code <- member_of(["ADT", "ORM", "ORU", "SIU", "ACK"]),
+          trigger <- member_of(["A01", "A02", "A03", "A04", "A08", "O01", "R01"]),
+          extra_segments <- list_of(gen_structured_segment(), min_length: 1, max_length: 5)
+        ) do
+      msh =
+        "MSH|^~\\&|#{sending_app}|#{sending_fac}||RCV||20260322120000||" <>
+          "#{msg_code}^#{trigger}|#{control_id}|P|2.5.1"
+
+      Enum.join([msh | extra_segments], "\r") <> "\r"
+    end
+  end
+
   # ---------------------------------------------------------------------------
   # 1. Raw message round-trip
   # ---------------------------------------------------------------------------
@@ -106,6 +194,38 @@ defmodule HL7v2.PropertyTest do
         third_wire = Encoder.encode(second_parse)
 
         assert third_wire == second_wire
+      end
+    end
+  end
+
+  describe "structured field round-trip (delimiters)" do
+    property "parse(encode(parse(text))) is idempotent for messages with repetitions/components/sub-components" do
+      check all(text <- gen_structured_hl7_message(), max_runs: 100) do
+        {:ok, first_parse} = Parser.parse(text)
+        second_wire = Encoder.encode(first_parse)
+        {:ok, second_parse} = Parser.parse(second_wire)
+        third_wire = Encoder.encode(second_parse)
+
+        assert third_wire == second_wire
+      end
+    end
+
+    property "individual structured fields survive parse/encode round-trip" do
+      check all(
+              field_text <- gen_hl7_field(),
+              max_runs: 200
+            ) do
+        # Build a minimal message with this field in PID-3 position
+        msg_text =
+          "MSH|^~\\&|S|F||R||20260322||ADT^A01|1|P|2.5.1\r" <>
+            "PID|||#{field_text}\r"
+
+        {:ok, raw} = Parser.parse(msg_text)
+        wire = Encoder.encode(raw)
+        {:ok, reparsed} = Parser.parse(wire)
+        rewire = Encoder.encode(reparsed)
+
+        assert rewire == wire
       end
     end
   end

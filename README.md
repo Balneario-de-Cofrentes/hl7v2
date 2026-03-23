@@ -205,6 +205,9 @@ ADT/ORM/ORU/SIU/RDE/RDS/MDM/ACK with extra_fields preservation for unlisted fiel
 - Full message profile conformance (MSH-22+ not supported)
 - Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
   no whitespace normalization)
+- Automatic escape sequence decoding — typed field values preserve HL7 escape
+  sequences (`\F\`, `\S\`, `\R\`, etc.) literally for round-trip fidelity.
+  Call `HL7v2.Escape.decode/2` explicitly when you need decoded text.
 
 **Coverage:** 52 of 136 standard segments (38.2%, plus generic ZXX) typed. 54 of 89 v2.5.1
 data types (60.7%). 23 group-aware message structure definitions with positional

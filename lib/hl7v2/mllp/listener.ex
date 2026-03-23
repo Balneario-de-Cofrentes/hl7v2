@@ -15,6 +15,12 @@ defmodule HL7v2.MLLP.Listener do
   - `:tls` — keyword list of TLS options. When present, Ranch uses `:ranch_ssl`
     instead of `:ranch_tcp`. See `HL7v2.MLLP.TLS` for helpers.
   - `:timeout` — idle connection timeout in milliseconds (default: `60_000`).
+  - `:max_message_size` — maximum MLLP message buffer size in bytes per
+    connection (default: `10_485_760` — 10 MB). Connections exceeding this
+    limit are closed.
+  - `:handler_timeout` — maximum time in milliseconds for the handler to
+    process a single message (default: `60_000`). If exceeded, the handler
+    process is killed and the connection continues.
 
   ## Examples
 
@@ -73,6 +79,8 @@ defmodule HL7v2.MLLP.Listener do
     handler_state = Keyword.get(opts, :handler_state)
     num_acceptors = Keyword.get(opts, :num_acceptors, @default_num_acceptors)
     timeout = Keyword.get(opts, :timeout, @default_timeout)
+    max_message_size = Keyword.get(opts, :max_message_size)
+    handler_timeout = Keyword.get(opts, :handler_timeout)
     tls_opts = Keyword.get(opts, :tls)
     ref = Keyword.get(opts, :ref, make_ref())
 
@@ -83,11 +91,14 @@ defmodule HL7v2.MLLP.Listener do
       num_acceptors: num_acceptors
     }
 
-    proto_opts = [
-      handler: handler,
-      handler_state: handler_state,
-      timeout: timeout
-    ]
+    proto_opts =
+      [
+        handler: handler,
+        handler_state: handler_state,
+        timeout: timeout
+      ]
+      |> maybe_put(:max_message_size, max_message_size)
+      |> maybe_put(:handler_timeout, handler_timeout)
 
     case :ranch.start_listener(ref, transport, trans_opts, HL7v2.MLLP.Connection, proto_opts) do
       {:ok, _pid} ->
@@ -108,6 +119,9 @@ defmodule HL7v2.MLLP.Listener do
     :ranch.stop_listener(ref)
     :ok
   end
+
+  defp maybe_put(opts, _key, nil), do: opts
+  defp maybe_put(opts, key, value), do: Keyword.put(opts, key, value)
 
   defp transport_config(port, nil) do
     {:ranch_tcp, [port: port]}

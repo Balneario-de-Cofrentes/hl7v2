@@ -26,6 +26,7 @@ defmodule HL7v2.MLLP.Client do
   use GenServer
 
   @default_timeout 30_000
+  @default_max_message_size 10_485_760
 
   @doc """
   Starts a client connection.
@@ -35,6 +36,8 @@ defmodule HL7v2.MLLP.Client do
   - `:host` (required) — hostname or IP address to connect to.
   - `:port` (required) — TCP port to connect to.
   - `:timeout` — send/receive timeout in milliseconds (default: `30_000`).
+  - `:max_message_size` — maximum response size in bytes (default: `10_485_760` — 10 MB).
+    Returns `{:error, :message_too_large}` if the response buffer exceeds this limit.
   - `:tls` — keyword list of `:ssl` options. When present, connects via TLS.
 
   """
@@ -76,13 +79,20 @@ defmodule HL7v2.MLLP.Client do
     host = Keyword.fetch!(opts, :host)
     port = Keyword.fetch!(opts, :port)
     timeout = Keyword.get(opts, :timeout, @default_timeout)
+    max_message_size = Keyword.get(opts, :max_message_size, @default_max_message_size)
     tls_opts = Keyword.get(opts, :tls)
 
     host_charlist = host_to_charlist(host)
 
     case connect(host_charlist, port, tls_opts, timeout) do
       {:ok, socket, transport} ->
-        {:ok, %{socket: socket, transport: transport, timeout: timeout}}
+        {:ok,
+         %{
+           socket: socket,
+           transport: transport,
+           timeout: timeout,
+           max_message_size: max_message_size
+         }}
 
       {:error, reason} ->
         {:stop, reason}
@@ -96,7 +106,7 @@ defmodule HL7v2.MLLP.Client do
 
     case transport_send(transport, socket, framed) do
       :ok ->
-        case recv_response(transport, socket, timeout) do
+        case recv_response(transport, socket, timeout, state.max_message_size) do
           {:ok, response} -> {:reply, {:ok, response}, state}
           {:error, reason} -> {:reply, {:error, reason}, state}
         end
@@ -140,21 +150,25 @@ defmodule HL7v2.MLLP.Client do
   defp transport_close(:tcp, socket), do: :gen_tcp.close(socket)
   defp transport_close(:ssl, socket), do: :ssl.close(socket)
 
-  defp recv_response(transport, socket, timeout) do
-    recv_loop(transport, socket, <<>>, timeout)
+  defp recv_response(transport, socket, timeout, max_message_size) do
+    recv_loop(transport, socket, <<>>, timeout, max_message_size)
   end
 
-  defp recv_loop(transport, socket, buffer, timeout) do
+  defp recv_loop(transport, socket, buffer, timeout, max_message_size) do
     case transport_recv(transport, socket, 0, timeout) do
       {:ok, data} ->
         new_buffer = <<buffer::binary, data::binary>>
 
-        case HL7v2.MLLP.extract_messages(new_buffer) do
-          {[message | _], _remaining} ->
-            {:ok, message}
+        if byte_size(new_buffer) > max_message_size do
+          {:error, :message_too_large}
+        else
+          case HL7v2.MLLP.extract_messages(new_buffer) do
+            {[message | _], _remaining} ->
+              {:ok, message}
 
-          {[], _remaining} ->
-            recv_loop(transport, socket, new_buffer, timeout)
+            {[], _remaining} ->
+              recv_loop(transport, socket, new_buffer, timeout, max_message_size)
+          end
         end
 
       {:error, reason} ->

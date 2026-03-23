@@ -18,7 +18,11 @@ defmodule HL7v2.MLLP.ConnectionTest do
       port = Listener.port(listener)
 
       on_exit(fn ->
-        if Process.alive?(listener), do: Listener.stop(listener)
+        try do
+          if Process.alive?(listener), do: Listener.stop(listener)
+        catch
+          :exit, _ -> :ok
+        end
       end)
 
       %{port: port}
@@ -90,7 +94,12 @@ defmodule HL7v2.MLLP.ConnectionTest do
 
       on_exit(fn ->
         :telemetry.detach(handler_id)
-        if Process.alive?(listener), do: Listener.stop(listener)
+
+        try do
+          if Process.alive?(listener), do: Listener.stop(listener)
+        catch
+          :exit, _ -> :ok
+        end
       end)
 
       %{port: port, ref: ref}
@@ -135,7 +144,174 @@ defmodule HL7v2.MLLP.ConnectionTest do
       :gen_tcp.close(socket)
 
       assert_receive {^ref, [:hl7v2, :mllp, :message, :exception], %{duration: _},
-                      %{kind: :error, reason: %RuntimeError{}, stacktrace: _}}
+                      %{
+                        kind: :error,
+                        reason: {:handler_crash, {%RuntimeError{}, _}},
+                        stacktrace: _
+                      }}
+    end
+  end
+
+  describe "max_message_size" do
+    test "closes connection when buffer exceeds max_message_size" do
+      {:ok, listener} =
+        Listener.start_link(
+          port: 0,
+          handler: HL7v2.Test.EchoHandler,
+          max_message_size: 64
+        )
+
+      port = Listener.port(listener)
+
+      on_exit(fn ->
+        try do
+          if Process.alive?(listener), do: Listener.stop(listener)
+        catch
+          :exit, _ -> :ok
+        end
+      end)
+
+      {:ok, socket} = :gen_tcp.connect(~c"127.0.0.1", port, [:binary, active: false])
+
+      # Send a message larger than 64 bytes (without completing the MLLP frame
+      # so the buffer keeps growing)
+      big_payload = :binary.copy("X", 100)
+      :gen_tcp.send(socket, <<@sb, big_payload::binary>>)
+
+      # The server should close the connection
+      assert {:error, :closed} = :gen_tcp.recv(socket, 0, 2_000)
+
+      :gen_tcp.close(socket)
+    end
+
+    test "accepts messages under max_message_size" do
+      {:ok, listener} =
+        Listener.start_link(
+          port: 0,
+          handler: HL7v2.Test.EchoHandler,
+          max_message_size: 1024
+        )
+
+      port = Listener.port(listener)
+
+      on_exit(fn ->
+        try do
+          if Process.alive?(listener), do: Listener.stop(listener)
+        catch
+          :exit, _ -> :ok
+        end
+      end)
+
+      {:ok, client} = Client.start_link(host: "127.0.0.1", port: port)
+      {:ok, response} = Client.send_message(client, "small")
+      assert response == "small"
+
+      Client.close(client)
+    end
+  end
+
+  describe "handler_timeout" do
+    test "kills handler after handler_timeout and continues accepting messages" do
+      {:ok, listener} =
+        Listener.start_link(
+          port: 0,
+          handler: HL7v2.Test.SlowHandler,
+          handler_timeout: 100
+        )
+
+      port = Listener.port(listener)
+
+      on_exit(fn ->
+        try do
+          if Process.alive?(listener), do: Listener.stop(listener)
+        catch
+          :exit, _ -> :ok
+        end
+      end)
+
+      {:ok, socket} = :gen_tcp.connect(~c"127.0.0.1", port, [:binary, active: false])
+
+      # Send "slow" which sleeps forever in the handler
+      :gen_tcp.send(socket, <<@sb, "slow", @eb, @cr>>)
+
+      # No response should come (handler timed out), but connection stays alive
+      assert {:error, :timeout} = :gen_tcp.recv(socket, 0, 300)
+
+      # Send a normal message to verify the connection still works
+      :gen_tcp.send(socket, <<@sb, "hello", @eb, @cr>>)
+      {:ok, data} = :gen_tcp.recv(socket, 0, 5_000)
+      assert <<@sb, "hello", @eb, @cr>> == data
+
+      :gen_tcp.close(socket)
+    end
+
+    test "emits telemetry on handler timeout" do
+      ref = make_ref()
+      handler_id = "timeout-telemetry-#{inspect(ref)}"
+
+      :telemetry.attach_many(
+        handler_id,
+        [[:hl7v2, :mllp, :message, :exception]],
+        fn event, measurements, metadata, %{pid: pid, ref: ref} ->
+          send(pid, {ref, event, measurements, metadata})
+        end,
+        %{pid: self(), ref: ref}
+      )
+
+      {:ok, listener} =
+        Listener.start_link(
+          port: 0,
+          handler: HL7v2.Test.SlowHandler,
+          handler_timeout: 100
+        )
+
+      port = Listener.port(listener)
+
+      on_exit(fn ->
+        :telemetry.detach(handler_id)
+
+        try do
+          if Process.alive?(listener), do: Listener.stop(listener)
+        catch
+          :exit, _ -> :ok
+        end
+      end)
+
+      {:ok, socket} = :gen_tcp.connect(~c"127.0.0.1", port, [:binary, active: false])
+      :gen_tcp.send(socket, <<@sb, "slow", @eb, @cr>>)
+
+      assert_receive {^ref, [:hl7v2, :mllp, :message, :exception], %{duration: _},
+                      %{kind: :error, reason: :handler_timeout}},
+                     1_000
+
+      :gen_tcp.close(socket)
+    end
+  end
+
+  describe "client max_message_size" do
+    test "returns error when response exceeds client max_message_size" do
+      {:ok, listener} =
+        Listener.start_link(
+          port: 0,
+          handler: HL7v2.Test.EchoHandler
+        )
+
+      port = Listener.port(listener)
+
+      on_exit(fn ->
+        try do
+          if Process.alive?(listener), do: Listener.stop(listener)
+        catch
+          :exit, _ -> :ok
+        end
+      end)
+
+      # Client with tiny max — the echoed response will exceed it
+      {:ok, client} = Client.start_link(host: "127.0.0.1", port: port, max_message_size: 4)
+      result = Client.send_message(client, "this message is way too long for the limit")
+      assert {:error, :message_too_large} = result
+
+      Client.close(client)
     end
   end
 

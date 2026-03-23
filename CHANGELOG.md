@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.4.2 — 2026-03-23
+
+### MLLP Hardening
+
+- **`max_message_size` option** — configurable buffer limit for both MLLP
+  server connections and client recv loops (default: 10 MB). Connections
+  exceeding the limit are closed with telemetry and logging. Protects against
+  memory exhaustion from misbehaving or malicious senders.
+- **`handler_timeout` option** — configurable timeout for handler execution
+  (default: 60 s). Handlers that exceed the deadline are killed via
+  `spawn_monitor`/`Process.exit(:kill)`; the connection continues accepting
+  new messages. Telemetry event emitted on timeout.
+
+### Property Testing
+
+- Added delimiter-aware generators (`gen_hl7_field/0` family) that produce
+  fields with repetitions (`~`), components (`^`), and sub-components (`&`).
+  Two new property tests verify round-trip idempotency for structured messages
+  and individual structured fields.
+
+### Documentation
+
+- **Escape sequence behavior** documented in `TypedMessage` moduledoc and
+  README Scope section: typed field values preserve HL7 escape sequences
+  literally; users must call `HL7v2.Escape.decode/2` explicitly.
+
+### Stats
+
+2,383 tests (303 doctests + 32 properties + 2,048 tests), 0 failures
+
 ## v1.4.1 — 2026-03-23
 
 ### Fixes
