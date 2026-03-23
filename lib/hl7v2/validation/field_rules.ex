@@ -48,12 +48,13 @@ defmodule HL7v2.Validation.FieldRules do
     location = module.segment_id()
     field_defs = module.fields()
     validate_tables? = Keyword.get(opts, :validate_tables, false)
+    mode = Keyword.get(opts, :mode, :lenient)
 
     Enum.flat_map(field_defs, fn {_seq, name, _type, optionality, max_reps} ->
       value = Map.get(segment, name)
 
       required_errors(location, name, optionality, value) ++
-        max_reps_warnings(location, name, max_reps, value) ++
+        max_reps_errors(location, name, max_reps, value, mode) ++
         table_errors(location, name, value, validate_tables?)
     end)
   end
@@ -93,12 +94,14 @@ defmodule HL7v2.Validation.FieldRules do
 
   defp semantic_blank?(_), do: false
 
-  defp max_reps_warnings(location, name, max_reps, value)
+  defp max_reps_errors(location, name, max_reps, value, mode)
        when is_integer(max_reps) and max_reps > 1 and is_list(value) do
     if length(value) > max_reps do
+      level = if mode == :strict, do: :error, else: :warning
+
       [
         %{
-          level: :warning,
+          level: level,
           location: location,
           field: name,
           message: "field #{name} has #{length(value)} repetitions, max allowed is #{max_reps}"
@@ -109,7 +112,7 @@ defmodule HL7v2.Validation.FieldRules do
     end
   end
 
-  defp max_reps_warnings(_location, _name, _max_reps, _value), do: []
+  defp max_reps_errors(_location, _name, _max_reps, _value, _mode), do: []
 
   # Table validation — only runs when validate_tables? is true and the field
   # has a known table binding. Returns errors for invalid coded values.

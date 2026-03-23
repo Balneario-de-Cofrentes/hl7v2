@@ -45,12 +45,17 @@ defmodule HL7v2.Validation.Structural do
   @spec validate(MessageStructure.structure(), [binary()], keyword()) :: [error()]
   def validate(%{nodes: nodes, name: name}, segment_ids, opts \\ []) do
     mode = Keyword.get(opts, :mode, :lenient)
-    known_ids = collect_all_segment_ids(nodes)
 
-    {errors, remaining} = match_nodes(nodes, segment_ids, name, mode, known_ids)
+    # Convert known IDs to strings once to avoid creating atoms from untrusted input
+    known_strings =
+      nodes
+      |> collect_all_segment_ids()
+      |> MapSet.new(&Atom.to_string/1)
+
+    {errors, remaining} = match_nodes(nodes, segment_ids, name, mode, known_strings)
 
     # Any remaining segments after consuming all AST nodes
-    leftover_errors = check_leftover(remaining, name, mode, known_ids)
+    leftover_errors = check_leftover(remaining, name, mode, known_strings)
 
     # Post-process: if a segment is reported as "missing" but exists in the
     # leftover (unconsumed) segments, it's out of order, not missing.
@@ -308,16 +313,11 @@ defmodule HL7v2.Validation.Structural do
 
   defp do_skip_unknown([], _known, acc), do: {Enum.reverse(acc), []}
 
-  defp do_skip_unknown([head | rest] = remaining, known, acc) do
-    head_atom = safe_to_atom(head)
-
+  defp do_skip_unknown([head | rest] = remaining, known_strings, acc) do
     cond do
-      # Z-segment — skip silently
-      String.starts_with?(head, "Z") -> do_skip_unknown(rest, known, acc)
-      # Known segment — stop skipping
-      head_atom in known -> {Enum.reverse(acc), remaining}
-      # Unknown non-Z segment — skip with no error (handled in leftover)
-      true -> do_skip_unknown(rest, known, acc)
+      String.starts_with?(head, "Z") -> do_skip_unknown(rest, known_strings, acc)
+      MapSet.member?(known_strings, head) -> {Enum.reverse(acc), remaining}
+      true -> do_skip_unknown(rest, known_strings, acc)
     end
   end
 
@@ -329,13 +329,11 @@ defmodule HL7v2.Validation.Structural do
 
   defp do_peek_skip([], _known, count), do: {count, []}
 
-  defp do_peek_skip([head | rest] = remaining, known, count) do
-    head_atom = safe_to_atom(head)
-
+  defp do_peek_skip([head | rest] = remaining, known_strings, count) do
     cond do
-      String.starts_with?(head, "Z") -> do_peek_skip(rest, known, count + 1)
-      head_atom in known -> {count, remaining}
-      true -> do_peek_skip(rest, known, count + 1)
+      String.starts_with?(head, "Z") -> do_peek_skip(rest, known_strings, count + 1)
+      MapSet.member?(known_strings, head) -> {count, remaining}
+      true -> do_peek_skip(rest, known_strings, count + 1)
     end
   end
 
@@ -426,14 +424,13 @@ defmodule HL7v2.Validation.Structural do
   # indicate ordering problems.
   defp check_leftover([], _name, _mode, _known), do: []
 
-  defp check_leftover(remaining, name, mode, known) do
+  defp check_leftover(remaining, name, mode, known_strings) do
     remaining
     |> Enum.reject(&String.starts_with?(&1, "Z"))
     |> Enum.flat_map(fn seg_str ->
-      seg_atom = safe_to_atom(seg_str)
       level = if mode == :strict, do: :error, else: :warning
 
-      if seg_atom in known do
+      if MapSet.member?(known_strings, seg_str) do
         [
           %{
             level: level,
@@ -482,9 +479,4 @@ defmodule HL7v2.Validation.Structural do
   end
 
   # Safe atom conversion — only for known segment IDs that are already atoms
-  # in the structure definition. Unknown strings get a dynamically created atom
-  # which is fine since segment IDs are a bounded set.
-  defp safe_to_atom(str) when is_binary(str) do
-    String.to_atom(str)
-  end
 end

@@ -49,7 +49,7 @@ defmodule HL7v2.Validation do
   @spec validate(TypedMessage.t(), keyword()) :: :ok | {:error, [map()]} | {:ok, [map()]}
   def validate(%TypedMessage{} = msg, opts \\ []) do
     mode = Keyword.get(opts, :mode, :lenient)
-    field_opts = Keyword.take(opts, [:validate_tables])
+    field_opts = Keyword.take(opts, [:validate_tables, :mode]) |> Keyword.put(:mode, mode)
 
     all =
       MessageRules.check(msg) ++
