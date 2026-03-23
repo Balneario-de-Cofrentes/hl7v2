@@ -567,6 +567,6 @@ Multiple trigger events share the same abstract message structure. This is impor
 
 ## Sources
 
-- HL7 v2.5.1 Standard: PS3.2 (Control), PS3.3 (Patient Administration), PS3.4 (Order Entry), PS3.7 (Observation Reporting), PS3.10 (Scheduling)
+- HL7 v2.5.1 Standard: Chapter 2 (Control), Chapter 3 (Patient Administration), Chapter 4 (Order Entry), Chapter 7 (Observation Reporting), Chapter 10 (Scheduling)
 - [Caristix HL7-Definition V2 - HL7 v2.5.1 Trigger Events](https://hl7-definition.caristix.com/v2/HL7v2.5.1/TriggerEvents)
 - HL7 International: [https://www.hl7.org/implement/standards/product_brief.cfm?product_id=144](https://www.hl7.org/implement/standards/product_brief.cfm?product_id=144)

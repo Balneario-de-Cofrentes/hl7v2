@@ -52,7 +52,29 @@ defmodule HL7v2.Validation.Structural do
     # Any remaining segments after consuming all AST nodes
     leftover_errors = check_leftover(remaining, name, mode, known_ids)
 
-    errors ++ leftover_errors
+    # Post-process: if a segment is reported as "missing" but exists in the
+    # leftover (unconsumed) segments, it's out of order, not missing.
+    leftover_ids = MapSet.new(remaining)
+
+    (errors ++ leftover_errors)
+    |> improve_missing_diagnostics(leftover_ids, mode)
+  end
+
+  defp improve_missing_diagnostics(errors, leftover_ids, mode) do
+    Enum.map(errors, fn
+      %{message: "Required segment " <> rest} = error ->
+        seg_name = rest |> String.split(" ") |> hd()
+
+        if MapSet.member?(leftover_ids, seg_name) do
+          level = if mode == :strict, do: :error, else: :warning
+          %{error | level: level, message: "Required segment #{seg_name} is present but out of order"}
+        else
+          error
+        end
+
+      other ->
+        other
+    end)
   end
 
   # --- Positional Matching Engine ---

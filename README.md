@@ -173,7 +173,7 @@ end
               RGS MRG SFT PR1 DB1 ACC GT1 FT1)
               29 of ~136 standard segments + generic Z-segment pass-through
 
- Types       40 composite + 8 primitive (48 v2.5.1 types including legacy TN)
+ Types       38 composite + 10 primitive (48 v2.5.1 types including legacy TN)
 
  Messages    ADT (A01-A04, A08, A12) ORM^O01 ORU^R01 SIU^S12 ACK
               structural validation (order + groups + cardinality)
