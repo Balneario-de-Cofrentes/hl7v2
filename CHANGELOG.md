@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.2.0 — 2026-03-23
+
+### Standards Expansion
+
+- **8 new segments**: ROL (Role), IN2 (Insurance Additional Info, 72 fields),
+  IN3 (Insurance Certification, 28 fields), DRG (Diagnosis Related Group),
+  SPM (Specimen, 30 fields), TQ1 (Timing/Quantity), TQ2 (Timing Relationship),
+  PDA (Patient Death and Autopsy)
+- **6 new types**: RI (Repeat Interval), SN (Structured Numeric),
+  ED (Encapsulated Data), RP (Reference Pointer), RPT (Repeat Pattern),
+  PLN (Practitioner License)
+- **OBX dispatch**: Added SN, ED, RP to value_type_map
+- **Segment coverage**: 37/136 (27.2%, up from 21.3%)
+- **Type coverage**: 54/89 (60.7%, up from 53.9%)
+- **833 declared fields** across typed segments
+- All 14 previously-raw segments in supported structures now typed
+  (ROL, IN2, IN3, DRG, SPM, TQ1, TQ2, PDA + previously done)
+- Improved structural validator diagnostics: out-of-order segments no longer
+  double-reported
+
+### Stats
+
+2,126 tests (303 doctests + 30 properties + 1,793 tests), 0 failures
+
 ## v1.1.0 — 2026-03-23
 
 ### Positional Structural Validation
