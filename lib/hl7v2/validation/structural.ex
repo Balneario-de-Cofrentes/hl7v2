@@ -54,27 +54,46 @@ defmodule HL7v2.Validation.Structural do
 
     # Post-process: if a segment is reported as "missing" but exists in the
     # leftover (unconsumed) segments, it's out of order, not missing.
+    # Also suppress leftover warnings for segments already flagged as out-of-order.
     leftover_ids = MapSet.new(remaining)
 
-    (errors ++ leftover_errors)
-    |> improve_missing_diagnostics(leftover_ids, mode)
+    {improved, reclassified} = improve_missing_diagnostics(errors, leftover_ids, mode)
+
+    # Filter leftover errors for segments already reported as out-of-order
+    filtered_leftovers =
+      Enum.reject(leftover_errors, fn error ->
+        case error.message do
+          "Segment " <> rest ->
+            seg = rest |> String.split(" ") |> hd()
+            MapSet.member?(reclassified, seg)
+
+          _ ->
+            false
+        end
+      end)
+
+    improved ++ filtered_leftovers
   end
 
   defp improve_missing_diagnostics(errors, leftover_ids, mode) do
-    Enum.map(errors, fn
-      %{message: "Required segment " <> rest} = error ->
-        seg_name = rest |> String.split(" ") |> hd()
+    {improved, reclassified} =
+      Enum.map_reduce(errors, MapSet.new(), fn
+        %{message: "Required segment " <> rest} = error, acc ->
+          seg_name = rest |> String.split(" ") |> hd()
 
-        if MapSet.member?(leftover_ids, seg_name) do
-          level = if mode == :strict, do: :error, else: :warning
-          %{error | level: level, message: "Required segment #{seg_name} is present but out of order"}
-        else
-          error
-        end
+          if MapSet.member?(leftover_ids, seg_name) do
+            level = if mode == :strict, do: :error, else: :warning
+            upgraded = %{error | level: level, message: "Required segment #{seg_name} is present but out of order"}
+            {upgraded, MapSet.put(acc, seg_name)}
+          else
+            {error, acc}
+          end
 
-      other ->
-        other
-    end)
+        other, acc ->
+          {other, acc}
+      end)
+
+    {improved, reclassified}
   end
 
   # --- Positional Matching Engine ---
