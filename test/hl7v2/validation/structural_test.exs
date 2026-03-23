@@ -20,7 +20,12 @@ defmodule HL7v2.Validation.StructuralTest do
     end
 
     test "valid ADT_A01 with optional segments passes", %{structure: s} do
-      ids = ["MSH", "EVN", "PID", "NK1", "PV1", "PV2", "AL1", "DG1", "GT1", "IN1", "NTE"]
+      ids = ["MSH", "EVN", "PID", "NK1", "PV1", "PV2", "AL1", "DG1", "GT1", "IN1"]
+      assert Structural.validate(s, ids) == []
+    end
+
+    test "valid ADT_A01 with OBX and NTE passes", %{structure: s} do
+      ids = ["MSH", "EVN", "PID", "PV1", "IN1", "OBX", "NTE"]
       assert Structural.validate(s, ids) == []
     end
 
@@ -53,7 +58,9 @@ defmodule HL7v2.Validation.StructuralTest do
     test "duplicate non-repeating PV1 is flagged", %{structure: s} do
       ids = ["MSH", "EVN", "PID", "PV1", "PV1"]
       results = Structural.validate(s, ids)
-      assert Enum.any?(messages(results), &(&1 =~ "PV1" and &1 =~ "not repeating"))
+      # Positional matcher: second PV1 is unconsumed, flagged as out-of-position
+      assert Enum.any?(messages(results), &(&1 =~ "PV1"))
+      assert length(results) > 0
     end
 
     test "repeated NK1 is allowed (repeating segment)", %{structure: s} do
@@ -65,7 +72,10 @@ defmodule HL7v2.Validation.StructuralTest do
     test "orphan IN2 without IN1 anchor is flagged", %{structure: s} do
       ids = ["MSH", "EVN", "PID", "PV1", "IN2"]
       results = Structural.validate(s, ids)
-      assert Enum.any?(messages(results), &(&1 =~ "IN2" and &1 =~ "anchor" and &1 =~ "IN1"))
+      # Positional matcher: IN2 without IN1 means INSURANCE group doesn't match,
+      # so IN2 is leftover and flagged as out-of-position
+      assert Enum.any?(messages(results), &(&1 =~ "IN2"))
+      assert length(results) > 0
     end
 
     test "orphan ACC without group context is flagged in strict mode", %{structure: s} do
@@ -79,6 +89,29 @@ defmodule HL7v2.Validation.StructuralTest do
 
     test "unknown Z-segment is ignored", %{structure: s} do
       ids = ["MSH", "EVN", "PID", "PV1", "ZPD"]
+      assert Structural.validate(s, ids) == []
+    end
+
+    test "ROL after PID does not produce false warnings", %{structure: s} do
+      # ROL appears in multiple groups (PATIENT, VISIT, PROCEDURE, INSURANCE).
+      # ROL after PID should be consumed by the PATIENT group's ROL slot.
+      ids = ["MSH", "EVN", "PID", "ROL", "PV1"]
+      assert Structural.validate(s, ids) == []
+    end
+
+    test "ROL in multiple positions is valid", %{structure: s} do
+      # ROL after PID (PATIENT), ROL after PV1 (VISIT), ROL after PR1 (PROCEDURE)
+      ids = ["MSH", "EVN", "PID", "ROL", "PV1", "ROL", "PR1", "ROL"]
+      assert Structural.validate(s, ids) == []
+    end
+
+    test "ADT_A01 with OBX validates (OBSERVATION group)", %{structure: s} do
+      ids = ["MSH", "EVN", "PID", "PV1", "OBX"]
+      assert Structural.validate(s, ids) == []
+    end
+
+    test "ADT_A01 with multiple OBX in OBSERVATION group", %{structure: s} do
+      ids = ["MSH", "EVN", "PID", "PV1", "OBX", "NTE", "OBX"]
       assert Structural.validate(s, ids) == []
     end
   end
@@ -120,6 +153,21 @@ defmodule HL7v2.Validation.StructuralTest do
       ids = ["MSH", "PID", "OBR", "OBX", "OBX", "OBR", "OBX"]
       errors = errors_only(Structural.validate(s, ids))
       assert errors == []
+    end
+
+    test "ORU_R01 with SPM validates (SPECIMEN group)", %{structure: s} do
+      ids = ["MSH", "OBR", "OBX", "SPM"]
+      assert Structural.validate(s, ids) == []
+    end
+
+    test "ORU_R01 with SPM and OBX in SPECIMEN group", %{structure: s} do
+      ids = ["MSH", "OBR", "OBX", "SPM", "OBX", "NTE"]
+      assert Structural.validate(s, ids) == []
+    end
+
+    test "ORU_R01 with multiple SPECIMEN groups", %{structure: s} do
+      ids = ["MSH", "OBR", "OBX", "SPM", "OBX", "SPM", "OBX"]
+      assert Structural.validate(s, ids) == []
     end
   end
 
@@ -202,6 +250,19 @@ defmodule HL7v2.Validation.StructuralTest do
     test "A39 without MRG fails", %{structure: s} do
       ids = ["MSH", "EVN", "PID"]
       errors = errors_only(Structural.validate(s, ids))
+      assert Enum.any?(messages(errors), &(&1 =~ "MRG"))
+    end
+
+    test "A39 with multiple PID+MRG groups passes (repeating PATIENT)", %{structure: s} do
+      ids = ["MSH", "EVN", "PID", "MRG", "PID", "MRG"]
+      assert Structural.validate(s, ids) == []
+    end
+
+    test "A39 with second PID missing MRG produces error", %{structure: s} do
+      # Second PATIENT group repetition has PID but no MRG
+      ids = ["MSH", "EVN", "PID", "MRG", "PID"]
+      errors = errors_only(Structural.validate(s, ids))
+      assert length(errors) > 0
       assert Enum.any?(messages(errors), &(&1 =~ "MRG"))
     end
   end

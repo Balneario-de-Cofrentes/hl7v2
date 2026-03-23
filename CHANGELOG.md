@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.1.0 — 2026-03-23
+
+### Positional Structural Validation
+
+- **Rewritten structural validator** — state-machine-style positional matcher that walks
+  the segment stream against the structure AST. Replaces flat deduplicated checks.
+  - Handles segments in multiple groups (ROL in PATIENT, VISIT, PROCEDURE, INSURANCE)
+  - Validates repeating groups per-occurrence (A39 PATIENT requires PID+MRG each time)
+  - Ordering enforced naturally by sequential walk
+- **ADT_A01**: Added OBSERVATION group (OBX+NTE) per HL7 v2.5.1
+- **ORU_R01**: Added SPECIMEN group (SPM+OBX+NTE) per HL7 v2.5.1
+- **Type catalog**: Added 5 missing v2.5.1 types (CD, DLT, DTN, ICD, MOP) — 89 total
+- **Type coverage**: 48/89 (53.9%, corrected from inflated 57.1%)
+- 10 new structural validation tests
+
+### Stats
+
+1,933 tests (266 doctests + 30 properties + 1,637 tests), 0 failures
+
 ## v1.0.0 — 2026-03-23
 
 ### M6: Conformance Platform

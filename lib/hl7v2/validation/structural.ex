@@ -1,21 +1,23 @@
 defmodule HL7v2.Validation.Structural do
   @moduledoc """
-  Structural validation against HL7 v2.5.1 abstract message definitions.
+  Positional structural validation against HL7 v2.5.1 abstract message definitions.
 
-  Validates segment ordering, group structure, and cardinality against the
-  group-aware definitions in `HL7v2.Standard.MessageStructure`.
+  Validates segment ordering, group structure, and cardinality by walking the
+  actual segment stream against the structure AST in order — a state-machine
+  approach that correctly handles:
 
-  Unlike presence-only validation (which just checks if required segment IDs
-  exist), structural validation enforces:
-
-  - **Segment ordering** — segments must appear in the order defined by the structure
-  - **Group anchors** — group-starting segments must be present when group children appear
-  - **Cardinality** — non-repeating segments/groups must not appear more than once
-  - **Orphan detection** — grouped segments without their anchor are flagged
+  - **Segments in multiple groups** — ROL can appear in PATIENT, VISIT,
+    PROCEDURE, INSURANCE; each group consumes its own occurrences
+  - **Repeating groups** — each repetition independently validates required
+    children (e.g., ADT_A39 PATIENT group needs PID+MRG per occurrence)
+  - **Positional ordering** — violations are detected naturally because the
+    walk is sequential
+  - **Cardinality** — non-repeating segments/groups consumed at most once
 
   ## Modes
 
-  - `:lenient` (default) — ordering issues are warnings, missing required segments are errors
+  - `:lenient` (default) — unexpected segments are warnings, missing required
+    segments are errors
   - `:strict` — all structural violations are errors
 
   ## Usage
@@ -43,232 +45,399 @@ defmodule HL7v2.Validation.Structural do
   @spec validate(MessageStructure.structure(), [binary()], keyword()) :: [error()]
   def validate(%{nodes: nodes, name: name}, segment_ids, opts \\ []) do
     mode = Keyword.get(opts, :mode, :lenient)
+    known_ids = collect_all_segment_ids(nodes)
 
-    # Build expected order from the structure AST
-    expected_order = flatten_expected_order(nodes)
+    {errors, remaining} = match_nodes(nodes, segment_ids, name, mode, known_ids)
 
-    # Check 1: Required segments present
-    missing_errors = check_missing_required(nodes, segment_ids, name)
+    # Any remaining segments after consuming all AST nodes
+    leftover_errors = check_leftover(remaining, name, mode, known_ids)
 
-    # Check 2: Segment ordering
-    order_errors = check_ordering(expected_order, segment_ids, name, mode)
-
-    # Check 3: Cardinality (non-repeating segments appearing multiple times)
-    cardinality_errors = check_cardinality(nodes, segment_ids, name, mode)
-
-    # Check 4: Orphan detection — grouped segments without their anchor
-    orphan_errors = check_orphans(nodes, segment_ids, name, mode)
-
-    missing_errors ++ order_errors ++ cardinality_errors ++ orphan_errors
+    errors ++ leftover_errors
   end
 
-  # --- Required segment presence ---
+  # --- Positional Matching Engine ---
 
-  defp check_missing_required(nodes, segment_ids, structure_name) do
-    required = MessageStructure.required_segments(%{nodes: nodes})
-    missing = Enum.reject(required, &(Atom.to_string(&1) in segment_ids))
+  # Walk AST nodes in order, consuming segments from the stream.
+  # Returns {errors, remaining_segments}.
+  defp match_nodes([], remaining, _name, _mode, _known), do: {[], remaining}
 
-    Enum.map(missing, fn seg ->
-      %{
-        level: :error,
-        location: structure_name,
-        field: nil,
-        message: "Required segment #{seg} is missing"
-      }
-    end)
+  defp match_nodes([node | rest], remaining, name, mode, known) do
+    {node_errors, after_node} = match_node(node, remaining, name, mode, known)
+    {rest_errors, after_rest} = match_nodes(rest, after_node, name, mode, known)
+    {node_errors ++ rest_errors, after_rest}
   end
 
-  # --- Ordering ---
+  # --- Segment Nodes ---
 
-  # Flatten the AST into an ordered list of expected segment IDs.
-  # Groups are flattened in-order; their children follow the group's position.
-  defp flatten_expected_order(nodes) do
-    Enum.flat_map(nodes, fn
-      {:segment, id, _, :repeating} -> [id]
-      {:segment, id, _} -> [id]
-      {:group, _name, _, children} -> flatten_expected_order(children)
-      {:group, _name, _, :repeating, children} -> flatten_expected_order(children)
-    end)
-    |> Enum.uniq()
+  # Required segment (non-repeating)
+  defp match_node({:segment, id, :required}, remaining, name, _mode, known) do
+    seg_str = Atom.to_string(id)
+    {skipped, after_skip} = skip_unknown(remaining, known)
+
+    case after_skip do
+      [^seg_str | rest] ->
+        {skipped, rest}
+
+      _ ->
+        error = %{
+          level: :error,
+          location: name,
+          field: nil,
+          message: "Required segment #{id} is missing"
+        }
+
+        {skipped ++ [error], after_skip}
+    end
   end
 
-  defp check_ordering(expected_order, segment_ids, structure_name, mode) do
-    # Filter actual segments to only those in the expected order
-    # (unknown/Z segments are ignored for ordering)
-    expected_set = MapSet.new(Enum.map(expected_order, &Atom.to_string/1))
+  # Optional segment (non-repeating)
+  defp match_node({:segment, id, :optional}, remaining, _name, _mode, known) do
+    seg_str = Atom.to_string(id)
+    {skipped, after_skip} = skip_unknown(remaining, known)
 
-    known_actuals =
-      segment_ids
-      |> Enum.filter(&(&1 in expected_set))
-      |> Enum.uniq()
-
-    known_expected =
-      expected_order
-      |> Enum.map(&Atom.to_string/1)
-      |> Enum.filter(&(&1 in MapSet.new(known_actuals)))
-
-    # Check if the known actuals appear in the expected order
-    # Use a simple approach: for each consecutive pair in actuals,
-    # verify the first appears before the second in expected
-    find_order_violations(known_actuals, known_expected, structure_name, mode)
+    case after_skip do
+      [^seg_str | rest] -> {skipped, rest}
+      _ -> {skipped, after_skip}
+    end
   end
 
-  defp find_order_violations(actuals, expected, structure_name, mode) do
-    expected_indices =
-      expected
-      |> Enum.with_index()
-      |> Map.new()
+  # Required repeating segment
+  defp match_node({:segment, id, :required, :repeating}, remaining, name, _mode, known) do
+    seg_str = Atom.to_string(id)
+    {skipped, after_skip} = skip_unknown(remaining, known)
 
-    # Walk through actuals and check if their expected indices are non-decreasing
-    actuals
-    |> Enum.map(&{&1, Map.get(expected_indices, &1)})
-    |> Enum.reject(fn {_, idx} -> is_nil(idx) end)
-    |> check_monotonic(structure_name, mode)
+    case after_skip do
+      [^seg_str | _] ->
+        {consumed_rest, errors} = consume_repeating(after_skip, seg_str)
+        {skipped ++ errors, consumed_rest}
+
+      _ ->
+        error = %{
+          level: :error,
+          location: name,
+          field: nil,
+          message: "Required segment #{id} is missing"
+        }
+
+        {skipped ++ [error], after_skip}
+    end
   end
 
-  defp check_monotonic(indexed_segments, structure_name, mode) do
-    indexed_segments
-    |> Enum.chunk_every(2, 1, :discard)
-    |> Enum.flat_map(fn [{seg_a, idx_a}, {seg_b, idx_b}] ->
-      if idx_a > idx_b do
-        level = if mode == :strict, do: :error, else: :warning
+  # Optional repeating segment
+  defp match_node({:segment, id, :optional, :repeating}, remaining, _name, _mode, known) do
+    seg_str = Atom.to_string(id)
+    {skipped, after_skip} = skip_unknown(remaining, known)
 
+    case after_skip do
+      [^seg_str | _] ->
+        {consumed_rest, errors} = consume_repeating(after_skip, seg_str)
+        {skipped ++ errors, consumed_rest}
+
+      _ ->
+        {skipped, after_skip}
+    end
+  end
+
+  # --- Group Nodes ---
+
+  # Required group (non-repeating)
+  defp match_node({:group, group_name, :required, children}, remaining, name, mode, known) do
+    case try_match_group(children, remaining, name, mode, known) do
+      {:matched, errors, after_group} ->
+        {errors, after_group}
+
+      :no_match ->
+        # Required group not matched — report missing required children
+        missing = missing_required_in_group(children, group_name, name)
+        {missing, remaining}
+    end
+  end
+
+  # Optional group (non-repeating)
+  defp match_node({:group, _group_name, :optional, children}, remaining, name, mode, known) do
+    case try_match_group(children, remaining, name, mode, known) do
+      {:matched, errors, after_group} -> {errors, after_group}
+      :no_match -> {[], remaining}
+    end
+  end
+
+  # Required repeating group
+  defp match_node(
+         {:group, group_name, :required, :repeating, children},
+         remaining,
+         name,
+         mode,
+         known
+       ) do
+    case try_match_group(children, remaining, name, mode, known) do
+      {:matched, first_errors, after_first} ->
+        {repeat_errors, after_all} =
+          consume_repeating_group(children, after_first, name, mode, known)
+
+        {first_errors ++ repeat_errors, after_all}
+
+      :no_match ->
+        missing = missing_required_in_group(children, group_name, name)
+        {missing, remaining}
+    end
+  end
+
+  # Optional repeating group
+  defp match_node(
+         {:group, _group_name, :optional, :repeating, children},
+         remaining,
+         name,
+         mode,
+         known
+       ) do
+    case try_match_group(children, remaining, name, mode, known) do
+      {:matched, first_errors, after_first} ->
+        {repeat_errors, after_all} =
+          consume_repeating_group(children, after_first, name, mode, known)
+
+        {first_errors ++ repeat_errors, after_all}
+
+      :no_match ->
+        {[], remaining}
+    end
+  end
+
+  # --- Group Matching ---
+
+  # Try to match a group's children against the segment stream.
+  # A group matches if its first defined segment (the "anchor") is found
+  # at the head of the stream (after skipping unknowns).
+  #
+  # Returns {:matched, errors, remaining} or :no_match.
+  defp try_match_group(children, remaining, name, mode, known) do
+    anchor_ids = group_anchor_ids(children)
+
+    {_skipped, after_skip} = peek_skip_unknown(remaining, known)
+
+    case after_skip do
+      [head | _] ->
+        if head in anchor_ids do
+          {errors, after_match} = match_nodes(children, remaining, name, mode, known)
+          {:matched, errors, after_match}
+        else
+          :no_match
+        end
+
+      [] ->
+        :no_match
+    end
+  end
+
+  # Consume additional repetitions of a group.
+  defp consume_repeating_group(children, remaining, name, mode, known) do
+    case try_match_group(children, remaining, name, mode, known) do
+      {:matched, errors, after_group} ->
+        {more_errors, final} =
+          consume_repeating_group(children, after_group, name, mode, known)
+
+        {errors ++ more_errors, final}
+
+      :no_match ->
+        {[], remaining}
+    end
+  end
+
+  # --- Helpers ---
+
+  # Consume all consecutive occurrences of a segment ID.
+  defp consume_repeating([seg_str | rest], seg_str) do
+    consume_repeating(rest, seg_str)
+  end
+
+  defp consume_repeating(remaining, _seg_str), do: {remaining, []}
+
+  # Skip unknown/Z-segments at the head of the stream.
+  # Returns {warning_errors, remaining_after_skip}.
+  # Unknown segments are those not in the structure definition AND not Z-segments.
+  # Z-segments are silently skipped. Other unknowns generate warnings.
+  defp skip_unknown(remaining, known) do
+    do_skip_unknown(remaining, known, [])
+  end
+
+  defp do_skip_unknown([], _known, acc), do: {Enum.reverse(acc), []}
+
+  defp do_skip_unknown([head | rest] = remaining, known, acc) do
+    head_atom = safe_to_atom(head)
+
+    cond do
+      # Z-segment — skip silently
+      String.starts_with?(head, "Z") -> do_skip_unknown(rest, known, acc)
+      # Known segment — stop skipping
+      head_atom in known -> {Enum.reverse(acc), remaining}
+      # Unknown non-Z segment — skip with no error (handled in leftover)
+      true -> do_skip_unknown(rest, known, acc)
+    end
+  end
+
+  # Peek ahead past unknowns without consuming them (no warnings generated).
+  # Returns {skipped_count, remaining_after_skip}.
+  defp peek_skip_unknown(remaining, known) do
+    do_peek_skip(remaining, known, 0)
+  end
+
+  defp do_peek_skip([], _known, count), do: {count, []}
+
+  defp do_peek_skip([head | rest] = remaining, known, count) do
+    head_atom = safe_to_atom(head)
+
+    cond do
+      String.starts_with?(head, "Z") -> do_peek_skip(rest, known, count + 1)
+      head_atom in known -> {count, remaining}
+      true -> do_peek_skip(rest, known, count + 1)
+    end
+  end
+
+  # Get all segment IDs that could start a group (anchor candidates).
+  # This is the first segment in the children list — could be required or optional.
+  # We collect all leading segments until we hit a required one (inclusive)
+  # or a group node.
+  defp group_anchor_ids(children) do
+    do_anchor_ids(children, MapSet.new())
+    |> MapSet.to_list()
+    |> Enum.map(&Atom.to_string/1)
+  end
+
+  defp do_anchor_ids([], acc), do: acc
+
+  defp do_anchor_ids([{:segment, id, :required} | _], acc) do
+    MapSet.put(acc, id)
+  end
+
+  defp do_anchor_ids([{:segment, id, :required, :repeating} | _], acc) do
+    MapSet.put(acc, id)
+  end
+
+  defp do_anchor_ids([{:segment, id, :optional} | rest], acc) do
+    do_anchor_ids(rest, MapSet.put(acc, id))
+  end
+
+  defp do_anchor_ids([{:segment, id, :optional, :repeating} | rest], acc) do
+    do_anchor_ids(rest, MapSet.put(acc, id))
+  end
+
+  defp do_anchor_ids([{:group, _name, :required, children} | _], acc) do
+    # Include the group's own anchors
+    MapSet.union(acc, do_anchor_ids(children, MapSet.new()))
+  end
+
+  defp do_anchor_ids([{:group, _name, :required, :repeating, children} | _], acc) do
+    MapSet.union(acc, do_anchor_ids(children, MapSet.new()))
+  end
+
+  defp do_anchor_ids([{:group, _name, :optional, children} | rest], acc) do
+    group_anchors = do_anchor_ids(children, MapSet.new())
+    do_anchor_ids(rest, MapSet.union(acc, group_anchors))
+  end
+
+  defp do_anchor_ids([{:group, _name, :optional, :repeating, children} | rest], acc) do
+    group_anchors = do_anchor_ids(children, MapSet.new())
+    do_anchor_ids(rest, MapSet.union(acc, group_anchors))
+  end
+
+  # Report errors for missing required segments within a required group.
+  defp missing_required_in_group(children, _group_name, structure_name) do
+    children
+    |> Enum.flat_map(fn
+      {:segment, id, :required} ->
         [
           %{
-            level: level,
+            level: :error,
             location: structure_name,
             field: nil,
-            message: "Segment #{seg_b} appears before #{seg_a} but should come after it"
+            message: "Required segment #{id} is missing"
           }
         ]
-      else
-        []
-      end
-    end)
-  end
 
-  # --- Cardinality ---
-
-  defp check_cardinality(nodes, segment_ids, structure_name, mode) do
-    non_repeating = collect_non_repeating_segments(nodes)
-    id_counts = Enum.frequencies(segment_ids)
-
-    non_repeating
-    |> Enum.filter(fn seg_atom ->
-      count = Map.get(id_counts, Atom.to_string(seg_atom), 0)
-      count > 1
-    end)
-    |> Enum.map(fn seg_atom ->
-      count = Map.get(id_counts, Atom.to_string(seg_atom), 0)
-      level = if mode == :strict, do: :error, else: :warning
-
-      %{
-        level: level,
-        location: structure_name,
-        field: nil,
-        message: "Segment #{seg_atom} appears #{count} times but is not repeating"
-      }
-    end)
-  end
-
-  defp collect_non_repeating_segments(nodes) do
-    Enum.flat_map(nodes, fn
-      {:segment, _id, _, :repeating} -> []
-      {:segment, id, _optionality} -> [id]
-      {:group, _name, _, children} -> collect_non_repeating_segments(children)
-      {:group, _name, _, :repeating, _children} -> []
-    end)
-    |> Enum.uniq()
-  end
-
-  # --- Orphan Detection ---
-  #
-  # For each group in the structure: if child segments appear in the message
-  # but the group's anchor (first segment in the group) is absent, those
-  # children are orphans.
-
-  defp check_orphans(nodes, segment_ids, structure_name, mode) do
-    segment_id_set = MapSet.new(segment_ids)
-
-    collect_groups(nodes)
-    |> Enum.flat_map(fn {group_name, anchor, children_ids} ->
-      anchor_present? = MapSet.member?(segment_id_set, Atom.to_string(anchor))
-
-      if anchor_present? do
-        []
-      else
-        # Check if any non-anchor children appear without the anchor
-        orphans =
-          children_ids
-          |> Enum.filter(&MapSet.member?(segment_id_set, Atom.to_string(&1)))
-
-        Enum.map(orphans, fn orphan_id ->
-          level = if mode == :strict, do: :error, else: :warning
-
+      {:segment, id, :required, :repeating} ->
+        [
           %{
-            level: level,
+            level: :error,
             location: structure_name,
             field: nil,
-            message:
-              "Segment #{orphan_id} appears without group anchor #{anchor} " <>
-                "(expected in #{group_name} group)"
+            message: "Required segment #{id} is missing"
           }
-        end)
-      end
-    end)
-  end
+        ]
 
-  # Walk the AST to collect groups with their anchor segment and child segment IDs.
-  # The anchor is the first segment (required or optional) defined in the group.
-  defp collect_groups(nodes) do
-    Enum.flat_map(nodes, fn
-      {:group, name, _opt, children} ->
-        group_info(name, children) ++ collect_groups(children)
+      {:group, _, :required, sub_children} ->
+        missing_required_in_group(sub_children, nil, structure_name)
 
-      {:group, name, _opt, :repeating, children} ->
-        group_info(name, children) ++ collect_groups(children)
+      {:group, _, :required, :repeating, sub_children} ->
+        missing_required_in_group(sub_children, nil, structure_name)
 
       _ ->
         []
     end)
   end
 
-  defp group_info(name, children) do
-    case find_anchor(children) do
-      nil ->
-        []
+  # Check leftover segments after all AST nodes are consumed.
+  # Z-segments are silently ignored. Known segments that weren't consumed
+  # indicate ordering problems.
+  defp check_leftover([], _name, _mode, _known), do: []
 
-      anchor ->
-        child_ids =
-          children
-          |> collect_all_segment_ids()
-          |> Enum.reject(&(&1 == anchor))
+  defp check_leftover(remaining, name, mode, known) do
+    remaining
+    |> Enum.reject(&String.starts_with?(&1, "Z"))
+    |> Enum.flat_map(fn seg_str ->
+      seg_atom = safe_to_atom(seg_str)
+      level = if mode == :strict, do: :error, else: :warning
 
-        if child_ids == [] do
-          []
-        else
-          [{name, anchor, child_ids}]
-        end
-    end
+      if seg_atom in known do
+        [
+          %{
+            level: level,
+            location: name,
+            field: nil,
+            message: "Segment #{seg_str} appears after its expected position in the structure"
+          }
+        ]
+      else
+        [
+          %{
+            level: level,
+            location: name,
+            field: nil,
+            message: "Segment #{seg_str} is not defined in #{name} structure"
+          }
+        ]
+      end
+    end)
   end
 
-  # The anchor is the first REQUIRED direct segment child of the group.
-  # Optional-first segments (like ORC in ORDER_OBSERVATION) are not anchors.
-  # If no required direct segment exists, orphan detection is skipped.
-  defp find_anchor([{:segment, id, :required} | _]), do: id
-  defp find_anchor([{:segment, id, :required, :repeating} | _]), do: id
-  defp find_anchor([{:segment, _, :optional} | rest]), do: find_anchor(rest)
-  defp find_anchor([{:segment, _, :optional, :repeating} | rest]), do: find_anchor(rest)
-  defp find_anchor(_), do: nil
-
-  # Collect all segment IDs from a node list (flattened)
+  # Collect all segment IDs defined in the structure (as a MapSet of atoms).
   defp collect_all_segment_ids(nodes) do
-    Enum.flat_map(nodes, fn
-      {:segment, id, _} -> [id]
-      {:segment, id, _, :repeating} -> [id]
-      {:group, _, _, children} -> collect_all_segment_ids(children)
-      {:group, _, _, :repeating, children} -> collect_all_segment_ids(children)
-    end)
-    |> Enum.uniq()
+    nodes
+    |> do_collect_ids(MapSet.new())
+  end
+
+  defp do_collect_ids([], acc), do: acc
+
+  defp do_collect_ids([{:segment, id, _} | rest], acc) do
+    do_collect_ids(rest, MapSet.put(acc, id))
+  end
+
+  defp do_collect_ids([{:segment, id, _, :repeating} | rest], acc) do
+    do_collect_ids(rest, MapSet.put(acc, id))
+  end
+
+  defp do_collect_ids([{:group, _, _, children} | rest], acc) do
+    acc = do_collect_ids(children, acc)
+    do_collect_ids(rest, acc)
+  end
+
+  defp do_collect_ids([{:group, _, _, :repeating, children} | rest], acc) do
+    acc = do_collect_ids(children, acc)
+    do_collect_ids(rest, acc)
+  end
+
+  # Safe atom conversion — only for known segment IDs that are already atoms
+  # in the structure definition. Unknown strings get a dynamically created atom
+  # which is fine since segment IDs are a bounded set.
+  defp safe_to_atom(str) when is_binary(str) do
+    String.to_atom(str)
   end
 end

@@ -207,9 +207,9 @@ ADT/ORM/ORU/SIU/ACK subset with extra_fields preservation for unlisted fields.
 - Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
   no whitespace normalization)
 
-**Coverage:** 29 of ~136 standard segments (plus generic ZXX) typed. 48 of ~84 v2.5.1
-data types. 20 group-aware message structure definitions with structural validation
-(ordering, cardinality, orphan detection). Opt-in table validation for 20 HL7 tables. Extra
+**Coverage:** 29 of ~136 standard segments (plus generic ZXX) typed. 48 of 89 v2.5.1
+data types. 20 group-aware message structure definitions with positional structural
+validation (ordering, cardinality, group awareness). Opt-in table validation for 20 HL7 tables. Extra
 fields beyond declared definitions are preserved in `extra_fields` for lossless round-trip.
 OBX exposes 19 of 25 fields; OBR exposes 49 of 50 — unlisted fields survive as extra_fields.
 Some typed segment fields fall back to `:raw` where their HL7 data types (TQ, SPS, ELD) are

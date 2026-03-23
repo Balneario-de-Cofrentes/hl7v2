@@ -275,12 +275,20 @@ defmodule HL7v2.Standard do
       tier: :unsupported
     },
     "CCD" => %{name: "Charge Code and Date", category: :composite, tier: :unsupported},
+    "CD" => %{name: "Channel Definition", category: :composite, tier: :unsupported},
     "CSU" => %{name: "Channel Sensitivity and Units", category: :composite, tier: :unsupported},
     "DDI" => %{name: "Daily Deductible Information", category: :composite, tier: :unsupported},
     "DIN" => %{name: "Date and Institution Name", category: :composite, tier: :unsupported},
+    "DLT" => %{name: "Delta", category: :composite, tier: :unsupported},
+    "DTN" => %{name: "Day Type and Number", category: :composite, tier: :unsupported},
     "ED" => %{name: "Encapsulated Data", category: :composite, tier: :unsupported},
     "ELD" => %{name: "Error Location and Description", category: :composite, tier: :typed},
     "GTS" => %{name: "General Timing Specification", category: :primitive, tier: :unsupported},
+    "ICD" => %{
+      name: "Insurance Certification Definition",
+      category: :composite,
+      tier: :unsupported
+    },
     "LA1" => %{
       name: "Location with Address Variation 1",
       category: :composite,
@@ -292,6 +300,7 @@ defmodule HL7v2.Standard do
       tier: :unsupported
     },
     "MA" => %{name: "Multiplexed Array", category: :composite, tier: :unsupported},
+    "MOP" => %{name: "Money or Percentage", category: :composite, tier: :unsupported},
     "NA" => %{name: "Numeric Array", category: :composite, tier: :unsupported},
     "OCD" => %{name: "Occurrence Code and Date", category: :composite, tier: :unsupported},
     "OSD" => %{name: "Order Sequence Definition", category: :composite, tier: :unsupported},
