@@ -213,7 +213,8 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :PV1, :required},
       {:segment, :PV2, :optional},
       {:segment, :DB1, :optional, :repeating},
-      {:segment, :NTE, :optional, :repeating}
+      {:segment, :OBX, :optional, :repeating},
+      {:segment, :DG1, :optional, :repeating}
     ]
   }
 
@@ -230,12 +231,12 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :PV1, :required},
       {:segment, :PV2, :optional},
       {:segment, :DB1, :optional, :repeating},
-      {:segment, :DG1, :optional, :repeating},
-      {:segment, :NTE, :optional, :repeating}
+      {:segment, :OBX, :optional, :repeating},
+      {:segment, :DG1, :optional, :repeating}
     ]
   }
 
-  # ADT_A15: Pending admit/transfer (shared with A15)
+  # ADT_A15: Pending admit/transfer
   @adt_a15 %{
     name: "ADT_A15",
     description: "Pending Transfer",
@@ -250,7 +251,8 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :PV2, :optional},
       {:segment, :ROL, :optional, :repeating},
       {:segment, :DB1, :optional, :repeating},
-      {:segment, :NTE, :optional, :repeating}
+      {:segment, :OBX, :optional, :repeating},
+      {:segment, :DG1, :optional, :repeating}
     ]
   }
 
@@ -269,13 +271,13 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :PV2, :optional},
       {:segment, :ROL, :optional, :repeating},
       {:segment, :DB1, :optional, :repeating},
+      {:segment, :OBX, :optional, :repeating},
       {:segment, :DG1, :optional, :repeating},
-      {:segment, :DRG, :optional},
-      {:segment, :NTE, :optional, :repeating}
+      {:segment, :DRG, :optional}
     ]
   }
 
-  # ADT_A21: Leave of absence (shared with A22-A27)
+  # ADT_A21: Leave of absence (shared with A22-A27, A29, A32, A33)
   @adt_a21 %{
     name: "ADT_A21",
     description: "Patient Goes on Leave of Absence",
@@ -288,7 +290,7 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :PV1, :required},
       {:segment, :PV2, :optional},
       {:segment, :DB1, :optional, :repeating},
-      {:segment, :NTE, :optional, :repeating}
+      {:segment, :OBX, :optional, :repeating}
     ]
   }
 
@@ -307,8 +309,7 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :PID, :required},
       {:segment, :PD1, :optional},
       {:segment, :PV1, :optional},
-      {:segment, :DB1, :optional, :repeating},
-      {:segment, :NTE, :optional, :repeating}
+      {:segment, :DB1, :optional, :repeating}
     ]
   }
 
@@ -325,8 +326,7 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :PV1, :optional},
       {:segment, :PID, :required},
       {:segment, :PD1, :optional},
-      {:segment, :PV1, :optional},
-      {:segment, :NTE, :optional, :repeating}
+      {:segment, :PV1, :optional}
     ]
   }
 
@@ -343,9 +343,9 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :PV1, :required},
       {:segment, :PV2, :optional},
       {:segment, :DB1, :optional, :repeating},
+      {:segment, :OBX, :optional, :repeating},
       {:segment, :DG1, :optional, :repeating},
-      {:segment, :DRG, :optional},
-      {:segment, :NTE, :optional, :repeating}
+      {:segment, :DRG, :optional}
     ]
   }
 
