@@ -2,9 +2,14 @@ defmodule HL7v2.Message do
   @moduledoc """
   Programmatic HL7v2 message construction.
 
-  Builds well-formed HL7v2 messages from typed segment structs. The MSH segment
-  is auto-populated with sensible defaults (field separator, encoding characters,
-  processing ID, version, timestamp, control ID) and can be overridden via opts.
+  Low-level message constructor for building HL7v2 messages from typed segment
+  structs. The MSH segment is auto-populated with sensible defaults (field
+  separator, encoding characters, processing ID, version, timestamp, control ID)
+  and can be overridden via opts.
+
+  **Note:** This is an append-only builder — it does not enforce segment ordering
+  or required-segment presence. Use `HL7v2.validate/1` after building to check
+  structural conformance.
 
   ## Examples
 

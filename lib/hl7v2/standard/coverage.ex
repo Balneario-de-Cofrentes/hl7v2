@@ -9,7 +9,7 @@ defmodule HL7v2.Standard.Coverage do
   alias HL7v2.Standard
 
   @doc """
-  Returns the list of segments with full typed parse/encode support.
+  Returns all typed segment IDs.
 
   ## Examples
 
@@ -19,6 +19,41 @@ defmodule HL7v2.Standard.Coverage do
   """
   @spec typed_segments() :: [binary()]
   def typed_segments, do: Standard.typed_segment_ids()
+
+  @doc """
+  Returns per-segment field completeness: `{segment_id, typed_count, total_count, pct}`.
+
+  Segments with all fields typed show 100.0%. Segments with `:raw` holes show lower.
+  """
+  @spec segment_completeness() :: [{binary(), non_neg_integer(), non_neg_integer(), float()}]
+  def segment_completeness do
+    Standard.typed_segment_ids()
+    |> Enum.map(fn seg_id ->
+      module = Standard.segment_module(seg_id)
+      fields = module.fields()
+      total = length(fields)
+      typed = Enum.count(fields, fn {_, _, type, _, _} -> type != :raw end)
+      pct = if total > 0, do: Float.round(typed / total * 100, 1), else: 100.0
+      {seg_id, typed, total, pct}
+    end)
+    |> Enum.sort_by(fn {_, _, _, pct} -> pct end)
+  end
+
+  @doc "Returns segments where all fields are typed (no `:raw` holes)."
+  @spec fully_typed_segments() :: [binary()]
+  def fully_typed_segments do
+    segment_completeness()
+    |> Enum.filter(fn {_, _, _, pct} -> pct == 100.0 end)
+    |> Enum.map(fn {id, _, _, _} -> id end)
+  end
+
+  @doc "Returns segments with at least one `:raw` hole."
+  @spec partially_typed_segments() :: [binary()]
+  def partially_typed_segments do
+    segment_completeness()
+    |> Enum.filter(fn {_, _, _, pct} -> pct < 100.0 end)
+    |> Enum.map(fn {id, _, _, _} -> id end)
+  end
 
   @doc """
   Returns segments that exist in the standard but are not typed.
