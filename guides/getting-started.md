@@ -7,7 +7,7 @@ Add `hl7v2` to your dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:hl7v2, "~> 0.1"}
+    {:hl7v2, "~> 1.4"}
   ]
 end
 ```
@@ -67,7 +67,7 @@ msg =
     event_type_code: "A01"
   })
   |> HL7v2.Message.add_segment(%PID{
-    patient_identifier_list: [%CX{id_number: "12345"}],
+    patient_identifier_list: [%CX{id: "12345"}],
     patient_name: [%XPN{family_name: %FN{surname: "Smith"}, given_name: "John"}]
   })
   |> HL7v2.Message.add_segment(%PV1{

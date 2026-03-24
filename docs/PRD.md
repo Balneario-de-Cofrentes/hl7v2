@@ -1,4 +1,8 @@
-# HL7v2 — Product Requirements Document
+# HL7v2 — Product Requirements Document (Historical)
+
+> **Note:** This is the original PRD from the initial design phase. API examples
+> and shapes may not match the current implementation. See README.md and
+> HexDocs for the current API.
 
 ## Vision
 

@@ -93,19 +93,33 @@ defmodule HL7v2.MLLP.Connection do
       handler_timeout: handler_timeout
     }
 
-    try do
-      loop(transport, socket, config, meta, <<>>)
-    after
-      duration = System.monotonic_time() - conn_start
+    reason =
+      try do
+        loop(transport, socket, config, meta, <<>>)
+      catch
+        kind, value -> {:crash, kind, value}
+      end
 
-      :telemetry.execute(
-        [:hl7v2, :mllp, :connection, :stop],
-        %{duration: duration},
-        %{ref: ref, peer: peer, reason: :normal}
-      )
+    duration = System.monotonic_time() - conn_start
 
-      transport.close(socket)
-    end
+    stop_reason =
+      case reason do
+        :normal -> :normal
+        :closed -> :closed
+        :timeout -> :timeout
+        :message_too_large -> :message_too_large
+        {:error, err} -> {:error, err}
+        {:crash, _, _} -> :crash
+        other -> other
+      end
+
+    :telemetry.execute(
+      [:hl7v2, :mllp, :connection, :stop],
+      %{duration: duration},
+      %{ref: ref, peer: peer, reason: stop_reason}
+    )
+
+    transport.close(socket)
   end
 
   defp loop(transport, socket, config, meta, buffer) do
@@ -133,7 +147,7 @@ defmodule HL7v2.MLLP.Connection do
             }
           )
 
-          :ok
+          :message_too_large
         else
           {messages, remaining} = HL7v2.MLLP.extract_messages(new_buffer)
 
@@ -147,15 +161,15 @@ defmodule HL7v2.MLLP.Connection do
         end
 
       {closed_tag, ^socket} when closed_tag in [:tcp_closed, :ssl_closed] ->
-        :ok
+        :closed
 
       {error_tag, ^socket, reason} when error_tag in [:tcp_error, :ssl_error] ->
         Logger.warning("MLLP connection error: #{inspect(reason)}")
-        :ok
+        {:error, reason}
     after
       config.timeout ->
         Logger.debug("MLLP connection timeout after #{config.timeout}ms")
-        :ok
+        :timeout
     end
   end
 

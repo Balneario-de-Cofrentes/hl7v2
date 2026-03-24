@@ -161,7 +161,7 @@ end
 {:ok, _} = HL7v2.MLLP.Listener.start_link(
   port: 2576,
   handler: MyHandler,
-  tls: [certfile: "cert.pem", keyfile: "key.pem", cacertfile: "ca.pem", verify: :verify_peer]
+  tls: HL7v2.MLLP.TLS.mutual_tls_options(certfile: "cert.pem", keyfile: "key.pem", cacertfile: "ca.pem")
 )
 ```
 
