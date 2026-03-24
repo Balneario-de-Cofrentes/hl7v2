@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.4.3 — 2026-03-24
+
+### Fixes
+
+- **Structural validator honesty** — unknown non-Z segments are no longer silently
+  consumed during matching. They now stop the matcher and are flagged as leftover
+  warnings (e.g., ACC in an ACK message is now caught).
+- **ADT_A02** — added OBX and PDA per v2.5.1 spec (were missing)
+- **ADT_A03** — added NK1, VISIT group, AL1, GT1, INSURANCE group, ACC, PDA
+  per v2.5.1 spec (was incomplete)
+- **Canonical aliases** — added A29, A32, A33 → ADT_A21 (were falling through)
+- **Conformance roadmap** — updated to current state
+
 ## v1.4.2 — 2026-03-23
 
 ### MLLP Hardening
