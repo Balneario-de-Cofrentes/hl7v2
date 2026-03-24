@@ -62,7 +62,7 @@ defmodule HL7v2 do
         if validate? and mode == :typed do
           case HL7v2.Validation.validate(msg) do
             :ok -> {:ok, msg}
-            {:ok, _warnings} -> {:ok, msg}
+            {:ok, warnings} -> {:ok, msg, warnings}
             {:error, _} = err -> err
           end
         else

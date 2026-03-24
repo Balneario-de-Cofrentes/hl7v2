@@ -110,8 +110,11 @@ defmodule HL7v2.Escape do
   defp do_decode_hex(<<>>, acc), do: acc |> Enum.reverse() |> IO.iodata_to_binary()
 
   defp do_decode_hex(<<hi, lo, rest::binary>>, acc) do
-    byte = hex_to_int(hi) * 16 + hex_to_int(lo)
-    do_decode_hex(rest, [<<byte>> | acc])
+    case {hex_to_int(hi), hex_to_int(lo)} do
+      {nil, _} -> acc |> Enum.reverse() |> IO.iodata_to_binary()
+      {_, nil} -> acc |> Enum.reverse() |> IO.iodata_to_binary()
+      {h, l} -> do_decode_hex(rest, [<<h * 16 + l>> | acc])
+    end
   end
 
   # Odd-length hex — ignore trailing nibble
@@ -120,6 +123,7 @@ defmodule HL7v2.Escape do
   defp hex_to_int(c) when c in ?0..?9, do: c - ?0
   defp hex_to_int(c) when c in ?A..?F, do: c - ?A + 10
   defp hex_to_int(c) when c in ?a..?f, do: c - ?a + 10
+  defp hex_to_int(_), do: nil
 
   @doc """
   Encodes delimiter characters in `text` as HL7v2 escape sequences.
