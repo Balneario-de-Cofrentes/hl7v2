@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixes
 
-- **Structural validator honesty** — unknown non-Z segments are no longer silently
+- **Structural validator strictness** — unknown non-Z segments are no longer silently
   consumed during matching. They now stop the matcher and are flagged as leftover
   warnings (e.g., ACC in an ACK message is now caught).
 - **ADT_A02** — added OBX and PDA per v2.5.1 spec (were missing)
@@ -58,7 +58,7 @@ All notable changes to this project will be documented in this file.
 - **`HL7v2.type/1`** — now returns `{:ok, typed}` instead of raising `MatchError`
   on conversion failure. Aligns with the library's error-tuple convention.
 - **README/CHANGELOG accuracy** — stale segment counts, stale ROL example (was shown
-  as raw tuple but is typed since v1.2.0), missing changelog entries, honest UB1/UB2
+  as raw tuple but is typed since v1.2.0), missing changelog entries, UB1/UB2
   disclosure (mostly raw shells).
 
 ### Stats
@@ -302,9 +302,9 @@ All notable changes to this project will be documented in this file.
   but not dispatched, so SIU messages returned raw tuples instead of structs)
 - **ADT_A12** — ADT^A12 (Cancel Transfer) now correctly mapped to ADT_A12, not ADT_A09
 - **Presence validation** — Renamed "structure validation" to "presence validation"
-  throughout docs to honestly describe what it does (no ordering/group/cardinality)
+  throughout docs to clarify scope (no ordering/group/cardinality)
 - **Docs accuracy** — Fixed DICOM PS3.x citation in message-structures.md (was wrong
-  standard), updated README coverage numbers to honest counts
+  standard), updated README coverage numbers
 
 ## v0.5.1 — 2026-03-22
 
@@ -358,7 +358,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixes
 
-- 4 rounds of analyst review fixes: honest scope claims, data correctness bugs, doc
+- 4 rounds of analyst review fixes: scope claims, data correctness bugs, doc
   accuracy, fetch/2 error semantics
 
 ### Stats

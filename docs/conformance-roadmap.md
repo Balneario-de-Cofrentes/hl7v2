@@ -9,7 +9,7 @@ Run `mix hl7v2.coverage` for exact counts.
 
 ## Milestones
 
-### M1: Honest Core — COMPLETE (v0.5.0-v0.5.6)
+### M1: Core Fixes — COMPLETE (v0.5.0-v0.5.6)
 
 - [x] Fix DTM encode/parse fraction asymmetry (v0.5.6)
 - [x] Fix fetch/2 raw tuple bounds (v0.5.6)
@@ -23,7 +23,7 @@ Run `mix hl7v2.coverage` for exact counts.
 - [x] Fix ORM/ORU PID optional, SIU RGS required (v0.5.1)
 - [x] Fix validation warnings vs errors (v0.5.4)
 - [x] Fix builder separator derivation from MSH (v0.5.3)
-- [x] Honest README: coverage counts, capability framing, raw holes
+- [x] README: accurate coverage counts, capability framing, raw holes
 - [x] Presence validation naming everywhere
 - [x] Implementation plan marked historical
 - [x] MRG + RGS segments with tests
@@ -76,7 +76,7 @@ Run `mix hl7v2.coverage` for exact counts.
 
 | Stop at | You get | Status |
 |---------|---------|--------|
-| M1 | Honest, strong raw toolkit with typed subset | DONE (v0.5.x) |
+| M1 | Core fixes, accurate framing | DONE (v0.5.x) |
 | M3 | Real structural validation for supported structures | DONE (v0.7.0) |
 | M4 | Strong practical interoperability (no raw holes) | DONE (v0.8.0) |
 | M5 | Broad clinical segment coverage | DONE (v0.9.0) |
@@ -84,7 +84,7 @@ Run `mix hl7v2.coverage` for exact counts.
 
 ## Execution Order
 
-1. Contract honesty + correctness fixes (M1 — DONE)
+1. Core correctness fixes (M1 — DONE)
 2. Metadata generation + conformance test harness (M2 — DONE)
 3. Structural validator rewrite (M3)
 4. Datatype expansion (M4)

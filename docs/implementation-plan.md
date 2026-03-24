@@ -7,7 +7,7 @@
 ## Status: Initial Build Complete (2026-03-22)
 
 Initial 9 phases implemented. Library has since been extended through v0.5.x
-with additional segments, types, conformance fixes, and honest coverage framing.
+with additional segments, types, and conformance fixes.
 See CHANGELOG.md for the full history.
 
 ## Phase Overview
