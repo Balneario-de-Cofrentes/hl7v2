@@ -79,6 +79,7 @@ defmodule HL7v2.Validation.FieldRules do
   # A value is semantically blank if it's nil, an empty list, or a struct
   # where every field is nil (e.g., %XPN{} with all nil fields).
   defp semantic_blank?(nil), do: true
+  defp semantic_blank?(""), do: true
   defp semantic_blank?([]), do: true
 
   defp semantic_blank?(list) when is_list(list) do

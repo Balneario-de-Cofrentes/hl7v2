@@ -7,7 +7,8 @@ defmodule HL7v2.Segment.OBX do
 
   After base parsing, OBX-5 (observation_value) is re-parsed through
   `HL7v2.Segment.OBXValue` using the data type declared in OBX-2 (value_type).
-  Unknown or complex types (ED, SN, RP) are preserved as raw values.
+  Unsupported value types are preserved as raw values. See `HL7v2.Segment.OBXValue`
+  for the full list of supported OBX-2 codes.
   """
 
   use HL7v2.Segment,
