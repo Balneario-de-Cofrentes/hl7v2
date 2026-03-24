@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.4.4 — 2026-03-24
+
+### Fixes
+
+- **ADT structure definitions** — 8 structures corrected against v2.5.1 spec:
+  A09, A12, A15, A16, A21, A24, A37, A38 had incorrect NTE (removed) and
+  missing OBX/DG1 (added). Structural validation now matches the standard.
+- **Coverage metrics** — `mix hl7v2.coverage` now shows fully typed vs partially
+  typed segment split. `--detail` flag shows per-segment field completeness.
+- **Builder moduledoc** — clarified as low-level constructor (does not validate)
+
 ## v1.4.3 — 2026-03-24
 
 ### Fixes
