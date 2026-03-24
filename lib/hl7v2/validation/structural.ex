@@ -315,9 +315,18 @@ defmodule HL7v2.Validation.Structural do
 
   defp do_skip_unknown([head | rest] = remaining, known_strings, acc) do
     cond do
-      String.starts_with?(head, "Z") -> do_skip_unknown(rest, known_strings, acc)
-      MapSet.member?(known_strings, head) -> {Enum.reverse(acc), remaining}
-      true -> do_skip_unknown(rest, known_strings, acc)
+      # Z-segments are always silently skipped
+      String.starts_with?(head, "Z") ->
+        do_skip_unknown(rest, known_strings, acc)
+
+      # Known segment in the structure — stop skipping
+      MapSet.member?(known_strings, head) ->
+        {Enum.reverse(acc), remaining}
+
+      # Unknown non-Z segment — NOT in the structure definition.
+      # Stop skipping and let the caller handle it (will become a leftover warning).
+      true ->
+        {Enum.reverse(acc), remaining}
     end
   end
 
@@ -333,7 +342,8 @@ defmodule HL7v2.Validation.Structural do
     cond do
       String.starts_with?(head, "Z") -> do_peek_skip(rest, known_strings, count + 1)
       MapSet.member?(known_strings, head) -> {count, remaining}
-      true -> do_peek_skip(rest, known_strings, count + 1)
+      # Unknown non-Z — stop peeking, don't skip past it
+      true -> {count, remaining}
     end
   end
 

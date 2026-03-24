@@ -112,7 +112,8 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :PV2, :optional},
       {:segment, :ROL, :optional, :repeating},
       {:segment, :DB1, :optional, :repeating},
-      {:segment, :NTE, :optional, :repeating}
+      {:segment, :OBX, :optional, :repeating},
+      {:segment, :PDA, :optional}
     ]
   }
 
@@ -126,18 +127,29 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :PID, :required},
       {:segment, :PD1, :optional},
       {:segment, :ROL, :optional, :repeating},
-      {:segment, :PV1, :required},
-      {:segment, :PV2, :optional},
-      {:segment, :ROL, :optional, :repeating},
+      {:segment, :NK1, :optional, :repeating},
+      {:group, :VISIT, :required, [
+        {:segment, :PV1, :required},
+        {:segment, :PV2, :optional},
+        {:segment, :ROL, :optional, :repeating}
+      ]},
       {:segment, :DB1, :optional, :repeating},
+      {:segment, :AL1, :optional, :repeating},
       {:segment, :DG1, :optional, :repeating},
       {:segment, :DRG, :optional},
-      {:group, :PROCEDURE, :optional, :repeating,
-       [
-         {:segment, :PR1, :required},
-         {:segment, :ROL, :optional, :repeating}
-       ]},
-      {:segment, :NTE, :optional, :repeating}
+      {:group, :PROCEDURE, :optional, :repeating, [
+        {:segment, :PR1, :required},
+        {:segment, :ROL, :optional, :repeating}
+      ]},
+      {:segment, :GT1, :optional, :repeating},
+      {:group, :INSURANCE, :optional, :repeating, [
+        {:segment, :IN1, :required},
+        {:segment, :IN2, :optional},
+        {:segment, :IN3, :optional, :repeating},
+        {:segment, :ROL, :optional, :repeating}
+      ]},
+      {:segment, :ACC, :optional},
+      {:segment, :PDA, :optional}
     ]
   }
 

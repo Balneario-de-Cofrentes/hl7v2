@@ -1,11 +1,11 @@
 # HL7v2 Conformance Roadmap
 
-## Current State (v1.0.0)
+## Current State (v1.4.x)
 
-Strong raw round-trip core. Typed support for ADT/ORM/ORU/SIU/ACK with structural
-validation (order, groups, cardinality) and opt-in HL7 table checking. 29 standard
-segments, 48 v2.5.1 types, 20 group-aware message structure definitions, 20 coded-value
-tables, 1 raw hole (OBX-5 dispatch). 1,921 tests, 0 failures.
+Strong raw round-trip core. Typed support for ADT/ORM/ORU/SIU/RDE/RDS/MDM/ACK with
+positional structural validation and opt-in HL7 table checking. 52 standard segments,
+54 v2.5.1 types, 23 group-aware message structure definitions, 20 coded-value tables.
+Run `mix hl7v2.coverage` for exact counts.
 
 ## Milestones
 
