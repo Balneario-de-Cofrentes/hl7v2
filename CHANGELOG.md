@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.4.5 — 2026-03-24
+
+### Fixes
+
+- **Escape.decode/2 crash** — malformed hex escapes (`\XGG\`, `\X4Z\`) no longer
+  raise `FunctionClauseError`; invalid hex bytes gracefully terminate decoding
+- **parse(validate: true) warnings** — now returns `{:ok, msg, warnings}` when
+  validation produces only warnings (was silently discarding them as `{:ok, msg}`)
+- **Empty string required fields** — `""` on required fields now caught by validation
+  (was passing as non-blank)
+- **MLLP connection stop reason** — telemetry now carries actual reason (`:closed`,
+  `:timeout`, `:message_too_large`, `{:error, reason}`) instead of always `:normal`
+- **Getting-started guide** — install `~> 1.4`, fixed `CX` field name (`id` not `id_number`)
+- **README TLS example** — uses `HL7v2.MLLP.TLS.mutual_tls_options/1`
+- **OBX moduledoc** — removed stale claim that ED/SN/RP are raw (they're typed)
+- **PRD** — marked as historical
+
 ## v1.4.4 — 2026-03-24
 
 ### Fixes
