@@ -95,6 +95,28 @@ defmodule HL7v2.Validation.FieldRules do
 
   defp semantic_blank?(_), do: false
 
+  # Non-repeating field (max_reps == 1) with a list-of-lists value — illegal repetition.
+  # Flat lists (["M", "EXTRA"]) are extra components from non-conformant input, not repetitions.
+  defp max_reps_errors(location, name, 1, value, mode)
+       when is_list(value) and length(value) > 0 do
+    has_nested_lists? = Enum.any?(value, &is_list/1)
+
+    if has_nested_lists? do
+      level = if mode == :strict, do: :error, else: :warning
+
+      [
+        %{
+          level: level,
+          location: location,
+          field: name,
+          message: "field #{name} has #{length(value)} repetitions but is not repeatable"
+        }
+      ]
+    else
+      []
+    end
+  end
+
   defp max_reps_errors(location, name, max_reps, value, mode)
        when is_integer(max_reps) and max_reps > 1 and is_list(value) do
     if length(value) > max_reps do
