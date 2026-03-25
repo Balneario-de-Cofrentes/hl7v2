@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.1.1 — 2026-03-26
+
+### Fixes
+
+- **Strict repetition validation** — non-repeatable fields with illegal repetitions
+  (e.g., `M~F` on PID-8) are now caught in strict mode as errors and in lenient
+  mode as warnings. Previously silently accepted.
+
+## v2.1.0 — 2026-03-26
+
+### Full v2.5.1 Segment Catalog
+
+- **16 new segments**: ABS, AFF, BTX, EQL, ERQ, NCK, NDS, NSC, NST, ODS, ODT,
+  PRC, QRI, RMI, SPR, VTQ — completing the official v2.5.1 segment index
+- **152/152 v2.5.1 segments** in catalog, all typed (115 fully, 37 partial)
+- **89/89 v2.5.1 data types** implemented
+- SCD/SDD marked as v2.6 extensions
+- Fixed unused alias warning in DLT type
+
+## v2.0.0 — 2026-03-25
+
+### Full Standard Coverage
+
+- **84 new segments** — all remaining v2.5.1 standard segments
+- **35 new data types** — all remaining v2.5.1 data types
+- **66 raw holes filled** across 13 segments
+- Segment coverage: 136/136 → 152/152 (after v2.1.0 corrections)
+- Type coverage: 89/89 (100%)
+
 ## v1.4.6 — 2026-03-25
 
 ### Fixes
