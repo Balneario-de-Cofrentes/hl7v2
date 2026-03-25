@@ -90,7 +90,7 @@ defmodule HL7v2.Validation.FieldRules do
     struct
     |> Map.from_struct()
     |> Map.values()
-    |> Enum.all?(&is_nil/1)
+    |> Enum.all?(&semantic_blank?/1)
   end
 
   defp semantic_blank?(_), do: false

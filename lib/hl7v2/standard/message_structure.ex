@@ -22,11 +22,10 @@ defmodule HL7v2.Standard.MessageStructure do
 
   ## Limitations
 
-  These definitions represent the **segments this library knows about** within
-  each structure. Standard segments that are unsupported (PD1, ROL, SFT, etc.)
-  are included as segment references but will be preserved as raw tuples during
-  typed parsing. The structure definitions are complete enough for presence and
-  ordering validation within the implemented subset.
+  These definitions cover segments within 23 supported message structures.
+  Most referenced segments are typed; a few less-common ones (e.g., OSD, RMC,
+  DDI) remain as `:raw` field types within their segments. Run
+  `mix hl7v2.coverage --detail` for per-segment field completeness.
 
   Source: HL7 v2.5.1 abstract message definitions via
   https://www.hl7.eu/HL7v2x/v251/hl7v251msgstruct.htm and
