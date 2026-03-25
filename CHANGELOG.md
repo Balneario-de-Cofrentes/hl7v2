@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.4.6 — 2026-03-25
+
+### Fixes
+
+- **Nested composite validation** — `semantic_blank?` now recurses into nested
+  structs. `[%XPN{family_name: %FN{}}]` is correctly detected as blank for
+  required-field checks.
+- **Strict mode unsupported structures** — `validate(msg, mode: :strict)` now
+  returns errors (not warnings) for unsupported message structures.
+
 ## v1.4.5 — 2026-03-24
 
 ### Fixes
