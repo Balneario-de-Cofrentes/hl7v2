@@ -76,10 +76,21 @@ defmodule HL7v2.Validation do
         HL7v2.Validation.Structural.validate(struct_def, segment_ids, mode: mode)
 
       nil ->
-        # Fall back to presence-only validation
+        # No group-aware structure definition exists.
+        # In strict mode, unsupported structures are errors.
         case MessageDefinition.validate_structure(structure_name, segment_ids) do
-          :ok -> []
-          {:error, errors} -> errors
+          :ok ->
+            []
+
+          {:error, results} ->
+            if mode == :strict do
+              Enum.map(results, fn
+                %{level: :warning} = r -> %{r | level: :error}
+                r -> r
+              end)
+            else
+              results
+            end
         end
     end
   end
