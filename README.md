@@ -168,11 +168,12 @@ end
 ## Coverage
 
 ```
- Segments    52 standard + generic ZXX
-              52 of 136 standard segments (38.2%) + generic Z-segment pass-through
+ Segments    152 standard + generic ZXX
+              152 of 152 v2.5.1 segments (100%) + generic Z-segment pass-through
+              115 fully typed, 37 with raw holes
               Run `mix hl7v2.coverage` for the full list
 
- Types       54 of 89 v2.5.1 data types (60.7%)
+ Types       89 of 89 v2.5.1 data types (100%)
 
  Messages    ADT (A01-A04, A08, A12) ORM^O01 ORU^R01 SIU^S12 RDE^O11
               RDS^O13 MDM^T02 ACK — structural validation (order + groups + cardinality)
@@ -209,14 +210,14 @@ ADT/ORM/ORU/SIU/RDE/RDS/MDM/ACK with extra_fields preservation for unlisted fiel
   sequences (`\F\`, `\S\`, `\R\`, etc.) literally for round-trip fidelity.
   Call `HL7v2.Escape.decode/2` explicitly when you need decoded text.
 
-**Coverage:** 52 of 136 standard segments (38.2%, plus generic ZXX) typed. 54 of 89 v2.5.1
-data types (60.7%). 23 group-aware message structure definitions with positional
+**Coverage:** 152 of 152 v2.5.1 standard segments (100%, plus generic ZXX) typed. 89 of 89
+v2.5.1 data types (100%). 23 group-aware message structure definitions with positional
 structural validation. Opt-in table validation for 20 HL7 tables. Extra
 fields beyond declared definitions are preserved in `extra_fields` for lossless round-trip.
-OBX exposes 19 of 25 fields; OBR exposes 49 of 50 — unlisted fields survive as extra_fields.
+OBX exposes 19 of 25 fields; OBR exposes 49 of 50 -- unlisted fields survive as extra_fields.
 UB1 and UB2 are typed shells (most fields are `:raw`) included for structural completeness.
 Some typed segment fields fall back to `:raw` where their HL7 data types are
-not yet implemented — 67 raw holes total, preserved but not parsed into typed structs.
+not yet implemented -- 221 raw holes total, preserved but not parsed into typed structs.
 Run `mix hl7v2.coverage` for the full list.
 
 ## Handling Unknown Segments
@@ -234,8 +235,8 @@ handles all of them without crashing or losing data:
 # Z-segments → ZXX struct preserving segment ID and all raw fields
 %HL7v2.Segment.ZXX{segment_id: "ZPD", raw_fields: ["custom", "data"]}
 
-# Unknown standard segments → raw tuples, lossless
-{"ARQ", ["1", "REQ001", ...]}
+# Unknown segments from other versions → raw tuples, lossless
+{"XYZ", ["1", "DATA001", ...]}
 ```
 
 All three forms encode back to valid HL7 wire format. The typed API (`get/2`, `fetch/2`,

@@ -14,7 +14,7 @@ defmodule HL7v2.Type.DLT do
   @behaviour HL7v2.Type
 
   alias HL7v2.Type
-  alias HL7v2.Type.{NR, NM}
+  alias HL7v2.Type.NR
 
   defstruct [:normal_range, :numeric_threshold, :change_computation, :days_retained]
 
