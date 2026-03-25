@@ -43,12 +43,13 @@ defmodule HL7v2.Segment.UB2Test do
       assert result.non_covered_days == "2"
     end
 
-    test "preserves value_amount_and_code as raw" do
-      raw = List.duplicate("", 5) ++ [["some_raw_data"]]
+    test "parses value_amount_and_code as repeating UVC" do
+      raw = List.duplicate("", 5) ++ [[["01", "150.00"]]]
 
       result = UB2.parse(raw)
 
-      assert result.value_amount_and_code == ["some_raw_data"]
+      assert [%HL7v2.Type.UVC{value_code: %HL7v2.Type.CNE{identifier: "01"}}] =
+               result.value_amount_and_code
     end
 
     test "parses ub92_locator and document_control_number" do

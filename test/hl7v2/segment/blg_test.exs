@@ -2,6 +2,7 @@ defmodule HL7v2.Segment.BLGTest do
   use ExUnit.Case, async: true
 
   alias HL7v2.Segment.BLG
+  alias HL7v2.Type.CCD
 
   describe "fields/0" do
     test "returns 3 field definitions" do
@@ -16,13 +17,13 @@ defmodule HL7v2.Segment.BLGTest do
   end
 
   describe "parse/1" do
-    test "preserves when_to_charge as raw" do
+    test "parses when_to_charge as CCD" do
       raw = [["D", "20260315"]]
 
       result = BLG.parse(raw)
 
       assert %BLG{} = result
-      assert result.when_to_charge == ["D", "20260315"]
+      assert %CCD{invocation_event: "D"} = result.when_to_charge
     end
 
     test "parses charge_type as ID" do
@@ -46,7 +47,7 @@ defmodule HL7v2.Segment.BLGTest do
 
       result = BLG.parse(raw)
 
-      assert result.when_to_charge == ["D", "20260315"]
+      assert %CCD{invocation_event: "D"} = result.when_to_charge
       assert result.charge_type == "P"
       assert result.account_id.id == "ACCT001"
     end
@@ -68,7 +69,7 @@ defmodule HL7v2.Segment.BLGTest do
       encoded = raw |> BLG.parse() |> BLG.encode()
       reparsed = BLG.parse(encoded)
 
-      assert reparsed.when_to_charge == ["D", "20260315"]
+      assert %CCD{invocation_event: "D"} = reparsed.when_to_charge
       assert reparsed.charge_type == "P"
       assert reparsed.account_id.id == "ACCT001"
     end

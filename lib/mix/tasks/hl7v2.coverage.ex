@@ -33,12 +33,19 @@ defmodule Mix.Tasks.Hl7v2.Coverage do
 
     if "--detail" in args do
       Mix.shell().info("  Per-Segment Field Completeness:")
-      Mix.shell().info("  #{String.pad_trailing("Segment", 8)} #{String.pad_trailing("Typed", 8)} #{String.pad_trailing("Total", 8)} Complete")
+
+      Mix.shell().info(
+        "  #{String.pad_trailing("Segment", 8)} #{String.pad_trailing("Typed", 8)} #{String.pad_trailing("Total", 8)} Complete"
+      )
+
       Mix.shell().info("  #{String.duplicate("-", 40)}")
 
       for {seg, typed, total, pct} <- HL7v2.Standard.Coverage.segment_completeness() do
         marker = if pct == 100.0, do: "", else: " *"
-        Mix.shell().info("  #{String.pad_trailing(seg, 8)} #{String.pad_trailing("#{typed}", 8)} #{String.pad_trailing("#{total}", 8)} #{pct}%#{marker}")
+
+        Mix.shell().info(
+          "  #{String.pad_trailing(seg, 8)} #{String.pad_trailing("#{typed}", 8)} #{String.pad_trailing("#{total}", 8)} #{pct}%#{marker}"
+        )
       end
 
       Mix.shell().info("")
@@ -49,14 +56,10 @@ defmodule Mix.Tasks.Hl7v2.Coverage do
       Mix.shell().info("")
     end
 
-    Mix.shell().info(
-      "  Fully Typed: #{Enum.join(fully, ", ")}"
-    )
+    Mix.shell().info("  Fully Typed: #{Enum.join(fully, ", ")}")
 
     if length(partial) > 0 do
-      Mix.shell().info(
-        "  Partial (*):  #{Enum.join(partial, ", ")}"
-      )
+      Mix.shell().info("  Partial (*):  #{Enum.join(partial, ", ")}")
     end
 
     Mix.shell().info("")

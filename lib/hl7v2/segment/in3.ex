@@ -19,7 +19,7 @@ defmodule HL7v2.Segment.IN3 do
       {8, :operator, HL7v2.Type.XCN, :o, :unbounded},
       {9, :certification_begin_date, HL7v2.Type.DT, :o, 1},
       {10, :certification_end_date, HL7v2.Type.DT, :o, 1},
-      {11, :days, :raw, :o, 1},
+      {11, :days, HL7v2.Type.DTN, :o, 1},
       {12, :non_concur_code_description, HL7v2.Type.CE, :o, 1},
       {13, :non_concur_effective_date_time, HL7v2.Type.TS, :o, 1},
       {14, :physician_reviewer, HL7v2.Type.XCN, :o, :unbounded},
@@ -28,7 +28,7 @@ defmodule HL7v2.Segment.IN3 do
       {17, :appeal_reason, HL7v2.Type.CE, :o, 1},
       {18, :certification_agency, HL7v2.Type.CE, :o, 1},
       {19, :certification_agency_phone_number, HL7v2.Type.XTN, :o, :unbounded},
-      {20, :pre_certification_requirement, :raw, :o, :unbounded},
+      {20, :pre_certification_requirement, HL7v2.Type.ICD, :o, :unbounded},
       {21, :case_manager, HL7v2.Type.ST, :o, 1},
       {22, :second_opinion_date, HL7v2.Type.DT, :o, 1},
       {23, :second_opinion_status, HL7v2.Type.IS, :o, 1},
@@ -36,6 +36,6 @@ defmodule HL7v2.Segment.IN3 do
       {25, :second_opinion_physician, HL7v2.Type.XCN, :o, :unbounded},
       {26, :certification_type, HL7v2.Type.IS, :o, 1},
       {27, :certification_category, HL7v2.Type.IS, :o, 1},
-      {28, :field_28, :raw, :o, 1}
+      {28, :field_28, HL7v2.Type.CE, :o, 1}
     ]
 end

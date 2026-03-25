@@ -41,21 +41,21 @@ defmodule HL7v2.Segment.UB1Test do
       assert result.priority == "1"
     end
 
-    test "parses number_of_grace_days" do
+    test "parses number_of_grace_days_16" do
       raw = List.duplicate("", 15) ++ ["5"]
 
       result = UB1.parse(raw)
 
-      assert %HL7v2.Type.NM{value: "5"} = result.number_of_grace_days
+      assert %HL7v2.Type.NM{value: "5"} = result.number_of_grace_days_16
     end
 
-    test "preserves withdrawn fields as raw" do
-      raw = ["", "some_old_data", "more_old_data"]
+    test "parses withdrawn fields as typed" do
+      raw = ["", "100", "3"]
 
       result = UB1.parse(raw)
 
-      assert result.field_2 == "some_old_data"
-      assert result.field_3 == "more_old_data"
+      assert %HL7v2.Type.NM{value: "100"} = result.blood_deductible
+      assert %HL7v2.Type.NM{value: "3"} = result.blood_furnished_pints_of
     end
 
     test "parses empty list -- all fields nil" do
@@ -65,7 +65,7 @@ defmodule HL7v2.Segment.UB1Test do
       assert result.set_id == nil
       assert result.condition_code == nil
       assert result.priority == nil
-      assert result.number_of_grace_days == nil
+      assert result.number_of_grace_days_16 == nil
     end
   end
 

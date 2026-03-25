@@ -2,7 +2,7 @@ defmodule HL7v2.Segment.RXOTest do
   use ExUnit.Case, async: true
 
   alias HL7v2.Segment.RXO
-  alias HL7v2.Type.{CE, CQ, NM, XCN, FN}
+  alias HL7v2.Type.{CE, CQ, LA1, NM, XCN, FN}
 
   describe "fields/0" do
     test "returns 25 field definitions" do
@@ -36,12 +36,13 @@ defmodule HL7v2.Segment.RXOTest do
       assert %NM{value: "500"} = result.requested_give_amount_maximum
     end
 
-    test "parses deliver_to_location as raw" do
+    test "parses deliver_to_location as LA1" do
       raw = List.duplicate("", 7) ++ [["LOC1", "WARD-A", "ROOM-1"]]
 
       result = RXO.parse(raw)
 
-      assert result.deliver_to_location == ["LOC1", "WARD-A", "ROOM-1"]
+      assert %LA1{point_of_care: "LOC1", room: "WARD-A", bed: "ROOM-1"} =
+               result.deliver_to_location
     end
 
     test "parses allow_substitutions and needs_human_review" do
@@ -108,13 +109,13 @@ defmodule HL7v2.Segment.RXOTest do
       assert reparsed.requested_give_units.identifier == "mg"
     end
 
-    test "raw deliver_to_location round-trips" do
+    test "deliver_to_location round-trips" do
       raw = List.duplicate("", 7) ++ [["LOC1", "WARD-A"]]
 
       encoded = raw |> RXO.parse() |> RXO.encode()
       reparsed = RXO.parse(encoded)
 
-      assert reparsed.deliver_to_location == ["LOC1", "WARD-A"]
+      assert %LA1{point_of_care: "LOC1", room: "WARD-A"} = reparsed.deliver_to_location
     end
 
     test "trailing nil fields trimmed" do

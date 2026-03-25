@@ -11,7 +11,7 @@ defmodule HL7v2.Segment.BLG do
   use HL7v2.Segment,
     id: "BLG",
     fields: [
-      {1, :when_to_charge, :raw, :o, 1},
+      {1, :when_to_charge, HL7v2.Type.CCD, :o, 1},
       {2, :charge_type, HL7v2.Type.ID, :o, 1},
       {3, :account_id, HL7v2.Type.CX, :o, 1}
     ]

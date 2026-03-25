@@ -69,12 +69,13 @@ defmodule HL7v2.Segment.CTDTest do
                result.preferred_method_of_contact
     end
 
-    test "preserves contact_identifiers as raw" do
-      raw = [["RP"], "", "", "", "", "", ["raw_id_data"]]
+    test "parses contact_identifiers as repeating PLN" do
+      raw = [["RP"], "", "", "", "", "", [["A12345", "MD", "CA", "20281231"]]]
 
       result = CTD.parse(raw)
 
-      assert result.contact_identifiers == ["raw_id_data"]
+      assert [%HL7v2.Type.PLN{id_number: "A12345", type_of_id_number: "MD"}] =
+               result.contact_identifiers
     end
 
     test "parses empty list -- all fields nil" do

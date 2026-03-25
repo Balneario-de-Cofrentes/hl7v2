@@ -19,7 +19,7 @@ defmodule HL7v2.Segment.RXA do
       {8, :administered_dosage_form, HL7v2.Type.CE, :o, 1},
       {9, :administration_notes, HL7v2.Type.CE, :o, :unbounded},
       {10, :administering_provider, HL7v2.Type.XCN, :o, :unbounded},
-      {11, :administered_at_location, :raw, :o, 1},
+      {11, :administered_at_location, HL7v2.Type.LA2, :o, 1},
       {12, :administered_per_time_unit, HL7v2.Type.ST, :o, 1},
       {13, :administered_strength, HL7v2.Type.NM, :o, 1},
       {14, :administered_strength_units, HL7v2.Type.CE, :o, 1},

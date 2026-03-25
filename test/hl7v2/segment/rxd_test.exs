@@ -2,7 +2,7 @@ defmodule HL7v2.Segment.RXDTest do
   use ExUnit.Case, async: true
 
   alias HL7v2.Segment.RXD
-  alias HL7v2.Type.{CE, CQ, DTM, NM, TS, XCN, FN}
+  alias HL7v2.Type.{CE, CQ, DTM, LA1, NM, TS, XCN, FN}
 
   describe "fields/0" do
     test "returns 33 field definitions" do
@@ -72,12 +72,12 @@ defmodule HL7v2.Segment.RXDTest do
       assert %CQ{quantity: "1500"} = result.total_daily_dose
     end
 
-    test "parses dispense_to_location as raw" do
+    test "parses dispense_to_location as LA1" do
       raw = List.duplicate("", 12) ++ [["LOC1", "WARD-A"]]
 
       result = RXD.parse(raw)
 
-      assert result.dispense_to_location == ["LOC1", "WARD-A"]
+      assert %LA1{point_of_care: "LOC1", room: "WARD-A"} = result.dispense_to_location
     end
 
     test "parses needs_human_review" do
@@ -105,13 +105,13 @@ defmodule HL7v2.Segment.RXDTest do
       assert ["LOT001", "LOT002"] = result.substance_lot_number
     end
 
-    test "preserves raw fields 21-33" do
-      raw = List.duplicate("", 20) ++ ["raw21", "raw22"]
+    test "parses indication and dispense_package_size" do
+      raw = List.duplicate("", 20) ++ [[["IND1", "Infection"]], "100"]
 
       result = RXD.parse(raw)
 
-      assert result.field_21 == "raw21"
-      assert result.field_22 == "raw22"
+      assert [%CE{identifier: "IND1"}] = result.indication
+      assert %NM{value: "100"} = result.dispense_package_size
     end
 
     test "parses empty list -- all fields nil" do

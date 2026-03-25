@@ -17,6 +17,6 @@ defmodule HL7v2.Segment.CTD do
       {4, :contact_location, HL7v2.Type.PL, :o, 1},
       {5, :contact_communication_information, HL7v2.Type.XTN, :o, :unbounded},
       {6, :preferred_method_of_contact, HL7v2.Type.CE, :o, 1},
-      {7, :contact_identifiers, :raw, :o, :unbounded}
+      {7, :contact_identifiers, HL7v2.Type.PLN, :o, :unbounded}
     ]
 end

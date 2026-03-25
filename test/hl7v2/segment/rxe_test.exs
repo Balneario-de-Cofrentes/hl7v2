@@ -2,7 +2,7 @@ defmodule HL7v2.Segment.RXETest do
   use ExUnit.Case, async: true
 
   alias HL7v2.Segment.RXE
-  alias HL7v2.Type.{CE, CQ, NM, XCN, FN}
+  alias HL7v2.Type.{CE, CQ, LA1, NM, TS, DTM, XCN, FN}
 
   describe "fields/0" do
     test "returns 44 field definitions" do
@@ -38,13 +38,13 @@ defmodule HL7v2.Segment.RXETest do
       assert %CE{identifier: "mg"} = result.give_units
     end
 
-    test "parses give_dosage_form and deliver_to_location as raw" do
+    test "parses give_dosage_form and deliver_to_location as LA1" do
       raw = List.duplicate("", 5) ++ [["TAB", "Tablet"], "", ["LOC1", "WARD"]]
 
       result = RXE.parse(raw)
 
       assert %CE{identifier: "TAB"} = result.give_dosage_form
-      assert result.deliver_to_location == ["LOC1", "WARD"]
+      assert %LA1{point_of_care: "LOC1", room: "WARD"} = result.deliver_to_location
     end
 
     test "parses substitution_status and dispense fields" do
@@ -112,13 +112,13 @@ defmodule HL7v2.Segment.RXETest do
       assert result.dispense_package_method == "TR"
     end
 
-    test "preserves raw fields 32-44" do
-      raw = List.duplicate("", 31) ++ ["raw32", "raw33"]
+    test "parses original_order_date_time and give_drug_strength_volume" do
+      raw = List.duplicate("", 31) ++ [["20260322"], "50"]
 
       result = RXE.parse(raw)
 
-      assert result.field_32 == "raw32"
-      assert result.field_33 == "raw33"
+      assert %TS{time: %DTM{year: 2026}} = result.original_order_date_time
+      assert %NM{value: "50"} = result.give_drug_strength_volume
     end
 
     test "parses empty list -- all fields nil" do
@@ -143,13 +143,14 @@ defmodule HL7v2.Segment.RXETest do
       assert reparsed.give_units.identifier == "mg"
     end
 
-    test "raw fields round-trip" do
-      raw = List.duplicate("", 31) ++ ["raw32"]
+    test "new typed fields round-trip" do
+      raw = List.duplicate("", 31) ++ [["20260322"], "50"]
 
       encoded = raw |> RXE.parse() |> RXE.encode()
       reparsed = RXE.parse(encoded)
 
-      assert reparsed.field_32 == "raw32"
+      assert %TS{} = reparsed.original_order_date_time
+      assert %NM{value: "50"} = reparsed.give_drug_strength_volume
     end
 
     test "trailing nil fields trimmed" do

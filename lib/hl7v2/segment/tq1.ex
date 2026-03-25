@@ -13,7 +13,7 @@ defmodule HL7v2.Segment.TQ1 do
     fields: [
       {1, :set_id, HL7v2.Type.SI, :o, 1},
       {2, :quantity, HL7v2.Type.CQ, :o, 1},
-      {3, :repeat_pattern, :raw, :o, :unbounded},
+      {3, :repeat_pattern, HL7v2.Type.RPT, :o, :unbounded},
       {4, :explicit_time, HL7v2.Type.TM, :o, :unbounded},
       {5, :relative_time_and_units, HL7v2.Type.CQ, :o, :unbounded},
       {6, :service_duration, HL7v2.Type.CQ, :o, 1},

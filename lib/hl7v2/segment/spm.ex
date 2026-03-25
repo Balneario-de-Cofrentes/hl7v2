@@ -41,6 +41,6 @@ defmodule HL7v2.Segment.SPM do
       {27, :container_type, HL7v2.Type.CWE, :o, 1},
       {28, :container_condition, HL7v2.Type.CWE, :o, 1},
       {29, :specimen_child_role, HL7v2.Type.CWE, :o, 1},
-      {30, :field_30, :raw, :o, 1}
+      {30, :field_30, HL7v2.Type.CWE, :o, 1}
     ]
 end

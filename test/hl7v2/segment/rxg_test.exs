@@ -70,12 +70,13 @@ defmodule HL7v2.Segment.RXGTest do
       assert result.substitution_status == "G"
     end
 
-    test "parses dispense_to_location as raw" do
+    test "parses dispense_to_location as LA1" do
       raw = List.duplicate("", 10) ++ [["LOC1", "WARD-A"]]
 
       result = RXG.parse(raw)
 
-      assert result.dispense_to_location == ["LOC1", "WARD-A"]
+      assert %HL7v2.Type.LA1{point_of_care: "LOC1", room: "WARD-A"} =
+               result.dispense_to_location
     end
 
     test "parses needs_human_review" do
@@ -130,14 +131,15 @@ defmodule HL7v2.Segment.RXGTest do
       assert result.pharmacy_order_type == "M"
     end
 
-    test "preserves raw fields 25-27" do
-      raw = List.duplicate("", 24) ++ ["raw25", "raw26", "raw27"]
+    test "parses dispense_to_pharmacy and deliver_to_patient_location" do
+      raw = List.duplicate("", 24) ++ [["PHARM1", "Main Pharmacy"], "", ["ICU", "101"]]
 
       result = RXG.parse(raw)
 
-      assert result.field_25 == "raw25"
-      assert result.field_26 == "raw26"
-      assert result.field_27 == "raw27"
+      assert %CWE{identifier: "PHARM1"} = result.dispense_to_pharmacy
+
+      assert %HL7v2.Type.PL{point_of_care: "ICU", room: "101"} =
+               result.deliver_to_patient_location
     end
 
     test "parses empty list -- all fields nil" do
@@ -162,13 +164,13 @@ defmodule HL7v2.Segment.RXGTest do
       assert reparsed.give_units.identifier == "mg"
     end
 
-    test "raw fields round-trip" do
-      raw = List.duplicate("", 24) ++ ["raw25"]
+    test "typed fields 25-27 round-trip" do
+      raw = List.duplicate("", 24) ++ [["PHARM1", "Main Pharmacy"]]
 
       encoded = raw |> RXG.parse() |> RXG.encode()
       reparsed = RXG.parse(encoded)
 
-      assert reparsed.field_25 == "raw25"
+      assert %CWE{identifier: "PHARM1"} = reparsed.dispense_to_pharmacy
     end
 
     test "trailing nil fields trimmed" do

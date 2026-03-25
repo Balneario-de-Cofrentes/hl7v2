@@ -26,12 +26,13 @@ defmodule HL7v2.Segment.TQ1Test do
       assert %HL7v2.Type.CQ{quantity: "1"} = result.quantity
     end
 
-    test "parses repeat_pattern as raw" do
-      raw = ["1", "", "Q8H"]
+    test "parses repeat_pattern as RPT" do
+      raw = ["1", "", [["Q8H"]]]
 
       result = TQ1.parse(raw)
 
-      assert result.repeat_pattern == "Q8H"
+      assert [%HL7v2.Type.RPT{repeat_pattern_code: %HL7v2.Type.CWE{identifier: "Q8H"}}] =
+               result.repeat_pattern
     end
 
     test "parses explicit_time as repeating TM" do

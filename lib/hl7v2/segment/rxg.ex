@@ -20,7 +20,7 @@ defmodule HL7v2.Segment.RXG do
       {8, :give_dosage_form, HL7v2.Type.CE, :o, 1},
       {9, :administration_notes, HL7v2.Type.CE, :o, :unbounded},
       {10, :substitution_status, HL7v2.Type.ID, :o, 1},
-      {11, :dispense_to_location, :raw, :o, 1},
+      {11, :dispense_to_location, HL7v2.Type.LA1, :o, 1},
       {12, :needs_human_review, HL7v2.Type.ID, :o, 1},
       {13, :pharmacy_treatment_suppliers_special_dispensing_instructions, HL7v2.Type.CE, :o,
        :unbounded},
@@ -35,8 +35,8 @@ defmodule HL7v2.Segment.RXG do
       {22, :give_drug_strength_volume_units, HL7v2.Type.CWE, :o, 1},
       {23, :give_barcode_identifier, HL7v2.Type.CWE, :o, 1},
       {24, :pharmacy_order_type, HL7v2.Type.ID, :o, 1},
-      {25, :field_25, :raw, :o, 1},
-      {26, :field_26, :raw, :o, 1},
-      {27, :field_27, :raw, :o, 1}
+      {25, :dispense_to_pharmacy, HL7v2.Type.CWE, :o, 1},
+      {26, :dispense_to_pharmacy_address, HL7v2.Type.XAD, :o, 1},
+      {27, :deliver_to_patient_location, HL7v2.Type.PL, :o, 1}
     ]
 end

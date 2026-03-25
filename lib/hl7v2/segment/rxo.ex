@@ -16,7 +16,7 @@ defmodule HL7v2.Segment.RXO do
       {5, :requested_dosage_form, HL7v2.Type.CE, :o, 1},
       {6, :providers_pharmacy_treatment_instructions, HL7v2.Type.CE, :o, :unbounded},
       {7, :providers_administration_instructions, HL7v2.Type.CE, :o, :unbounded},
-      {8, :deliver_to_location, :raw, :o, 1},
+      {8, :deliver_to_location, HL7v2.Type.LA1, :o, 1},
       {9, :allow_substitutions, HL7v2.Type.ID, :o, 1},
       {10, :requested_dispense_code, HL7v2.Type.CE, :o, 1},
       {11, :requested_dispense_amount, HL7v2.Type.NM, :o, 1},

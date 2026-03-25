@@ -74,12 +74,13 @@ defmodule HL7v2.Segment.RXATest do
                result.administering_provider
     end
 
-    test "parses administered_at_location as raw" do
+    test "parses administered_at_location as LA2" do
       raw = List.duplicate("", 10) ++ [["CLINIC", "ROOM-A"]]
 
       result = RXA.parse(raw)
 
-      assert result.administered_at_location == ["CLINIC", "ROOM-A"]
+      assert %HL7v2.Type.LA2{point_of_care: "CLINIC", room: "ROOM-A"} =
+               result.administered_at_location
     end
 
     test "parses administered_per_time_unit and strength" do
