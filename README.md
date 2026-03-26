@@ -163,13 +163,18 @@ end
 ```
  Segments    152 standard + generic ZXX
               152 of 152 v2.5.1 segments (100%) + generic Z-segment pass-through
-              115 fully typed, 37 with raw holes
+              149 fully typed, 3 with intentional raw holes (RDT, QPD, OBX)
               Run `mix hl7v2.coverage` for the full list
 
- Types       89 of 89 v2.5.1 data types (100%)
+ Types       90 of 90 v2.5.1 data types (100%)
 
- Messages    ADT (A01-A04, A08, A12) ORM^O01 ORU^R01 SIU^S12 RDE^O11
-              RDS^O13 MDM^T02 ACK — structural validation (order + groups + cardinality)
+ Structures  190 message structure definitions covering all major v2.5.1 families
+              ADT, BAR, BPS/BRP/BRT/BTS, CRM, CSU, DFT, MDM, MFN/MFK/MFR,
+              OML/OMG/OMD/OMP/OMS/OMI/OMN/OMB, ORU/OUL/ORA, ORM/ORR/ORG/ORL/ORP/ORD/ORS/ORN/ORI/ORB,
+              RDE/RDS/RGV/RAS, RRE/RRD/RRG/RRA, REF/RRI, SIU/SRM/SRR,
+              PGL/PPG/PPP/PPR/PPT, QBP/QSB/QVR/RSP/RTB/RDY, PMU, PEX/SUR,
+              CCR/CCI/CCU/CCQ/CCF, EHC, RQI/RQA/RQC/RQP/RPA/RPI/RPL/RPR/RCI,
+              RER/RDR/RAR/ROR, VXU/VXQ/VXR/VXX, DOC, UDM, ACK + more
 
  Transport   MLLP framing, Ranch 2.x listener, GenServer client,
               TLS/mTLS, telemetry instrumentation

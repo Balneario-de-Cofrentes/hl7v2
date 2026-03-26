@@ -3088,6 +3088,2422 @@ defmodule HL7v2.Standard.MessageStructure do
     ]
   }
 
+  # ---------------------------------------------------------------------------
+  # MDM Structures — Additional Variants
+  # ---------------------------------------------------------------------------
+
+  # MDM_T01: Original Document Notification (no OBX content)
+  @mdm_t01 %{
+    name: "MDM_T01",
+    description: "Original Document Notification",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :EVN, :required},
+      {:segment, :PID, :required},
+      {:segment, :PV1, :required},
+      {:segment, :TXA, :required}
+    ]
+  }
+
+  # MDM_T03: Document Status Change Notification
+  @mdm_t03 %{
+    name: "MDM_T03",
+    description: "Document Status Change Notification",
+    nodes: @mdm_t01.nodes
+  }
+
+  # MDM_T04: Document Status Change Notification and Content
+  @mdm_t04 %{
+    name: "MDM_T04",
+    description: "Document Status Change Notification and Content",
+    nodes: @mdm_t02.nodes
+  }
+
+  # MDM_T05: Document Addendum Notification
+  @mdm_t05 %{
+    name: "MDM_T05",
+    description: "Document Addendum Notification",
+    nodes: @mdm_t01.nodes
+  }
+
+  # MDM_T06: Document Addendum Notification and Content
+  @mdm_t06 %{
+    name: "MDM_T06",
+    description: "Document Addendum Notification and Content",
+    nodes: @mdm_t02.nodes
+  }
+
+  # MDM_T07: Document Edit Notification
+  @mdm_t07 %{
+    name: "MDM_T07",
+    description: "Document Edit Notification",
+    nodes: @mdm_t01.nodes
+  }
+
+  # MDM_T08: Document Edit Notification and Content
+  @mdm_t08 %{
+    name: "MDM_T08",
+    description: "Document Edit Notification and Content",
+    nodes: @mdm_t02.nodes
+  }
+
+  # MDM_T09: Document Replacement Notification
+  @mdm_t09 %{
+    name: "MDM_T09",
+    description: "Document Replacement Notification",
+    nodes: @mdm_t01.nodes
+  }
+
+  # MDM_T10: Document Replacement Notification and Content
+  @mdm_t10 %{
+    name: "MDM_T10",
+    description: "Document Replacement Notification and Content",
+    nodes: @mdm_t02.nodes
+  }
+
+  # MDM_T11: Document Cancel Notification
+  @mdm_t11 %{
+    name: "MDM_T11",
+    description: "Document Cancel Notification",
+    nodes: @mdm_t01.nodes
+  }
+
+  # ---------------------------------------------------------------------------
+  # Additional Order Structures
+  # ---------------------------------------------------------------------------
+
+  # OMI_O23: Imaging Order
+  @omi_o23 %{
+    name: "OMI_O23",
+    description: "Imaging Order",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :PATIENT, :optional,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :PATIENT_VISIT, :optional,
+          [
+            {:segment, :PV1, :required},
+            {:segment, :PV2, :optional}
+          ]},
+         {:group, :INSURANCE, :optional, :repeating,
+          [
+            {:segment, :IN1, :required},
+            {:segment, :IN2, :optional},
+            {:segment, :IN3, :optional}
+          ]},
+         {:segment, :GT1, :optional},
+         {:segment, :AL1, :optional, :repeating}
+       ]},
+      {:group, :ORDER, :required, :repeating,
+       [
+         {:segment, :ORC, :required},
+         {:group, :TIMING, :optional, :repeating,
+          [
+            {:segment, :TQ1, :required},
+            {:segment, :TQ2, :optional, :repeating}
+          ]},
+         {:segment, :OBR, :required},
+         {:segment, :NTE, :optional, :repeating},
+         {:segment, :CTD, :optional},
+         {:segment, :DG1, :optional, :repeating},
+         {:group, :OBSERVATION, :optional, :repeating,
+          [
+            {:segment, :OBX, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:segment, :IPC, :required, :repeating}
+       ]}
+    ]
+  }
+
+  # ORI_O24: Imaging Order Response
+  @ori_o24 %{
+    name: "ORI_O24",
+    description: "Imaging Order Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :RESPONSE, :optional,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:segment, :OBR, :optional},
+            {:segment, :NTE, :optional, :repeating},
+            {:segment, :IPC, :optional, :repeating}
+          ]}
+       ]}
+    ]
+  }
+
+  # OMN_O07: Non-Stock Requisition Order
+  @omn_o07 %{
+    name: "OMN_O07",
+    description: "Non-Stock Requisition Order",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :PATIENT, :optional,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :PATIENT_VISIT, :optional,
+          [
+            {:segment, :PV1, :required},
+            {:segment, :PV2, :optional}
+          ]},
+         {:group, :INSURANCE, :optional, :repeating,
+          [
+            {:segment, :IN1, :required},
+            {:segment, :IN2, :optional},
+            {:segment, :IN3, :optional}
+          ]},
+         {:segment, :GT1, :optional},
+         {:segment, :AL1, :optional, :repeating}
+       ]},
+      {:group, :ORDER, :required, :repeating,
+       [
+         {:segment, :ORC, :required},
+         {:group, :TIMING, :optional, :repeating,
+          [
+            {:segment, :TQ1, :required},
+            {:segment, :TQ2, :optional, :repeating}
+          ]},
+         {:segment, :RQD, :required},
+         {:segment, :RQ1, :optional},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :OBSERVATION, :optional, :repeating,
+          [
+            {:segment, :OBX, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:segment, :BLG, :optional}
+       ]}
+    ]
+  }
+
+  # ORN_O08: Non-Stock Requisition Acknowledgment
+  @orn_o08 %{
+    name: "ORN_O08",
+    description: "Non-Stock Requisition Acknowledgment",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :RESPONSE, :optional,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:segment, :RQD, :optional},
+            {:segment, :RQ1, :optional},
+            {:segment, :NTE, :optional, :repeating}
+          ]}
+       ]}
+    ]
+  }
+
+  # ORD_O04: Dietary Order Acknowledgment
+  @ord_o04 %{
+    name: "ORD_O04",
+    description: "Dietary Order Acknowledgment",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :RESPONSE, :optional,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER_DIET, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING_DIET, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:segment, :ODS, :optional, :repeating},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER_TRAY, :optional, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING_TRAY, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:segment, :ODT, :optional, :repeating},
+            {:segment, :NTE, :optional, :repeating}
+          ]}
+       ]}
+    ]
+  }
+
+  # ORS_O06: Stock Requisition Acknowledgment
+  @ors_o06 %{
+    name: "ORS_O06",
+    description: "Stock Requisition Acknowledgment",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :RESPONSE, :optional,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:segment, :RQD, :optional},
+            {:segment, :RQ1, :optional},
+            {:segment, :NTE, :optional, :repeating}
+          ]}
+       ]}
+    ]
+  }
+
+  # OML_O33: Laboratory Order for Multiple Orders Related to a Single Specimen
+  @oml_o33 %{
+    name: "OML_O33",
+    description: "Laboratory Order — Multiple Orders Per Specimen",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :PATIENT, :optional,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :PATIENT_VISIT, :optional,
+          [
+            {:segment, :PV1, :required},
+            {:segment, :PV2, :optional}
+          ]},
+         {:group, :INSURANCE, :optional, :repeating,
+          [
+            {:segment, :IN1, :required},
+            {:segment, :IN2, :optional},
+            {:segment, :IN3, :optional}
+          ]},
+         {:segment, :GT1, :optional},
+         {:segment, :AL1, :optional, :repeating}
+       ]},
+      {:group, :SPECIMEN, :required, :repeating,
+       [
+         {:segment, :SPM, :required},
+         {:segment, :OBX, :optional, :repeating},
+         {:segment, :SAC, :optional, :repeating},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:group, :OBSERVATION_REQUEST, :optional,
+             [
+               {:segment, :OBR, :required},
+               {:segment, :TCD, :optional},
+               {:segment, :NTE, :optional, :repeating},
+               {:segment, :DG1, :optional, :repeating},
+               {:group, :OBSERVATION, :optional, :repeating,
+                [
+                  {:segment, :OBX, :required},
+                  {:segment, :TCD, :optional},
+                  {:segment, :NTE, :optional, :repeating}
+                ]},
+               {:group, :PRIOR_RESULT, :optional, :repeating,
+                [
+                  {:segment, :AL1, :optional, :repeating},
+                  {:group, :ORDER_PRIOR, :required, :repeating,
+                   [
+                     {:segment, :ORC, :required},
+                     {:segment, :OBR, :required},
+                     {:segment, :NTE, :optional, :repeating},
+                     {:group, :OBSERVATION_PRIOR, :optional, :repeating,
+                      [
+                        {:segment, :OBX, :required},
+                        {:segment, :NTE, :optional, :repeating}
+                      ]}
+                   ]}
+                ]}
+             ]},
+            {:segment, :FT1, :optional, :repeating},
+            {:segment, :CTI, :optional, :repeating},
+            {:segment, :BLG, :optional}
+          ]}
+       ]}
+    ]
+  }
+
+  # OML_O35: Laboratory Order for Multiple Orders Related to a Single Container
+  @oml_o35 %{
+    name: "OML_O35",
+    description: "Laboratory Order — Multiple Orders Per Container",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :PATIENT, :optional,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :PATIENT_VISIT, :optional,
+          [
+            {:segment, :PV1, :required},
+            {:segment, :PV2, :optional}
+          ]},
+         {:group, :INSURANCE, :optional, :repeating,
+          [
+            {:segment, :IN1, :required},
+            {:segment, :IN2, :optional},
+            {:segment, :IN3, :optional}
+          ]},
+         {:segment, :GT1, :optional},
+         {:segment, :AL1, :optional, :repeating}
+       ]},
+      {:group, :SPECIMEN, :required, :repeating,
+       [
+         {:segment, :SPM, :required},
+         {:segment, :OBX, :optional, :repeating},
+         {:segment, :SAC, :optional, :repeating},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:group, :OBSERVATION_REQUEST, :optional,
+             [
+               {:segment, :OBR, :required},
+               {:segment, :TCD, :optional},
+               {:segment, :NTE, :optional, :repeating},
+               {:segment, :DG1, :optional, :repeating},
+               {:group, :OBSERVATION, :optional, :repeating,
+                [
+                  {:segment, :OBX, :required},
+                  {:segment, :TCD, :optional},
+                  {:segment, :NTE, :optional, :repeating}
+                ]}
+             ]},
+            {:segment, :FT1, :optional, :repeating},
+            {:segment, :CTI, :optional, :repeating},
+            {:segment, :BLG, :optional}
+          ]}
+       ]}
+    ]
+  }
+
+  # ORL_O34: Laboratory Order Response — Specimen-oriented
+  @orl_o34 %{
+    name: "ORL_O34",
+    description: "Laboratory Order Response — Specimen Oriented",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :RESPONSE, :optional,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required}
+          ]},
+         {:group, :SPECIMEN, :required, :repeating,
+          [
+            {:segment, :SPM, :required},
+            {:segment, :SAC, :optional, :repeating},
+            {:group, :ORDER, :required, :repeating,
+             [
+               {:segment, :ORC, :required},
+               {:group, :TIMING, :optional, :repeating,
+                [
+                  {:segment, :TQ1, :required},
+                  {:segment, :TQ2, :optional, :repeating}
+                ]},
+               {:group, :OBSERVATION_REQUEST, :optional,
+                [
+                  {:segment, :OBR, :required},
+                  {:segment, :SPM, :optional}
+                ]}
+             ]}
+          ]}
+       ]}
+    ]
+  }
+
+  # ORL_O36: Laboratory Order Response — Container Oriented
+  @orl_o36 %{
+    name: "ORL_O36",
+    description: "Laboratory Order Response — Container Oriented",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :RESPONSE, :optional,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required}
+          ]},
+         {:group, :SPECIMEN, :required, :repeating,
+          [
+            {:segment, :SPM, :required},
+            {:segment, :SAC, :optional, :repeating},
+            {:group, :ORDER, :required, :repeating,
+             [
+               {:segment, :ORC, :required},
+               {:group, :TIMING, :optional, :repeating,
+                [
+                  {:segment, :TQ1, :required},
+                  {:segment, :TQ2, :optional, :repeating}
+                ]},
+               {:group, :OBSERVATION_REQUEST, :optional,
+                [
+                  {:segment, :OBR, :required}
+                ]}
+             ]}
+          ]}
+       ]}
+    ]
+  }
+
+  # OMB_O27: Blood Product Order
+  @omb_o27 %{
+    name: "OMB_O27",
+    description: "Blood Product Order",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :PATIENT, :optional,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :PATIENT_VISIT, :optional,
+          [
+            {:segment, :PV1, :required},
+            {:segment, :PV2, :optional}
+          ]},
+         {:group, :INSURANCE, :optional, :repeating,
+          [
+            {:segment, :IN1, :required},
+            {:segment, :IN2, :optional},
+            {:segment, :IN3, :optional}
+          ]},
+         {:segment, :GT1, :optional},
+         {:segment, :AL1, :optional, :repeating}
+       ]},
+      {:group, :ORDER, :required, :repeating,
+       [
+         {:segment, :ORC, :required},
+         {:group, :TIMING, :optional, :repeating,
+          [
+            {:segment, :TQ1, :required},
+            {:segment, :TQ2, :optional, :repeating}
+          ]},
+         {:segment, :BPO, :required},
+         {:segment, :SPM, :optional},
+         {:segment, :NTE, :optional, :repeating},
+         {:segment, :DG1, :optional, :repeating},
+         {:group, :OBSERVATION, :optional, :repeating,
+          [
+            {:segment, :OBX, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:segment, :FT1, :optional, :repeating},
+         {:segment, :BLG, :optional}
+       ]}
+    ]
+  }
+
+  # ORB_O28: Blood Product Order Acknowledgment
+  @orb_o28 %{
+    name: "ORB_O28",
+    description: "Blood Product Order Acknowledgment",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :RESPONSE, :optional,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:segment, :BPO, :optional}
+          ]}
+       ]}
+    ]
+  }
+
+  # OML_O39: Specimen Shipment Order
+  @oml_o39 %{
+    name: "OML_O39",
+    description: "Specimen Shipment Order",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :PATIENT, :optional,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :PATIENT_VISIT, :optional,
+          [
+            {:segment, :PV1, :required},
+            {:segment, :PV2, :optional}
+          ]},
+         {:group, :INSURANCE, :optional, :repeating,
+          [
+            {:segment, :IN1, :required},
+            {:segment, :IN2, :optional},
+            {:segment, :IN3, :optional}
+          ]},
+         {:segment, :GT1, :optional},
+         {:segment, :AL1, :optional, :repeating}
+       ]},
+      {:group, :SPECIMEN, :required, :repeating,
+       [
+         {:segment, :SPM, :required},
+         {:segment, :OBX, :optional, :repeating},
+         {:segment, :SAC, :optional, :repeating},
+         {:group, :ORDER, :optional, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:group, :OBSERVATION_REQUEST, :optional,
+             [
+               {:segment, :OBR, :required},
+               {:segment, :TCD, :optional},
+               {:segment, :NTE, :optional, :repeating},
+               {:segment, :DG1, :optional, :repeating},
+               {:group, :OBSERVATION, :optional, :repeating,
+                [
+                  {:segment, :OBX, :required},
+                  {:segment, :TCD, :optional},
+                  {:segment, :NTE, :optional, :repeating}
+                ]}
+             ]},
+            {:segment, :FT1, :optional, :repeating},
+            {:segment, :CTI, :optional, :repeating},
+            {:segment, :BLG, :optional}
+          ]}
+       ]}
+    ]
+  }
+
+  # ORL_O40: Specimen Shipment Order Response
+  @orl_o40 %{
+    name: "ORL_O40",
+    description: "Specimen Shipment Order Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:group, :RESPONSE, :optional,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required}
+          ]},
+         {:group, :SPECIMEN, :required, :repeating,
+          [
+            {:segment, :SPM, :required},
+            {:segment, :SAC, :optional, :repeating},
+            {:group, :ORDER, :optional, :repeating,
+             [
+               {:segment, :ORC, :required},
+               {:group, :TIMING, :optional, :repeating,
+                [
+                  {:segment, :TQ1, :required},
+                  {:segment, :TQ2, :optional, :repeating}
+                ]},
+               {:group, :OBSERVATION_REQUEST, :optional,
+                [
+                  {:segment, :OBR, :required}
+                ]}
+             ]}
+          ]}
+       ]}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Additional Observation Structures
+  # ---------------------------------------------------------------------------
+
+  # OUL_R22: Unsolicited Specimen Oriented Observation
+  @oul_r22 %{
+    name: "OUL_R22",
+    description: "Unsolicited Specimen Oriented Observation",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional},
+      {:group, :PATIENT, :optional,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional},
+         {:segment, :PV1, :optional},
+         {:segment, :PV2, :optional}
+       ]},
+      {:group, :SPECIMEN, :required, :repeating,
+       [
+         {:segment, :SPM, :required},
+         {:segment, :OBX, :optional, :repeating},
+         {:group, :CONTAINER, :optional, :repeating,
+          [
+            {:segment, :SAC, :required},
+            {:segment, :INV, :optional}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :OBR, :required},
+            {:segment, :ORC, :optional},
+            {:segment, :NTE, :optional, :repeating},
+            {:group, :TIMING_QTY, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:group, :RESULT, :optional, :repeating,
+             [
+               {:segment, :OBX, :required},
+               {:segment, :TCD, :optional},
+               {:segment, :SID, :optional},
+               {:segment, :NTE, :optional, :repeating}
+             ]},
+            {:segment, :CTI, :optional, :repeating}
+          ]}
+       ]}
+    ]
+  }
+
+  # OUL_R23: Unsolicited Specimen Container Oriented Observation
+  @oul_r23 %{
+    name: "OUL_R23",
+    description: "Unsolicited Specimen Container Oriented Observation",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional},
+      {:group, :PATIENT, :optional,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional},
+         {:segment, :PV1, :optional},
+         {:segment, :PV2, :optional}
+       ]},
+      {:group, :SPECIMEN, :required, :repeating,
+       [
+         {:segment, :SPM, :required},
+         {:segment, :OBX, :optional, :repeating},
+         {:group, :CONTAINER, :required, :repeating,
+          [
+            {:segment, :SAC, :required},
+            {:segment, :INV, :optional},
+            {:group, :ORDER, :required, :repeating,
+             [
+               {:segment, :OBR, :required},
+               {:segment, :ORC, :optional},
+               {:segment, :NTE, :optional, :repeating},
+               {:group, :TIMING_QTY, :optional, :repeating,
+                [
+                  {:segment, :TQ1, :required},
+                  {:segment, :TQ2, :optional, :repeating}
+                ]},
+               {:group, :RESULT, :optional, :repeating,
+                [
+                  {:segment, :OBX, :required},
+                  {:segment, :TCD, :optional},
+                  {:segment, :SID, :optional},
+                  {:segment, :NTE, :optional, :repeating}
+                ]},
+               {:segment, :CTI, :optional, :repeating}
+             ]}
+          ]}
+       ]}
+    ]
+  }
+
+  # OUL_R24: Unsolicited Order Oriented Observation
+  @oul_r24 %{
+    name: "OUL_R24",
+    description: "Unsolicited Order Oriented Observation",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional},
+      {:group, :PATIENT, :optional,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional},
+         {:segment, :PV1, :optional},
+         {:segment, :PV2, :optional}
+       ]},
+      {:group, :ORDER, :required, :repeating,
+       [
+         {:segment, :OBR, :required},
+         {:segment, :ORC, :optional},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :TIMING_QTY, :optional, :repeating,
+          [
+            {:segment, :TQ1, :required},
+            {:segment, :TQ2, :optional, :repeating}
+          ]},
+         {:group, :SPECIMEN, :optional, :repeating,
+          [
+            {:segment, :SPM, :required},
+            {:segment, :OBX, :optional, :repeating},
+            {:group, :CONTAINER, :optional, :repeating,
+             [
+               {:segment, :SAC, :required},
+               {:segment, :INV, :optional}
+             ]}
+          ]},
+         {:group, :RESULT, :optional, :repeating,
+          [
+            {:segment, :OBX, :required},
+            {:segment, :TCD, :optional},
+            {:segment, :SID, :optional},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:segment, :CTI, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Patient Info Request/Response Structures
+  # ---------------------------------------------------------------------------
+
+  # QRY_A19: Patient Query
+  @qry_a19 %{
+    name: "QRY_A19",
+    description: "Patient Query",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional}
+    ]
+  }
+
+  # RQI_I01: Request for Insurance Information
+  @rqi_i01 %{
+    name: "RQI_I01",
+    description: "Request for Insurance Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:group, :PROVIDER, :required, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:segment, :PID, :required},
+      {:segment, :NK1, :optional, :repeating},
+      {:group, :GUARANTOR_INSURANCE, :optional,
+       [
+         {:segment, :GT1, :optional, :repeating},
+         {:group, :INSURANCE, :required, :repeating,
+          [
+            {:segment, :IN1, :required},
+            {:segment, :IN2, :optional},
+            {:segment, :IN3, :optional}
+          ]}
+       ]},
+      {:segment, :NTE, :optional, :repeating}
+    ]
+  }
+
+  # RPA_I08: Request for Treatment Authorization Info Response
+  @rpa_i08 %{
+    name: "RPA_I08",
+    description: "Request for Treatment Authorization Information Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :RF1, :optional},
+      {:group, :AUTHORIZATION, :optional,
+       [
+         {:segment, :AUT, :required},
+         {:segment, :CTD, :optional}
+       ]},
+      {:group, :PROVIDER, :required, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:segment, :PID, :required},
+      {:segment, :NK1, :optional, :repeating},
+      {:segment, :GT1, :optional, :repeating},
+      {:group, :INSURANCE, :optional, :repeating,
+       [
+         {:segment, :IN1, :required},
+         {:segment, :IN2, :optional},
+         {:segment, :IN3, :optional}
+       ]},
+      {:segment, :ACC, :optional},
+      {:segment, :DG1, :optional, :repeating},
+      {:segment, :DRG, :optional, :repeating},
+      {:segment, :AL1, :optional, :repeating},
+      {:group, :PROCEDURE, :required, :repeating,
+       [
+         {:segment, :PR1, :required},
+         {:segment, :ROL, :optional, :repeating}
+       ]},
+      {:group, :OBSERVATION, :optional, :repeating,
+       [
+         {:segment, :OBR, :required},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :RESULTS, :optional, :repeating,
+          [
+            {:segment, :OBX, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]}
+       ]},
+      {:group, :VISIT, :optional,
+       [
+         {:segment, :PV1, :required},
+         {:segment, :PV2, :optional}
+       ]},
+      {:segment, :NTE, :optional, :repeating}
+    ]
+  }
+
+  # RPI_I01: Return Patient Information
+  @rpi_i01 %{
+    name: "RPI_I01",
+    description: "Return Patient Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:group, :PROVIDER, :required, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:segment, :PID, :required},
+      {:segment, :NK1, :optional, :repeating},
+      {:group, :GUARANTOR_INSURANCE, :optional,
+       [
+         {:segment, :GT1, :optional, :repeating},
+         {:group, :INSURANCE, :required, :repeating,
+          [
+            {:segment, :IN1, :required},
+            {:segment, :IN2, :optional},
+            {:segment, :IN3, :optional}
+          ]}
+       ]},
+      {:segment, :NTE, :optional, :repeating}
+    ]
+  }
+
+  # RPI_I04: Return Patient Information (insurance specific)
+  @rpi_i04 %{
+    name: "RPI_I04",
+    description: "Return Patient Information — Insurance",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:group, :PROVIDER, :required, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:segment, :PID, :required},
+      {:segment, :NK1, :optional, :repeating},
+      {:group, :GUARANTOR_INSURANCE, :optional,
+       [
+         {:segment, :GT1, :optional, :repeating},
+         {:group, :INSURANCE, :required, :repeating,
+          [
+            {:segment, :IN1, :required},
+            {:segment, :IN2, :optional},
+            {:segment, :IN3, :optional}
+          ]}
+       ]},
+      {:segment, :NTE, :optional, :repeating}
+    ]
+  }
+
+  # RQA_I08: Request for Treatment Authorization
+  @rqa_i08 %{
+    name: "RQA_I08",
+    description: "Request for Treatment Authorization Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :RF1, :optional},
+      {:group, :AUTHORIZATION, :optional,
+       [
+         {:segment, :AUT, :required},
+         {:segment, :CTD, :optional}
+       ]},
+      {:group, :PROVIDER, :required, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:segment, :PID, :required},
+      {:segment, :NK1, :optional, :repeating},
+      {:segment, :GT1, :optional, :repeating},
+      {:group, :INSURANCE, :optional, :repeating,
+       [
+         {:segment, :IN1, :required},
+         {:segment, :IN2, :optional},
+         {:segment, :IN3, :optional}
+       ]},
+      {:segment, :ACC, :optional},
+      {:segment, :DG1, :optional, :repeating},
+      {:segment, :DRG, :optional, :repeating},
+      {:segment, :AL1, :optional, :repeating},
+      {:group, :PROCEDURE, :required, :repeating,
+       [
+         {:segment, :PR1, :required},
+         {:segment, :ROL, :optional, :repeating}
+       ]},
+      {:group, :OBSERVATION, :optional, :repeating,
+       [
+         {:segment, :OBR, :required},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :RESULTS, :optional, :repeating,
+          [
+            {:segment, :OBX, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]}
+       ]},
+      {:group, :VISIT, :optional,
+       [
+         {:segment, :PV1, :required},
+         {:segment, :PV2, :optional}
+       ]},
+      {:segment, :NTE, :optional, :repeating}
+    ]
+  }
+
+  # RQC_I05: Request for Patient Clinical Information
+  @rqc_i05 %{
+    name: "RQC_I05",
+    description: "Request for Patient Clinical Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:group, :PROVIDER, :required, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:segment, :PID, :required},
+      {:segment, :NK1, :optional, :repeating},
+      {:segment, :GT1, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating}
+    ]
+  }
+
+  # RCI_I05: Return Patient Clinical Information
+  @rci_i05 %{
+    name: "RCI_I05",
+    description: "Return Clinical Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:group, :PROVIDER, :required, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:segment, :PID, :required},
+      {:segment, :DG1, :optional, :repeating},
+      {:segment, :DRG, :optional, :repeating},
+      {:segment, :AL1, :optional, :repeating},
+      {:group, :OBSERVATION, :optional, :repeating,
+       [
+         {:segment, :OBR, :required},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :RESULTS, :optional, :repeating,
+          [
+            {:segment, :OBX, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]}
+       ]},
+      {:segment, :NTE, :optional, :repeating}
+    ]
+  }
+
+  # RQP_I04: Request for Patient Demographics
+  @rqp_i04 %{
+    name: "RQP_I04",
+    description: "Request for Patient Demographics",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:group, :PROVIDER, :required, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:segment, :PID, :required},
+      {:segment, :NK1, :optional, :repeating},
+      {:segment, :GT1, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating}
+    ]
+  }
+
+  # RPL_I02: Return Patient Display List
+  @rpl_i02 %{
+    name: "RPL_I02",
+    description: "Return Patient Display List",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:group, :PROVIDER, :required, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:segment, :NTE, :optional, :repeating},
+      {:segment, :DSP, :optional, :repeating},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RPR_I03: Return Patient Subscription List
+  @rpr_i03 %{
+    name: "RPR_I03",
+    description: "Return Patient Subscription List",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:group, :PROVIDER, :required, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:segment, :NTE, :optional, :repeating}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Additional Pharmacy Structures
+  # ---------------------------------------------------------------------------
+
+  # RER_RER: Pharmacy Encoded Order Query Response
+  @rer_rer %{
+    name: "RER_RER",
+    description: "Pharmacy Encoded Order Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:group, :DEFINITION, :required, :repeating,
+       [
+         {:segment, :QRD, :required},
+         {:segment, :QRF, :optional},
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:segment, :RXE, :required},
+            {:segment, :RXR, :required, :repeating},
+            {:segment, :RXC, :optional, :repeating}
+          ]}
+       ]}
+    ]
+  }
+
+  # RDR_RDR: Pharmacy Dispense Query Response
+  @rdr_rdr %{
+    name: "RDR_RDR",
+    description: "Pharmacy Dispense Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:group, :DEFINITION, :required, :repeating,
+       [
+         {:segment, :QRD, :required},
+         {:segment, :QRF, :optional},
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :DISPENSE, :optional, :repeating,
+             [
+               {:segment, :RXD, :required},
+               {:segment, :RXR, :required, :repeating},
+               {:segment, :RXC, :optional, :repeating}
+             ]}
+          ]}
+       ]}
+    ]
+  }
+
+  # RAR_RAR: Pharmacy Administration Query Response
+  @rar_rar %{
+    name: "RAR_RAR",
+    description: "Pharmacy Administration Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:group, :DEFINITION, :required, :repeating,
+       [
+         {:segment, :QRD, :required},
+         {:segment, :QRF, :optional},
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :ADMINISTRATION, :optional, :repeating,
+             [
+               {:segment, :RXA, :required},
+               {:segment, :RXR, :required}
+             ]}
+          ]}
+       ]}
+    ]
+  }
+
+  # ROR_ROR: Pharmacy Prescription Order Query Response
+  @ror_ror %{
+    name: "ROR_ROR",
+    description: "Pharmacy Prescription Order Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:group, :DEFINITION, :required, :repeating,
+       [
+         {:segment, :QRD, :required},
+         {:segment, :QRF, :optional},
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:segment, :RXO, :required},
+            {:segment, :RXR, :required, :repeating},
+            {:segment, :RXC, :optional, :repeating}
+          ]}
+       ]}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Additional Personnel Structures
+  # ---------------------------------------------------------------------------
+
+  # PMU_B04: Active Practicing Person
+  @pmu_b04 %{
+    name: "PMU_B04",
+    description: "Active Practicing Person",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :EVN, :required},
+      {:segment, :STF, :required},
+      {:segment, :PRA, :optional, :repeating},
+      {:segment, :ORG, :optional, :repeating}
+    ]
+  }
+
+  # PMU_B07: Grant Certificate/Permission
+  @pmu_b07 %{
+    name: "PMU_B07",
+    description: "Grant Certificate/Permission",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :EVN, :required},
+      {:segment, :STF, :required},
+      {:segment, :PRA, :optional, :repeating},
+      {:segment, :CER, :optional, :repeating}
+    ]
+  }
+
+  # PMU_B08: Revoke Certificate/Permission
+  @pmu_b08 %{
+    name: "PMU_B08",
+    description: "Revoke Certificate/Permission",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :EVN, :required},
+      {:segment, :STF, :required},
+      {:segment, :PRA, :optional, :repeating},
+      {:segment, :CER, :optional, :repeating}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Additional ADT Structures
+  # ---------------------------------------------------------------------------
+
+  # ADT_A54: Change Attending Doctor
+  @adt_a54 %{
+    name: "ADT_A54",
+    description: "Change Attending Doctor",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :EVN, :required},
+      {:segment, :PID, :required},
+      {:segment, :PD1, :optional},
+      {:segment, :ROL, :required, :repeating},
+      {:segment, :PV1, :required},
+      {:segment, :PV2, :optional},
+      {:segment, :ROL, :optional, :repeating}
+    ]
+  }
+
+  # ADT_A60: Update Allergy Information
+  @adt_a60 %{
+    name: "ADT_A60",
+    description: "Update Allergy Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :EVN, :required},
+      {:segment, :PID, :required},
+      {:segment, :PV1, :optional},
+      {:segment, :PV2, :optional},
+      {:segment, :IAM, :optional, :repeating}
+    ]
+  }
+
+  # ADT_A61: Change Consulting Doctor
+  @adt_a61 %{
+    name: "ADT_A61",
+    description: "Change Consulting Doctor",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :EVN, :required},
+      {:segment, :PID, :required},
+      {:segment, :PD1, :optional},
+      {:segment, :ROL, :optional, :repeating},
+      {:segment, :PV1, :required},
+      {:segment, :PV2, :optional},
+      {:segment, :ROL, :optional, :repeating}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Additional Query Structures
+  # ---------------------------------------------------------------------------
+
+  # QBP_Q11: Query by Parameter (Segment Pattern Response)
+  @qbp_q11 %{
+    name: "QBP_Q11",
+    description: "Query by Parameter — Segment Pattern Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QPD, :required},
+      {:segment, :RCP, :required},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # QBP_Q13: Query by Parameter — Tabular Response
+  @qbp_q13 %{
+    name: "QBP_Q13",
+    description: "Query by Parameter — Tabular Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QPD, :required},
+      {:segment, :RDF, :optional},
+      {:segment, :RCP, :required},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # QBP_Q15: Query by Parameter — Display Response
+  @qbp_q15 %{
+    name: "QBP_Q15",
+    description: "Query by Parameter — Display Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QPD, :required},
+      {:segment, :RCP, :required},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # QSB_Q16: Create Subscription
+  @qsb_q16 %{
+    name: "QSB_Q16",
+    description: "Create Subscription",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QPD, :required},
+      {:segment, :RCP, :required},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # QVR_Q17: Query for Previous Events
+  @qvr_q17 %{
+    name: "QVR_Q17",
+    description: "Query for Previous Events",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QPD, :required},
+      {:segment, :RCP, :required},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RSP_K11: Segment Pattern Response (specific)
+  @rsp_k11 %{
+    name: "RSP_K11",
+    description: "Segment Pattern Response in Response to QBP^Q11",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional},
+      {:segment, :QAK, :required},
+      {:segment, :QPD, :required},
+      {:group, :ROW_DEFINITION, :optional,
+       [
+         {:segment, :RDF, :required},
+         {:segment, :RDT, :optional, :repeating}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RSP_K13: Segment Pattern Response (tabular)
+  @rsp_k13 %{
+    name: "RSP_K13",
+    description: "Segment Pattern Response in Response to QBP^Q13",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional},
+      {:segment, :QAK, :required},
+      {:segment, :QPD, :required},
+      {:group, :ROW_DEFINITION, :optional,
+       [
+         {:segment, :RDF, :required},
+         {:segment, :RDT, :optional, :repeating}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RSP_K15: Display Based Response (specific)
+  @rsp_k15 %{
+    name: "RSP_K15",
+    description: "Display Based Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional},
+      {:segment, :QAK, :required},
+      {:segment, :QPD, :required},
+      {:segment, :DSP, :optional, :repeating},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RSP_K31: Pharmacy Dispense Response
+  @rsp_k31 %{
+    name: "RSP_K31",
+    description: "Pharmacy Information Comprehensive Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional},
+      {:segment, :QAK, :required},
+      {:segment, :QPD, :required},
+      {:segment, :RCP, :optional},
+      {:group, :RESPONSE, :optional, :repeating,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :PD1, :optional},
+            {:segment, :NTE, :optional, :repeating},
+            {:segment, :AL1, :optional, :repeating},
+            {:group, :PATIENT_VISIT, :optional,
+             [
+               {:segment, :PV1, :required},
+               {:segment, :PV2, :optional}
+             ]}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:segment, :RXD, :required},
+            {:segment, :RXR, :required, :repeating},
+            {:segment, :RXC, :optional, :repeating},
+            {:group, :OBSERVATION, :optional, :repeating,
+             [
+               {:segment, :OBX, :optional},
+               {:segment, :NTE, :optional, :repeating}
+             ]}
+          ]}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Additional Master File Structures (with named content)
+  # ---------------------------------------------------------------------------
+
+  # MFN_M03: Master File — Test/Observation Batteries
+  @mfn_m03 %{
+    name: "MFN_M03",
+    description: "Master File — Test/Observation",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MFI, :required},
+      {:group, :MF_TEST, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :OM1, :required},
+         {:segment, :NTE, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  # MFN_M04: Master File — Charge Description
+  @mfn_m04 %{
+    name: "MFN_M04",
+    description: "Master File — Charge Description",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MFI, :required},
+      {:group, :MF_CDM, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :CDM, :required},
+         {:segment, :NTE, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  # MFN_M06: Master File — Clinical Study with Phases and Schedules
+  @mfn_m06 %{
+    name: "MFN_M06",
+    description: "Master File — Clinical Study",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MFI, :required},
+      {:group, :MF_CLIN_STUDY, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :CM0, :required},
+         {:segment, :CM1, :optional, :repeating},
+         {:segment, :CM2, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  # MFN_M07: Master File — Observation Numeric
+  @mfn_m07 %{
+    name: "MFN_M07",
+    description: "Master File — Observation — Numeric",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MFI, :required},
+      {:group, :MF_OBS_ATTRIBUTES, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :OM1, :required},
+         {:segment, :OM2, :optional},
+         {:segment, :OM3, :optional},
+         {:segment, :OM4, :optional}
+       ]}
+    ]
+  }
+
+  # MFN_M08: Master File — Test/Observation Numeric
+  @mfn_m08 %{
+    name: "MFN_M08",
+    description: "Master File — Test/Observation Numeric",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MFI, :required},
+      {:group, :MF_TEST_NUMERIC, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :OM1, :required},
+         {:segment, :OM2, :optional},
+         {:segment, :OM3, :optional},
+         {:segment, :OM4, :optional}
+       ]}
+    ]
+  }
+
+  # MFN_M09: Master File — Test/Observation Categorical
+  @mfn_m09 %{
+    name: "MFN_M09",
+    description: "Master File — Test/Observation Categorical",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MFI, :required},
+      {:group, :MF_TEST_CATEGORICAL, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :OM1, :required},
+         {:segment, :OM3, :optional},
+         {:segment, :OM4, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  # MFN_M10: Master File — Test/Observation Batteries
+  @mfn_m10 %{
+    name: "MFN_M10",
+    description: "Master File — Test/Observation Batteries",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MFI, :required},
+      {:group, :MF_TEST_BATTERIES, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :OM1, :required},
+         {:segment, :OM5, :optional},
+         {:segment, :OM4, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  # MFN_M11: Master File — Test/Calculated Observations
+  @mfn_m11 %{
+    name: "MFN_M11",
+    description: "Master File — Test/Calculated Observations",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MFI, :required},
+      {:group, :MF_TEST_CALCULATED, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :OM1, :required},
+         {:segment, :OM6, :optional},
+         {:segment, :OM2, :required}
+       ]}
+    ]
+  }
+
+  # MFN_M12: Master File — Additional Basic Observation/Service Attributes
+  @mfn_m12 %{
+    name: "MFN_M12",
+    description: "Master File — Additional Observation Attributes",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MFI, :required},
+      {:group, :MF_OBS_ATTRIBUTES, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :OM1, :required},
+         {:segment, :OM7, :optional}
+       ]}
+    ]
+  }
+
+  # MFN_M13: Master File — Inventory Item Master File
+  @mfn_m13 %{
+    name: "MFN_M13",
+    description: "Master File — Inventory Item",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MFI, :required},
+      {:group, :MF_INV_ITEM, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :IIM, :required}
+       ]}
+    ]
+  }
+
+  # MFR_M01: Master File Response
+  @mfr_m01 %{
+    name: "MFR_M01",
+    description: "Master File Query Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :QAK, :optional},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:segment, :MFI, :required},
+      {:group, :MF_QUERY, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :NTE, :optional, :repeating}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Vaccination Additional Structures
+  # ---------------------------------------------------------------------------
+
+  # VXX_V02: Vaccination Query Response with Multiple PID Matches
+  @vxx_v02 %{
+    name: "VXX_V02",
+    description: "Response to Vaccination Query with Multiple PID Matches",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:group, :PATIENT, :required, :repeating,
+       [
+         {:segment, :PID, :required},
+         {:segment, :NK1, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Additional DFT Structures
+  # ---------------------------------------------------------------------------
+
+  # DFT_P03 exists already. Add P11 alias relationships.
+
+  # ---------------------------------------------------------------------------
+  # Collaborative Care Structures (Chapter 11)
+  # ---------------------------------------------------------------------------
+
+  # CCR_I16: Collaborative Care Referral
+  @ccr_i16 %{
+    name: "CCR_I16",
+    description: "Collaborative Care Referral",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :RF1, :required},
+      {:group, :PROVIDER_CONTACT, :optional, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:group, :CLINICAL_ORDER, :optional, :repeating,
+       [
+         {:segment, :ORC, :required},
+         {:group, :CLINICAL_ORDER_TIMING, :optional, :repeating,
+          [
+            {:segment, :TQ1, :required},
+            {:segment, :TQ2, :optional, :repeating}
+          ]},
+         {:group, :CLINICAL_ORDER_DETAIL, :optional, :repeating,
+          [
+            {:segment, :OBR, :required},
+            {:segment, :OBX, :optional, :repeating}
+          ]},
+         {:segment, :CTI, :optional, :repeating}
+       ]},
+      {:group, :PATIENT, :required, :repeating,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional}
+       ]},
+      {:segment, :NK1, :optional, :repeating},
+      {:group, :INSURANCE, :optional, :repeating,
+       [
+         {:segment, :IN1, :required},
+         {:segment, :IN2, :optional},
+         {:segment, :IN3, :optional}
+       ]},
+      {:group, :APPOINTMENT_HISTORY, :optional, :repeating,
+       [
+         {:segment, :SCH, :required},
+         {:group, :RESOURCES, :optional, :repeating,
+          [
+            {:segment, :RGS, :required},
+            {:group, :RESOURCE_DETAIL, :optional, :repeating,
+             [
+               {:segment, :AIS, :required},
+               {:segment, :AIG, :optional},
+               {:segment, :AIL, :optional},
+               {:segment, :AIP, :optional}
+             ]}
+          ]}
+       ]},
+      {:group, :CLINICAL_HISTORY, :optional, :repeating,
+       [
+         {:segment, :ORC, :required},
+         {:group, :CLINICAL_HISTORY_DETAIL, :optional, :repeating,
+          [
+            {:segment, :OBR, :required},
+            {:segment, :OBX, :optional, :repeating}
+          ]},
+         {:group, :ROLE_CLINICAL_HISTORY, :optional, :repeating,
+          [
+            {:segment, :ROL, :required},
+            {:segment, :VAR, :optional, :repeating}
+          ]},
+         {:segment, :CTI, :optional, :repeating}
+       ]},
+      {:group, :PATIENT_VISITS, :required, :repeating,
+       [
+         {:segment, :PV1, :required},
+         {:segment, :PV2, :optional}
+       ]},
+      {:group, :MEDICATION_HISTORY, :optional, :repeating,
+       [
+         {:segment, :ORC, :required},
+         {:group, :MEDICATION_ORDER_DETAIL, :optional,
+          [
+            {:segment, :RXO, :required},
+            {:segment, :RXR, :required, :repeating},
+            {:segment, :RXC, :optional, :repeating}
+          ]},
+         {:group, :MEDICATION_ENCODING_DETAIL, :optional,
+          [
+            {:segment, :RXE, :required},
+            {:segment, :RXR, :required, :repeating}
+          ]},
+         {:group, :MEDICATION_ADMINISTRATION_DETAIL, :optional, :repeating,
+          [
+            {:segment, :RXA, :required},
+            {:segment, :RXR, :required}
+          ]},
+         {:segment, :CTI, :optional, :repeating}
+       ]},
+      {:group, :PROBLEM, :optional, :repeating,
+       [
+         {:segment, :PRB, :required},
+         {:segment, :VAR, :optional, :repeating},
+         {:group, :ROLE_PROBLEM, :optional, :repeating,
+          [
+            {:segment, :ROL, :required},
+            {:segment, :VAR, :optional, :repeating}
+          ]},
+         {:segment, :OBX, :optional, :repeating}
+       ]},
+      {:group, :GOAL, :optional, :repeating,
+       [
+         {:segment, :GOL, :required},
+         {:segment, :VAR, :optional, :repeating},
+         {:group, :ROLE_GOAL, :optional, :repeating,
+          [
+            {:segment, :ROL, :required},
+            {:segment, :VAR, :optional, :repeating}
+          ]},
+         {:segment, :OBX, :optional, :repeating}
+       ]},
+      {:group, :PATHWAY, :optional, :repeating,
+       [
+         {:segment, :PTH, :required},
+         {:segment, :VAR, :optional, :repeating},
+         {:group, :ROLE_PATHWAY, :optional, :repeating,
+          [
+            {:segment, :ROL, :required},
+            {:segment, :VAR, :optional, :repeating}
+          ]},
+         {:segment, :OBX, :optional, :repeating}
+       ]},
+      {:segment, :REL, :optional, :repeating}
+    ]
+  }
+
+  # CCI_I22: Collaborative Care Information
+  @cci_i22 %{
+    name: "CCI_I22",
+    description: "Collaborative Care Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :PID, :required},
+      {:segment, :PD1, :optional},
+      {:segment, :NK1, :optional, :repeating},
+      {:group, :INSURANCE, :optional, :repeating,
+       [
+         {:segment, :IN1, :required},
+         {:segment, :IN2, :optional},
+         {:segment, :IN3, :optional}
+       ]},
+      {:group, :CLINICAL_HISTORY, :optional, :repeating,
+       [
+         {:segment, :ORC, :required},
+         {:group, :CLINICAL_HISTORY_DETAIL, :optional, :repeating,
+          [
+            {:segment, :OBR, :required},
+            {:segment, :OBX, :optional, :repeating}
+          ]}
+       ]},
+      {:group, :PATIENT_VISITS, :required, :repeating,
+       [
+         {:segment, :PV1, :required},
+         {:segment, :PV2, :optional}
+       ]},
+      {:group, :MEDICATION_HISTORY, :optional, :repeating,
+       [
+         {:segment, :ORC, :required},
+         {:group, :MEDICATION_ORDER_DETAIL, :optional,
+          [
+            {:segment, :RXO, :required},
+            {:segment, :RXR, :required, :repeating}
+          ]},
+         {:group, :MEDICATION_ENCODING_DETAIL, :optional,
+          [
+            {:segment, :RXE, :required},
+            {:segment, :RXR, :required, :repeating}
+          ]},
+         {:group, :MEDICATION_ADMINISTRATION_DETAIL, :optional, :repeating,
+          [
+            {:segment, :RXA, :required},
+            {:segment, :RXR, :required}
+          ]}
+       ]},
+      {:group, :PROBLEM, :optional, :repeating,
+       [
+         {:segment, :PRB, :required},
+         {:segment, :VAR, :optional, :repeating},
+         {:segment, :OBX, :optional, :repeating}
+       ]},
+      {:group, :GOAL, :optional, :repeating,
+       [
+         {:segment, :GOL, :required},
+         {:segment, :VAR, :optional, :repeating},
+         {:segment, :OBX, :optional, :repeating}
+       ]},
+      {:group, :PATHWAY, :optional, :repeating,
+       [
+         {:segment, :PTH, :required},
+         {:segment, :VAR, :optional, :repeating},
+         {:segment, :OBX, :optional, :repeating}
+       ]},
+      {:segment, :REL, :optional, :repeating}
+    ]
+  }
+
+  # CCU_I20: Asynchronous Collaborative Care Update
+  @ccu_i20 %{
+    name: "CCU_I20",
+    description: "Asynchronous Collaborative Care Update",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :RF1, :required},
+      {:group, :PROVIDER_CONTACT, :optional, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:group, :PATIENT, :required, :repeating,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional}
+       ]},
+      {:segment, :NK1, :optional, :repeating},
+      {:group, :INSURANCE, :optional, :repeating,
+       [
+         {:segment, :IN1, :required},
+         {:segment, :IN2, :optional},
+         {:segment, :IN3, :optional}
+       ]},
+      {:group, :CLINICAL_HISTORY, :optional, :repeating,
+       [
+         {:segment, :ORC, :required},
+         {:group, :CLINICAL_HISTORY_DETAIL, :optional, :repeating,
+          [
+            {:segment, :OBR, :required},
+            {:segment, :OBX, :optional, :repeating}
+          ]}
+       ]},
+      {:group, :PATIENT_VISITS, :required, :repeating,
+       [
+         {:segment, :PV1, :required},
+         {:segment, :PV2, :optional}
+       ]},
+      {:group, :MEDICATION_HISTORY, :optional, :repeating,
+       [
+         {:segment, :ORC, :required},
+         {:group, :MEDICATION_ORDER_DETAIL, :optional,
+          [
+            {:segment, :RXO, :required},
+            {:segment, :RXR, :required, :repeating}
+          ]},
+         {:group, :MEDICATION_ENCODING_DETAIL, :optional,
+          [
+            {:segment, :RXE, :required},
+            {:segment, :RXR, :required, :repeating}
+          ]},
+         {:group, :MEDICATION_ADMINISTRATION_DETAIL, :optional, :repeating,
+          [
+            {:segment, :RXA, :required},
+            {:segment, :RXR, :required}
+          ]}
+       ]},
+      {:group, :PROBLEM, :optional, :repeating,
+       [
+         {:segment, :PRB, :required},
+         {:segment, :VAR, :optional, :repeating},
+         {:segment, :OBX, :optional, :repeating}
+       ]},
+      {:group, :GOAL, :optional, :repeating,
+       [
+         {:segment, :GOL, :required},
+         {:segment, :VAR, :optional, :repeating},
+         {:segment, :OBX, :optional, :repeating}
+       ]},
+      {:group, :PATHWAY, :optional, :repeating,
+       [
+         {:segment, :PTH, :required},
+         {:segment, :VAR, :optional, :repeating},
+         {:segment, :OBX, :optional, :repeating}
+       ]},
+      {:segment, :REL, :optional, :repeating}
+    ]
+  }
+
+  # CCQ_I19: Collaborative Care Query
+  @ccq_i19 %{
+    name: "CCQ_I19",
+    description: "Collaborative Care Query",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :RF1, :required},
+      {:group, :PROVIDER_CONTACT, :optional, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
+      {:segment, :REL, :optional, :repeating}
+    ]
+  }
+
+  # CCF_I22: Collaborative Care Fetch
+  @ccf_i22 %{
+    name: "CCF_I22",
+    description: "Collaborative Care Fetch",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :PID, :required},
+      {:segment, :REL, :optional, :repeating}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Additional Misc Structures
+  # ---------------------------------------------------------------------------
+
+  # ORA_R41: Observation Report Alert Acknowledgment
+  @ora_r41 %{
+    name: "ORA_R41",
+    description: "Observation Report Alert Acknowledgment",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating}
+    ]
+  }
+
+  # ORU_R32: Unsolicited Pre-ordered Point-of-Care Observation
+  @oru_r32 %{
+    name: "ORU_R32",
+    description: "Unsolicited Pre-ordered Point-of-Care Observation",
+    nodes: @oru_r30.nodes
+  }
+
+  # ---------------------------------------------------------------------------
+  # EHC Structures (Chapter 16 - E-Health)
+  # ---------------------------------------------------------------------------
+
+  # EHC_E01: Submit Health Care Services Invoice
+  @ehc_e01 %{
+    name: "EHC_E01",
+    description: "Submit Health Care Services Invoice",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:group, :INVOICE_INFORMATION_SUBMIT, :required, :repeating,
+       [
+         {:segment, :IVC, :required},
+         {:segment, :CTD, :optional, :repeating},
+         {:segment, :LOC, :optional, :repeating},
+         {:segment, :ROL, :optional, :repeating},
+         {:group, :PRODUCT_SERVICE_SECTION, :required, :repeating,
+          [
+            {:segment, :PSS, :required},
+            {:group, :PRODUCT_SERVICE_GROUP, :required, :repeating,
+             [
+               {:segment, :PSG, :required},
+               {:group, :PRODUCT_SERVICE_LINE_ITEM, :required, :repeating,
+                [
+                  {:segment, :PSL, :required},
+                  {:segment, :NTE, :optional, :repeating},
+                  {:segment, :ADJ, :optional, :repeating},
+                  {:segment, :ABS, :optional},
+                  {:segment, :LOC, :optional, :repeating},
+                  {:segment, :ROL, :optional, :repeating}
+                ]}
+             ]}
+          ]}
+       ]}
+    ]
+  }
+
+  # EHC_E02: Cancel Health Care Services Invoice
+  @ehc_e02 %{
+    name: "EHC_E02",
+    description: "Cancel Health Care Services Invoice",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:group, :INVOICE_INFORMATION_CANCEL, :required, :repeating,
+       [
+         {:segment, :IVC, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  # EHC_E04: Re-Assess Health Care Services Invoice Request
+  @ehc_e04 %{
+    name: "EHC_E04",
+    description: "Re-Assess Health Care Services Invoice Request",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:group, :REASSESSMENT_REQUEST_INFO, :required, :repeating,
+       [
+         {:segment, :IVC, :required},
+         {:segment, :CTD, :optional, :repeating},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :PRODUCT_SERVICE_SECTION, :required, :repeating,
+          [
+            {:segment, :PSS, :required},
+            {:group, :PRODUCT_SERVICE_GROUP, :required, :repeating,
+             [
+               {:segment, :PSG, :required},
+               {:segment, :PSL, :required, :repeating}
+             ]}
+          ]}
+       ]}
+    ]
+  }
+
+  # EHC_E10: Edit/Adjudication Results
+  @ehc_e10 %{
+    name: "EHC_E10",
+    description: "Edit/Adjudication Results",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:group, :INVOICE_PROCESSING_RESULTS_INFO, :required, :repeating,
+       [
+         {:segment, :IVC, :required},
+         {:segment, :IPR, :required},
+         {:group, :PRODUCT_SERVICE_SECTION, :required, :repeating,
+          [
+            {:segment, :PSS, :required},
+            {:group, :PRODUCT_SERVICE_GROUP, :required, :repeating,
+             [
+               {:segment, :PSG, :required},
+               {:group, :PRODUCT_SERVICE_LINE_ITEM, :required, :repeating,
+                [
+                  {:segment, :PSL, :required},
+                  {:segment, :ADJ, :optional, :repeating}
+                ]}
+             ]}
+          ]}
+       ]}
+    ]
+  }
+
+  # EHC_E12: Request Additional Information
+  @ehc_e12 %{
+    name: "EHC_E12",
+    description: "Request Additional Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :RFI, :required},
+      {:segment, :CTD, :optional, :repeating},
+      {:segment, :IVC, :required},
+      {:segment, :PSS, :required},
+      {:segment, :PSG, :required},
+      {:segment, :PID, :optional},
+      {:segment, :PSL, :optional, :repeating},
+      {:group, :REQUEST, :required, :repeating,
+       [
+         {:segment, :CTD, :optional},
+         {:segment, :OBR, :required},
+         {:segment, :NTE, :optional},
+         {:segment, :OBX, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  # EHC_E13: Additional Information Response
+  @ehc_e13 %{
+    name: "EHC_E13",
+    description: "Additional Information Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :RFI, :required},
+      {:segment, :CTD, :optional, :repeating},
+      {:segment, :IVC, :required},
+      {:segment, :PSS, :required},
+      {:segment, :PSG, :required},
+      {:segment, :PID, :optional},
+      {:segment, :PSL, :optional, :repeating},
+      {:group, :REQUEST, :required, :repeating,
+       [
+         {:segment, :CTD, :optional},
+         {:segment, :OBR, :required},
+         {:segment, :NTE, :optional},
+         {:segment, :OBX, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  # EHC_E15: Payment/Remittance Advice
+  @ehc_e15 %{
+    name: "EHC_E15",
+    description: "Payment/Remittance Advice",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:group, :PAYMENT_REMITTANCE_HEADER_INFO, :required,
+       [
+         {:segment, :PMT, :required},
+         {:group, :PAYMENT_REMITTANCE_DETAIL_INFO, :optional, :repeating,
+          [
+            {:segment, :IPR, :required},
+            {:segment, :IVC, :required},
+            {:group, :PRODUCT_SERVICE_SECTION, :required, :repeating,
+             [
+               {:segment, :PSS, :required},
+               {:group, :PRODUCT_SERVICE_GROUP, :required, :repeating,
+                [
+                  {:segment, :PSG, :required},
+                  {:segment, :PSL, :optional, :repeating},
+                  {:segment, :ADJ, :optional, :repeating}
+                ]}
+             ]}
+          ]}
+       ]},
+      {:group, :ADJUSTMENT_PAYEE, :optional, :repeating,
+       [
+         {:segment, :ADJ, :required},
+         {:segment, :ROL, :optional}
+       ]}
+    ]
+  }
+
+  # EHC_E20: Submit Authorization Request
+  @ehc_e20 %{
+    name: "EHC_E20",
+    description: "Submit Authorization Request",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:group, :AUTHORIZATION_REQUEST, :required, :repeating,
+       [
+         {:segment, :IVC, :required},
+         {:segment, :CTD, :optional, :repeating},
+         {:segment, :LOC, :optional, :repeating},
+         {:segment, :ROL, :optional, :repeating},
+         {:group, :PAT_INFO, :required, :repeating,
+          [
+            {:segment, :PID, :required},
+            {:segment, :ACC, :optional},
+            {:group, :INSURANCE, :required, :repeating,
+             [
+               {:segment, :IN1, :required},
+               {:segment, :IN2, :optional}
+             ]},
+            {:group, :DIAGNOSIS, :optional, :repeating,
+             [
+               {:segment, :DG1, :required},
+               {:segment, :NTE, :optional, :repeating}
+             ]},
+            {:group, :PROCEDURE, :optional, :repeating,
+             [
+               {:segment, :PR1, :required},
+               {:segment, :NTE, :optional, :repeating}
+             ]}
+          ]}
+       ]}
+    ]
+  }
+
+  # EHC_E21: Cancel Authorization Request
+  @ehc_e21 %{
+    name: "EHC_E21",
+    description: "Cancel Authorization Request",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:group, :AUTHORIZATION_REQUEST, :required, :repeating,
+       [
+         {:segment, :IVC, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]}
+    ]
+  }
+
+  # EHC_E24: Authorization Response
+  @ehc_e24 %{
+    name: "EHC_E24",
+    description: "Authorization Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:group, :AUTHORIZATION_RESPONSE_INFO, :required, :repeating,
+       [
+         {:segment, :IVC, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]}
+    ]
+  }
+
   @structures %{
     "ADR_A19" => @adr_a19,
     "ADT_A01" => @adt_a01,
@@ -3192,6 +5608,103 @@ defmodule HL7v2.Standard.MessageStructure do
     "VXQ_V01" => @vxq_v01,
     "VXR_V03" => @vxr_v03,
     "VXU_V04" => @vxu_v04,
+    "VXX_V02" => @vxx_v02,
+    # MDM variants
+    "MDM_T01" => @mdm_t01,
+    "MDM_T03" => @mdm_t03,
+    "MDM_T04" => @mdm_t04,
+    "MDM_T05" => @mdm_t05,
+    "MDM_T06" => @mdm_t06,
+    "MDM_T07" => @mdm_t07,
+    "MDM_T08" => @mdm_t08,
+    "MDM_T09" => @mdm_t09,
+    "MDM_T10" => @mdm_t10,
+    "MDM_T11" => @mdm_t11,
+    # Additional order structures
+    "OMI_O23" => @omi_o23,
+    "ORI_O24" => @ori_o24,
+    "OMN_O07" => @omn_o07,
+    "ORN_O08" => @orn_o08,
+    "ORD_O04" => @ord_o04,
+    "ORS_O06" => @ors_o06,
+    "OML_O33" => @oml_o33,
+    "OML_O35" => @oml_o35,
+    "ORL_O34" => @orl_o34,
+    "ORL_O36" => @orl_o36,
+    "OMB_O27" => @omb_o27,
+    "ORB_O28" => @orb_o28,
+    "OML_O39" => @oml_o39,
+    "ORL_O40" => @orl_o40,
+    # Additional observation structures
+    "OUL_R22" => @oul_r22,
+    "OUL_R23" => @oul_r23,
+    "OUL_R24" => @oul_r24,
+    "ORA_R41" => @ora_r41,
+    "ORU_R32" => @oru_r32,
+    # Patient info request/response
+    "QRY_A19" => @qry_a19,
+    "RQI_I01" => @rqi_i01,
+    "RPA_I08" => @rpa_i08,
+    "RPI_I01" => @rpi_i01,
+    "RPI_I04" => @rpi_i04,
+    "RQA_I08" => @rqa_i08,
+    "RQC_I05" => @rqc_i05,
+    "RCI_I05" => @rci_i05,
+    "RQP_I04" => @rqp_i04,
+    "RPL_I02" => @rpl_i02,
+    "RPR_I03" => @rpr_i03,
+    # Pharmacy query responses
+    "RER_RER" => @rer_rer,
+    "RDR_RDR" => @rdr_rdr,
+    "RAR_RAR" => @rar_rar,
+    "ROR_ROR" => @ror_ror,
+    # Additional personnel
+    "PMU_B04" => @pmu_b04,
+    "PMU_B07" => @pmu_b07,
+    "PMU_B08" => @pmu_b08,
+    # Additional ADT
+    "ADT_A54" => @adt_a54,
+    "ADT_A60" => @adt_a60,
+    "ADT_A61" => @adt_a61,
+    # Additional query
+    "QBP_Q11" => @qbp_q11,
+    "QBP_Q13" => @qbp_q13,
+    "QBP_Q15" => @qbp_q15,
+    "QSB_Q16" => @qsb_q16,
+    "QVR_Q17" => @qvr_q17,
+    "RSP_K11" => @rsp_k11,
+    "RSP_K13" => @rsp_k13,
+    "RSP_K15" => @rsp_k15,
+    "RSP_K31" => @rsp_k31,
+    # Additional master file
+    "MFN_M03" => @mfn_m03,
+    "MFN_M04" => @mfn_m04,
+    "MFN_M06" => @mfn_m06,
+    "MFN_M07" => @mfn_m07,
+    "MFN_M08" => @mfn_m08,
+    "MFN_M09" => @mfn_m09,
+    "MFN_M10" => @mfn_m10,
+    "MFN_M11" => @mfn_m11,
+    "MFN_M12" => @mfn_m12,
+    "MFN_M13" => @mfn_m13,
+    "MFR_M01" => @mfr_m01,
+    # Collaborative care
+    "CCR_I16" => @ccr_i16,
+    "CCI_I22" => @cci_i22,
+    "CCU_I20" => @ccu_i20,
+    "CCQ_I19" => @ccq_i19,
+    "CCF_I22" => @ccf_i22,
+    # EHC (E-Health)
+    "EHC_E01" => @ehc_e01,
+    "EHC_E02" => @ehc_e02,
+    "EHC_E04" => @ehc_e04,
+    "EHC_E10" => @ehc_e10,
+    "EHC_E12" => @ehc_e12,
+    "EHC_E13" => @ehc_e13,
+    "EHC_E15" => @ehc_e15,
+    "EHC_E20" => @ehc_e20,
+    "EHC_E21" => @ehc_e21,
+    "EHC_E24" => @ehc_e24,
     "ACK" => @ack
   }
 

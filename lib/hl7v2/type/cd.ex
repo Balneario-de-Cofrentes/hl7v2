@@ -9,7 +9,7 @@ defmodule HL7v2.Type.CD do
   1. Channel Identifier (WVI) -- sub-components
   2. Waveform Source (WVS) -- sub-components
   3. Channel Sensitivity and Units (CSU) -- sub-components
-  4. Channel Calibration Parameters (ST) -- raw
+  4. Channel Calibration Parameters (CCP) -- sub-components
   5. Channel Sampling Frequency (NM)
   6. Minimum Data Value (NR) -- sub-components
   7. Maximum Data Value (NR) -- sub-components
@@ -19,7 +19,7 @@ defmodule HL7v2.Type.CD do
   @behaviour HL7v2.Type
 
   alias HL7v2.Type
-  alias HL7v2.Type.{WVI, WVS, CSU, NR}
+  alias HL7v2.Type.{WVI, WVS, CSU, CCP, NR}
 
   defstruct [
     :channel_identifier,
@@ -35,7 +35,7 @@ defmodule HL7v2.Type.CD do
           channel_identifier: WVI.t() | nil,
           waveform_source: WVS.t() | nil,
           channel_sensitivity_and_units: CSU.t() | nil,
-          channel_calibration_parameters: binary() | nil,
+          channel_calibration_parameters: CCP.t() | nil,
           channel_sampling_frequency: binary() | nil,
           minimum_data_value: NR.t() | nil,
           maximum_data_value: NR.t() | nil
@@ -62,7 +62,7 @@ defmodule HL7v2.Type.CD do
       channel_identifier: Type.parse_sub(WVI, Type.get_component(components, 0)),
       waveform_source: Type.parse_sub(WVS, Type.get_component(components, 1)),
       channel_sensitivity_and_units: Type.parse_sub(CSU, Type.get_component(components, 2)),
-      channel_calibration_parameters: Type.get_component(components, 3),
+      channel_calibration_parameters: Type.parse_sub(CCP, Type.get_component(components, 3)),
       channel_sampling_frequency: Type.get_component(components, 4),
       minimum_data_value: Type.parse_sub(NR, Type.get_component(components, 5)),
       maximum_data_value: Type.parse_sub(NR, Type.get_component(components, 6))
@@ -89,7 +89,7 @@ defmodule HL7v2.Type.CD do
       Type.encode_sub(WVI, cd.channel_identifier),
       Type.encode_sub(WVS, cd.waveform_source),
       Type.encode_sub(CSU, cd.channel_sensitivity_and_units),
-      cd.channel_calibration_parameters || "",
+      Type.encode_sub(CCP, cd.channel_calibration_parameters),
       cd.channel_sampling_frequency || "",
       Type.encode_sub(NR, cd.minimum_data_value),
       Type.encode_sub(NR, cd.maximum_data_value)

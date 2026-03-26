@@ -1,7 +1,7 @@
 # HL7 v2.5.1 Segment Definitions Reference
 
-Field-by-field definitions for 13 of the 52 standard HL7 v2.5.1 segments implemented in
-HL7v2 integration. Source: HL7 v2.5.1 standard via Caristix HL7-Definition.
+Field-by-field definitions for selected segments from the 152 standard HL7 v2.5.1 segments implemented in
+HL7v2 (149 fully typed, 3 with intentional raw holes). Source: HL7 v2.5.1 standard via Caristix HL7-Definition.
 
 **Usage codes:** R = Required, O = Optional, C = Conditional, B = Backward compatible (retained for backward compatibility), W = Withdrawn, X = Not used
 

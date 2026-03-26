@@ -44,6 +44,7 @@ defmodule HL7v2.Segment do
                      HL7v2.Type.AD,
                      HL7v2.Type.AUI,
                      HL7v2.Type.CCD,
+                     HL7v2.Type.CCP,
                      HL7v2.Type.CD,
                      HL7v2.Type.CE,
                      HL7v2.Type.CF,

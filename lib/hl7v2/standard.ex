@@ -410,6 +410,7 @@ defmodule HL7v2.Standard do
     # -- Remaining v2.5.1 types (all typed) --
     "AD" => %{name: "Address", category: :composite, tier: :typed},
     "CCD" => %{name: "Charge Code and Date", category: :composite, tier: :typed},
+    "CCP" => %{name: "Channel Calibration Parameters", category: :composite, tier: :typed},
     "CD" => %{name: "Channel Definition", category: :composite, tier: :typed},
     "CF" => %{name: "Coded Element with Formatted Values", category: :composite, tier: :typed},
     "CSU" => %{name: "Channel Sensitivity and Units", category: :composite, tier: :typed},
