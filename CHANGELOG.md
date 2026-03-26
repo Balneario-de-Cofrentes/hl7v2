@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.5.0 — 2026-03-26
+
+### Deep Semantic Validation
+
+- **108 HL7 tables** (was 20) — demographics, clinical, scheduling, administrative,
+  financial coded-value tables
+- **80 coded field bindings** (was 11) — across MSH, PID, PV1, PV2, NK1, AL1, IAM,
+  DG1, DRG, NTE, ORC, OBR, OBX, IN1, FT1, TXA, SCH, AIS, AIG, RXR, EVN, ERR, MSA
+- **Conditional field rules** for 17 segments — OBX, MSH, NK1, ORC, OBR, SCH, AIS,
+  AIG, AIL, AIP, RGS, ARQ, DG1, PID, PV2, QAK, MFE/MFA. Rules produce warnings
+  in lenient mode, errors in strict mode.
+
+## v2.4.0 — 2026-03-26
+
+### CCP Type + 190 Message Structures
+
+- **CCP type** (Channel Calibration Parameters) — last missing v2.5.1 type. 90/90.
+- **86 new message structures** (104 → 190) covering all major v2.5.1 families
+- README and docs updated to current coverage
+
+## v2.3.0 — 2026-03-25
+
+### 104 Message Structures
+
+- 81 new message structures across all HL7 v2.5.1 families: ADT, BAR, DFT,
+  pharmacy, lab, query, master files, scheduling, referrals, pathways, equipment,
+  blood bank, clinical study, personnel, network management
+- 226 canonical trigger-event mappings
+
+## v2.2.0 — 2026-03-25
+
+### Zero Raw Holes
+
+- 218 raw field holes filled across 36 segments
+- Only 3 intentional raw holes remaining (OBX-5 dispatch, RDT-1 variable, QPD-3 query)
+
 ## v2.1.3 — 2026-03-26
 
 ### Fixes
