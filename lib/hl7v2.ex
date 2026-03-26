@@ -53,7 +53,10 @@ defmodule HL7v2 do
 
   """
   @spec parse(binary(), keyword()) :: {:ok, term()} | {:error, term()}
-  def parse(text, opts \\ []) do
+  def parse(text, opts \\ [])
+  def parse(text, _opts) when not is_binary(text), do: {:error, :invalid_input}
+
+  def parse(text, opts) do
     mode = Keyword.get(opts, :mode, :raw)
     validate? = Keyword.get(opts, :validate, false)
 

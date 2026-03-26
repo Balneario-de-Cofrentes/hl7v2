@@ -134,7 +134,7 @@ defmodule HL7v2.Access do
 
   @doc false
   @spec parse_path(binary()) :: {:ok, path()} | {:error, :invalid_path}
-  def parse_path(path) do
+  def parse_path(path) when is_binary(path) do
     case Regex.run(@path_regex, path) do
       nil ->
         {:error, :invalid_path}
