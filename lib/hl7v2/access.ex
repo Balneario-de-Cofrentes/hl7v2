@@ -296,13 +296,18 @@ defmodule HL7v2.Access do
   end
 
   defp select_component(value, comp) when is_struct(value) do
-    ordered_keys =
-      value.__struct__.__info__(:struct)
-      |> Enum.map(& &1.field)
+    if HL7v2.Segment.composite_type?(value.__struct__) do
+      ordered_keys =
+        value.__struct__.__info__(:struct)
+        |> Enum.map(& &1.field)
 
-    case Enum.at(ordered_keys, comp - 1) do
-      nil -> nil
-      key -> Map.get(value, key)
+      case Enum.at(ordered_keys, comp - 1) do
+        nil -> nil
+        key -> Map.get(value, key)
+      end
+    else
+      # Primitive type (NM, SI, DT, etc.) — component access is invalid
+      :invalid_component
     end
   end
 

@@ -19,7 +19,7 @@ defmodule HL7v2.Message do
           sending_facility: "HOSP"
         )
         |> HL7v2.Message.add_segment(%HL7v2.Segment.PID{
-          patient_identifier_list: [%HL7v2.Type.CX{id_number: "12345"}],
+          patient_identifier_list: [%HL7v2.Type.CX{id: "12345"}],
           patient_name: [%HL7v2.Type.XPN{family_name: %HL7v2.Type.FN{surname: "Smith"}, given_name: "John"}]
         })
 
