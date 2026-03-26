@@ -59,9 +59,10 @@ defmodule HL7v2.MessageDefinition do
     {"ADT", "A47"} => "ADT_A30",
     {"ADT", "A48"} => "ADT_A30",
     {"ADT", "A49"} => "ADT_A30",
+    {"ADT", "A18"} => "ADT_A18",
     {"ADT", "A50"} => "ADT_A50",
     {"ADT", "A51"} => "ADT_A50",
-    {"ADT", "A52"} => "ADT_A50",
+    {"ADT", "A52"} => "ADT_A52",
     {"ADT", "A53"} => "ADT_A50",
     # BAR aliases
     {"BAR", "P01"} => "BAR_P01",
@@ -228,9 +229,6 @@ defmodule HL7v2.MessageDefinition do
     {"RSP", "K15"} => "RSP_K15",
     {"RSP", "K21"} => "RSP_K21",
     {"RSP", "K22"} => "RSP_K21",
-    {"RSP", "K23"} => "RSP_K21",
-    {"RSP", "K24"} => "RSP_K21",
-    {"RSP", "K25"} => "RSP_K21",
     {"RSP", "K31"} => "RSP_K31",
     {"RTB", "K13"} => "RTB_K13",
     # Pharmacy query responses
@@ -337,6 +335,36 @@ defmodule HL7v2.MessageDefinition do
     {"EHC", "E24"} => "EHC_E24",
     # Master file response
     {"MFR", "M01"} => "MFR_M01",
+    {"MFR", "M04"} => "MFR_M04",
+    {"MFR", "M05"} => "MFR_M05",
+    {"MFR", "M06"} => "MFR_M06",
+    {"MFR", "M07"} => "MFR_M07",
+    {"MFN", "M15"} => "MFN_M15",
+    # Observation response
+    {"ORF", "R04"} => "ORF_R04",
+    # Legacy queries
+    {"QRY", "Q01"} => "QRY_Q01",
+    {"QRY", "Q02"} => "QRY_Q02",
+    {"QRY", "R02"} => "QRY_R02",
+    {"QRY", "PC4"} => "QRY_PC4",
+    {"QRY", "PC5"} => "QRY_PC4",
+    {"QRY", "PC9"} => "QRY_PC4",
+    {"QRY", "PCE"} => "QRY_PC4",
+    {"QRY", "PCK"} => "QRY_PC4",
+    {"OSQ", "Q06"} => "OSQ_Q06",
+    {"OSR", "Q06"} => "OSR_Q06",
+    # Additional RSP responses
+    {"RSP", "Q11"} => "RSP_Q11",
+    {"RSP", "K23"} => "RSP_K23",
+    {"RSP", "K24"} => "RSP_K23",
+    {"RSP", "K25"} => "RSP_K25",
+    {"RSP", "Z82"} => "RSP_Z82",
+    {"RSP", "Z86"} => "RSP_Z86",
+    {"RSP", "Z88"} => "RSP_Z88",
+    {"RSP", "Z90"} => "RSP_Z90",
+    # Scheduling query
+    {"SQM", "S25"} => "SQM_S25",
+    {"SQR", "S25"} => "SQR_S25",
     # UDM
     {"UDM", "Q05"} => "UDM_Q05",
     # Vaccination

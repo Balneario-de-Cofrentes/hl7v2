@@ -5504,6 +5504,617 @@ defmodule HL7v2.Standard.MessageStructure do
     ]
   }
 
+  # ---------------------------------------------------------------------------
+  # ADT Additional — Merge Patient Information (A18)
+  # ---------------------------------------------------------------------------
+
+  # ADT_A18: Merge Patient Information (variant of merge)
+  @adt_a18 %{
+    name: "ADT_A18",
+    description: "Merge Patient Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :EVN, :required},
+      {:segment, :PID, :required},
+      {:segment, :PD1, :optional},
+      {:segment, :MRG, :required},
+      {:segment, :PV1, :required}
+    ]
+  }
+
+  # ADT_A52: Cancel Leave of Absence (same structure as ADT_A21)
+  @adt_a52 %{
+    name: "ADT_A52",
+    description: "Cancel Leave of Absence",
+    nodes: @adt_a21.nodes
+  }
+
+  # ---------------------------------------------------------------------------
+  # Master File Response Structures (MFR)
+  # ---------------------------------------------------------------------------
+
+  # MFR_M04: Master File Response — Charge Description
+  @mfr_m04 %{
+    name: "MFR_M04",
+    description: "Master File Response — Charge Description",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :QAK, :optional},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:segment, :MFI, :required},
+      {:group, :MF_QUERY, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :CDM, :required},
+         {:segment, :LOC, :optional, :repeating},
+         {:segment, :PRC, :optional, :repeating}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # MFR_M05: Master File Response — Patient Location
+  @mfr_m05 %{
+    name: "MFR_M05",
+    description: "Master File Response — Patient Location",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :QAK, :optional},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:segment, :MFI, :required},
+      {:group, :MF_QUERY, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :LOC, :required},
+         {:segment, :LCH, :optional, :repeating},
+         {:segment, :LRL, :optional, :repeating},
+         {:group, :MF_LOC_DEPT, :optional, :repeating,
+          [
+            {:segment, :LDP, :required},
+            {:segment, :LCH, :optional, :repeating},
+            {:segment, :LCC, :optional, :repeating}
+          ]}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # MFR_M06: Master File Response — Clinical Study
+  @mfr_m06 %{
+    name: "MFR_M06",
+    description: "Master File Response — Clinical Study",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :QAK, :optional},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:segment, :MFI, :required},
+      {:group, :MF_QUERY, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :CM0, :required},
+         {:segment, :CM1, :optional, :repeating},
+         {:segment, :CM2, :optional, :repeating}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # MFR_M07: Master File Response — Calendar/Campaign
+  @mfr_m07 %{
+    name: "MFR_M07",
+    description: "Master File Response — Calendar/Campaign",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :QAK, :optional},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:segment, :MFI, :required},
+      {:group, :MF_QUERY, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :CM0, :required}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # MFN_M15: Master File Notification — Specimen
+  @mfn_m15 %{
+    name: "MFN_M15",
+    description: "Master File Notification — Inventory Item Enhanced",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MFI, :required},
+      {:group, :MF_INV_ITEM, :required, :repeating,
+       [
+         {:segment, :MFE, :required},
+         {:segment, :IIM, :required}
+       ]}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Observation Response Structures
+  # ---------------------------------------------------------------------------
+
+  # ORF_R04: Response to Query — Observation
+  @orf_r04 %{
+    name: "ORF_R04",
+    description: "Response to Query — Transmission of Requested Observation",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :QRD, :optional},
+      {:segment, :QRF, :optional},
+      {:group, :QUERY_RESPONSE, :optional, :repeating,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :optional},
+            {:segment, :OBR, :required},
+            {:segment, :NTE, :optional, :repeating},
+            {:group, :TIMING_QTY, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:group, :OBSERVATION, :optional, :repeating,
+             [
+               {:segment, :OBX, :optional},
+               {:segment, :NTE, :optional, :repeating}
+             ]}
+          ]}
+       ]},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :QAK, :optional},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Legacy Query Structures (QRY, OSQ, OSR)
+  # ---------------------------------------------------------------------------
+
+  # QRY_Q01: Query Sent for Immediate Response
+  @qry_q01 %{
+    name: "QRY_Q01",
+    description: "Query Sent for Immediate Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # QRY_Q02: Query Sent for Deferred Response
+  @qry_q02 %{
+    name: "QRY_Q02",
+    description: "Query Sent for Deferred Response",
+    nodes: @qry_q01.nodes
+  }
+
+  # QRY_R02: Query for Results of Observation
+  @qry_r02 %{
+    name: "QRY_R02",
+    description: "Query for Results of Observation",
+    nodes: @qry_q01.nodes
+  }
+
+  # QRY_PC4: Problem Query
+  @qry_pc4 %{
+    name: "QRY_PC4",
+    description: "Problem Query",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional}
+    ]
+  }
+
+  # OSQ_Q06: Query for Order Status
+  @osq_q06 %{
+    name: "OSQ_Q06",
+    description: "Query for Order Status",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # OSR_Q06: Query Response for Order Status
+  @osr_q06 %{
+    name: "OSR_Q06",
+    description: "Query Response for Order Status",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:segment, :QAK, :required},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:group, :RESPONSE, :optional,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:segment, :OBR, :optional},
+            {:segment, :NTE, :optional, :repeating}
+          ]}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Additional RSP Query Response Structures
+  # ---------------------------------------------------------------------------
+
+  # RSP_Q11: Segment Pattern Response (variant for QBP^Q11)
+  @rsp_q11 %{
+    name: "RSP_Q11",
+    description: "Segment Pattern Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional},
+      {:segment, :QAK, :required},
+      {:segment, :QPD, :required},
+      {:group, :QUERY_RESPONSE, :optional, :repeating,
+       [
+         {:segment, :PID, :required},
+         {:segment, :PD1, :optional},
+         {:segment, :NK1, :optional, :repeating},
+         {:segment, :QRI, :optional}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RSP_K23: Allocate Identifiers Response
+  @rsp_k23 %{
+    name: "RSP_K23",
+    description: "Allocate Identifiers Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional},
+      {:segment, :QAK, :required},
+      {:segment, :QPD, :required},
+      {:segment, :PID, :optional},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RSP_K25: Personnel Information Response
+  @rsp_k25 %{
+    name: "RSP_K25",
+    description: "Personnel Information Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional},
+      {:segment, :QAK, :required},
+      {:segment, :QPD, :required},
+      {:group, :STAFF, :optional, :repeating,
+       [
+         {:segment, :STF, :required},
+         {:segment, :PRA, :optional},
+         {:segment, :ORG, :optional, :repeating},
+         {:segment, :AFF, :optional, :repeating},
+         {:segment, :LAN, :optional, :repeating},
+         {:segment, :EDU, :optional, :repeating},
+         {:segment, :CER, :optional, :repeating}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RSP_Z82: Pharmacy Dispense Information Response
+  @rsp_z82 %{
+    name: "RSP_Z82",
+    description: "Dispense History Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional},
+      {:segment, :QAK, :required},
+      {:segment, :QPD, :required},
+      {:segment, :RCP, :optional},
+      {:group, :QUERY_RESPONSE, :optional, :repeating,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :PD1, :optional},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:segment, :RXD, :required},
+            {:segment, :RXR, :required, :repeating},
+            {:segment, :RXC, :optional, :repeating},
+            {:group, :OBSERVATION, :optional, :repeating,
+             [
+               {:segment, :OBX, :optional},
+               {:segment, :NTE, :optional, :repeating}
+             ]}
+          ]}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RSP_Z86: Pharmacy Information Comprehensive Response
+  @rsp_z86 %{
+    name: "RSP_Z86",
+    description: "Pharmacy Information Comprehensive Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional},
+      {:segment, :QAK, :required},
+      {:segment, :QPD, :required},
+      {:group, :QUERY_RESPONSE, :optional, :repeating,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :PD1, :optional},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:segment, :RXE, :required},
+            {:segment, :RXR, :required, :repeating},
+            {:segment, :RXC, :optional, :repeating},
+            {:group, :OBSERVATION, :optional, :repeating,
+             [
+               {:segment, :OBX, :optional},
+               {:segment, :NTE, :optional, :repeating}
+             ]}
+          ]}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RSP_Z88: Pharmacy Encoded Order Response
+  @rsp_z88 %{
+    name: "RSP_Z88",
+    description: "Pharmacy Encoded Order Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional},
+      {:segment, :QAK, :required},
+      {:segment, :QPD, :required},
+      {:segment, :RCP, :required},
+      {:group, :QUERY_RESPONSE, :optional, :repeating,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :PD1, :optional},
+            {:segment, :NTE, :optional, :repeating},
+            {:segment, :AL1, :optional, :repeating}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :TIMING, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:segment, :RXE, :required},
+            {:segment, :RXR, :required, :repeating},
+            {:segment, :RXC, :optional, :repeating},
+            {:group, :OBSERVATION, :optional, :repeating,
+             [
+               {:segment, :OBX, :optional},
+               {:segment, :NTE, :optional, :repeating}
+             ]}
+          ]}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RSP_Z90: Lab Results Response
+  @rsp_z90 %{
+    name: "RSP_Z90",
+    description: "Lab Results History Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional},
+      {:segment, :QAK, :required},
+      {:segment, :QPD, :required},
+      {:segment, :RCP, :required},
+      {:group, :QUERY_RESPONSE, :optional, :repeating,
+       [
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :PD1, :optional},
+            {:segment, :NK1, :optional, :repeating},
+            {:segment, :NTE, :optional, :repeating},
+            {:group, :VISIT, :optional,
+             [
+               {:segment, :PV1, :required},
+               {:segment, :PV2, :optional}
+             ]}
+          ]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :optional},
+            {:segment, :OBR, :required},
+            {:segment, :NTE, :optional, :repeating},
+            {:group, :TIMING_QTY, :optional, :repeating,
+             [
+               {:segment, :TQ1, :required},
+               {:segment, :TQ2, :optional, :repeating}
+             ]},
+            {:group, :OBSERVATION, :optional, :repeating,
+             [
+               {:segment, :OBX, :required},
+               {:segment, :NTE, :optional, :repeating}
+             ]}
+          ]}
+       ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Scheduling Query Structures (SQM/SQR)
+  # ---------------------------------------------------------------------------
+
+  # SQM_S25: Schedule Query Message
+  @sqm_s25 %{
+    name: "SQM_S25",
+    description: "Schedule Query Message",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:group, :REQUEST, :optional,
+       [
+         {:segment, :ARQ, :required},
+         {:segment, :APR, :optional},
+         {:group, :RESOURCES, :required, :repeating,
+          [
+            {:segment, :RGS, :required},
+            {:group, :SERVICE, :optional, :repeating,
+             [
+               {:segment, :AIS, :required},
+               {:segment, :APR, :optional}
+             ]},
+            {:group, :GENERAL_RESOURCE, :optional, :repeating,
+             [
+               {:segment, :AIG, :required},
+               {:segment, :APR, :optional}
+             ]},
+            {:group, :PERSONNEL_RESOURCE, :optional, :repeating,
+             [
+               {:segment, :AIP, :required},
+               {:segment, :APR, :optional}
+             ]},
+            {:group, :LOCATION_RESOURCE, :optional, :repeating,
+             [
+               {:segment, :AIL, :required},
+               {:segment, :APR, :optional}
+             ]}
+          ]}
+       ]}
+    ]
+  }
+
+  # SQR_S25: Schedule Query Response
+  @sqr_s25 %{
+    name: "SQR_S25",
+    description: "Schedule Query Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QAK, :required},
+      {:group, :SCHEDULE, :optional, :repeating,
+       [
+         {:segment, :SCH, :required},
+         {:segment, :TQ1, :optional, :repeating},
+         {:segment, :NTE, :optional, :repeating},
+         {:group, :PATIENT, :optional,
+          [
+            {:segment, :PID, :required},
+            {:segment, :PV1, :optional},
+            {:segment, :PV2, :optional},
+            {:segment, :DG1, :optional, :repeating}
+          ]},
+         {:group, :RESOURCES, :required, :repeating,
+          [
+            {:segment, :RGS, :required},
+            {:group, :SERVICE, :optional, :repeating,
+             [
+               {:segment, :AIS, :required},
+               {:segment, :NTE, :optional, :repeating}
+             ]},
+            {:group, :GENERAL_RESOURCE, :optional, :repeating,
+             [
+               {:segment, :AIG, :required},
+               {:segment, :NTE, :optional, :repeating}
+             ]},
+            {:group, :PERSONNEL_RESOURCE, :optional, :repeating,
+             [
+               {:segment, :AIP, :required},
+               {:segment, :NTE, :optional, :repeating}
+             ]},
+            {:group, :LOCATION_RESOURCE, :optional, :repeating,
+             [
+               {:segment, :AIL, :required},
+               {:segment, :NTE, :optional, :repeating}
+             ]}
+          ]}
+       ]}
+    ]
+  }
+
   @structures %{
     "ADR_A19" => @adr_a19,
     "ADT_A01" => @adt_a01,
@@ -5528,6 +6139,8 @@ defmodule HL7v2.Standard.MessageStructure do
     "ADT_A43" => @adt_a43,
     "ADT_A45" => @adt_a45,
     "ADT_A50" => @adt_a50,
+    "ADT_A18" => @adt_a18,
+    "ADT_A52" => @adt_a52,
     "BAR_P01" => @bar_p01,
     "BAR_P02" => @bar_p02,
     "BAR_P05" => %{@bar_p01 | name: "BAR_P05", description: "Update Account"},
@@ -5688,6 +6301,31 @@ defmodule HL7v2.Standard.MessageStructure do
     "MFN_M12" => @mfn_m12,
     "MFN_M13" => @mfn_m13,
     "MFR_M01" => @mfr_m01,
+    "MFR_M04" => @mfr_m04,
+    "MFR_M05" => @mfr_m05,
+    "MFR_M06" => @mfr_m06,
+    "MFR_M07" => @mfr_m07,
+    "MFN_M15" => @mfn_m15,
+    # Observation response
+    "ORF_R04" => @orf_r04,
+    # Legacy query structures
+    "QRY_Q01" => @qry_q01,
+    "QRY_Q02" => @qry_q02,
+    "QRY_R02" => @qry_r02,
+    "QRY_PC4" => @qry_pc4,
+    "OSQ_Q06" => @osq_q06,
+    "OSR_Q06" => @osr_q06,
+    # Additional RSP responses
+    "RSP_Q11" => @rsp_q11,
+    "RSP_K23" => @rsp_k23,
+    "RSP_K25" => @rsp_k25,
+    "RSP_Z82" => @rsp_z82,
+    "RSP_Z86" => @rsp_z86,
+    "RSP_Z88" => @rsp_z88,
+    "RSP_Z90" => @rsp_z90,
+    # Scheduling query
+    "SQM_S25" => @sqm_s25,
+    "SQR_S25" => @sqr_s25,
     # Collaborative care
     "CCR_I16" => @ccr_i16,
     "CCI_I22" => @cci_i22,
