@@ -153,6 +153,101 @@ defmodule HL7v2.Standard.Tables do
         "U" => "Unknown"
       }
     },
+    5 => %{
+      name: "Race",
+      codes: %{
+        "1002-5" => "American Indian or Alaska Native",
+        "2028-9" => "Asian",
+        "2054-5" => "Black or African American",
+        "2076-8" => "Native Hawaiian or Other Pacific Islander",
+        "2106-3" => "White",
+        "2131-1" => "Other Race",
+        "A" => "Asian or Pacific Islander",
+        "B" => "Black",
+        "H" => "Hispanic",
+        "I" => "American Indian or Alaska Native",
+        "N" => "Native Hawaiian or Other Pacific Islander",
+        "O" => "Other",
+        "U" => "Unknown",
+        "W" => "White"
+      }
+    },
+    6 => %{
+      name: "Religion",
+      codes: %{
+        "AGN" => "Agnostic",
+        "ATH" => "Atheist",
+        "BAH" => "Baha'i",
+        "BMA" => "Buddhist: Mahayana",
+        "BOT" => "Buddhist: Other",
+        "BTA" => "Buddhist: Tantrayana",
+        "BTH" => "Buddhist: Theravada",
+        "BUD" => "Buddhist",
+        "CAT" => "Christian: Roman Catholic",
+        "CHR" => "Christian",
+        "CHS" => "Christian: Christian Science",
+        "CMA" => "Christian: Christian Missionary Alliance",
+        "CNF" => "Confucian",
+        "COC" => "Christian: Church of Christ",
+        "COG" => "Christian: Church of God",
+        "COI" => "Christian: Church of God in Christ",
+        "COL" => "Christian: Congregational",
+        "COM" => "Christian: Community",
+        "COP" => "Christian: Other Pentecostal",
+        "COT" => "Christian: Other",
+        "EPI" => "Christian: Episcopalian",
+        "ERL" => "Ethnic Religionist",
+        "EVC" => "Christian: Evangelical Church",
+        "FRQ" => "Christian: Friends",
+        "FUL" => "Christian: Full Gospel",
+        "GRE" => "Christian: Greek Orthodox",
+        "HIN" => "Hindu",
+        "HOT" => "Hindu: Other",
+        "HSH" => "Hindu: Shaivites",
+        "HVA" => "Hindu: Vaishnavites",
+        "JAI" => "Jain",
+        "JCO" => "Jewish: Conservative",
+        "JEW" => "Jewish",
+        "JOR" => "Jewish: Orthodox",
+        "JOT" => "Jewish: Other",
+        "JRC" => "Jewish: Reconstructionist",
+        "JRF" => "Jewish: Reform",
+        "JRN" => "Jewish: Renewal",
+        "LMS" => "Christian: Lutheran Missouri Synod",
+        "LUT" => "Christian: Lutheran",
+        "MEN" => "Christian: Mennonite",
+        "MET" => "Christian: Methodist",
+        "MOM" => "Christian: Latter-day Saints",
+        "MOS" => "Muslim",
+        "MOT" => "Muslim: Other",
+        "MSH" => "Muslim: Shiite",
+        "MSU" => "Muslim: Sunni",
+        "NAM" => "Native American",
+        "NAZ" => "Christian: Church of the Nazarene",
+        "NOE" => "Nonreligious",
+        "NRL" => "New Religionist",
+        "ORT" => "Christian: Orthodox",
+        "OTH" => "Other",
+        "PEN" => "Christian: Pentecostal",
+        "PRC" => "Christian: Other Protestant",
+        "PRE" => "Christian: Presbyterian",
+        "PRO" => "Christian: Protestant",
+        "QUA" => "Christian: Friends",
+        "REC" => "Christian: Reformed Church",
+        "REO" => "Christian: Reorganized Church of Jesus Christ-LDS",
+        "SAA" => "Christian: Salvation Army",
+        "SEV" => "Christian: Seventh Day Adventist",
+        "SHN" => "Shintoist",
+        "SIK" => "Sikh",
+        "SOU" => "Christian: Southern Baptist",
+        "SPI" => "Spiritist",
+        "UNI" => "Christian: Unitarian",
+        "UNU" => "Christian: Unitarian Universalist",
+        "VAR" => "Unknown",
+        "WES" => "Christian: Wesleyan",
+        "WMC" => "Christian: Wesleyan Methodist"
+      }
+    },
     7 => %{
       name: "Admission Type",
       codes: %{
@@ -176,12 +271,158 @@ defmodule HL7v2.Standard.Tables do
         "CR" => "Enhanced mode: Accept Acknowledgment Commit Reject"
       }
     },
+    9 => %{
+      name: "Ambulatory Status",
+      codes: %{
+        "A0" => "No functional limitations",
+        "A1" => "Ambulates with assistive device",
+        "A2" => "Wheelchair/stretcher bound",
+        "A3" => "Comatose; non-responsive",
+        "A4" => "Disoriented",
+        "A5" => "Vision impaired",
+        "A6" => "Hearing impaired",
+        "A7" => "Speech impaired",
+        "A8" => "Non-English speaking",
+        "A9" => "Functional level unknown",
+        "B1" => "Oxygen therapy",
+        "B2" => "Special equipment (tubes, IVs, catheters)",
+        "B3" => "Amputee",
+        "B4" => "Mastectomy",
+        "B5" => "Paraplegic",
+        "B6" => "Pregnant"
+      }
+    },
+    10 => %{
+      name: "Physician ID",
+      codes: %{
+        "AD" => "Admitting",
+        "AT" => "Attending",
+        "CP" => "Consulting Provider",
+        "FHCP" => "Family Health Care Professional",
+        "PP" => "Primary Care Provider",
+        "RP" => "Referring Provider",
+        "RT" => "Referred to Provider"
+      }
+    },
+    15 => %{
+      name: "Point of Origin",
+      codes: %{
+        "1" => "Physician referral",
+        "2" => "Clinic referral",
+        "3" => "HMO referral",
+        "4" => "Transfer from a hospital",
+        "5" => "Transfer from a skilled nursing facility",
+        "6" => "Transfer from another health care facility",
+        "7" => "Emergency room",
+        "8" => "Court/law enforcement",
+        "9" => "Information not available"
+      }
+    },
+    17 => %{
+      name: "Transaction Type",
+      codes: %{
+        "CG" => "Charge",
+        "CD" => "Credit",
+        "PY" => "Payment",
+        "AJ" => "Adjustment"
+      }
+    },
+    18 => %{
+      name: "Patient Type",
+      codes: %{
+        "I" => "Inpatient",
+        "O" => "Outpatient",
+        "P" => "Preadmit",
+        "E" => "Emergency",
+        "B" => "Obstetrics",
+        "R" => "Recurring"
+      }
+    },
+    23 => %{
+      name: "Admit Source",
+      codes: %{
+        "1" => "Physician referral",
+        "2" => "Clinic referral",
+        "3" => "HMO referral",
+        "4" => "Transfer from a hospital",
+        "5" => "Transfer from a skilled nursing facility",
+        "6" => "Transfer from another health care facility",
+        "7" => "Emergency room",
+        "8" => "Court/law enforcement",
+        "9" => "Information not available"
+      }
+    },
+    38 => %{
+      name: "Order Status",
+      codes: %{
+        "A" => "Some, but not all, results available",
+        "CA" => "Order was canceled",
+        "CM" => "Order is completed",
+        "DC" => "Order was discontinued",
+        "ER" => "Error, order not found",
+        "HD" => "Order is on hold",
+        "IP" => "In process, unspecified",
+        "RP" => "Order has been replaced",
+        "SC" => "In process, scheduled"
+      }
+    },
+    48 => %{
+      name: "What Subject Filter",
+      codes: %{
+        "ADV" => "Advice/diagnosis",
+        "ANU" => "Nursing unit lookup (returns patients)",
+        "APN" => "Patient name lookup",
+        "APP" => "Physician lookup",
+        "ARN" => "Nursing unit lookup (returns location)",
+        "APM" => "Medical record number query, returns visits",
+        "APA" => "Account number query, return matching visit",
+        "CAN" => "Cancel. Used to cancel a query",
+        "DEM" => "Demographics",
+        "FIN" => "Financial",
+        "GID" => "Generate new identifier",
+        "GOL" => "Goals",
+        "MRI" => "Most recent inpatient",
+        "MRO" => "Most recent outpatient",
+        "NCK" => "Network clock",
+        "NSC" => "Network status change",
+        "NST" => "Network statistic",
+        "ORD" => "Order",
+        "OTH" => "Other",
+        "PRB" => "Problems",
+        "PRO" => "Procedure",
+        "RES" => "Result",
+        "RAR" => "Pharmacy administration information",
+        "RER" => "Pharmacy encoded order information",
+        "RDR" => "Pharmacy dispense information",
+        "RGR" => "Pharmacy give information",
+        "ROR" => "Pharmacy prescription information",
+        "SAL" => "All schedule related information",
+        "SBK" => "Booked slots on the identified schedule",
+        "SBL" => "Blocked slots on the identified schedule",
+        "SOF" => "First open slot on the identified schedule",
+        "SOP" => "Open slots on the identified schedule",
+        "SSA" => "Time slots available for a single appointment",
+        "SSR" => "Time slots available for a recurring appointment",
+        "STA" => "Status",
+        "VXI" => "Vaccine information"
+      }
+    },
     52 => %{
       name: "Diagnosis Type",
       codes: %{
         "A" => "Admitting",
         "F" => "Final",
         "W" => "Working"
+      }
+    },
+    62 => %{
+      name: "Event Reason",
+      codes: %{
+        "01" => "Patient request",
+        "02" => "Physician/health practitioner order",
+        "03" => "Census management",
+        "O" => "Other",
+        "U" => "Unknown"
       }
     },
     63 => %{
@@ -266,6 +507,100 @@ defmodule HL7v2.Standard.Tables do
         "VR" => "Virology",
         "VUS" => "Vascular Ultrasound",
         "XRC" => "Cineradiograph"
+      }
+    },
+    65 => %{
+      name: "Specimen Action Code",
+      codes: %{
+        "A" => "Add ordered tests to the existing specimen",
+        "C" => "Cancel order for battery or tests named",
+        "G" => "Generated order; reflex order",
+        "L" => "Lab to obtain specimen from patient",
+        "O" => "Specimen obtained by service other than Lab",
+        "P" => "Pending collection",
+        "R" => "Revised order",
+        "S" => "Schedule the tests specified below"
+      }
+    },
+    69 => %{
+      name: "Hospital Service",
+      codes: %{
+        "CAR" => "Cardiac Service",
+        "MED" => "Medical Service",
+        "PUL" => "Pulmonary Service",
+        "SUR" => "Surgical Service",
+        "URO" => "Urology Service"
+      }
+    },
+    70 => %{
+      name: "Specimen Source Codes",
+      codes: %{
+        "ABS" => "Abscess",
+        "AMN" => "Amniotic Fluid",
+        "ASP" => "Aspirate",
+        "BLD" => "Whole Blood",
+        "BON" => "Bone",
+        "BPH" => "Basophils",
+        "BRN" => "Burn",
+        "BRO" => "Bronchial",
+        "BRTH" => "Breath (use EXHLD)",
+        "CALC" => "Calculus (ite Stone)",
+        "CSF" => "Cerebral Spinal Fluid",
+        "CVX" => "Cervix",
+        "EAR" => "Ear",
+        "EOS" => "Eosinophils",
+        "EYE" => "Eye",
+        "FIB" => "Fibroblasts",
+        "GAST" => "Gastric Fluid/Contents",
+        "HAR" => "Hair",
+        "LYM" => "Lymphocytes",
+        "MAC" => "Macrophages",
+        "MAR" => "Marrow",
+        "NOS" => "Nose (Nasal Passage)",
+        "PER" => "Peritoneal Fluid/Ascites",
+        "PLA" => "Plasma",
+        "PLB" => "Plasma Bag",
+        "PLR" => "Pleural Fluid (Thoracentesis Fld)",
+        "SAL" => "Saliva",
+        "SEM" => "Seminal Fluid",
+        "SER" => "Serum",
+        "SKN" => "Skin",
+        "SNV" => "Synovial Fluid (Joint Fluid)",
+        "SPT" => "Sputum",
+        "STL" => "Stool = Fecal",
+        "SWT" => "Sweat",
+        "THR" => "Throat",
+        "TIS" => "Tissue",
+        "UMB" => "Umbilical Blood",
+        "UR" => "Urine",
+        "VOM" => "Vomitus",
+        "WND" => "Wound"
+      }
+    },
+    72 => %{
+      name: "Insurance Plan ID",
+      codes: %{
+        "BC" => "Blue Cross",
+        "BS" => "Blue Shield",
+        "HM" => "HMO",
+        "MC" => "Medicaid",
+        "MA" => "Medicare Part A",
+        "MB" => "Medicare Part B",
+        "OF" => "Other Federal Program",
+        "TV" => "Title V",
+        "VA" => "Veterans Affairs Plan",
+        "WC" => "Workers Compensation"
+      }
+    },
+    80 => %{
+      name: "Nature of Abnormal Testing",
+      codes: %{
+        "A" => "An age-based population",
+        "B" => "Breed",
+        "N" => "None - generic normal range",
+        "R" => "A race-based population",
+        "S" => "A sex-based population",
+        "SP" => "Species"
       }
     },
     76 => %{
@@ -420,6 +755,31 @@ defmodule HL7v2.Standard.Tables do
         "X" => "Results cannot be obtained for this observation"
       }
     },
+    91 => %{
+      name: "Query Priority",
+      codes: %{
+        "D" => "Deferred",
+        "I" => "Immediate"
+      }
+    },
+    100 => %{
+      name: "Invocation Event",
+      codes: %{
+        "D" => "On disconnect",
+        "O" => "On receipt of order",
+        "Q" => "At specified date/time",
+        "R" => "On result",
+        "S" => "At time service is started",
+        "T" => "At a designated date/time"
+      }
+    },
+    102 => %{
+      name: "Delayed Acknowledgment Type",
+      codes: %{
+        "D" => "Message Received, stored for later processing",
+        "F" => "Acknowledgment after processing"
+      }
+    },
     103 => %{
       name: "Processing ID",
       codes: %{
@@ -446,6 +806,155 @@ defmodule HL7v2.Standard.Tables do
         "2.8" => "Release 2.8",
         "2.8.1" => "Release 2.8.1",
         "2.8.2" => "Release 2.8.2"
+      }
+    },
+    105 => %{
+      name: "Source of Comment",
+      codes: %{
+        "L" => "Ancillary (filler) department is source of comment",
+        "O" => "Other system is source of comment",
+        "P" => "Orderer (placer) is source of comment"
+      }
+    },
+    112 => %{
+      name: "Discharge Disposition",
+      codes: %{
+        "01" => "Discharged to home or self care (routine discharge)",
+        "02" => "Discharged/transferred to a short term general hospital",
+        "03" => "Discharged/transferred to skilled nursing facility (SNF)",
+        "04" => "Discharged/transferred to an intermediate care facility (ICF)",
+        "05" => "Discharged/transferred to a designated cancer center or children's hospital",
+        "06" =>
+          "Discharged/transferred to home under care of organized home health service organization",
+        "07" => "Left against medical advice or discontinued care",
+        "08" => "Discharged/transferred to home under care of Home IV provider",
+        "09" => "Admitted as an inpatient to this hospital",
+        "10" => "Discharge to be defined at state level",
+        "20" => "Expired",
+        "21" => "Discharged/transferred to court/law enforcement",
+        "30" => "Still patient or expected to return for outpatient services",
+        "40" => "Expired at home",
+        "41" => "Expired in a medical facility",
+        "42" => "Expired - place unknown",
+        "43" => "Discharged/transferred to a federal health care facility"
+      }
+    },
+    113 => %{
+      name: "Discharged to Location",
+      codes: %{
+        "01" => "Home",
+        "02" => "Short term general hospital",
+        "03" => "Skilled nursing facility (SNF)",
+        "04" => "Intermediate care facility (ICF)",
+        "05" => "Designated cancer center or children's hospital",
+        "06" => "Home under care of organized home health service organization",
+        "07" => "Left against medical advice",
+        "08" => "Home under care of Home IV provider",
+        "09" => "Admitted as an inpatient to this hospital",
+        "10" => "State-defined",
+        "20" => "Expired",
+        "21" => "Court/law enforcement",
+        "30" => "Still patient"
+      }
+    },
+    116 => %{
+      name: "Bed Status",
+      codes: %{
+        "C" => "Closed",
+        "H" => "Housekeeping",
+        "I" => "Isolated",
+        "K" => "Contaminated",
+        "O" => "Occupied",
+        "U" => "Unoccupied"
+      }
+    },
+    117 => %{
+      name: "Account Status",
+      codes: %{
+        "1" => "Active",
+        "2" => "Active and billed",
+        "3" => "Closed",
+        "4" => "Inactive",
+        "5" => "Inactive and billed"
+      }
+    },
+    119 => %{
+      name: "Order Control Codes",
+      codes: %{
+        "AF" => "Order/service refill request approval",
+        "CA" => "Cancel order/service request",
+        "CH" => "Child order/service",
+        "CN" => "Combined result",
+        "CR" => "Canceled as requested",
+        "DC" => "Discontinue order/service request",
+        "DE" => "Data errors",
+        "DF" => "Order/service refill request denied",
+        "DR" => "Discontinued as requested",
+        "FU" => "Order/service refilled, unsolicited",
+        "HD" => "Hold order request",
+        "HR" => "On hold as requested",
+        "LI" => "Link order/service to patient care problem or goal",
+        "NA" => "Number assigned",
+        "NW" => "New order/service",
+        "OC" => "Order/service canceled",
+        "OD" => "Order/service discontinued",
+        "OE" => "Order/service released",
+        "OF" => "Order/service refilled as requested",
+        "OH" => "Order/service held",
+        "OK" => "Order/service accepted & OK",
+        "OP" => "Notification of order for outside dispense",
+        "OR" => "Released as requested",
+        "PA" => "Parent order/service",
+        "RE" => "Observations/Performed Service to follow",
+        "RF" => "Refill order/service request",
+        "RL" => "Release previous hold",
+        "RO" => "Replacement order",
+        "RP" => "Order/service replace request",
+        "RQ" => "Replaced as requested",
+        "RR" => "Request received",
+        "RU" => "Replaced unsolicited",
+        "SC" => "Status changed",
+        "SN" => "Send order/service number",
+        "SR" => "Response to send order/service status request",
+        "SS" => "Send order/service status request",
+        "UA" => "Unable to accept order/service",
+        "UC" => "Unable to cancel",
+        "UD" => "Unable to discontinue",
+        "UF" => "Unable to refill",
+        "UH" => "Unable to put on hold",
+        "UM" => "Unable to replace",
+        "UN" => "Unlink order/service from patient care problem or goal",
+        "UR" => "Unable to release",
+        "UX" => "Unable to change",
+        "XO" => "Change order/service request",
+        "XR" => "Changed as requested",
+        "XX" => "Order/service changed, unsol."
+      }
+    },
+    121 => %{
+      name: "Response Flag",
+      codes: %{
+        "D" => "Same as R, plus report/reference intervals, normals, and units",
+        "E" => "Report exceptions only",
+        "F" => "Same as D, plus patient demographics from PID segment",
+        "N" => "Only the MSA segment is returned",
+        "R" => "Same as E, plus Observations and OBX segments"
+      }
+    },
+    123 => %{
+      name: "Result Status",
+      codes: %{
+        "A" => "Some, but not all, results available",
+        "C" => "Correction to results",
+        "F" => "Final results",
+        "I" => "No results available; specimen received, procedure incomplete",
+        "O" => "Order received; specimen not yet received",
+        "P" => "Preliminary",
+        "R" => "Results stored; not yet verified",
+        "S" => "No results available; procedure scheduled, but not done",
+        "X" => "No results available; order canceled",
+        "Y" => "No order on record for this test",
+        "Z" => "No record of this patient"
       }
     },
     125 => %{
@@ -482,6 +991,114 @@ defmodule HL7v2.Standard.Tables do
         "XTN" => "Extended Telecommunication Number"
       }
     },
+    127 => %{
+      name: "Allergen Type",
+      codes: %{
+        "AA" => "Animal Allergy",
+        "DA" => "Drug Allergy",
+        "EA" => "Environmental Allergy",
+        "FA" => "Food Allergy",
+        "LA" => "Pollen Allergy",
+        "MA" => "Miscellaneous Allergy",
+        "MC" => "Miscellaneous Contraindication",
+        "NKA" => "No Known Allergies",
+        "PA" => "Plant Allergy",
+        "PL" => "Pollen"
+      }
+    },
+    128 => %{
+      name: "Allergy Severity",
+      codes: %{
+        "MI" => "Mild",
+        "MO" => "Moderate",
+        "SV" => "Severe",
+        "U" => "Unknown"
+      }
+    },
+    130 => %{
+      name: "Visit User Code",
+      codes: %{
+        "HO" => "Home",
+        "MO" => "Mobile Unit",
+        "PH" => "Phone",
+        "TE" => "Teaching"
+      }
+    },
+    131 => %{
+      name: "Contact Role",
+      codes: %{
+        "C" => "Emergency Contact",
+        "E" => "Employer",
+        "F" => "Federal Agency",
+        "I" => "Insurance Company",
+        "N" => "Next-of-Kin",
+        "O" => "Other",
+        "P" => "Person preparing referral",
+        "S" => "State Agency",
+        "U" => "Unknown"
+      }
+    },
+    136 => %{
+      name: "Yes/No Indicator",
+      codes: %{
+        "N" => "No",
+        "Y" => "Yes"
+      }
+    },
+    137 => %{
+      name: "Mail Claim Party",
+      codes: %{
+        "E" => "Employer",
+        "G" => "Guarantor",
+        "I" => "Insurance Company",
+        "O" => "Other",
+        "P" => "Patient"
+      }
+    },
+    141 => %{
+      name: "Military Rank/Grade",
+      codes: %{
+        "E1" => "Enlisted 1",
+        "E2" => "Enlisted 2",
+        "E3" => "Enlisted 3",
+        "E4" => "Enlisted 4",
+        "E5" => "Enlisted 5",
+        "E6" => "Enlisted 6",
+        "E7" => "Enlisted 7",
+        "E8" => "Enlisted 8",
+        "E9" => "Enlisted 9",
+        "O1" => "Officers 1",
+        "O2" => "Officers 2",
+        "O3" => "Officers 3",
+        "O4" => "Officers 4",
+        "O5" => "Officers 5",
+        "O6" => "Officers 6",
+        "O7" => "Officers 7",
+        "O8" => "Officers 8",
+        "O9" => "Officers 9",
+        "O10" => "Officers 10",
+        "W1" => "Warrant Officers 1",
+        "W2" => "Warrant Officers 2",
+        "W3" => "Warrant Officers 3",
+        "W4" => "Warrant Officers 4"
+      }
+    },
+    148 => %{
+      name: "Money or Percentage Indicator",
+      codes: %{
+        "AT" => "Currency amount",
+        "PC" => "Percentage"
+      }
+    },
+    150 => %{
+      name: "Certification Patient Type",
+      codes: %{
+        "ER" => "Emergency",
+        "IPE" => "Inpatient Elective",
+        "OPE" => "Outpatient Elective",
+        "UR" => "Urgent"
+      }
+    },
     155 => %{
       name: "Accept/Application Acknowledgment Conditions",
       codes: %{
@@ -489,6 +1106,238 @@ defmodule HL7v2.Standard.Tables do
         "ER" => "Error/Reject Conditions Only",
         "NE" => "Never",
         "SU" => "Successful Completion Only"
+      }
+    },
+    162 => %{
+      name: "Route of Administration",
+      codes: %{
+        "AP" => "Apply Externally",
+        "B" => "Buccal",
+        "DT" => "Dental",
+        "EP" => "Epidural",
+        "ET" => "Endotracheal Tube",
+        "GTT" => "Gastrostomy Tube",
+        "GU" => "GU Irrigant",
+        "IA" => "Intra-arterial",
+        "IB" => "Intrabursal",
+        "IC" => "Intracardiac",
+        "ICV" => "Intracervical (uterus)",
+        "ID" => "Intradermal",
+        "IH" => "Inhalation",
+        "IHA" => "Intrahepatic Artery",
+        "IM" => "Intramuscular",
+        "IN" => "Intranasal",
+        "IO" => "Intraocular",
+        "IP" => "Intraperitoneal",
+        "IS" => "Intrasynovial",
+        "IT" => "Intrathecal",
+        "IU" => "Intrauterine",
+        "IV" => "Intravenous",
+        "MM" => "Mucous Membrane",
+        "MTH" => "Mouth/Throat",
+        "NG" => "Nasogastric",
+        "NP" => "Nasal Prongs",
+        "NS" => "Nasal",
+        "NT" => "Nasotracheal Tube",
+        "OP" => "Ophthalmic",
+        "OT" => "Otic",
+        "OTH" => "Other/Miscellaneous",
+        "PF" => "Perfusion",
+        "PO" => "Oral",
+        "PR" => "Rectal",
+        "RM" => "Rebreather Mask",
+        "SC" => "Subcutaneous",
+        "SD" => "Soaked Dressing",
+        "SL" => "Sublingual",
+        "TD" => "Transdermal",
+        "TL" => "Translingual",
+        "TP" => "Topical",
+        "TRA" => "Tracheostomy",
+        "UR" => "Urethral",
+        "VG" => "Vaginal",
+        "VM" => "Ventimask",
+        "WND" => "Wound"
+      }
+    },
+    163 => %{
+      name: "Body Site",
+      codes: %{
+        "BE" => "Bilateral Ears",
+        "BN" => "Bilateral Nares",
+        "BU" => "Buttock",
+        "CT" => "Chest Tube",
+        "LA" => "Left Arm",
+        "LAC" => "Left Anterior Chest",
+        "LACF" => "Left Antecubital Fossa",
+        "LD" => "Left Deltoid",
+        "LE" => "Left Ear",
+        "LEJ" => "Left External Jugular",
+        "LF" => "Left Foot",
+        "LG" => "Left Gluteus Medius",
+        "LH" => "Left Hand",
+        "LIJ" => "Left Internal Jugular",
+        "LLAQ" => "Left Lower Abd Quadrant",
+        "LLFA" => "Left Lower Forearm",
+        "LMFA" => "Left Mid Forearm",
+        "LN" => "Left Naris",
+        "LPC" => "Left Posterior Chest",
+        "LSC" => "Left Subclavian",
+        "LT" => "Left Thigh",
+        "LUA" => "Left Upper Arm",
+        "LUAQ" => "Left Upper Abd Quadrant",
+        "LUFA" => "Left Upper Forearm",
+        "LVG" => "Left Ventrogluteal",
+        "LVL" => "Left Vastus Lateralis",
+        "NB" => "Nebulized",
+        "OD" => "Right Eye",
+        "OS" => "Left Eye",
+        "OU" => "Bilateral Eyes",
+        "PA" => "Perianal",
+        "PERIN" => "Perineal",
+        "RA" => "Right Arm",
+        "RAC" => "Right Anterior Chest",
+        "RACF" => "Right Antecubital Fossa",
+        "RD" => "Right Deltoid",
+        "RE" => "Right Ear",
+        "REJ" => "Right External Jugular",
+        "RF" => "Right Foot",
+        "RG" => "Right Gluteus Medius",
+        "RH" => "Right Hand",
+        "RIJ" => "Right Internal Jugular",
+        "RLAQ" => "Right Lower Abd Quadrant",
+        "RLFA" => "Right Lower Forearm",
+        "RMFA" => "Right Mid Forearm",
+        "RN" => "Right Naris",
+        "RPC" => "Right Posterior Chest",
+        "RSC" => "Right Subclavian",
+        "RT" => "Right Thigh",
+        "RUA" => "Right Upper Arm",
+        "RUAQ" => "Right Upper Abd Quadrant",
+        "RUFA" => "Right Upper Forearm",
+        "RVG" => "Right Ventrogluteal",
+        "RVL" => "Right Vastus Lateralis"
+      }
+    },
+    171 => %{
+      name: "Citizenship",
+      codes: %{
+        "AFG" => "Afghanistan",
+        "ALB" => "Albania",
+        "ARG" => "Argentina",
+        "AUS" => "Australia",
+        "AUT" => "Austria",
+        "BEL" => "Belgium",
+        "BRA" => "Brazil",
+        "CAN" => "Canada",
+        "CHE" => "Switzerland",
+        "CHN" => "China",
+        "COL" => "Colombia",
+        "CUB" => "Cuba",
+        "DEU" => "Germany",
+        "DNK" => "Denmark",
+        "DOM" => "Dominican Republic",
+        "ECU" => "Ecuador",
+        "EGY" => "Egypt",
+        "ESP" => "Spain",
+        "FIN" => "Finland",
+        "FRA" => "France",
+        "GBR" => "United Kingdom",
+        "GRC" => "Greece",
+        "GTM" => "Guatemala",
+        "HND" => "Honduras",
+        "HTI" => "Haiti",
+        "IND" => "India",
+        "IRL" => "Ireland",
+        "IRN" => "Iran",
+        "IRQ" => "Iraq",
+        "ISR" => "Israel",
+        "ITA" => "Italy",
+        "JAM" => "Jamaica",
+        "JPN" => "Japan",
+        "KOR" => "Korea",
+        "MEX" => "Mexico",
+        "NGA" => "Nigeria",
+        "NLD" => "Netherlands",
+        "NOR" => "Norway",
+        "PAK" => "Pakistan",
+        "PER" => "Peru",
+        "PHL" => "Philippines",
+        "POL" => "Poland",
+        "PRI" => "Puerto Rico",
+        "PRT" => "Portugal",
+        "RUS" => "Russia",
+        "SAU" => "Saudi Arabia",
+        "SWE" => "Sweden",
+        "THA" => "Thailand",
+        "TUR" => "Turkey",
+        "TWN" => "Taiwan",
+        "UKR" => "Ukraine",
+        "USA" => "United States",
+        "VEN" => "Venezuela",
+        "VNM" => "Vietnam"
+      }
+    },
+    172 => %{
+      name: "Veterans Military Status",
+      codes: %{
+        "ACT" => "Active duty",
+        "DEC" => "Deceased",
+        "RET" => "Retired",
+        "SEP" => "Separated"
+      }
+    },
+    174 => %{
+      name: "Nature of Service/Test/Observation",
+      codes: %{
+        "A" => "Atomic service/test/observation",
+        "C" => "Single observation calculated via a rule or formula",
+        "F" => "Functional procedure that may consist of one or more interrelated measures",
+        "P" => "Profile or battery consisting of many independent atomic observations",
+        "S" => "Superset — a set of batteries or procedures ordered under a single code"
+      }
+    },
+    175 => %{
+      name: "Master File Identifier Code",
+      codes: %{
+        "CDM" => "Charge Description Master File",
+        "CLN" => "Clinic Master File",
+        "CMA" => "Clinical Study with Phases and Schedules Master File",
+        "CMB" => "Clinical Study without Phases but with Schedules Master File",
+        "LOC" => "Location Master File",
+        "OMx" => "Observation Batteries/Definitions Master File",
+        "PRA" => "Practitioner Master File",
+        "STF" => "Staff Master File"
+      }
+    },
+    180 => %{
+      name: "Record-Level Event Code",
+      codes: %{
+        "MAC" => "Reactivate deactivated record",
+        "MAD" => "Add record to master file",
+        "MDC" => "Deactivate: discontinue using record in master file, but do not delete",
+        "MDL" => "Delete record from master file",
+        "MUP" => "Update record for master file"
+      }
+    },
+    185 => %{
+      name: "Preferred Method of Contact",
+      codes: %{
+        "B" => "Beeper Number",
+        "C" => "Cellular Phone Number",
+        "E" => "E-Mail Address",
+        "F" => "FAX Number",
+        "H" => "Home Phone Number",
+        "O" => "Office Phone Number"
+      }
+    },
+    189 => %{
+      name: "Ethnic Group",
+      codes: %{
+        "H" => "Hispanic or Latino",
+        "N" => "Not Hispanic or Latino",
+        "U" => "Unknown",
+        "2135-2" => "Hispanic or Latino",
+        "2186-5" => "Not Hispanic or Latino"
       }
     },
     190 => %{
@@ -622,6 +1471,261 @@ defmodule HL7v2.Standard.Tables do
         "XX" => "Organization Identifier"
       }
     },
+    206 => %{
+      name: "Segment Action Code",
+      codes: %{
+        "A" => "Add/Insert",
+        "D" => "Delete",
+        "U" => "Update",
+        "X" => "No Change"
+      }
+    },
+    207 => %{
+      name: "Processing Mode",
+      codes: %{
+        "A" => "Archive",
+        "I" => "Initial load",
+        "Not present" => "Not present (the default, meaning current processing)",
+        "R" => "Restore from archive",
+        "T" => "Current processing, transmitted at intervals"
+      }
+    },
+    208 => %{
+      name: "Query Response Status",
+      codes: %{
+        "AE" => "Application error",
+        "AR" => "Application reject",
+        "NF" => "No data found, no errors",
+        "OK" => "Data found, no errors (this is the default)"
+      }
+    },
+    209 => %{
+      name: "Relational Operator",
+      codes: %{
+        "CT" => "Contains",
+        "EQ" => "Equal",
+        "GE" => "Greater than or equal",
+        "GN" => "Generic",
+        "GT" => "Greater than",
+        "LE" => "Less than or equal",
+        "LT" => "Less than",
+        "NE" => "Not equal"
+      }
+    },
+    211 => %{
+      name: "Alternate Character Sets",
+      codes: %{
+        "8859/1" => "ISO 8859/1 Character Set",
+        "8859/2" => "ISO 8859/2 Character Set",
+        "8859/3" => "ISO 8859/3 Character Set",
+        "8859/4" => "ISO 8859/4 Character Set",
+        "8859/5" => "ISO 8859/5 Character Set",
+        "8859/6" => "ISO 8859/6 Character Set",
+        "8859/7" => "ISO 8859/7 Character Set",
+        "8859/8" => "ISO 8859/8 Character Set",
+        "8859/9" => "ISO 8859/9 Character Set",
+        "8859/15" => "ISO 8859/15 Latin-15",
+        "ASCII" => "The printable 7-bit ASCII character set",
+        "BIG-5" => "Code for Taiwanese Character Set (BIG-5)",
+        "CNS 11643-1992" => "Code for Taiwanese Character Set (CNS 11643-1992)",
+        "GB 18030-2000" => "Code for Chinese Character Set (GB 18030-2000)",
+        "ISO IR14" => "Code for Information Exchange (one byte)(JIS X 0201-1976)",
+        "ISO IR159" =>
+          "Code of the supplementary Japanese Graphic Character set (JIS X 0212-1990)",
+        "ISO IR6" => "ASCII graphic character set consisting of 94 characters",
+        "ISO IR87" => "Code for the Japanese Graphic Character set (JIS X 0208-1990)",
+        "KS X 1001" => "Code for Korean Character Set (KS X 1001)",
+        "UNICODE" => "The world wide character standard from ISO/IEC 10646-1-1993",
+        "UNICODE UTF-16" => "UCS Transformation Format, 16-bit form",
+        "UNICODE UTF-32" => "UCS Transformation Format, 32-bit form",
+        "UNICODE UTF-8" => "UCS Transformation Format, 8-bit form"
+      }
+    },
+    215 => %{
+      name: "Publicity Code",
+      codes: %{
+        "F" => "Family only",
+        "N" => "No publicity",
+        "O" => "Other",
+        "U" => "Unknown"
+      }
+    },
+    217 => %{
+      name: "Visit Priority Code",
+      codes: %{
+        "1" => "Emergency",
+        "2" => "Urgent",
+        "3" => "Elective"
+      }
+    },
+    228 => %{
+      name: "Diagnosis Classification",
+      codes: %{
+        "C" => "Consultation",
+        "D" => "Diagnosis",
+        "I" => "Invasive procedure not classified elsewhere",
+        "M" => "Medication (antibiotic)",
+        "O" => "Other",
+        "R" => "Radiological scheduling (not using ICDA codes)",
+        "S" => "Sign and symptom",
+        "T" => "Tissue diagnosis"
+      }
+    },
+    229 => %{
+      name: "DRG Payor",
+      codes: %{
+        "C" => "Champus",
+        "G" => "Managed Care Organization",
+        "M" => "Medicare"
+      }
+    },
+    231 => %{
+      name: "Student Status",
+      codes: %{
+        "F" => "Full-time student",
+        "N" => "Not a student",
+        "P" => "Part-time student"
+      }
+    },
+    234 => %{
+      name: "Report Timing",
+      codes: %{
+        "10D" => "10 day report",
+        "15D" => "15 day report",
+        "30D" => "30 day report",
+        "3D" => "3 day report",
+        "7D" => "7 day report",
+        "AD" => "Additional information",
+        "CO" => "Correction",
+        "DE" => "Device evaluation",
+        "PD" => "Periodic",
+        "RQ" => "Requested information"
+      }
+    },
+    254 => %{
+      name: "Kind of Quantity",
+      codes: %{
+        "ABS" => "Absorbance",
+        "ACNC" => "Concentration, Arbitrary Substance",
+        "CACT" => "Catalytic Activity",
+        "CNC" => "Catalytic Concentration",
+        "CNCR" => "Catalytic Concentration Ratio",
+        "CNFR" => "Catalytic Fraction",
+        "CRAT" => "Catalytic Rate",
+        "CRTO" => "Catalytic Ratio",
+        "ENT" => "Entitic",
+        "ENTC" => "Entitic Catalytic Activity",
+        "ENTN" => "Entitic Number",
+        "ENTS" => "Entitic Substance of Amount",
+        "MASS" => "Mass",
+        "MCNC" => "Mass Concentration",
+        "MRAT" => "Mass Rate",
+        "NUM" => "Number",
+        "SCNC" => "Substance Concentration",
+        "SUB" => "Substance Amount",
+        "TITR" => "Titer",
+        "VOL" => "Volume"
+      }
+    },
+    255 => %{
+      name: "Duration Categories",
+      codes: %{
+        "*" => "Life of the \"unit\"",
+        "12H" => "12 hours",
+        "1H" => "1 hour",
+        "1L" => "1 month (30 days)",
+        "1W" => "1 week",
+        "24H" => "24 hours",
+        "2D" => "2 days",
+        "2H" => "2 hours",
+        "2L" => "2 months",
+        "2W" => "2 weeks",
+        "30M" => "30 minutes",
+        "3D" => "3 days",
+        "3H" => "3 hours",
+        "3L" => "3 months",
+        "3W" => "3 weeks",
+        "4D" => "4 days",
+        "4H" => "4 hours",
+        "4W" => "4 weeks",
+        "5D" => "5 days",
+        "5H" => "5 hours",
+        "6D" => "6 days",
+        "6H" => "6 hours",
+        "7H" => "7 hours",
+        "8H" => "8 hours",
+        "PT" => "To identify measures at a point in time",
+        "ST" => "To identify measures taken over the course of a study"
+      }
+    },
+    267 => %{
+      name: "Days of the Week",
+      codes: %{
+        "FRI" => "Friday",
+        "MON" => "Monday",
+        "SAT" => "Saturday",
+        "SUN" => "Sunday",
+        "THU" => "Thursday",
+        "TUE" => "Tuesday",
+        "WED" => "Wednesday"
+      }
+    },
+    271 => %{
+      name: "Document Completion Status",
+      codes: %{
+        "AU" => "Authenticated",
+        "DI" => "Dictated",
+        "DO" => "Documented",
+        "IN" => "Incomplete",
+        "IP" => "In Progress",
+        "LA" => "Legally Authenticated",
+        "PA" => "Pre-Authenticated"
+      }
+    },
+    272 => %{
+      name: "Document Confidentiality Status",
+      codes: %{
+        "R" => "Restricted",
+        "U" => "Usual Control",
+        "V" => "Very Restricted"
+      }
+    },
+    273 => %{
+      name: "Document Availability Status",
+      codes: %{
+        "AV" => "Available for patient care",
+        "CA" => "Deleted",
+        "OB" => "Obsolete",
+        "UN" => "Unavailable for patient care"
+      }
+    },
+    275 => %{
+      name: "Document Storage Status",
+      codes: %{
+        "AA" => "Active and archived",
+        "AC" => "Active",
+        "AR" => "Archived (not active)",
+        "PU" => "Purged"
+      }
+    },
+    276 => %{
+      name: "Appointment Reason Codes",
+      codes: %{
+        "CHECKUP" => "A routine check-up",
+        "EMERGENCY" => "Emergency appointment",
+        "FOLLOWUP" => "A follow up visit from a previous appointment",
+        "ROUTINE" => "Routine appointment - default if not valued",
+        "WALKIN" => "A previously unscheduled walk-in visit"
+      }
+    },
+    277 => %{
+      name: "Appointment Type Codes",
+      codes: %{
+        "Complete" => "A request to add a completed appointment",
+        "Normal" => "Routine schedule request type - default if not valued",
+        "Tentative" => "A request for a tentative (e.g., \"penciled in\") appointment"
+      }
+    },
     278 => %{
       name: "Filler Status Codes",
       codes: %{
@@ -636,6 +1740,347 @@ defmodule HL7v2.Standard.Tables do
         "Pending" => "Pending",
         "Started" => "Started",
         "Waitlist" => "Waitlist"
+      }
+    },
+    279 => %{
+      name: "Allow Substitution Codes",
+      codes: %{
+        "Confirm" => "Contact the Placer Contact Person prior to making any substitutions",
+        "No" => "Substitution is not allowed",
+        "Yes" => "Substitution is allowed"
+      }
+    },
+    283 => %{
+      name: "Referral Status",
+      codes: %{
+        "A" => "Accepted",
+        "E" => "Expired",
+        "P" => "Pending",
+        "R" => "Rejected",
+        "W" => "Withdrawn"
+      }
+    },
+    286 => %{
+      name: "Provider Role",
+      codes: %{
+        "CP" => "Consulting Provider",
+        "PP" => "Primary Care Provider",
+        "RP" => "Referring Provider",
+        "RT" => "Referred to Provider"
+      }
+    },
+    287 => %{
+      name: "Problem/Goal Action Code",
+      codes: %{
+        "AD" => "ADD",
+        "CO" => "CORRECT",
+        "DE" => "DELETE",
+        "LI" => "LINK",
+        "UC" => "UNCHANGED",
+        "UN" => "UNLINK",
+        "UP" => "UPDATE"
+      }
+    },
+    291 => %{
+      name: "Subtype of Referenced Data",
+      codes: %{
+        "BASIC" => "ISDN PCM audio data",
+        "DICOM" => "Digital Imaging and Communications in Medicine",
+        "FAX" => "Facsimile data",
+        "GIF" => "GIF image data",
+        "HTML" => "Hypertext Markup Language",
+        "JOT" => "Electronic ink data (Jot 1.0 standard)",
+        "JPEG" => "Joint Photographic Experts Group",
+        "Octet-stream" => "Uninterpreted binary data",
+        "PICT" => "PICT format image data",
+        "PostScript" => "PostScript program",
+        "RTF" => "Rich Text Format",
+        "SGML" => "SGML data",
+        "TIFF" => "TIFF image data",
+        "XML" => "Extensible Markup Language",
+        "x-hl7-cda-level-one" => "HL7 Clinical Document Architecture Level One document"
+      }
+    },
+    294 => %{
+      name: "Time Selection Criteria Parameter Class Codes",
+      codes: %{
+        "FRI" => "An indicator that Friday is or is not preferred for the day",
+        "MON" => "An indicator that Monday is or is not preferred for the day",
+        "PREFEND" => "The preferred end time for the appointment request",
+        "PREFSTART" => "The preferred start time for the appointment request",
+        "SAT" => "An indicator that Saturday is or is not preferred for the day",
+        "SUN" => "An indicator that Sunday is or is not preferred for the day",
+        "THU" => "An indicator that Thursday is or is not preferred for the day",
+        "TUE" => "An indicator that Tuesday is or is not preferred for the day",
+        "WED" => "An indicator that Wednesday is or is not preferred for the day"
+      }
+    },
+    295 => %{
+      name: "Handicap",
+      codes: %{
+        "1" => "Disabled",
+        "2" => "Hearing impaired",
+        "3" => "Speech impaired",
+        "4" => "Vision impaired",
+        "5" => "Mentally impaired",
+        "6" => "Mobility impaired",
+        "0" => "Not handicapped",
+        "U" => "Unknown"
+      }
+    },
+    299 => %{
+      name: "Encoding",
+      codes: %{
+        "A" => "No encoding - data are displayable ASCII characters",
+        "Base64" =>
+          "Encoding as defined by MIME (Multipurpose Internet Mail Extensions) standard RFC 1521",
+        "Hex" => "Hexadecimal encoding"
+      }
+    },
+    301 => %{
+      name: "Universal ID Type",
+      codes: %{
+        "CLIA" => "Clinical Laboratory Improvement Amendments",
+        "CLIP" => "Clinical Laboratory Improvement Program",
+        "DNS" => "An Internet dotted name (RFC 1034)",
+        "EUI64" => "IEEE 64-bit Extended Unique Identifier",
+        "GUID" => "Globally Unique Identifier (same as UUID)",
+        "HCD" => "CEN Healthcare Coding Identifier",
+        "HL7" => "HL7 registration schemes",
+        "ISO" => "An International Standards Organization Object Identifier",
+        "L" => "Local",
+        "L,M,N" => "Local, Machine, Network",
+        "M" => "Machine",
+        "N" => "Network",
+        "Random" => "Random (usually a GU type)",
+        "URI" => "Uniform Resource Identifier",
+        "UUID" => "Universally Unique Identifier (DCE)",
+        "x400" => "An X.400 MHS format identifier",
+        "x500" => "An X.500 directory name"
+      }
+    },
+    322 => %{
+      name: "Completion Status",
+      codes: %{
+        "CP" => "Complete",
+        "NA" => "Not Administered",
+        "PA" => "Partially Administered",
+        "RE" => "Refused"
+      }
+    },
+    323 => %{
+      name: "Action Code",
+      codes: %{
+        "A" => "Add/Insert",
+        "D" => "Delete",
+        "U" => "Update"
+      }
+    },
+    324 => %{
+      name: "Location Characteristic ID",
+      codes: %{
+        "GEN" => "Gender of patient(s)",
+        "IMP" => "Implant: can be used for radiation implant patients",
+        "INF" => "Infectious disease: this location can be used for isolation",
+        "LCR" => "Level of care",
+        "LIC" => "Licensed",
+        "OVR" => "Overflow",
+        "PRL" => "Privacy level: indicating the level of private versus non-private room",
+        "SET" => "Bed is set up",
+        "SHA" => "Shadow: a temporary holding location that does not physically exist",
+        "SMK" => "Smoking",
+        "STF" => "Bed is staffed",
+        "TEA" => "Teaching location"
+      }
+    },
+    326 => %{
+      name: "Visit Indicator",
+      codes: %{
+        "A" => "Account level (default)",
+        "V" => "Visit level"
+      }
+    },
+    356 => %{
+      name: "Alternate Character Set Handling Scheme",
+      codes: %{
+        "2.3" => "The character set switching mode specified in HL7 2.5, section 2.7.2",
+        "ISO 2022-1994" =>
+          "This standard is titled \"Information Technology - Character Code Structure and Extension Technique\"",
+        "UNICODE UTF-8" => "UTF-8 Unicode Encoding"
+      }
+    },
+    357 => %{
+      name: "Message Error Condition Codes",
+      codes: %{
+        "0" => "Message accepted",
+        "100" => "Segment sequence error",
+        "101" => "Required field missing",
+        "102" => "Data type error",
+        "103" => "Table value not found",
+        "200" => "Unsupported message type",
+        "201" => "Unsupported event code",
+        "202" => "Unsupported processing ID",
+        "203" => "Unsupported version ID",
+        "204" => "Unknown key identifier",
+        "205" => "Duplicate key identifier",
+        "206" => "Application record locked",
+        "207" => "Application internal error"
+      }
+    },
+    364 => %{
+      name: "Comment Type",
+      codes: %{
+        "1D" => "1-dimensional bar code",
+        "2D" => "2-dimensional bar code",
+        "GI" => "General Instructions",
+        "PI" => "Patient Instructions",
+        "RE" => "Remark"
+      }
+    },
+    365 => %{
+      name: "Equipment State",
+      codes: %{
+        "CL" => "Clearing",
+        "CO" => "Configuring",
+        "DI" => "Diagnosed",
+        "ES" => "E-stopped",
+        "ID" => "Idle",
+        "IN" => "Initializing",
+        "MA" => "Maintenance",
+        "OP" => "Normal Operation",
+        "PA" => "Pausing",
+        "PD" => "Paused",
+        "PU" => "Powered Up",
+        "RS" => "Ready to start",
+        "SS" => "Sampling stopped",
+        "TS" => "Transport stopped"
+      }
+    },
+    395 => %{
+      name: "Modify Indicator",
+      codes: %{
+        "M" => "Modified Subscription",
+        "N" => "New Subscription"
+      }
+    },
+    399 => %{
+      name: "Country Code",
+      codes: %{
+        "ABW" => "Aruba",
+        "AFG" => "Afghanistan",
+        "AGO" => "Angola",
+        "AIA" => "Anguilla",
+        "ALB" => "Albania",
+        "AND" => "Andorra",
+        "ARE" => "United Arab Emirates",
+        "ARG" => "Argentina",
+        "ARM" => "Armenia",
+        "AUS" => "Australia",
+        "AUT" => "Austria",
+        "AZE" => "Azerbaijan",
+        "BEL" => "Belgium",
+        "BGD" => "Bangladesh",
+        "BGR" => "Bulgaria",
+        "BHR" => "Bahrain",
+        "BIH" => "Bosnia and Herzegovina",
+        "BLR" => "Belarus",
+        "BOL" => "Bolivia",
+        "BRA" => "Brazil",
+        "CAN" => "Canada",
+        "CHE" => "Switzerland",
+        "CHL" => "Chile",
+        "CHN" => "China",
+        "COL" => "Colombia",
+        "CRI" => "Costa Rica",
+        "CUB" => "Cuba",
+        "CYP" => "Cyprus",
+        "CZE" => "Czech Republic",
+        "DEU" => "Germany",
+        "DNK" => "Denmark",
+        "DOM" => "Dominican Republic",
+        "DZA" => "Algeria",
+        "ECU" => "Ecuador",
+        "EGY" => "Egypt",
+        "ESP" => "Spain",
+        "EST" => "Estonia",
+        "ETH" => "Ethiopia",
+        "FIN" => "Finland",
+        "FRA" => "France",
+        "GBR" => "United Kingdom",
+        "GEO" => "Georgia",
+        "GHA" => "Ghana",
+        "GRC" => "Greece",
+        "GTM" => "Guatemala",
+        "HKG" => "Hong Kong",
+        "HND" => "Honduras",
+        "HRV" => "Croatia",
+        "HTI" => "Haiti",
+        "HUN" => "Hungary",
+        "IDN" => "Indonesia",
+        "IND" => "India",
+        "IRL" => "Ireland",
+        "IRN" => "Iran",
+        "IRQ" => "Iraq",
+        "ISL" => "Iceland",
+        "ISR" => "Israel",
+        "ITA" => "Italy",
+        "JAM" => "Jamaica",
+        "JOR" => "Jordan",
+        "JPN" => "Japan",
+        "KAZ" => "Kazakhstan",
+        "KEN" => "Kenya",
+        "KOR" => "Korea (Republic of)",
+        "KWT" => "Kuwait",
+        "LBN" => "Lebanon",
+        "LBY" => "Libya",
+        "LKA" => "Sri Lanka",
+        "LTU" => "Lithuania",
+        "LUX" => "Luxembourg",
+        "LVA" => "Latvia",
+        "MAR" => "Morocco",
+        "MDA" => "Moldova",
+        "MEX" => "Mexico",
+        "MKD" => "North Macedonia",
+        "MLT" => "Malta",
+        "MMR" => "Myanmar",
+        "MNE" => "Montenegro",
+        "MNG" => "Mongolia",
+        "MOZ" => "Mozambique",
+        "MYS" => "Malaysia",
+        "NGA" => "Nigeria",
+        "NLD" => "Netherlands",
+        "NOR" => "Norway",
+        "NPL" => "Nepal",
+        "NZL" => "New Zealand",
+        "OMN" => "Oman",
+        "PAK" => "Pakistan",
+        "PAN" => "Panama",
+        "PER" => "Peru",
+        "PHL" => "Philippines",
+        "POL" => "Poland",
+        "PRI" => "Puerto Rico",
+        "PRT" => "Portugal",
+        "PRY" => "Paraguay",
+        "QAT" => "Qatar",
+        "ROU" => "Romania",
+        "RUS" => "Russia",
+        "SAU" => "Saudi Arabia",
+        "SGP" => "Singapore",
+        "SRB" => "Serbia",
+        "SVK" => "Slovakia",
+        "SVN" => "Slovenia",
+        "SWE" => "Sweden",
+        "THA" => "Thailand",
+        "TUN" => "Tunisia",
+        "TUR" => "Turkey",
+        "TWN" => "Taiwan",
+        "UKR" => "Ukraine",
+        "URY" => "Uruguay",
+        "USA" => "United States",
+        "UZB" => "Uzbekistan",
+        "VEN" => "Venezuela",
+        "VNM" => "Vietnam",
+        "ZAF" => "South Africa"
       }
     },
     396 => %{
@@ -739,6 +2184,51 @@ defmodule HL7v2.Standard.Tables do
         "W2" => "WHO Record # Drug Codes (8 digit)",
         "W4" => "WHO Record # Code with ASTM Extension",
         "WC" => "WHO ATC"
+      }
+    },
+    429 => %{
+      name: "Production Class Code",
+      codes: %{
+        "BR" => "Breeding/genetic stock",
+        "DA" => "Dairy",
+        "DR" => "Draft",
+        "DU" => "Dual Purpose",
+        "LY" => "Layer, Includes Multiplier flocks",
+        "MT" => "Meat",
+        "NA" => "Not Applicable",
+        "OT" => "Other",
+        "PL" => "Pleasure",
+        "RA" => "Racing",
+        "SH" => "Show"
+      }
+    },
+    516 => %{
+      name: "Error Severity",
+      codes: %{
+        "E" => "Error",
+        "F" => "Fatal Error",
+        "I" => "Information",
+        "W" => "Warning"
+      }
+    },
+    517 => %{
+      name: "Inform Person Code",
+      codes: %{
+        "HD" => "Help Desk",
+        "NPP" => "Nursing Practice Partner",
+        "PAT" => "Patient",
+        "USR" => "User"
+      }
+    },
+    520 => %{
+      name: "Message Population",
+      codes: %{
+        "D" => "Dissemination",
+        "E" => "Education",
+        "H" => "Historical",
+        "I" => "Initial population",
+        "P" => "Persistent",
+        "R" => "Representative"
       }
     }
   }

@@ -287,6 +287,513 @@ defmodule HL7v2.ValidationTest do
     end
   end
 
+  describe "expanded table bindings" do
+    test "PID marital_status validated via CE identifier" do
+      pid = %HL7v2.Segment.PID{
+        patient_identifier_list: [%HL7v2.Type.CX{id: "12345"}],
+        patient_name: [%HL7v2.Type.XPN{family_name: %HL7v2.Type.FN{surname: "Smith"}}],
+        marital_status: %HL7v2.Type.CE{identifier: "ZZ"}
+      }
+
+      errors = FieldRules.check(pid, validate_tables: true)
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert length(table_errors) == 1
+      assert hd(table_errors).field == :marital_status
+    end
+
+    test "PID marital_status passes with valid code" do
+      pid = %HL7v2.Segment.PID{
+        patient_identifier_list: [%HL7v2.Type.CX{id: "12345"}],
+        patient_name: [%HL7v2.Type.XPN{family_name: %HL7v2.Type.FN{surname: "Smith"}}],
+        marital_status: %HL7v2.Type.CE{identifier: "M"}
+      }
+
+      errors = FieldRules.check(pid, validate_tables: true)
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert table_errors == []
+    end
+
+    test "PID race validated via CE identifier (repeating field)" do
+      pid = %HL7v2.Segment.PID{
+        patient_identifier_list: [%HL7v2.Type.CX{id: "12345"}],
+        patient_name: [%HL7v2.Type.XPN{family_name: %HL7v2.Type.FN{surname: "Smith"}}],
+        race: [
+          %HL7v2.Type.CE{identifier: "W"},
+          %HL7v2.Type.CE{identifier: "BOGUS"}
+        ]
+      }
+
+      errors = FieldRules.check(pid, validate_tables: true)
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert length(table_errors) == 1
+      assert hd(table_errors).field == :race
+    end
+
+    test "ORC order_control validated against table 0119" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.ORC{
+            order_control: "BOGUS",
+            placer_order_number: %HL7v2.Type.EI{entity_identifier: "123"}
+          },
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert length(table_errors) == 1
+      assert hd(table_errors).field == :order_control
+    end
+
+    test "ORC valid order_control passes" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.ORC{
+            order_control: "NW",
+            placer_order_number: %HL7v2.Type.EI{entity_identifier: "123"}
+          },
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert table_errors == []
+    end
+
+    test "OBR result_status validated against table 0123" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.OBR{
+            universal_service_identifier: %HL7v2.Type.CE{identifier: "CBC"},
+            result_status: "ZZ",
+            placer_order_number: %HL7v2.Type.EI{entity_identifier: "123"}
+          },
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert Enum.any?(table_errors, &(&1.field == :result_status))
+    end
+
+    test "PV1 discharge_disposition validated against table 0112" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.PV1{patient_class: "I", discharge_disposition: "99"},
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert length(table_errors) == 1
+      assert hd(table_errors).field == :discharge_disposition
+    end
+
+    test "PV1 bed_status validated against table 0116" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.PV1{patient_class: "I", bed_status: "Z"},
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert length(table_errors) == 1
+      assert hd(table_errors).field == :bed_status
+    end
+
+    test "PV1 visit_indicator validated against table 0326" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.PV1{patient_class: "I", visit_indicator: "X"},
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert length(table_errors) == 1
+      assert hd(table_errors).field == :visit_indicator
+    end
+
+    test "AL1 allergen_type_code validated via CE identifier" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.AL1{
+            set_id: "1",
+            allergen_code: %HL7v2.Type.CE{identifier: "PEANUT"},
+            allergen_type_code: %HL7v2.Type.CE{identifier: "BOGUS"}
+          },
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert Enum.any?(table_errors, &(&1.field == :allergen_type_code))
+    end
+
+    test "AL1 allergy_severity_code validated via CE identifier" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.AL1{
+            set_id: "1",
+            allergen_code: %HL7v2.Type.CE{identifier: "PEANUT"},
+            allergy_severity_code: %HL7v2.Type.CE{identifier: "SV"}
+          },
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert table_errors == []
+    end
+
+    test "NTE source_of_comment validated against table 0105" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.NTE{source_of_comment: "X"},
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert length(table_errors) == 1
+      assert hd(table_errors).field == :source_of_comment
+    end
+
+    test "NTE valid source_of_comment passes" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.NTE{source_of_comment: "L"},
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert table_errors == []
+    end
+
+    test "EVN event_type_code validated against table 0003" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.EVN{
+            event_type_code: "Z99",
+            recorded_date_time: %HL7v2.Type.TS{
+              time: %HL7v2.Type.DTM{year: 2026, month: 3, day: 22}
+            }
+          },
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert Enum.any?(table_errors, &(&1.field == :event_type_code))
+    end
+
+    test "DG1 diagnosis_type validated against table 0052" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.DG1{set_id: "1", diagnosis_type: "X"},
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert Enum.any?(table_errors, &(&1.field == :diagnosis_type))
+    end
+
+    test "OBX nature_of_abnormal_test validated against table 0080" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.OBX{
+            observation_identifier: %HL7v2.Type.CE{identifier: "1234"},
+            observation_result_status: "F",
+            value_type: "NM",
+            nature_of_abnormal_test: "Z"
+          },
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert Enum.any?(table_errors, &(&1.field == :nature_of_abnormal_test))
+    end
+
+    test "MSH country_code validated against table 0399" do
+      errors =
+        FieldRules.check(
+          %HL7v2.Segment.MSH{
+            field_separator: "|",
+            encoding_characters: "^~\\&",
+            message_type: %HL7v2.Type.MSG{message_code: "ADT", trigger_event: "A01"},
+            message_control_id: "MSG001",
+            processing_id: %HL7v2.Type.PT{processing_id: "P"},
+            version_id: %HL7v2.Type.VID{version_id: "2.5.1"},
+            date_time_of_message: %HL7v2.Type.TS{
+              time: %HL7v2.Type.DTM{year: 2026, month: 3, day: 22}
+            },
+            country_code: "BOGUS"
+          },
+          validate_tables: true
+        )
+
+      table_errors = Enum.filter(errors, &(&1.message =~ "invalid code"))
+      assert Enum.any?(table_errors, &(&1.field == :country_code))
+    end
+  end
+
+  describe "conditional field rules" do
+    test "OBX: value_type required when observation_value is populated (lenient = warning)" do
+      obx = %HL7v2.Segment.OBX{
+        observation_identifier: %HL7v2.Type.CE{identifier: "1234"},
+        observation_result_status: "F",
+        value_type: nil,
+        observation_value: "42"
+      }
+
+      errors = FieldRules.check(obx, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert length(cond_errors) >= 1
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :value_type and err.level == :warning
+             end)
+    end
+
+    test "OBX: value_type required when observation_value is populated (strict = error)" do
+      obx = %HL7v2.Segment.OBX{
+        observation_identifier: %HL7v2.Type.CE{identifier: "1234"},
+        observation_result_status: "F",
+        value_type: nil,
+        observation_value: "42"
+      }
+
+      errors = FieldRules.check(obx, mode: :strict)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :value_type and err.level == :error
+             end)
+    end
+
+    test "OBX: no conditional warning when both value_type and observation_value are nil" do
+      obx = %HL7v2.Segment.OBX{
+        observation_identifier: %HL7v2.Type.CE{identifier: "1234"},
+        observation_result_status: "F",
+        value_type: nil,
+        observation_value: nil
+      }
+
+      errors = FieldRules.check(obx)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "OBX: no conditional warning when value_type is populated" do
+      obx = %HL7v2.Segment.OBX{
+        observation_identifier: %HL7v2.Type.CE{identifier: "1234"},
+        observation_result_status: "F",
+        value_type: "NM",
+        observation_value: "42"
+      }
+
+      errors = FieldRules.check(obx)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "MSH: warns when MSH-15 is set but MSH-16 is not (lenient)" do
+      msh = %HL7v2.Segment.MSH{
+        field_separator: "|",
+        encoding_characters: "^~\\&",
+        message_type: %HL7v2.Type.MSG{message_code: "ADT", trigger_event: "A01"},
+        message_control_id: "MSG001",
+        processing_id: %HL7v2.Type.PT{processing_id: "P"},
+        version_id: %HL7v2.Type.VID{version_id: "2.5.1"},
+        date_time_of_message: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 3, day: 22}
+        },
+        accept_acknowledgment_type: "AL",
+        application_acknowledgment_type: nil
+      }
+
+      errors = FieldRules.check(msh, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert length(cond_errors) == 1
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :application_acknowledgment_type and err.level == :warning
+             end)
+    end
+
+    test "MSH: errors when MSH-16 is set but MSH-15 is not (strict)" do
+      msh = %HL7v2.Segment.MSH{
+        field_separator: "|",
+        encoding_characters: "^~\\&",
+        message_type: %HL7v2.Type.MSG{message_code: "ADT", trigger_event: "A01"},
+        message_control_id: "MSG001",
+        processing_id: %HL7v2.Type.PT{processing_id: "P"},
+        version_id: %HL7v2.Type.VID{version_id: "2.5.1"},
+        date_time_of_message: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 3, day: 22}
+        },
+        accept_acknowledgment_type: nil,
+        application_acknowledgment_type: "NE"
+      }
+
+      errors = FieldRules.check(msh, mode: :strict)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :accept_acknowledgment_type and err.level == :error
+             end)
+    end
+
+    test "MSH: no warning when both MSH-15 and MSH-16 are populated" do
+      msh = %HL7v2.Segment.MSH{
+        field_separator: "|",
+        encoding_characters: "^~\\&",
+        message_type: %HL7v2.Type.MSG{message_code: "ADT", trigger_event: "A01"},
+        message_control_id: "MSG001",
+        processing_id: %HL7v2.Type.PT{processing_id: "P"},
+        version_id: %HL7v2.Type.VID{version_id: "2.5.1"},
+        date_time_of_message: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 3, day: 22}
+        },
+        accept_acknowledgment_type: "AL",
+        application_acknowledgment_type: "AL"
+      }
+
+      errors = FieldRules.check(msh)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "MSH: no warning when both MSH-15 and MSH-16 are absent" do
+      msh = valid_msh()
+      errors = FieldRules.check(msh)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "NK1: warns when set_id is present but nk_name is missing" do
+      nk1 = %HL7v2.Segment.NK1{
+        set_id: "1",
+        nk_name: nil
+      }
+
+      errors = FieldRules.check(nk1, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :nk_name and err.level == :warning
+             end)
+    end
+
+    test "NK1: no warning when set_id and nk_name are both present" do
+      nk1 = %HL7v2.Segment.NK1{
+        set_id: "1",
+        nk_name: [%HL7v2.Type.XPN{family_name: %HL7v2.Type.FN{surname: "Jones"}}]
+      }
+
+      errors = FieldRules.check(nk1)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "ORC: warns when both placer and filler order numbers are missing" do
+      orc = %HL7v2.Segment.ORC{
+        order_control: "NW",
+        placer_order_number: nil,
+        filler_order_number: nil
+      }
+
+      errors = FieldRules.check(orc, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.level == :warning and err.message =~ "placer_order_number"
+             end)
+    end
+
+    test "ORC: no warning when placer_order_number is present" do
+      orc = %HL7v2.Segment.ORC{
+        order_control: "NW",
+        placer_order_number: %HL7v2.Type.EI{entity_identifier: "P123"}
+      }
+
+      errors = FieldRules.check(orc)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "ORC: no warning when filler_order_number is present" do
+      orc = %HL7v2.Segment.ORC{
+        order_control: "NW",
+        filler_order_number: %HL7v2.Type.EI{entity_identifier: "F456"}
+      }
+
+      errors = FieldRules.check(orc)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "OBR: warns when result_status is present but observation_date_time is missing" do
+      obr = %HL7v2.Segment.OBR{
+        universal_service_identifier: %HL7v2.Type.CE{identifier: "CBC"},
+        result_status: "F",
+        observation_date_time: nil,
+        filler_order_number: %HL7v2.Type.EI{entity_identifier: "F789"}
+      }
+
+      errors = FieldRules.check(obr, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :observation_date_time and err.level == :warning
+             end)
+    end
+
+    test "OBR: no conditional warning when result_status and observation_date_time are both present" do
+      obr = %HL7v2.Segment.OBR{
+        universal_service_identifier: %HL7v2.Type.CE{identifier: "CBC"},
+        result_status: "F",
+        observation_date_time: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 3, day: 22}
+        },
+        filler_order_number: %HL7v2.Type.EI{entity_identifier: "F789"}
+      }
+
+      errors = FieldRules.check(obr)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "observation_date_time"))
+      assert cond_errors == []
+    end
+
+    test "SCH: warns when both placer and filler appointment IDs are missing" do
+      sch = %HL7v2.Segment.SCH{
+        event_reason: %HL7v2.Type.CE{identifier: "ROUTINE"},
+        filler_contact_person: [%HL7v2.Type.XCN{id_number: "DOC1"}],
+        entered_by_person: [%HL7v2.Type.XCN{id_number: "USER1"}],
+        placer_appointment_id: nil,
+        filler_appointment_id: nil
+      }
+
+      errors = FieldRules.check(sch, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.level == :warning and err.message =~ "placer_appointment_id"
+             end)
+    end
+
+    test "conditional rules in strict mode produce :error" do
+      nk1 = %HL7v2.Segment.NK1{
+        set_id: "1",
+        nk_name: nil
+      }
+
+      errors = FieldRules.check(nk1, mode: :strict)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :nk_name and err.level == :error
+             end)
+    end
+
+    test "default segment with no conditional rules produces no conditional errors" do
+      msa = %HL7v2.Segment.MSA{acknowledgment_code: "AA", message_control_id: "MSG001"}
+      errors = FieldRules.check(msa)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+  end
+
   # -- Helpers --
 
   defp valid_typed_message do

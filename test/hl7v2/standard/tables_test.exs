@@ -39,6 +39,109 @@ defmodule HL7v2.Standard.TablesTest do
         assert id in ids, "expected table #{id} in table_ids()"
       end
     end
+
+    test "includes new expanded tables" do
+      ids = Tables.table_ids()
+
+      new_tables = [
+        5,
+        6,
+        9,
+        10,
+        15,
+        17,
+        18,
+        23,
+        38,
+        48,
+        62,
+        65,
+        69,
+        70,
+        72,
+        80,
+        91,
+        100,
+        102,
+        105,
+        112,
+        113,
+        116,
+        117,
+        119,
+        121,
+        123,
+        127,
+        128,
+        130,
+        131,
+        136,
+        137,
+        141,
+        148,
+        150,
+        162,
+        163,
+        171,
+        172,
+        174,
+        175,
+        180,
+        185,
+        189,
+        206,
+        207,
+        208,
+        209,
+        211,
+        215,
+        217,
+        228,
+        229,
+        231,
+        234,
+        254,
+        255,
+        267,
+        271,
+        272,
+        273,
+        275,
+        276,
+        277,
+        279,
+        283,
+        286,
+        287,
+        291,
+        294,
+        295,
+        299,
+        301,
+        322,
+        323,
+        324,
+        326,
+        356,
+        357,
+        364,
+        365,
+        395,
+        399,
+        429,
+        516,
+        517,
+        520
+      ]
+
+      for id <- new_tables do
+        assert id in ids, "expected new table #{id} in table_ids()"
+      end
+    end
+
+    test "has at least 100 tables" do
+      assert length(Tables.table_ids()) >= 100
+    end
   end
 
   describe "get/1" do
@@ -185,6 +288,149 @@ defmodule HL7v2.Standard.TablesTest do
       assert Map.has_key?(table.codes, "SCT")
       assert Map.has_key?(table.codes, "SNM")
       assert Map.has_key?(table.codes, "I10")
+    end
+
+    test "table 0005 (Race)" do
+      table = Tables.get(5)
+      assert table.name == "Race"
+      assert Map.has_key?(table.codes, "W")
+      assert Map.has_key?(table.codes, "B")
+      assert Map.has_key?(table.codes, "H")
+      assert Map.has_key?(table.codes, "A")
+    end
+
+    test "table 0006 (Religion)" do
+      table = Tables.get(6)
+      assert table.name == "Religion"
+      assert Map.has_key?(table.codes, "CAT")
+      assert Map.has_key?(table.codes, "JEW")
+      assert Map.has_key?(table.codes, "MOS")
+      assert Map.has_key?(table.codes, "PRO")
+    end
+
+    test "table 0038 (Order Status)" do
+      table = Tables.get(38)
+      assert table.name == "Order Status"
+      assert Map.has_key?(table.codes, "CA")
+      assert Map.has_key?(table.codes, "CM")
+      assert Map.has_key?(table.codes, "IP")
+    end
+
+    test "table 0112 (Discharge Disposition)" do
+      table = Tables.get(112)
+      assert table.name == "Discharge Disposition"
+      assert Map.has_key?(table.codes, "01")
+      assert Map.has_key?(table.codes, "07")
+      assert Map.has_key?(table.codes, "20")
+    end
+
+    test "table 0116 (Bed Status)" do
+      table = Tables.get(116)
+      assert table.name == "Bed Status"
+      assert map_size(table.codes) == 6
+
+      for code <- ~w(C H I K O U) do
+        assert Map.has_key?(table.codes, code), "expected #{code} in table 0116"
+      end
+    end
+
+    test "table 0119 (Order Control Codes)" do
+      table = Tables.get(119)
+      assert table.name == "Order Control Codes"
+      assert Map.has_key?(table.codes, "NW")
+      assert Map.has_key?(table.codes, "CA")
+      assert Map.has_key?(table.codes, "OK")
+      assert Map.has_key?(table.codes, "UA")
+    end
+
+    test "table 0123 (Result Status)" do
+      table = Tables.get(123)
+      assert table.name == "Result Status"
+      assert Map.has_key?(table.codes, "F")
+      assert Map.has_key?(table.codes, "P")
+      assert Map.has_key?(table.codes, "C")
+    end
+
+    test "table 0127 (Allergen Type)" do
+      table = Tables.get(127)
+      assert table.name == "Allergen Type"
+      assert Map.has_key?(table.codes, "DA")
+      assert Map.has_key?(table.codes, "FA")
+      assert Map.has_key?(table.codes, "NKA")
+    end
+
+    test "table 0128 (Allergy Severity)" do
+      table = Tables.get(128)
+      assert table.name == "Allergy Severity"
+      assert Map.has_key?(table.codes, "MI")
+      assert Map.has_key?(table.codes, "SV")
+    end
+
+    test "table 0136 (Yes/No Indicator)" do
+      table = Tables.get(136)
+      assert table.name == "Yes/No Indicator"
+      assert map_size(table.codes) == 2
+      assert Map.has_key?(table.codes, "Y")
+      assert Map.has_key?(table.codes, "N")
+    end
+
+    test "table 0162 (Route of Administration)" do
+      table = Tables.get(162)
+      assert table.name == "Route of Administration"
+      assert Map.has_key?(table.codes, "PO")
+      assert Map.has_key?(table.codes, "IV")
+      assert Map.has_key?(table.codes, "IM")
+      assert Map.has_key?(table.codes, "SC")
+    end
+
+    test "table 0267 (Days of the Week)" do
+      table = Tables.get(267)
+      assert table.name == "Days of the Week"
+      assert map_size(table.codes) == 7
+
+      for code <- ~w(MON TUE WED THU FRI SAT SUN) do
+        assert Map.has_key?(table.codes, code), "expected #{code} in table 0267"
+      end
+    end
+
+    test "table 0301 (Universal ID Type)" do
+      table = Tables.get(301)
+      assert table.name == "Universal ID Type"
+      assert Map.has_key?(table.codes, "DNS")
+      assert Map.has_key?(table.codes, "UUID")
+      assert Map.has_key?(table.codes, "ISO")
+      assert Map.has_key?(table.codes, "URI")
+    end
+
+    test "table 0326 (Visit Indicator)" do
+      table = Tables.get(326)
+      assert table.name == "Visit Indicator"
+      assert Map.has_key?(table.codes, "A")
+      assert Map.has_key?(table.codes, "V")
+    end
+
+    test "table 0357 (Message Error Condition Codes)" do
+      table = Tables.get(357)
+      assert table.name == "Message Error Condition Codes"
+      assert Map.has_key?(table.codes, "0")
+      assert Map.has_key?(table.codes, "200")
+      assert Map.has_key?(table.codes, "207")
+    end
+
+    test "table 0399 (Country Code)" do
+      table = Tables.get(399)
+      assert table.name == "Country Code"
+      assert Map.has_key?(table.codes, "USA")
+      assert Map.has_key?(table.codes, "ESP")
+      assert Map.has_key?(table.codes, "GBR")
+    end
+
+    test "table 0516 (Error Severity)" do
+      table = Tables.get(516)
+      assert table.name == "Error Severity"
+      assert Map.has_key?(table.codes, "E")
+      assert Map.has_key?(table.codes, "W")
+      assert Map.has_key?(table.codes, "I")
     end
   end
 
