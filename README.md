@@ -56,7 +56,7 @@ msg = HL7v2.Message.new("ADT", "A01", sending_application: "PHAOS")
 
 ```elixir
 def deps do
-  [{:hl7v2, "~> 1.4"}]
+  [{:hl7v2, "~> 2.1"}]
 end
 ```
 
