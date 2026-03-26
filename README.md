@@ -180,38 +180,19 @@ end
  Speed       <1s full suite
 ```
 
-## Scope and Limitations
+## Scope
 
-This library targets **HL7 v2.5.1** with permissive parsing of adjacent versions.
+**HL7 v2.5.1** with permissive parsing of adjacent versions (v2.3 through v2.8.x).
 
-**What it does well:** delimiter parsing, typed segment/composite structs, canonical
-round-trip encoding, programmatic message building, MLLP transport with TLS, and
-validation (required fields, repetition limits, structural order/group/cardinality
-checks for supported message types). Lenient mode (default) reports ordering issues
-as warnings; strict mode treats them as errors.
-Raw mode is lossless for all valid HL7v2 messages. Typed mode covers
-ADT/ORM/ORU/SIU/RDE/RDS/MDM/ACK with extra_fields preservation for unlisted fields.
+- Every v2.5.1 segment and data type has a typed Elixir module
+- Raw mode is lossless for all valid HL7v2 messages, including malformed input
+- Typed mode preserves values it cannot parse (invalid dates, malformed
+  numbers) in `original` fields for round-trip fidelity
+- Extra fields beyond declared definitions are preserved in `extra_fields`
+- Escape sequences are preserved literally in typed fields — call
+  `HL7v2.Escape.decode/2` when you need decoded text
 
-**What it does not do:**
-
-- Full abstract-message-definition validation (group nesting depth, alternatives)
-- Conditional field logic (fields marked `:c` are not evaluated)
-- Full message profile conformance (MSH-22+ not supported)
-- Text type semantics (ST, TX, FT are lossless pass-through — no delimiter rejection,
-  no whitespace normalization)
-- Automatic escape sequence decoding — typed field values preserve HL7 escape
-  sequences (`\F\`, `\S\`, `\R\`, etc.) literally for round-trip fidelity.
-  Call `HL7v2.Escape.decode/2` explicitly when you need decoded text.
-
-**Coverage:** 152 of 152 v2.5.1 standard segments (100%, plus generic ZXX) typed. 89 of 89
-v2.5.1 data types (100%). 23 group-aware message structure definitions with positional
-structural validation. Opt-in table validation for 20 HL7 tables. Extra
-fields beyond declared definitions are preserved in `extra_fields` for lossless round-trip.
-OBX exposes 19 of 25 fields; OBR exposes 49 of 50 -- unlisted fields survive as extra_fields.
-UB1 and UB2 are typed shells (most fields are `:raw`) included for structural completeness.
-Some typed segment fields fall back to `:raw` where their HL7 data types are
-not yet implemented -- 221 raw holes total, preserved but not parsed into typed structs.
-Run `mix hl7v2.coverage` for the full list.
+Run `mix hl7v2.coverage` for detailed per-segment field completeness.
 
 ## Handling Unknown Segments
 
