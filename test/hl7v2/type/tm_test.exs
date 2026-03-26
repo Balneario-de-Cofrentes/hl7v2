@@ -63,24 +63,24 @@ defmodule HL7v2.Type.TMTest do
       assert TM.parse(nil) == nil
     end
 
-    test "returns nil for invalid hour" do
-      assert TM.parse("25") == nil
+    test "preserves invalid hour in original field" do
+      assert %TM{original: "25"} = TM.parse("25")
     end
 
-    test "returns nil for invalid minute" do
-      assert TM.parse("1460") == nil
+    test "preserves invalid minute in original field" do
+      assert %TM{original: "1460"} = TM.parse("1460")
     end
 
-    test "returns nil for invalid second" do
-      assert TM.parse("143061") == nil
+    test "preserves invalid second in original field" do
+      assert %TM{original: "143061"} = TM.parse("143061")
     end
 
-    test "returns nil for too-short input" do
-      assert TM.parse("1") == nil
+    test "preserves too-short input in original field" do
+      assert %TM{original: "1"} = TM.parse("1")
     end
 
-    test "returns nil for non-numeric" do
-      assert TM.parse("AB") == nil
+    test "preserves non-numeric input in original field" do
+      assert %TM{original: "AB"} = TM.parse("AB")
     end
 
     test "midnight" do

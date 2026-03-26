@@ -15,7 +15,8 @@ defmodule HL7v2.Type.TM do
     :minute,
     :second,
     :fraction,
-    :offset
+    :offset,
+    :original
   ]
 
   @type t :: %__MODULE__{
@@ -53,7 +54,11 @@ defmodule HL7v2.Type.TM do
 
   def parse(value) when is_binary(value) do
     {time_part, offset} = split_offset(value)
-    parse_time(time_part, offset)
+
+    case parse_time(time_part, offset) do
+      nil -> %__MODULE__{original: value}
+      result -> result
+    end
   end
 
   @doc """
@@ -73,6 +78,7 @@ defmodule HL7v2.Type.TM do
   """
   @spec encode(t() | nil) :: binary()
   def encode(nil), do: ""
+  def encode(%__MODULE__{original: original, hour: nil}) when is_binary(original), do: original
 
   def encode(%__MODULE__{} = tm) do
     result = pad2(tm.hour)

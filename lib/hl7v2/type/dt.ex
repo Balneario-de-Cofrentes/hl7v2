@@ -57,23 +57,24 @@ defmodule HL7v2.Type.DT do
     end
   end
 
-  def parse(<<y::binary-size(4), m::binary-size(2)>>) do
+  def parse(<<y::binary-size(4), m::binary-size(2)>> = raw) do
     with {year, ""} <- Integer.parse(y),
          {month, ""} <- Integer.parse(m),
          true <- month in 1..12 do
       %__MODULE__{year: year, month: month}
     else
-      _ -> nil
+      _ -> %__MODULE__{original: raw}
     end
   end
 
-  def parse(<<y::binary-size(4)>>) do
+  def parse(<<y::binary-size(4)>> = raw) do
     case Integer.parse(y) do
       {year, ""} when year > 0 -> %__MODULE__{year: year}
-      _ -> nil
+      _ -> %__MODULE__{original: raw}
     end
   end
 
+  def parse(value) when is_binary(value), do: %__MODULE__{original: value}
   def parse(_), do: nil
 
   @doc """

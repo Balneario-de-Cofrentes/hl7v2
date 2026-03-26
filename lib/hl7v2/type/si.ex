@@ -39,7 +39,8 @@ defmodule HL7v2.Type.SI do
   def parse(value) when is_binary(value) do
     case Integer.parse(String.trim(value)) do
       {n, ""} when n >= 0 and n <= 9999 -> n
-      _ -> nil
+      # Preserve invalid value as raw string for lossless round-trip
+      _ -> value
     end
   end
 
@@ -55,7 +56,8 @@ defmodule HL7v2.Type.SI do
       ""
 
   """
-  @spec encode(non_neg_integer() | nil) :: binary()
+  @spec encode(non_neg_integer() | binary() | nil) :: binary()
   def encode(nil), do: ""
   def encode(value) when is_integer(value) and value >= 0, do: Integer.to_string(value)
+  def encode(value) when is_binary(value), do: value
 end

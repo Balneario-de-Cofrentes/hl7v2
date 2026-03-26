@@ -13,13 +13,13 @@ defmodule HL7v2.Type.SITest do
       assert SI.parse("9999") == 9999
     end
 
-    test "returns nil for out-of-range values" do
-      assert SI.parse("-1") == nil
-      assert SI.parse("10000") == nil
+    test "preserves out-of-range values as raw string" do
+      assert SI.parse("-1") == "-1"
+      assert SI.parse("10000") == "10000"
     end
 
-    test "returns nil for non-numeric" do
-      assert SI.parse("abc") == nil
+    test "preserves non-numeric input as raw string" do
+      assert SI.parse("abc") == "abc"
     end
 
     test "returns nil for empty" do

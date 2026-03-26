@@ -31,18 +31,18 @@ defmodule HL7v2.Type.DTTest do
       assert %DT{original: "20261332"} = DT.parse("20261332")
     end
 
-    test "returns nil for invalid month" do
-      assert DT.parse("202613") == nil
+    test "preserves invalid month in original field" do
+      assert %DT{original: "202613"} = DT.parse("202613")
     end
 
-    test "returns nil for non-numeric" do
-      assert DT.parse("abcd") == nil
+    test "preserves non-numeric input in original field" do
+      assert %DT{original: "abcd"} = DT.parse("abcd")
     end
 
-    test "returns nil for wrong length" do
-      assert DT.parse("202") == nil
-      assert DT.parse("20260") == nil
-      assert DT.parse("2026032") == nil
+    test "preserves wrong-length input in original field" do
+      assert %DT{original: "202"} = DT.parse("202")
+      assert %DT{original: "20260"} = DT.parse("20260")
+      assert %DT{original: "2026032"} = DT.parse("2026032")
     end
 
     test "handles leap year correctly" do
