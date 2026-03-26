@@ -180,7 +180,7 @@ end
               TLS/mTLS, telemetry instrumentation
 
  Validation  structural (order/groups/cardinality) + opt-in table checking
-              20 HL7 tables, 11 coded fields validated
+              108 HL7 tables, 80 coded fields validated, conditional field rules
 
  Speed       <1s full suite
 ```

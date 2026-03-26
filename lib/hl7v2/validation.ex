@@ -29,7 +29,8 @@ defmodule HL7v2.Validation do
   Runs three validation passes:
   1. **Message rules** — MSH presence, required MSH fields
   2. **Structural rules** — segment ordering, group anchors, cardinality
-     (for structures with group-aware definitions), or presence-only fallback
+     for 190 supported message structures. Unsupported structures produce a
+     warning in lenient mode or an error in strict mode.
   3. **Field rules** — required fields, max repetitions per segment
 
   Each error map has:

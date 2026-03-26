@@ -497,6 +497,93 @@ defmodule HL7v2.Validation.FieldRules do
     end
   end
 
+  # AIG/AIL/AIP: segment_action_code required for modification events (same pattern as AIS)
+  def conditional_errors(%mod{} = seg, location, mode)
+      when mod in [HL7v2.Segment.AIG, HL7v2.Segment.AIL, HL7v2.Segment.AIP] do
+    cond_level = if mode == :strict, do: :error, else: :warning
+
+    has_content? =
+      case mod do
+        HL7v2.Segment.AIG -> not semantic_blank?(seg.resource_type)
+        HL7v2.Segment.AIL -> not semantic_blank?(seg.location_resource_id)
+        HL7v2.Segment.AIP -> not semantic_blank?(seg.personnel_resource_id)
+      end
+
+    if has_content? and semantic_blank?(seg.segment_action_code) do
+      [%{level: cond_level, location: location, field: :segment_action_code,
+         message: "conditional field segment_action_code may be required for modification messages"}]
+    else
+      []
+    end
+  end
+
+  # RGS: segment_action_code conditional on modification context
+  def conditional_errors(%HL7v2.Segment.RGS{} = rgs, location, mode) do
+    cond_level = if mode == :strict, do: :error, else: :warning
+
+    if not semantic_blank?(rgs.set_id) and semantic_blank?(rgs.segment_action_code) do
+      [%{level: cond_level, location: location, field: :segment_action_code,
+         message: "conditional field segment_action_code may be required for modification messages"}]
+    else
+      []
+    end
+  end
+
+  # ARQ: filler_appointment_id conditional — at least one of placer/filler required
+  def conditional_errors(%HL7v2.Segment.ARQ{} = arq, location, mode) do
+    cond_level = if mode == :strict, do: :error, else: :warning
+
+    if semantic_blank?(arq.placer_appointment_id) and semantic_blank?(arq.filler_appointment_id) do
+      [%{level: cond_level, location: location, field: :placer_appointment_id,
+         message: "conditional: at least one of placer_appointment_id or filler_appointment_id should be populated"}]
+    else
+      []
+    end
+  end
+
+  # DG1: diagnosis_action_code conditional when used in update messages
+  def conditional_errors(%HL7v2.Segment.DG1{} = dg1, location, mode) do
+    cond_level = if mode == :strict, do: :error, else: :warning
+
+    if not semantic_blank?(dg1.diagnosis_identifier) and semantic_blank?(dg1.diagnosis_action_code) do
+      [%{level: cond_level, location: location, field: :diagnosis_action_code,
+         message: "conditional field diagnosis_action_code should be populated when diagnosis_identifier is present"}]
+    else
+      []
+    end
+  end
+
+  # PID: species_code/breed_code conditional — breed requires species
+  def conditional_errors(%HL7v2.Segment.PID{} = pid, location, mode) do
+    cond_level = if mode == :strict, do: :error, else: :warning
+
+    if not semantic_blank?(pid.breed_code) and semantic_blank?(pid.species_code) do
+      [%{level: cond_level, location: location, field: :species_code,
+         message: "conditional field species_code is required when breed_code is populated"}]
+    else
+      []
+    end
+  end
+
+  # PV2: prior_pending_location conditional on transfer events
+  def conditional_errors(%HL7v2.Segment.PV2{} = _pv2, _location, _mode), do: []
+
+  # QAK: query_tag conditional — should match original query tag
+  def conditional_errors(%HL7v2.Segment.QAK{} = _qak, _location, _mode), do: []
+
+  # MFE/MFA: mfn_control_id conditional on master file operations
+  def conditional_errors(%mod{} = seg, location, mode)
+      when mod in [HL7v2.Segment.MFE, HL7v2.Segment.MFA] do
+    cond_level = if mode == :strict, do: :error, else: :warning
+
+    if semantic_blank?(Map.get(seg, :mfn_control_id)) do
+      [%{level: cond_level, location: location, field: :mfn_control_id,
+         message: "conditional field mfn_control_id should be populated for master file operations"}]
+    else
+      []
+    end
+  end
+
   # Default: no conditional rules for segments without specific rules
   def conditional_errors(_segment, _location, _mode), do: []
 end
