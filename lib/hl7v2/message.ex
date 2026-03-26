@@ -55,7 +55,8 @@ defmodule HL7v2.Message do
 
   """
   @spec new(binary(), binary(), keyword()) :: t()
-  def new(message_code, trigger_event, opts \\ []) do
+  def new(message_code, trigger_event, opts \\ [])
+      when is_binary(message_code) and is_binary(trigger_event) do
     msh = %MSH{
       field_separator: "|",
       encoding_characters: "^~\\&",
@@ -84,7 +85,7 @@ defmodule HL7v2.Message do
   via this function.
   """
   @spec add_segment(t(), struct()) :: t()
-  def add_segment(%__MODULE__{} = msg, segment) do
+  def add_segment(%__MODULE__{} = msg, segment) when is_struct(segment) do
     %{msg | segments: msg.segments ++ [segment]}
   end
 

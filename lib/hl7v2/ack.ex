@@ -29,7 +29,7 @@ defmodule HL7v2.Ack do
   """
 
   alias HL7v2.Segment.{MSH, MSA, ERR}
-  alias HL7v2.Type.{MSG, TS, DTM, CWE}
+  alias HL7v2.Type.{MSG, PT, VID, TS, DTM, CWE}
   alias HL7v2.{RawMessage, Encoder, Separator}
 
   @doc """
@@ -154,15 +154,15 @@ defmodule HL7v2.Ack do
         message_structure: "ACK"
       },
       message_control_id: control_id,
-      processing_id: original_msh.processing_id,
-      version_id: original_msh.version_id
+      processing_id: original_msh.processing_id || %PT{processing_id: "P"},
+      version_id: original_msh.version_id || %VID{version_id: "2.5.1"}
     }
   end
 
   defp build_msa(original_msh, ack_code, opts) do
     %MSA{
       acknowledgment_code: ack_code,
-      message_control_id: original_msh.message_control_id,
+      message_control_id: original_msh.message_control_id || "UNKNOWN",
       text_message: Keyword.get(opts, :text)
     }
   end
