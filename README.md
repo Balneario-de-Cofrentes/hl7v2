@@ -166,7 +166,7 @@ end
               149 fully typed, 3 with intentional raw holes (RDT, QPD, OBX)
               Run `mix hl7v2.coverage` for the full list
 
- Types       90 of 90 v2.5.1 data types (100%)
+ Types       89 v2.5.1 data types + legacy TN (100% of official catalog)
 
  Structures  190 message structure definitions covering all major v2.5.1 families
               ADT, BAR, BPS/BRP/BRT/BTS, CRM, CSU, DFT, MDM, MFN/MFK/MFR,
@@ -187,10 +187,11 @@ end
 
 ## Scope
 
-**HL7 v2.5.1** with permissive parsing of adjacent versions (v2.3 through v2.8.x).
+**HL7 v2.5.1** schema with best-effort adjacent-version tolerance (v2.3 through v2.8.x
+messages parse and round-trip; version-specific deltas are not semantically enforced).
 
 - Every v2.5.1 segment and data type has a typed Elixir module
-- Raw mode is lossless for all valid HL7v2 messages, including malformed input
+- Raw mode is lossless after successful MSH/separator detection
 - Typed mode preserves values it cannot parse (invalid dates, malformed
   numbers) in `original` fields for round-trip fidelity
 - Extra fields beyond declared definitions are preserved in `extra_fields`
