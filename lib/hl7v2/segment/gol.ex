@@ -1,10 +1,8 @@
 defmodule HL7v2.Segment.GOL do
   @moduledoc """
-  Goal Detail (GOL) segment — HL7v2 v2.5.1.
+  Goal Detail (GOL) segment -- HL7v2 v2.5.1.
 
   Contains goal information for patient care plans.
-  First 15 fields are typed; remaining fields use `:raw` for lossless round-trip.
-
   21 fields per HL7 v2.5.1 specification.
   """
 
@@ -26,11 +24,11 @@ defmodule HL7v2.Segment.GOL do
       {13, :next_goal_review_date_time, HL7v2.Type.TS, :o, 1},
       {14, :previous_goal_review_date_time, HL7v2.Type.TS, :o, 1},
       {15, :goal_review_interval, HL7v2.Type.TQ, :o, 1},
-      {16, :field_16, :raw, :o, 1},
-      {17, :field_17, :raw, :o, 1},
-      {18, :field_18, :raw, :o, 1},
-      {19, :field_19, :raw, :o, 1},
-      {20, :field_20, :raw, :o, 1},
-      {21, :field_21, :raw, :o, 1}
+      {16, :goal_evaluation, HL7v2.Type.CE, :o, 1},
+      {17, :goal_evaluation_comment, HL7v2.Type.ST, :o, :unbounded},
+      {18, :goal_life_cycle_status, HL7v2.Type.CE, :o, 1},
+      {19, :goal_life_cycle_status_date_time, HL7v2.Type.TS, :o, 1},
+      {20, :goal_target_type, HL7v2.Type.CE, :o, :unbounded},
+      {21, :goal_target_name, HL7v2.Type.XPN, :o, :unbounded}
     ]
 end

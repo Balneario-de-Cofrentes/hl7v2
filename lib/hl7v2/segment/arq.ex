@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.ARQ do
   Appointment Request (ARQ) segment -- HL7v2 v2.5.1.
 
   Contains appointment request information for scheduling.
-  25 fields per HL7 v2.5.1 specification. Fields 1-20 are typed,
-  fields 21-25 use :raw.
+  25 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -30,10 +29,10 @@ defmodule HL7v2.Segment.ARQ do
       {18, :placer_contact_location, HL7v2.Type.PL, :o, 1},
       {19, :entered_by_person, HL7v2.Type.XCN, :r, :unbounded},
       {20, :entered_by_phone_number, HL7v2.Type.XTN, :o, :unbounded},
-      {21, :field_21, :raw, :o, 1},
-      {22, :field_22, :raw, :o, 1},
-      {23, :field_23, :raw, :o, 1},
-      {24, :field_24, :raw, :o, 1},
-      {25, :field_25, :raw, :o, 1}
+      {21, :entered_by_location, HL7v2.Type.PL, :o, 1},
+      {22, :parent_placer_appointment_id, HL7v2.Type.EI, :o, 1},
+      {23, :parent_filler_appointment_id, HL7v2.Type.EI, :o, 1},
+      {24, :placer_order_number, HL7v2.Type.EI, :o, :unbounded},
+      {25, :filler_order_number, HL7v2.Type.EI, :o, :unbounded}
     ]
 end

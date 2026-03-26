@@ -28,7 +28,7 @@ defmodule HL7v2.Segment.BTSTest do
       result = BTS.parse(["10", "End of batch", "12345.67"])
       assert result.batch_message_count == "10"
       assert result.batch_comment == "End of batch"
-      assert result.batch_totals == "12345.67"
+      assert [%HL7v2.Type.NM{value: "12345.67"}] = result.batch_totals
     end
   end
 

@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.PEO do
   Product Experience Observation (PEO) segment -- HL7v2 v2.5.1.
 
   Contains product experience observation information.
-  25 fields per HL7 v2.5.1 specification. Fields 1-15 are typed,
-  fields 16-25 use :raw.
+  25 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -25,15 +24,15 @@ defmodule HL7v2.Segment.PEO do
       {13, :event_description_from_others, HL7v2.Type.FT, :o, :unbounded},
       {14, :event_from_original_reporter, HL7v2.Type.FT, :o, :unbounded},
       {15, :event_description_from_patient, HL7v2.Type.FT, :o, :unbounded},
-      {16, :field_16, :raw, :o, 1},
-      {17, :field_17, :raw, :o, 1},
-      {18, :field_18, :raw, :o, 1},
-      {19, :field_19, :raw, :o, 1},
-      {20, :field_20, :raw, :o, 1},
-      {21, :field_21, :raw, :o, 1},
-      {22, :field_22, :raw, :o, 1},
-      {23, :field_23, :raw, :o, 1},
-      {24, :field_24, :raw, :o, 1},
-      {25, :field_25, :raw, :o, 1}
+      {16, :event_description_from_practitioner, HL7v2.Type.FT, :o, :unbounded},
+      {17, :event_description_from_autopsy, HL7v2.Type.FT, :o, :unbounded},
+      {18, :cause_of_death, HL7v2.Type.CE, :o, :unbounded},
+      {19, :primary_observer_name, HL7v2.Type.XPN, :o, :unbounded},
+      {20, :primary_observer_address, HL7v2.Type.XAD, :o, :unbounded},
+      {21, :primary_observer_telephone, HL7v2.Type.XTN, :o, :unbounded},
+      {22, :primary_observers_qualification, HL7v2.Type.ID, :o, 1},
+      {23, :confirmation_provided_by, HL7v2.Type.ID, :o, 1},
+      {24, :primary_observer_aware_date_time, HL7v2.Type.TS, :o, 1},
+      {25, :primary_observers_identity_may_be_divulged, HL7v2.Type.ID, :o, 1}
     ]
 end

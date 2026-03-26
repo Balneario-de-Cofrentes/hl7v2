@@ -41,10 +41,10 @@ defmodule HL7v2.Segment.IIMTest do
       assert %HL7v2.Type.NM{value: "100"} = result.inventory_received_quantity
     end
 
-    test "preserves raw trailing fields" do
-      raw = List.duplicate(nil, 10) ++ ["raw_11"]
+    test "parses typed trailing fields" do
+      raw = List.duplicate(nil, 10) ++ [["20260315"]]
       result = IIM.parse(raw)
-      assert result.field_11 == "raw_11"
+      assert %HL7v2.Type.TS{} = result.inventory_on_hand_date
     end
   end
 

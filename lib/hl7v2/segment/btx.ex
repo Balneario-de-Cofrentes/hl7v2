@@ -3,9 +3,7 @@ defmodule HL7v2.Segment.BTX do
   Blood Product Transfusion/Disposition (BTX) segment -- HL7v2 v2.5.1.
 
   Contains blood product transfusion and disposition information.
-
-  20 fields per HL7 v2.5.1 specification. Fields 1-15 are typed,
-  fields 16-20 use :raw.
+  20 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -26,10 +24,10 @@ defmodule HL7v2.Segment.BTX do
       {13, :bp_date_time_of_status, HL7v2.Type.TS, :r, 1},
       {14, :bp_administrator, HL7v2.Type.XCN, :o, 1},
       {15, :bp_verifier, HL7v2.Type.XCN, :o, 1},
-      {16, :field_16, :raw, :o, 1},
-      {17, :field_17, :raw, :o, 1},
-      {18, :field_18, :raw, :o, 1},
-      {19, :field_19, :raw, :o, 1},
-      {20, :field_20, :raw, :o, 1}
+      {16, :bp_transfusion_start_date_time_of_status, HL7v2.Type.TS, :o, 1},
+      {17, :bp_transfusion_end_date_time_of_status, HL7v2.Type.TS, :o, 1},
+      {18, :bp_adverse_reaction_type, HL7v2.Type.CWE, :o, :unbounded},
+      {19, :bp_transfusion_interrupted_reason, HL7v2.Type.CWE, :o, 1},
+      {20, :bp_unique_id, HL7v2.Type.EI, :c, 1}
     ]
 end

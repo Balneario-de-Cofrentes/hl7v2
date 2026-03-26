@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.PSH do
   Product Summary Header (PSH) segment -- HL7v2 v2.5.1.
 
   Contains product summary header information.
-  14 fields per HL7 v2.5.1 specification. Fields 1-10 are typed,
-  fields 11-14 use :raw.
+  14 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -20,9 +19,11 @@ defmodule HL7v2.Segment.PSH do
       {8, :quantity_distributed_method, HL7v2.Type.ID, :o, 1},
       {9, :quantity_distributed_comment, HL7v2.Type.FT, :o, 1},
       {10, :quantity_in_use, HL7v2.Type.CQ, :o, 1},
-      {11, :field_11, :raw, :o, 1},
-      {12, :field_12, :raw, :o, 1},
-      {13, :field_13, :raw, :o, 1},
-      {14, :field_14, :raw, :o, 1}
+      {11, :quantity_in_use_method, HL7v2.Type.ID, :o, 1},
+      {12, :quantity_in_use_comment, HL7v2.Type.FT, :o, 1},
+      {13, :number_of_product_experience_reports_filed_by_facility, HL7v2.Type.NM, :o,
+       :unbounded},
+      {14, :number_of_product_experience_reports_filed_by_distributor, HL7v2.Type.NM, :o,
+       :unbounded}
     ]
 end

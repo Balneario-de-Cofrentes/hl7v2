@@ -38,10 +38,10 @@ defmodule HL7v2.Segment.CONTest do
       assert %HL7v2.Type.EI{entity_identifier: "CON12345"} = result.consent_form_number
     end
 
-    test "preserves raw trailing fields" do
-      raw = List.duplicate(nil, 15) ++ ["raw_16"]
+    test "parses typed trailing fields" do
+      raw = List.duplicate(nil, 15) ++ ["Y"]
       result = CON.parse(raw)
-      assert result.field_16 == "raw_16"
+      assert result.subject_competence_indicator == "Y"
     end
   end
 

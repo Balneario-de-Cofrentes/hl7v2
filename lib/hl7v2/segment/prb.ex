@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.PRB do
   Problem Details (PRB) segment -- HL7v2 v2.5.1.
 
   Contains problem detail information.
-  25 fields per HL7 v2.5.1 specification. Fields 1-15 are typed,
-  fields 16-25 use :raw.
+  25 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -25,15 +24,15 @@ defmodule HL7v2.Segment.PRB do
       {13, :problem_confirmation_status, HL7v2.Type.CE, :o, 1},
       {14, :problem_life_cycle_status, HL7v2.Type.CE, :o, 1},
       {15, :problem_life_cycle_status_date_time, HL7v2.Type.TS, :o, 1},
-      {16, :field_16, :raw, :o, 1},
-      {17, :field_17, :raw, :o, 1},
-      {18, :field_18, :raw, :o, 1},
-      {19, :field_19, :raw, :o, 1},
-      {20, :field_20, :raw, :o, 1},
-      {21, :field_21, :raw, :o, 1},
-      {22, :field_22, :raw, :o, 1},
-      {23, :field_23, :raw, :o, 1},
-      {24, :field_24, :raw, :o, 1},
-      {25, :field_25, :raw, :o, 1}
+      {16, :problem_date_of_onset, HL7v2.Type.TS, :o, 1},
+      {17, :problem_onset_text, HL7v2.Type.ST, :o, 1},
+      {18, :problem_ranking, HL7v2.Type.CE, :o, 1},
+      {19, :certainty_of_problem, HL7v2.Type.CE, :o, 1},
+      {20, :probability_of_problem, HL7v2.Type.NM, :o, 1},
+      {21, :individual_awareness_of_problem, HL7v2.Type.CE, :o, 1},
+      {22, :problem_prognosis, HL7v2.Type.CE, :o, 1},
+      {23, :individual_awareness_of_prognosis, HL7v2.Type.CE, :o, 1},
+      {24, :family_significant_other_awareness_of_problem_prognosis, HL7v2.Type.ST, :o, 1},
+      {25, :security_sensitivity, HL7v2.Type.CE, :o, 1}
     ]
 end

@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.RCP do
   Response Control Parameter (RCP) segment -- HL7v2 v2.5.1.
 
   Contains response control parameters for queries.
-  7 fields per HL7 v2.5.1 specification. SRT type is unsupported;
-  field 6 uses :raw.
+  7 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -15,7 +14,7 @@ defmodule HL7v2.Segment.RCP do
       {3, :response_modality, HL7v2.Type.CE, :o, 1},
       {4, :execution_and_delivery_time, HL7v2.Type.TS, :o, 1},
       {5, :modify_indicator, HL7v2.Type.ID, :o, 1},
-      {6, :sort_by_field, :raw, :o, :unbounded},
+      {6, :sort_by_field, HL7v2.Type.SRT, :o, :unbounded},
       {7, :segment_group_inclusion, HL7v2.Type.ST, :o, :unbounded}
     ]
 end

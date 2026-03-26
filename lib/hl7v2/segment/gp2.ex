@@ -1,10 +1,8 @@
 defmodule HL7v2.Segment.GP2 do
   @moduledoc """
-  Grouping/Reimbursement — Procedure Line Item (GP2) segment — HL7v2 v2.5.1.
+  Grouping/Reimbursement -- Procedure Line Item (GP2) segment -- HL7v2 v2.5.1.
 
   Contains grouping and reimbursement information at the procedure line-item level.
-  First 10 fields are typed; remaining fields use `:raw` for lossless round-trip.
-
   14 fields per HL7 v2.5.1 specification.
   """
 
@@ -21,9 +19,9 @@ defmodule HL7v2.Segment.GP2 do
       {8, :modifier_edit_code, HL7v2.Type.IS, :o, :unbounded},
       {9, :payment_adjustment_code, HL7v2.Type.IS, :o, 1},
       {10, :packaging_status_code, HL7v2.Type.IS, :o, 1},
-      {11, :field_11, :raw, :o, 1},
-      {12, :field_12, :raw, :o, 1},
-      {13, :field_13, :raw, :o, 1},
-      {14, :field_14, :raw, :o, 1}
+      {11, :expected_cms_payment_amount, HL7v2.Type.CP, :o, 1},
+      {12, :reimbursement_type_code, HL7v2.Type.IS, :o, 1},
+      {13, :co_pay_amount, HL7v2.Type.CP, :o, 1},
+      {14, :pay_rate_per_service_unit, HL7v2.Type.NM, :o, 1}
     ]
 end

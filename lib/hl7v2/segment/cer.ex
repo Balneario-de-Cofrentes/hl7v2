@@ -1,10 +1,8 @@
 defmodule HL7v2.Segment.CER do
   @moduledoc """
-  Certificate Detail (CER) segment — HL7v2 v2.5.1.
+  Certificate Detail (CER) segment -- HL7v2 v2.5.1.
 
   Contains certificate information for personnel or organizations.
-  First 20 fields are typed; remaining fields use `:raw` for lossless round-trip.
-
   31 fields per HL7 v2.5.1 specification.
   """
 
@@ -31,16 +29,16 @@ defmodule HL7v2.Segment.CER do
       {18, :crl_distribution_point, HL7v2.Type.CWE, :o, :unbounded},
       {19, :jurisdiction_country, HL7v2.Type.ID, :o, 1},
       {20, :jurisdiction_state_province, HL7v2.Type.CWE, :o, 1},
-      {21, :field_21, :raw, :o, 1},
-      {22, :field_22, :raw, :o, 1},
-      {23, :field_23, :raw, :o, 1},
-      {24, :field_24, :raw, :o, 1},
-      {25, :field_25, :raw, :o, 1},
-      {26, :field_26, :raw, :o, 1},
-      {27, :field_27, :raw, :o, 1},
-      {28, :field_28, :raw, :o, 1},
-      {29, :field_29, :raw, :o, 1},
-      {30, :field_30, :raw, :o, 1},
-      {31, :field_31, :raw, :o, 1}
+      {21, :jurisdiction_county_parish, HL7v2.Type.CWE, :o, 1},
+      {22, :jurisdiction_breadth, HL7v2.Type.CWE, :o, :unbounded},
+      {23, :granting_date, HL7v2.Type.TS, :o, 1},
+      {24, :issuing_date, HL7v2.Type.TS, :o, 1},
+      {25, :activation_date, HL7v2.Type.TS, :o, 1},
+      {26, :inactivation_date, HL7v2.Type.TS, :o, 1},
+      {27, :expiration_date, HL7v2.Type.TS, :o, 1},
+      {28, :renewal_date, HL7v2.Type.TS, :o, 1},
+      {29, :revocation_date, HL7v2.Type.TS, :o, 1},
+      {30, :revocation_reason_code, HL7v2.Type.CE, :o, 1},
+      {31, :certificate_status, HL7v2.Type.CWE, :o, 1}
     ]
 end

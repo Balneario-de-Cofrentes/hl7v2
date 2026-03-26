@@ -36,10 +36,10 @@ defmodule HL7v2.Segment.CSRTest do
       assert %HL7v2.Type.CX{id: "PAT001"} = result.sponsor_patient_id
     end
 
-    test "preserves raw trailing fields" do
-      raw = List.duplicate(nil, 12) ++ ["raw_13"]
+    test "parses typed trailing fields" do
+      raw = List.duplicate(nil, 12) ++ [["STRATUM01", "High Risk", "STRATA"]]
       result = CSR.parse(raw)
-      assert result.field_13 == "raw_13"
+      assert [%HL7v2.Type.CE{identifier: "STRATUM01"}] = result.stratum_for_study_randomization
     end
   end
 

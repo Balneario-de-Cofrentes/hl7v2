@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.QRD do
   Original-Style Query Definition (QRD) segment -- HL7v2 v2.5.1.
 
   Contains original-style query definition information.
-  12 fields per HL7 v2.5.1 specification. VR type is unsupported
-  in composite_types; field 11 uses :raw.
+  12 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -20,7 +19,7 @@ defmodule HL7v2.Segment.QRD do
       {8, :who_subject_filter, HL7v2.Type.XCN, :r, :unbounded},
       {9, :what_subject_filter, HL7v2.Type.CE, :r, :unbounded},
       {10, :what_department_data_code, HL7v2.Type.CE, :r, :unbounded},
-      {11, :what_data_code_value_qual, :raw, :o, :unbounded},
+      {11, :what_data_code_value_qual, HL7v2.Type.VR, :o, :unbounded},
       {12, :query_results_level, HL7v2.Type.ID, :o, 1}
     ]
 end

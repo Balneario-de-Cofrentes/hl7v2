@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.OM7 do
   Additional Basic Attributes (OM7) segment -- HL7v2 v2.5.1.
 
   Contains additional basic attributes for an observation/service.
-  24 fields per HL7 v2.5.1 specification. Fields 1-15 are typed,
-  fields 16-24 use :raw.
+  24 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -25,14 +24,14 @@ defmodule HL7v2.Segment.OM7 do
       {13, :consent_effective_start_date_time, HL7v2.Type.TS, :o, 1},
       {14, :consent_effective_end_date_time, HL7v2.Type.TS, :o, 1},
       {15, :consent_interval_quantity, HL7v2.Type.NM, :o, 1},
-      {16, :field_16, :raw, :o, 1},
-      {17, :field_17, :raw, :o, 1},
-      {18, :field_18, :raw, :o, 1},
-      {19, :field_19, :raw, :o, 1},
-      {20, :field_20, :raw, :o, 1},
-      {21, :field_21, :raw, :o, 1},
-      {22, :field_22, :raw, :o, 1},
-      {23, :field_23, :raw, :o, 1},
-      {24, :field_24, :raw, :o, 1}
+      {16, :consent_interval_units, HL7v2.Type.CE, :o, 1},
+      {17, :consent_waiting_period_quantity, HL7v2.Type.NM, :o, 1},
+      {18, :consent_waiting_period_units, HL7v2.Type.CE, :o, 1},
+      {19, :effective_date_time_of_change, HL7v2.Type.TS, :o, 1},
+      {20, :entered_by, HL7v2.Type.XCN, :o, 1},
+      {21, :orderable_at_location, HL7v2.Type.PL, :o, :unbounded},
+      {22, :formulary_status, HL7v2.Type.IS, :o, 1},
+      {23, :special_order_indicator, HL7v2.Type.ID, :o, 1},
+      {24, :primary_key_value_cdm, HL7v2.Type.CE, :o, :unbounded}
     ]
 end

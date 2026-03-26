@@ -5,8 +5,7 @@ defmodule HL7v2.Segment.SPM do
   Contains specimen-related information for laboratory orders. Replaces
   the OBR-15 specimen source field with a richer, structured model.
 
-  30 fields per HL7 v2.5.1 specification. Fields 1-17 are typed where
-  possible, fields 18-30 use a mix of typed and :raw.
+  30 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,

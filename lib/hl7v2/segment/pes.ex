@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.PES do
   Product Experience Sender (PES) segment -- HL7v2 v2.5.1.
 
   Contains product experience sender information.
-  13 fields per HL7 v2.5.1 specification. Fields 1-10 are typed,
-  fields 11-13 use :raw.
+  13 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -20,8 +19,8 @@ defmodule HL7v2.Segment.PES do
       {8, :sender_comment, HL7v2.Type.FT, :o, 1},
       {9, :sender_aware_date_time, HL7v2.Type.TS, :o, 1},
       {10, :event_report_date, HL7v2.Type.TS, :r, 1},
-      {11, :field_11, :raw, :o, 1},
-      {12, :field_12, :raw, :o, 1},
-      {13, :field_13, :raw, :o, 1}
+      {11, :event_report_timing_type, HL7v2.Type.ID, :o, :unbounded},
+      {12, :event_report_source, HL7v2.Type.ID, :o, 1},
+      {13, :event_reported_to, HL7v2.Type.ID, :o, :unbounded}
     ]
 end

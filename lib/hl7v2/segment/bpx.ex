@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.BPX do
   Blood Product Dispense Status (BPX) segment -- HL7v2 v2.5.1.
 
   Contains blood product dispense status information.
-  21 fields per HL7 v2.5.1 specification. Fields 1-15 are typed,
-  fields 16-21 use :raw.
+  21 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -25,11 +24,11 @@ defmodule HL7v2.Segment.BPX do
       {13, :bp_expiration_date_time, HL7v2.Type.TS, :o, 1},
       {14, :bp_quantity, HL7v2.Type.NM, :r, 1},
       {15, :bp_amount, HL7v2.Type.NM, :o, 1},
-      {16, :field_16, :raw, :o, 1},
-      {17, :field_17, :raw, :o, 1},
-      {18, :field_18, :raw, :o, 1},
-      {19, :field_19, :raw, :o, 1},
-      {20, :field_20, :raw, :o, 1},
-      {21, :field_21, :raw, :o, 1}
+      {16, :bp_units, HL7v2.Type.CE, :o, 1},
+      {17, :bp_unique_id, HL7v2.Type.EI, :o, 1},
+      {18, :bp_actual_dispensed_to_location, HL7v2.Type.PL, :o, 1},
+      {19, :bp_actual_dispensed_to_address, HL7v2.Type.XAD, :o, 1},
+      {20, :bp_dispensed_to_receiver, HL7v2.Type.XCN, :o, 1},
+      {21, :bp_dispensing_individual, HL7v2.Type.XCN, :o, 1}
     ]
 end

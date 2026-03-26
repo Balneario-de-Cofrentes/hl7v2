@@ -4,7 +4,6 @@ defmodule HL7v2.Segment.ERQ do
 
   Withdrawn/deprecated query segment from v2.3 that still appears in the
   v2.5.1 index. Requests replay of events.
-
   3 fields per HL7 v2.5.1 specification.
   """
 
@@ -13,6 +12,6 @@ defmodule HL7v2.Segment.ERQ do
     fields: [
       {1, :query_tag, HL7v2.Type.ST, :o, 1},
       {2, :event_identifier, HL7v2.Type.CE, :r, 1},
-      {3, :input_parameter_list, :raw, :o, :unbounded}
+      {3, :input_parameter_list, HL7v2.Type.QIP, :o, :unbounded}
     ]
 end

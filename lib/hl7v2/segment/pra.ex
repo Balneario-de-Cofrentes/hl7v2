@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.PRA do
   Practitioner Detail (PRA) segment -- HL7v2 v2.5.1.
 
   Contains practitioner detail information.
-  12 fields per HL7 v2.5.1 specification. SPD and PIP types are
-  unsupported; those fields use :raw.
+  12 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -14,9 +13,9 @@ defmodule HL7v2.Segment.PRA do
       {2, :practitioner_group, HL7v2.Type.CE, :o, :unbounded},
       {3, :practitioner_category, HL7v2.Type.IS, :o, :unbounded},
       {4, :provider_billing, HL7v2.Type.ID, :o, 1},
-      {5, :specialty, :raw, :o, :unbounded},
+      {5, :specialty, HL7v2.Type.SPD, :o, :unbounded},
       {6, :practitioner_id_numbers, HL7v2.Type.PLN, :o, :unbounded},
-      {7, :privileges, :raw, :o, :unbounded},
+      {7, :privileges, HL7v2.Type.PIP, :o, :unbounded},
       {8, :date_entered_practice, HL7v2.Type.DT, :o, 1},
       {9, :institution, HL7v2.Type.CE, :o, 1},
       {10, :date_left_practice, HL7v2.Type.DT, :o, 1},

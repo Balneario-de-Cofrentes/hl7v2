@@ -3,9 +3,7 @@ defmodule HL7v2.Segment.PRC do
   Pricing (PRC) segment -- HL7v2 v2.5.1.
 
   Contains pricing information for charges.
-
-  18 fields per HL7 v2.5.1 specification. Fields 1-12 are typed,
-  fields 13-18 use :raw.
+  18 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -23,11 +21,11 @@ defmodule HL7v2.Segment.PRC do
       {10, :maximum_price, HL7v2.Type.MO, :o, 1},
       {11, :effective_start_date, HL7v2.Type.TS, :o, 1},
       {12, :effective_end_date, HL7v2.Type.TS, :o, 1},
-      {13, :field_13, :raw, :o, 1},
-      {14, :field_14, :raw, :o, 1},
-      {15, :field_15, :raw, :o, 1},
-      {16, :field_16, :raw, :o, 1},
-      {17, :field_17, :raw, :o, 1},
-      {18, :field_18, :raw, :o, 1}
+      {13, :price_override_flag, HL7v2.Type.IS, :o, 1},
+      {14, :billing_category, HL7v2.Type.CE, :o, :unbounded},
+      {15, :chargeable_flag, HL7v2.Type.ID, :o, 1},
+      {16, :active_inactive_flag, HL7v2.Type.ID, :o, 1},
+      {17, :cost, HL7v2.Type.MO, :o, 1},
+      {18, :charge_on_indicator, HL7v2.Type.IS, :o, 1}
     ]
 end

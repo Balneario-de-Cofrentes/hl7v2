@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.TCC do
   Test Code Configuration (TCC) segment -- HL7v2 v2.5.1.
 
   Contains test code configuration information for laboratory automation.
-  14 fields per HL7 v2.5.1 specification. Fields 1-10 are typed,
-  fields 11-14 use :raw.
+  14 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -20,9 +19,9 @@ defmodule HL7v2.Segment.TCC do
       {8, :inventory_limits_warning_level, HL7v2.Type.NM, :o, 1},
       {9, :automatic_rerun_allowed, HL7v2.Type.ID, :o, 1},
       {10, :automatic_repeat_allowed, HL7v2.Type.ID, :o, 1},
-      {11, :field_11, :raw, :o, 1},
-      {12, :field_12, :raw, :o, 1},
-      {13, :field_13, :raw, :o, 1},
-      {14, :field_14, :raw, :o, 1}
+      {11, :automatic_reflex_allowed, HL7v2.Type.ID, :o, 1},
+      {12, :equipment_dynamic_range, HL7v2.Type.SN, :o, 1},
+      {13, :units, HL7v2.Type.CE, :o, 1},
+      {14, :processing_type, HL7v2.Type.CE, :o, 1}
     ]
 end

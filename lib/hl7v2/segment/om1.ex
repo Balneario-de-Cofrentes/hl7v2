@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.OM1 do
   General Segment (OM1) -- HL7v2 v2.5.1.
 
   Contains general information about an observation definition.
-  47 fields per HL7 v2.5.1 specification. Fields 1-25 are typed,
-  fields 26-47 use :raw.
+  47 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -36,27 +35,27 @@ defmodule HL7v2.Segment.OM1 do
       {23, :typical_turn_around_time, HL7v2.Type.NM, :o, 1},
       {24, :processing_time, HL7v2.Type.NM, :o, 1},
       {25, :processing_priority, HL7v2.Type.ID, :o, :unbounded},
-      {26, :field_26, :raw, :o, 1},
-      {27, :field_27, :raw, :o, 1},
-      {28, :field_28, :raw, :o, 1},
-      {29, :field_29, :raw, :o, 1},
-      {30, :field_30, :raw, :o, 1},
-      {31, :field_31, :raw, :o, 1},
-      {32, :field_32, :raw, :o, 1},
-      {33, :field_33, :raw, :o, 1},
-      {34, :field_34, :raw, :o, 1},
-      {35, :field_35, :raw, :o, 1},
-      {36, :field_36, :raw, :o, 1},
-      {37, :field_37, :raw, :o, 1},
-      {38, :field_38, :raw, :o, 1},
-      {39, :field_39, :raw, :o, 1},
-      {40, :field_40, :raw, :o, 1},
-      {41, :field_41, :raw, :o, 1},
-      {42, :field_42, :raw, :o, 1},
-      {43, :field_43, :raw, :o, 1},
-      {44, :field_44, :raw, :o, 1},
-      {45, :field_45, :raw, :o, 1},
-      {46, :field_46, :raw, :o, 1},
-      {47, :field_47, :raw, :o, 1}
+      {26, :reporting_priority, HL7v2.Type.ID, :o, 1},
+      {27, :outside_site, HL7v2.Type.CE, :o, :unbounded},
+      {28, :address_of_outside_site, HL7v2.Type.XAD, :o, :unbounded},
+      {29, :phone_number_of_outside_site, HL7v2.Type.XTN, :o, 1},
+      {30, :confidentiality_code, HL7v2.Type.CWE, :o, 1},
+      {31, :observations_required_to_interpret_the_observation, HL7v2.Type.CE, :o, 1},
+      {32, :interpretation_of_observations, HL7v2.Type.TX, :o, 1},
+      {33, :contraindications_to_observations, HL7v2.Type.CE, :o, 1},
+      {34, :reflex_tests_observations, HL7v2.Type.CE, :o, :unbounded},
+      {35, :rules_that_trigger_reflex_testing, HL7v2.Type.TX, :o, 1},
+      {36, :fixed_canned_message, HL7v2.Type.CE, :o, 1},
+      {37, :patient_preparation, HL7v2.Type.TX, :o, 1},
+      {38, :procedure_medication, HL7v2.Type.CE, :o, 1},
+      {39, :factors_that_may_affect_the_observation, HL7v2.Type.TX, :o, 1},
+      {40, :service_test_observation_performance_schedule, HL7v2.Type.ST, :o, :unbounded},
+      {41, :description_of_test_methods, HL7v2.Type.TX, :o, 1},
+      {42, :kind_of_quantity_observed, HL7v2.Type.CE, :o, 1},
+      {43, :point_versus_interval, HL7v2.Type.CE, :o, 1},
+      {44, :challenge_information, HL7v2.Type.TX, :o, 1},
+      {45, :relationship_modifier, HL7v2.Type.CE, :o, 1},
+      {46, :target_anatomic_site_of_test, HL7v2.Type.CE, :o, 1},
+      {47, :modality_of_imaging_measurement, HL7v2.Type.CE, :o, 1}
     ]
 end

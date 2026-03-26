@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.PCR do
   Possible Causal Relationship (PCR) segment -- HL7v2 v2.5.1.
 
   Contains possible causal relationship information for product experience.
-  23 fields per HL7 v2.5.1 specification. Fields 1-15 are typed,
-  fields 16-23 use :raw.
+  23 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -25,13 +24,13 @@ defmodule HL7v2.Segment.PCR do
       {13, :product_available_for_inspection, HL7v2.Type.IS, :o, 1},
       {14, :product_evaluation_performed, HL7v2.Type.CE, :o, 1},
       {15, :product_evaluation_status, HL7v2.Type.CE, :o, 1},
-      {16, :field_16, :raw, :o, 1},
-      {17, :field_17, :raw, :o, 1},
-      {18, :field_18, :raw, :o, 1},
-      {19, :field_19, :raw, :o, 1},
-      {20, :field_20, :raw, :o, 1},
-      {21, :field_21, :raw, :o, 1},
-      {22, :field_22, :raw, :o, 1},
-      {23, :field_23, :raw, :o, 1}
+      {16, :product_evaluation_results, HL7v2.Type.CE, :o, 1},
+      {17, :evaluated_product_source, HL7v2.Type.ID, :o, 1},
+      {18, :date_product_returned_to_manufacturer, HL7v2.Type.TS, :o, 1},
+      {19, :device_operator_qualifications, HL7v2.Type.ID, :o, 1},
+      {20, :relatedness_assessment, HL7v2.Type.ID, :o, 1},
+      {21, :action_taken_in_response_to_the_event, HL7v2.Type.ID, :o, :unbounded},
+      {22, :event_causality_observations, HL7v2.Type.ID, :o, :unbounded},
+      {23, :indirect_exposure_mechanism, HL7v2.Type.ID, :o, :unbounded}
     ]
 end

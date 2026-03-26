@@ -40,10 +40,10 @@ defmodule HL7v2.Segment.GOLTest do
       assert %HL7v2.Type.NM{value: "1"} = result.goal_list_priority
     end
 
-    test "preserves raw trailing fields" do
-      raw = List.duplicate(nil, 15) ++ ["raw_16"]
+    test "parses typed trailing fields" do
+      raw = List.duplicate(nil, 15) ++ [["EVAL01", "Goal Met", "EVAL_STATUS"]]
       result = GOL.parse(raw)
-      assert result.field_16 == "raw_16"
+      assert %HL7v2.Type.CE{identifier: "EVAL01"} = result.goal_evaluation
     end
   end
 

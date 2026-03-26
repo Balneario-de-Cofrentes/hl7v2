@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.INV do
   Inventory Detail (INV) segment -- HL7v2 v2.5.1.
 
   Contains inventory detail information for laboratory automation.
-  20 fields per HL7 v2.5.1 specification. Fields 1-15 are typed,
-  fields 16-20 use :raw.
+  20 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -23,12 +22,12 @@ defmodule HL7v2.Segment.INV do
       {11, :quantity_units, HL7v2.Type.CE, :o, 1},
       {12, :expiration_date_time, HL7v2.Type.TS, :o, 1},
       {13, :first_used_date_time, HL7v2.Type.TS, :o, 1},
-      {14, :on_board_stability_duration, HL7v2.Type.ST, :o, 1},
+      {14, :on_board_stability_duration, HL7v2.Type.TQ, :o, 1},
       {15, :on_board_stability_time, HL7v2.Type.TS, :o, 1},
-      {16, :field_16, :raw, :o, 1},
-      {17, :field_17, :raw, :o, 1},
-      {18, :field_18, :raw, :o, 1},
-      {19, :field_19, :raw, :o, 1},
-      {20, :field_20, :raw, :o, 1}
+      {16, :test_fluid_identifier, HL7v2.Type.CE, :o, :unbounded},
+      {17, :manufacturer_lot_number, HL7v2.Type.ST, :o, 1},
+      {18, :manufacturer_identifier, HL7v2.Type.CE, :o, 1},
+      {19, :supplier_identifier, HL7v2.Type.CE, :o, 1},
+      {20, :on_board_stability_time_2, HL7v2.Type.CQ, :o, 1}
     ]
 end

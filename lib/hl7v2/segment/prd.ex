@@ -15,7 +15,7 @@ defmodule HL7v2.Segment.PRD do
       {4, :provider_location, HL7v2.Type.PL, :o, 1},
       {5, :provider_communication_information, HL7v2.Type.XTN, :o, :unbounded},
       {6, :preferred_method_of_contact, HL7v2.Type.CE, :o, 1},
-      {7, :provider_identifiers, :raw, :o, :unbounded},
+      {7, :provider_identifiers, HL7v2.Type.PLN, :o, :unbounded},
       {8, :effective_start_date_of_provider_role, HL7v2.Type.TS, :o, 1},
       {9, :effective_end_date_of_provider_role, HL7v2.Type.TS, :o, :unbounded}
     ]

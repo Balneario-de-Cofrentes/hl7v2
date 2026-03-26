@@ -25,12 +25,12 @@ defmodule HL7v2.Segment.APRTest do
       assert %HL7v2.Type.NM{value: "30"} = result.slot_spacing_criteria
     end
 
-    test "parses raw criteria fields" do
+    test "parses typed criteria fields as SCV" do
       raw = [["MON", "Monday"], "", "", ""]
 
       result = APR.parse(raw)
 
-      assert result.time_selection_criteria == ["MON", "Monday"]
+      assert [%HL7v2.Type.SCV{parameter_value: "Monday"}] = result.time_selection_criteria
     end
 
     test "parses empty list" do

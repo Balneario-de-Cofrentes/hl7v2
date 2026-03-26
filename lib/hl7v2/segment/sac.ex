@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.SAC do
   Specimen Container Detail (SAC) segment -- HL7v2 v2.5.1.
 
   Contains specimen container detail information.
-  44 fields per HL7 v2.5.1 specification. Fields 1-25 are typed,
-  fields 26-44 use :raw.
+  44 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -35,24 +34,24 @@ defmodule HL7v2.Segment.SAC do
       {23, :initial_specimen_volume, HL7v2.Type.NM, :o, 1},
       {24, :volume_units, HL7v2.Type.CE, :o, 1},
       {25, :separator_type, HL7v2.Type.CE, :o, 1},
-      {26, :field_26, :raw, :o, 1},
-      {27, :field_27, :raw, :o, 1},
-      {28, :field_28, :raw, :o, 1},
-      {29, :field_29, :raw, :o, 1},
-      {30, :field_30, :raw, :o, 1},
-      {31, :field_31, :raw, :o, 1},
-      {32, :field_32, :raw, :o, 1},
-      {33, :field_33, :raw, :o, 1},
-      {34, :field_34, :raw, :o, 1},
-      {35, :field_35, :raw, :o, 1},
-      {36, :field_36, :raw, :o, 1},
-      {37, :field_37, :raw, :o, 1},
-      {38, :field_38, :raw, :o, 1},
-      {39, :field_39, :raw, :o, 1},
-      {40, :field_40, :raw, :o, 1},
-      {41, :field_41, :raw, :o, 1},
-      {42, :field_42, :raw, :o, 1},
-      {43, :field_43, :raw, :o, 1},
-      {44, :field_44, :raw, :o, 1}
+      {26, :cap_type, HL7v2.Type.CE, :o, 1},
+      {27, :additive, HL7v2.Type.CWE, :o, :unbounded},
+      {28, :specimen_component, HL7v2.Type.CE, :o, 1},
+      {29, :dilution_factor, HL7v2.Type.SN, :o, 1},
+      {30, :treatment, HL7v2.Type.CE, :o, 1},
+      {31, :temperature, HL7v2.Type.SN, :o, 1},
+      {32, :hemolysis_index, HL7v2.Type.NM, :o, 1},
+      {33, :hemolysis_index_units, HL7v2.Type.CE, :o, 1},
+      {34, :lipemia_index, HL7v2.Type.NM, :o, 1},
+      {35, :lipemia_index_units, HL7v2.Type.CE, :o, 1},
+      {36, :icterus_index, HL7v2.Type.NM, :o, 1},
+      {37, :icterus_index_units, HL7v2.Type.CE, :o, 1},
+      {38, :fibrin_index, HL7v2.Type.NM, :o, 1},
+      {39, :fibrin_index_units, HL7v2.Type.CE, :o, 1},
+      {40, :system_induced_contaminants, HL7v2.Type.CE, :o, :unbounded},
+      {41, :drug_interference, HL7v2.Type.CE, :o, :unbounded},
+      {42, :artificial_blood, HL7v2.Type.CE, :o, 1},
+      {43, :special_handling_code, HL7v2.Type.CWE, :o, :unbounded},
+      {44, :other_environmental_factors, HL7v2.Type.CE, :o, :unbounded}
     ]
 end

@@ -36,10 +36,10 @@ defmodule HL7v2.Segment.GP2Test do
       assert result.reimbursement_action_code == "0"
     end
 
-    test "preserves raw trailing fields" do
-      raw = List.duplicate(nil, 10) ++ ["raw_11"]
+    test "parses typed trailing fields" do
+      raw = List.duplicate(nil, 10) ++ [["150.00", "USD"]]
       result = GP2.parse(raw)
-      assert result.field_11 == "raw_11"
+      assert %HL7v2.Type.CP{} = result.expected_cms_payment_amount
     end
   end
 

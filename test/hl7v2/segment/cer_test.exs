@@ -50,10 +50,10 @@ defmodule HL7v2.Segment.CERTest do
       assert result.subject_name == "John Doe, MD"
     end
 
-    test "preserves raw trailing fields" do
-      raw = List.duplicate(nil, 20) ++ ["raw_field_21"]
+    test "parses typed trailing fields" do
+      raw = List.duplicate(nil, 20) ++ [["COUNTY01", "County Parish", "GEO"]]
       result = CER.parse(raw)
-      assert result.field_21 == "raw_field_21"
+      assert %HL7v2.Type.CWE{identifier: "COUNTY01"} = result.jurisdiction_county_parish
     end
   end
 

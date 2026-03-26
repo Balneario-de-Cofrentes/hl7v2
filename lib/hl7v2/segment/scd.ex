@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.SCD do
   Anti-Microbial Cycle Data (SCD) segment -- HL7v2 v2.5.1.
 
   Contains anti-microbial cycle data for sterilization.
-  36 fields per HL7 v2.5.1 specification. Fields 1-20 are typed,
-  fields 21-36 use :raw.
+  36 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,
@@ -30,21 +29,21 @@ defmodule HL7v2.Segment.SCD do
       {18, :over_temperature, HL7v2.Type.CQ, :o, 1},
       {19, :abort_cycle, HL7v2.Type.CNE, :o, 1},
       {20, :alarm, HL7v2.Type.CNE, :o, 1},
-      {21, :field_21, :raw, :o, 1},
-      {22, :field_22, :raw, :o, 1},
-      {23, :field_23, :raw, :o, 1},
-      {24, :field_24, :raw, :o, 1},
-      {25, :field_25, :raw, :o, 1},
-      {26, :field_26, :raw, :o, 1},
-      {27, :field_27, :raw, :o, 1},
-      {28, :field_28, :raw, :o, 1},
-      {29, :field_29, :raw, :o, 1},
-      {30, :field_30, :raw, :o, 1},
-      {31, :field_31, :raw, :o, 1},
-      {32, :field_32, :raw, :o, 1},
-      {33, :field_33, :raw, :o, 1},
-      {34, :field_34, :raw, :o, 1},
-      {35, :field_35, :raw, :o, 1},
-      {36, :field_36, :raw, :o, 1}
+      {21, :long_in_charge_phase, HL7v2.Type.CNE, :o, 1},
+      {22, :long_in_exhaust_phase, HL7v2.Type.CNE, :o, 1},
+      {23, :long_in_fast_exhaust_phase, HL7v2.Type.CNE, :o, 1},
+      {24, :reset, HL7v2.Type.CNE, :o, 1},
+      {25, :operator_unload, HL7v2.Type.XCN, :o, 1},
+      {26, :door_open, HL7v2.Type.CNE, :o, 1},
+      {27, :reading_failure, HL7v2.Type.CNE, :o, 1},
+      {28, :cycle_type, HL7v2.Type.CWE, :o, 1},
+      {29, :thermal_rinse_time, HL7v2.Type.CQ, :o, 1},
+      {30, :wash_time, HL7v2.Type.CQ, :o, 1},
+      {31, :injection_rate, HL7v2.Type.CQ, :o, 1},
+      {32, :procedure_code, HL7v2.Type.CNE, :o, 1},
+      {33, :patient_identifier_list, HL7v2.Type.CX, :o, :unbounded},
+      {34, :attending_doctor, HL7v2.Type.XCN, :o, 1},
+      {35, :dilution_factor, HL7v2.Type.SN, :o, 1},
+      {36, :fill_time, HL7v2.Type.CQ, :o, 1}
     ]
 end
