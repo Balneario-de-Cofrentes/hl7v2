@@ -53,13 +53,24 @@ defmodule HL7v2.Access do
   """
   @spec get(TypedMessage.t(), binary() | Path.t()) :: term()
   def get(%TypedMessage{} = msg, %Path{} = path) do
-    resolve(msg, path_to_map(path))
+    case resolve(msg, path_to_map(path)) do
+      :invalid_repetition -> nil
+      :invalid_component -> nil
+      value -> value
+    end
   end
 
   def get(%TypedMessage{} = msg, path) when is_binary(path) do
     case parse_path(path) do
-      {:ok, parsed} -> resolve(msg, parsed)
-      {:error, _} -> nil
+      {:ok, parsed} ->
+        case resolve(msg, parsed) do
+          :invalid_repetition -> nil
+          :invalid_component -> nil
+          value -> value
+        end
+
+      {:error, _} ->
+        nil
     end
   end
 
@@ -238,11 +249,15 @@ defmodule HL7v2.Access do
   defp unwrap_and_select(nil, _, _), do: nil
 
   defp unwrap_and_select(value, max_reps, %{repetition: rep, component: comp}) do
-    value = select_repetition(value, max_reps, rep)
-    select_component(value, comp)
+    case select_repetition(value, max_reps, rep) do
+      :invalid_repetition -> :invalid_repetition
+      selected -> select_component(selected, comp)
+    end
   end
 
-  defp select_repetition(value, 1, _rep), do: value
+  # Non-repeating field: only nil (no selector) is valid
+  defp select_repetition(value, 1, nil), do: value
+  defp select_repetition(_value, 1, _rep), do: :invalid_repetition
 
   # Repetition wildcard: return all repetitions
   defp select_repetition(value, _max_reps, :all) when is_list(value), do: value
@@ -276,7 +291,8 @@ defmodule HL7v2.Access do
     end
   end
 
-  defp select_component(value, _comp), do: value
+  # Scalar/primitive value with component selector — not a composite type
+  defp select_component(_value, _comp), do: :invalid_component
 
   # -- Error-returning resolution for fetch/2 --
 
@@ -357,11 +373,11 @@ defmodule HL7v2.Access do
         value = Map.get(segment, field_name)
         result = unwrap_and_select(value, max_reps, path)
 
-        # Distinguish nil-from-absent-data vs nil-from-out-of-range component
-        if result == nil and path.component != nil and value != nil do
-          {:error, :component_not_found}
-        else
-          {:ok, result}
+        case result do
+          :invalid_repetition -> {:error, :invalid_repetition}
+          :invalid_component -> {:error, :invalid_component}
+          nil when path.component != nil and value != nil -> {:error, :component_not_found}
+          _ -> {:ok, result}
         end
 
       nil ->
