@@ -163,7 +163,17 @@ defmodule HL7v2.MLLP.Client do
           {:error, :message_too_large}
         else
           case HL7v2.MLLP.extract_messages(new_buffer) do
-            {[message | _], _remaining} ->
+            {[message], _remaining} ->
+              {:ok, message}
+
+            {[message | extra], _remaining} ->
+              require Logger
+
+              Logger.warning(
+                "MLLP client received #{1 + length(extra)} frames in one response, " <>
+                  "returning first and discarding #{length(extra)} extra"
+              )
+
               {:ok, message}
 
             {[], _remaining} ->
