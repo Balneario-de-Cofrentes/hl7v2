@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.6.0 — 2026-03-26
+
+### Full v2.5.1 Structure Coverage
+
+- **23 new structures** closing all identified gaps vs the official v2.5.1 index:
+  ADT_A18, ADT_A52, MFR_M04-M07, MFN_M15, ORF_R04, QRY variants, OSQ/OSR_Q06,
+  RSP_Q11/K23/K25/Z82/Z86/Z88/Z90, SQM/SQR_S25
+- **213 message structure definitions** total (186 official + aliases/responses)
+- README: tightened type count (89 + legacy TN), version scope, raw mode claims
+
 ## v2.5.0 — 2026-03-26
 
 ### Deep Semantic Validation

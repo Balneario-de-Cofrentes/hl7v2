@@ -510,8 +510,15 @@ defmodule HL7v2.Validation.FieldRules do
       end
 
     if has_content? and semantic_blank?(seg.segment_action_code) do
-      [%{level: cond_level, location: location, field: :segment_action_code,
-         message: "conditional field segment_action_code may be required for modification messages"}]
+      [
+        %{
+          level: cond_level,
+          location: location,
+          field: :segment_action_code,
+          message:
+            "conditional field segment_action_code may be required for modification messages"
+        }
+      ]
     else
       []
     end
@@ -522,8 +529,15 @@ defmodule HL7v2.Validation.FieldRules do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if not semantic_blank?(rgs.set_id) and semantic_blank?(rgs.segment_action_code) do
-      [%{level: cond_level, location: location, field: :segment_action_code,
-         message: "conditional field segment_action_code may be required for modification messages"}]
+      [
+        %{
+          level: cond_level,
+          location: location,
+          field: :segment_action_code,
+          message:
+            "conditional field segment_action_code may be required for modification messages"
+        }
+      ]
     else
       []
     end
@@ -534,8 +548,15 @@ defmodule HL7v2.Validation.FieldRules do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if semantic_blank?(arq.placer_appointment_id) and semantic_blank?(arq.filler_appointment_id) do
-      [%{level: cond_level, location: location, field: :placer_appointment_id,
-         message: "conditional: at least one of placer_appointment_id or filler_appointment_id should be populated"}]
+      [
+        %{
+          level: cond_level,
+          location: location,
+          field: :placer_appointment_id,
+          message:
+            "conditional: at least one of placer_appointment_id or filler_appointment_id should be populated"
+        }
+      ]
     else
       []
     end
@@ -545,9 +566,17 @@ defmodule HL7v2.Validation.FieldRules do
   def conditional_errors(%HL7v2.Segment.DG1{} = dg1, location, mode) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
-    if not semantic_blank?(dg1.diagnosis_identifier) and semantic_blank?(dg1.diagnosis_action_code) do
-      [%{level: cond_level, location: location, field: :diagnosis_action_code,
-         message: "conditional field diagnosis_action_code should be populated when diagnosis_identifier is present"}]
+    if not semantic_blank?(dg1.diagnosis_identifier) and
+         semantic_blank?(dg1.diagnosis_action_code) do
+      [
+        %{
+          level: cond_level,
+          location: location,
+          field: :diagnosis_action_code,
+          message:
+            "conditional field diagnosis_action_code should be populated when diagnosis_identifier is present"
+        }
+      ]
     else
       []
     end
@@ -558,8 +587,14 @@ defmodule HL7v2.Validation.FieldRules do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if not semantic_blank?(pid.breed_code) and semantic_blank?(pid.species_code) do
-      [%{level: cond_level, location: location, field: :species_code,
-         message: "conditional field species_code is required when breed_code is populated"}]
+      [
+        %{
+          level: cond_level,
+          location: location,
+          field: :species_code,
+          message: "conditional field species_code is required when breed_code is populated"
+        }
+      ]
     else
       []
     end
@@ -577,8 +612,15 @@ defmodule HL7v2.Validation.FieldRules do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if semantic_blank?(Map.get(seg, :mfn_control_id)) do
-      [%{level: cond_level, location: location, field: :mfn_control_id,
-         message: "conditional field mfn_control_id should be populated for master file operations"}]
+      [
+        %{
+          level: cond_level,
+          location: location,
+          field: :mfn_control_id,
+          message:
+            "conditional field mfn_control_id should be populated for master file operations"
+        }
+      ]
     else
       []
     end
