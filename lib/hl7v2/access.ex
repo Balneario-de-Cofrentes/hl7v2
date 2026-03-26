@@ -146,19 +146,23 @@ defmodule HL7v2.Access do
 
   defp build_parsed(captures) do
     segment = Enum.at(captures, 1)
-    seg_idx_raw = Enum.at(captures, 2)
-    field_raw = Enum.at(captures, 3)
-    comp_raw = Enum.at(captures, 4)
-    rep_raw = Enum.at(captures, 5)
+    seg_idx = parse_index(Enum.at(captures, 2))
+    field = parse_int(Enum.at(captures, 3))
+    comp = parse_int(Enum.at(captures, 4))
+    rep = parse_index(Enum.at(captures, 5))
 
-    {:ok,
-     %{
-       segment: segment,
-       segment_index: parse_index(seg_idx_raw),
-       field: parse_int(field_raw),
-       component: parse_int(comp_raw),
-       repetition: parse_index(rep_raw)
-     }}
+    if seg_idx == :invalid_index or rep == :invalid_index do
+      {:error, :invalid_path}
+    else
+      {:ok,
+       %{
+         segment: segment,
+         segment_index: seg_idx,
+         field: field,
+         component: comp,
+         repetition: rep
+       }}
+    end
   end
 
   defp parse_int(nil), do: nil
@@ -168,6 +172,7 @@ defmodule HL7v2.Access do
   defp parse_index(nil), do: nil
   defp parse_index(""), do: nil
   defp parse_index("*"), do: :all
+  defp parse_index("0"), do: :invalid_index
   defp parse_index(s), do: String.to_integer(s)
 
   # -- Resolution --
@@ -246,7 +251,17 @@ defmodule HL7v2.Access do
   defp resolve_field(_, _), do: nil
 
   # Unwrap repeating fields and select component
-  defp unwrap_and_select(nil, _, _), do: nil
+  defp unwrap_and_select(nil, max_reps, %{repetition: rep, component: comp}) do
+    # Even for nil values, validate that selectors are legal
+    case select_repetition(nil, max_reps, rep) do
+      :invalid_repetition -> :invalid_repetition
+      _ ->
+        case select_component(nil, comp) do
+          :invalid_component -> :invalid_component
+          _ -> nil
+        end
+    end
+  end
 
   defp unwrap_and_select(value, max_reps, %{repetition: rep, component: comp}) do
     case select_repetition(value, max_reps, rep) do
