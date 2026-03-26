@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.1.2 — 2026-03-26
+
+### Fixes
+
+- **DT/DTM invalid value preservation** — invalid dates (e.g., `20240230`, `20250229`)
+  and malformed DTM values are now preserved in an `original` field instead of silently
+  dropping to nil. Prevents clinical data loss on dirty feeds during typed round-trip.
+
 ## v2.1.1 — 2026-03-26
 
 ### Fixes
