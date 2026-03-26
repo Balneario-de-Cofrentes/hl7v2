@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.1.3 — 2026-03-26
+
+### Fixes
+
+- **SI/TM/DT invalid value preservation** — completes the lossless round-trip
+  work started in v2.1.2. Invalid SI values preserved as raw strings, invalid
+  TM/DT values preserved in `original` field. No primitive type silently drops
+  malformed values anymore.
+
 ## v2.1.2 — 2026-03-26
 
 ### Fixes
