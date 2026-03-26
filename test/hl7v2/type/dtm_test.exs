@@ -132,8 +132,8 @@ defmodule HL7v2.Type.DTMTest do
       assert DTM.parse(nil) == nil
     end
 
-    test "returns nil for too-short input" do
-      assert DTM.parse("202") == nil
+    test "preserves too-short input in original field" do
+      assert %DTM{original: "202"} = DTM.parse("202")
     end
 
     test "preserves malformed timezone offset for lossless round-trip" do
@@ -188,24 +188,24 @@ defmodule HL7v2.Type.DTMTest do
       assert DTM.parse("202603221430+2359").offset == "+2359"
     end
 
-    test "returns nil for invalid month" do
-      assert DTM.parse("202613") == nil
+    test "preserves invalid month in original field" do
+      assert %DTM{original: "202613"} = DTM.parse("202613")
     end
 
-    test "returns nil for invalid day" do
-      assert DTM.parse("20260332") == nil
+    test "preserves invalid day in original field" do
+      assert %DTM{original: "20260332"} = DTM.parse("20260332")
     end
 
-    test "returns nil for invalid hour" do
-      assert DTM.parse("2026032225") == nil
+    test "preserves invalid hour in original field" do
+      assert %DTM{original: "2026032225"} = DTM.parse("2026032225")
     end
 
-    test "returns nil for invalid minute" do
-      assert DTM.parse("202603221461") == nil
+    test "preserves invalid minute in original field" do
+      assert %DTM{original: "202603221461"} = DTM.parse("202603221461")
     end
 
-    test "returns nil for invalid second" do
-      assert DTM.parse("20260322143061") == nil
+    test "preserves invalid second in original field" do
+      assert %DTM{original: "20260322143061"} = DTM.parse("20260322143061")
     end
   end
 
@@ -307,40 +307,40 @@ defmodule HL7v2.Type.DTMTest do
   end
 
   describe "parse/1 edge cases" do
-    test "returns nil for non-digit year" do
-      assert DTM.parse("ABCD") == nil
+    test "preserves non-digit year in original field" do
+      assert %DTM{original: "ABCD"} = DTM.parse("ABCD")
     end
 
-    test "returns nil for 5 character input (odd length)" do
-      assert DTM.parse("20261") == nil
+    test "preserves 5 character input (odd length) in original field" do
+      assert %DTM{original: "20261"} = DTM.parse("20261")
     end
 
-    test "returns nil for 7 character input (odd length)" do
-      assert DTM.parse("2026031") == nil
+    test "preserves 7 character input (odd length) in original field" do
+      assert %DTM{original: "2026031"} = DTM.parse("2026031")
     end
 
-    test "returns nil for 9 character input (odd length between 8 and 10)" do
-      assert DTM.parse("202603221") == nil
+    test "preserves 9 character input (odd length between 8 and 10) in original field" do
+      assert %DTM{original: "202603221"} = DTM.parse("202603221")
     end
 
-    test "returns nil for 11 character input (odd length between 10 and 12)" do
-      assert DTM.parse("20260322141") == nil
+    test "preserves 11 character input (odd length between 10 and 12) in original field" do
+      assert %DTM{original: "20260322141"} = DTM.parse("20260322141")
     end
 
-    test "returns nil for 13 character input (odd length between 12 and 14)" do
-      assert DTM.parse("2026032214301") == nil
+    test "preserves 13 character input (odd length between 12 and 14) in original field" do
+      assert %DTM{original: "2026032214301"} = DTM.parse("2026032214301")
     end
 
-    test "returns nil for fraction longer than 4 digits" do
-      assert DTM.parse("20260322143022.12345") == nil
+    test "preserves fraction longer than 4 digits in original field" do
+      assert %DTM{original: "20260322143022.12345"} = DTM.parse("20260322143022.12345")
     end
 
-    test "returns nil for empty fraction after dot" do
-      assert DTM.parse("20260322143022.") == nil
+    test "preserves empty fraction after dot in original field" do
+      assert %DTM{original: "20260322143022."} = DTM.parse("20260322143022.")
     end
 
-    test "returns nil for non-digit fraction" do
-      assert DTM.parse("20260322143022.abcd") == nil
+    test "preserves non-digit fraction in original field" do
+      assert %DTM{original: "20260322143022.abcd"} = DTM.parse("20260322143022.abcd")
     end
 
     test "parses seconds without fraction correctly" do
@@ -356,12 +356,12 @@ defmodule HL7v2.Type.DTMTest do
              }
     end
 
-    test "returns nil for year 0" do
-      assert DTM.parse("0000") == nil
+    test "preserves year 0 in original field" do
+      assert %DTM{original: "0000"} = DTM.parse("0000")
     end
 
-    test "returns nil for month 0" do
-      assert DTM.parse("202600") == nil
+    test "preserves month 0 in original field" do
+      assert %DTM{original: "202600"} = DTM.parse("202600")
     end
 
     test "parses Feb 29 in leap year" do
@@ -369,16 +369,16 @@ defmodule HL7v2.Type.DTMTest do
       assert %DTM{year: 2024, month: 2, day: 29} = result
     end
 
-    test "returns nil for Feb 29 in non-leap year" do
-      assert DTM.parse("20250229") == nil
+    test "preserves Feb 29 in non-leap year in original field" do
+      assert %DTM{original: "20250229"} = DTM.parse("20250229")
     end
 
-    test "returns nil for non-digit in hour position" do
-      assert DTM.parse("20260322AB") == nil
+    test "preserves non-digit in hour position in original field" do
+      assert %DTM{original: "20260322AB"} = DTM.parse("20260322AB")
     end
 
-    test "returns nil for non-digit in minute position" do
-      assert DTM.parse("202603221430XX") == nil
+    test "preserves non-digit in minute position in original field" do
+      assert %DTM{original: "202603221430XX"} = DTM.parse("202603221430XX")
     end
   end
 

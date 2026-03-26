@@ -27,8 +27,8 @@ defmodule HL7v2.Type.DTTest do
       assert DT.parse(nil) == nil
     end
 
-    test "returns nil for invalid date" do
-      assert DT.parse("20261332") == nil
+    test "preserves invalid date in original field" do
+      assert %DT{original: "20261332"} = DT.parse("20261332")
     end
 
     test "returns nil for invalid month" do
@@ -47,7 +47,7 @@ defmodule HL7v2.Type.DTTest do
 
     test "handles leap year correctly" do
       assert DT.parse("20240229") == ~D[2024-02-29]
-      assert DT.parse("20250229") == nil
+      assert %DT{original: "20250229"} = DT.parse("20250229")
     end
   end
 

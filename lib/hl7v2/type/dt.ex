@@ -9,7 +9,7 @@ defmodule HL7v2.Type.DT do
 
   @behaviour HL7v2.Type
 
-  defstruct [:year, :month, :day]
+  defstruct [:year, :month, :day, :original]
 
   @type t :: %__MODULE__{
           year: pos_integer(),
@@ -45,14 +45,15 @@ defmodule HL7v2.Type.DT do
   def parse(nil), do: nil
   def parse(""), do: nil
 
-  def parse(<<y::binary-size(4), m::binary-size(2), d::binary-size(2)>>) do
+  def parse(<<y::binary-size(4), m::binary-size(2), d::binary-size(2)>> = raw) do
     with {year, ""} <- Integer.parse(y),
          {month, ""} <- Integer.parse(m),
          {day, ""} <- Integer.parse(d),
          {:ok, date} <- Date.new(year, month, day) do
       date
     else
-      _ -> nil
+      # Invalid date — preserve raw string for lossless round-trip
+      _ -> %__MODULE__{original: raw}
     end
   end
 
@@ -95,6 +96,9 @@ defmodule HL7v2.Type.DT do
   """
   @spec encode(Date.t() | t() | nil) :: binary()
   def encode(nil), do: ""
+
+  # Preserved invalid value — emit raw string for lossless round-trip
+  def encode(%__MODULE__{original: original}) when is_binary(original), do: original
 
   def encode(%Date{year: y, month: m, day: d}) do
     pad4(y) <> pad2(m) <> pad2(d)

@@ -21,7 +21,8 @@ defmodule HL7v2.Type.DTM do
     :minute,
     :second,
     :fraction,
-    :offset
+    :offset,
+    :original
   ]
 
   @type t :: %__MODULE__{
@@ -62,7 +63,11 @@ defmodule HL7v2.Type.DTM do
 
   def parse(value) when is_binary(value) do
     {datetime_part, offset} = split_offset(value)
-    parse_datetime(datetime_part, offset)
+
+    case parse_datetime(datetime_part, offset) do
+      nil -> %__MODULE__{original: value}
+      result -> result
+    end
   end
 
   @doc """
@@ -82,6 +87,9 @@ defmodule HL7v2.Type.DTM do
   """
   @spec encode(t() | DateTime.t() | NaiveDateTime.t() | nil) :: binary()
   def encode(nil), do: ""
+
+  # Preserved invalid value — emit raw string for lossless round-trip
+  def encode(%__MODULE__{original: original, year: nil}) when is_binary(original), do: original
 
   def encode(%DateTime{} = dt) do
     base =
