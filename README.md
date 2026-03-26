@@ -15,42 +15,35 @@
 [![Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/hl7v2)
 [![License](https://img.shields.io/hexpm/l/hl7v2.svg)](https://github.com/Balneario-de-Cofrentes/hl7v2/blob/main/LICENSE)
 
-The HL7v2 library that treats clinical messages as first-class data structures,
-not bags of strings.
+Pure Elixir HL7 v2.x toolkit — typed segment structs, programmatic message building,
+structural validation, and integrated MLLP transport.
 
-## The Difference
+## What You Get
 
-Other Elixir HL7v2 libraries give you string maps. We give you structs:
+- **Typed segments** — every v2.5.1 segment is an Elixir struct with named fields,
+  not string maps with integer keys
+- **Programmatic message building** — `Message.new/3` + `add_segment/2` with
+  auto-populated MSH
+- **Structural validation** — positional order/group/cardinality checks for
+  supported message structures, opt-in HL7 table validation
+- **Lossless raw mode** — canonical round-trip parsing that preserves everything,
+  including malformed input
+- **Integrated MLLP** — Ranch 2.x listener, GenServer client, TLS/mTLS, telemetry
+- **ACK/NAK builder** — `HL7v2.ack/2` with sender/receiver swap
+- **Path access** — `get/2`, `fetch/2`, `~h` sigil with compile-time validation
 
 ```elixir
-# elixir_hl7 — strings all the way down
-HL7.get(msg, ~p"PID-5")  # => "Smith^John"
+# Typed structs with named fields
+{:ok, msg} = HL7v2.parse(text, mode: :typed)
+pid = Enum.find(msg.segments, &is_struct(&1, HL7v2.Segment.PID))
+pid.patient_name  #=> [%XPN{family_name: %FN{surname: "Smith"}, given_name: "John"}]
 
-# hl7v2 — typed structs with named fields
-pid = Enum.find(typed.segments, &is_struct(&1, HL7v2.Segment.PID))
-pid.patient_name  # => [%XPN{family_name: %FN{surname: "Smith"}, given_name: "John"}]
-
-# Build messages programmatically — no other Elixir library does this:
+# Build messages programmatically
 msg = HL7v2.Message.new("ADT", "A01", sending_application: "PHAOS")
       |> HL7v2.Message.add_segment(%HL7v2.Segment.PID{
            patient_name: [%XPN{family_name: %FN{surname: "Smith"}, given_name: "John"}]
          })
 ```
-
-## Why HL7v2
-
-| | elixir_hl7 | **hl7v2** |
-|---|---|---|
-| Data model | Sparse maps, integer keys | **Typed structs, named fields** |
-| Building messages | Not supported | **`Message.new` + `add_segment`** |
-| Validation | None (by design) | **Opt-in required-field + segment-presence checks** |
-| Transport | Separate package (mllp) | **Integrated MLLP** |
-| Ranch | 1.8 | **2.x** |
-| Parse + type | Two steps | **`mode: :typed` in one call** |
-| ACK/NAK | Manual | **`Ack.accept/error/reject`** |
-| TLS | Separate config | **Built-in mTLS helpers** |
-| Path access | `~p"PID-5"` sigil | **`get/2` + `fetch/2` with error tuples** |
-| Telemetry | No | **`:telemetry` spans on all ops** |
 
 ## Installation
 
