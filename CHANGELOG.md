@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.7.1 — 2026-03-27
+
+### Fixes
+
+- **parse/2 table validation** — `validate_tables: true` option now forwarded to
+  validator (was silently ignored)
+- **add_segment/2 guards** — rejects MSH (ArgumentError) and non-segment structs
+- **ACK 5-char delimiter support** — ACK encoder handles truncation-character MSH-2
+- **parse/2 typespec** — includes `{:ok, msg, warnings}` return shape
+
 ## v2.7.0 — 2026-03-27
 
 ### Full v2.5.1 Structure Coverage
