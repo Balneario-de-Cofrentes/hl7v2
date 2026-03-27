@@ -52,7 +52,7 @@ defmodule HL7v2 do
       {:ok, msg} = HL7v2.parse(text, copy: true)
 
   """
-  @spec parse(binary(), keyword()) :: {:ok, term()} | {:error, term()}
+  @spec parse(binary(), keyword()) :: {:ok, term()} | {:ok, term(), [map()]} | {:error, term()}
   def parse(text, opts \\ [])
   def parse(text, _opts) when not is_binary(text), do: {:error, :invalid_input}
 
@@ -63,7 +63,9 @@ defmodule HL7v2 do
     Telemetry.span(:parse, %{mode: mode}, fn ->
       with {:ok, msg} <- Parser.parse(text, opts) do
         if validate? and mode == :typed do
-          case HL7v2.Validation.validate(msg) do
+          validate_opts = Keyword.take(opts, [:mode, :validate_tables])
+
+          case HL7v2.Validation.validate(msg, validate_opts) do
             :ok -> {:ok, msg}
             {:ok, warnings} -> {:ok, msg, warnings}
             {:error, _} = err -> err

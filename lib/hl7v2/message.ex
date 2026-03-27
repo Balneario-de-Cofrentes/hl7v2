@@ -85,7 +85,16 @@ defmodule HL7v2.Message do
   via this function.
   """
   @spec add_segment(t(), struct()) :: t()
+  def add_segment(%__MODULE__{}, %HL7v2.Segment.MSH{}) do
+    raise ArgumentError, "MSH is managed by Message.new/3 and cannot be added via add_segment/2"
+  end
+
   def add_segment(%__MODULE__{} = msg, segment) when is_struct(segment) do
+    unless function_exported?(segment.__struct__, :segment_id, 0) do
+      raise ArgumentError,
+            "expected an HL7v2 segment struct, got #{inspect(segment.__struct__)}"
+    end
+
     %{msg | segments: msg.segments ++ [segment]}
   end
 

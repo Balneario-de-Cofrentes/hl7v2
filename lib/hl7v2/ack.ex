@@ -197,23 +197,13 @@ defmodule HL7v2.Ack do
   defp separator_from_msh(%MSH{} = msh) do
     enc = msh.encoding_characters || "^~\\&"
 
-    case enc do
-      <<c, r, e, s>> ->
-        %Separator{
-          field: char_to_int(msh.field_separator) || ?|,
-          component: c,
-          repetition: r,
-          escape: e,
-          sub_component: s
-        }
+    fs = msh.field_separator || "|"
 
-      _ ->
-        Separator.default()
+    case HL7v2.Separator.from_msh("MSH" <> fs <> enc <> fs) do
+      {:ok, sep} -> sep
+      _ -> Separator.default()
     end
   end
-
-  defp char_to_int(<<c>>), do: c
-  defp char_to_int(_), do: nil
 
   defp extract_type(%MSH{message_type: %MSG{message_code: mc, trigger_event: te}})
        when is_binary(mc) do

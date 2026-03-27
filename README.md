@@ -168,7 +168,7 @@ end
 
  Types       89 v2.5.1 data types + legacy TN (100% of official catalog)
 
- Structures  190 message structure definitions covering all major v2.5.1 families
+ Structures  222 message structure definitions (186/186 official v2.5.1 + aliases)
               ADT, BAR, BPS/BRP/BRT/BTS, CRM, CSU, DFT, MDM, MFN/MFK/MFR,
               OML/OMG/OMD/OMP/OMS/OMI/OMN/OMB, ORU/OUL/ORA, ORM/ORR/ORG/ORL/ORP/ORD/ORS/ORN/ORI/ORB,
               RDE/RDS/RGV/RAS, RRE/RRD/RRG/RRA, REF/RRI, SIU/SRM/SRR,
