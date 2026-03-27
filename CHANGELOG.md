@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.7.0 — 2026-03-27
+
+### Full v2.5.1 Structure Coverage
+
+- **9 final missing structures**: EAN_U09, PPV_PCA, PRR_PC5, PTR_PCF, QBP_Z73,
+  QRY, RCL_I06, RGR_RGR, RTB_Z74
+- **186/186 official v2.5.1 structures** covered (222 total with aliases)
+- All official segments, types, and structures at 100%
+
 ## v2.6.0 — 2026-03-26
 
 ### Full v2.5.1 Structure Coverage

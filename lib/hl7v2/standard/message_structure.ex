@@ -6123,10 +6123,11 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :MSH, :required},
       {:segment, :SFT, :optional, :repeating},
       {:segment, :EQU, :required},
-      {:group, :NOTIFICATION, :required, :repeating, [
-        {:segment, :NDS, :required},
-        {:segment, :NTE, :optional}
-      ]},
+      {:group, :NOTIFICATION, :required, :repeating,
+       [
+         {:segment, :NDS, :required},
+         {:segment, :NTE, :optional}
+       ]},
       {:segment, :ROL, :optional}
     ]
   }
@@ -6142,56 +6143,68 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :ERR, :optional, :repeating},
       {:segment, :QAK, :optional},
       {:segment, :QRD, :required},
-      {:group, :PATIENT, :required, :repeating, [
-        {:segment, :PID, :required},
-        {:group, :PATIENT_VISIT, :optional, [
-          {:segment, :PV1, :required},
-          {:segment, :PV2, :optional}
-        ]},
-        {:group, :GOAL, :required, :repeating, [
-          {:segment, :GOL, :required},
-          {:segment, :NTE, :optional, :repeating},
-          {:segment, :VAR, :optional, :repeating},
-          {:group, :GOAL_ROLE, :optional, :repeating, [
-            {:segment, :ROL, :required},
-            {:segment, :VAR, :optional, :repeating}
+      {:group, :PATIENT, :required, :repeating,
+       [
+         {:segment, :PID, :required},
+         {:group, :PATIENT_VISIT, :optional,
+          [
+            {:segment, :PV1, :required},
+            {:segment, :PV2, :optional}
           ]},
-          {:group, :GOAL_PATHWAY, :optional, :repeating, [
-            {:segment, :PTH, :required},
-            {:segment, :VAR, :optional, :repeating}
-          ]},
-          {:group, :GOAL_OBSERVATION, :optional, :repeating, [
-            {:segment, :OBX, :required},
-            {:segment, :NTE, :optional, :repeating}
-          ]},
-          {:group, :PROBLEM, :optional, :repeating, [
-            {:segment, :PRB, :required},
+         {:group, :GOAL, :required, :repeating,
+          [
+            {:segment, :GOL, :required},
             {:segment, :NTE, :optional, :repeating},
             {:segment, :VAR, :optional, :repeating},
-            {:group, :PROBLEM_ROLE, :optional, :repeating, [
-              {:segment, :ROL, :required},
-              {:segment, :VAR, :optional, :repeating}
-            ]},
-            {:group, :PROBLEM_OBSERVATION, :optional, :repeating, [
-              {:segment, :OBX, :required},
-              {:segment, :NTE, :optional, :repeating}
-            ]}
-          ]},
-          {:group, :ORDER, :optional, :repeating, [
-            {:segment, :ORC, :required},
-            {:group, :ORDER_DETAIL, :optional, [
-              {:segment, :OBR, :required},
-              {:segment, :NTE, :optional, :repeating},
-              {:segment, :VAR, :optional, :repeating},
-              {:group, :ORDER_OBSERVATION, :optional, :repeating, [
-                {:segment, :OBX, :required},
-                {:segment, :NTE, :optional, :repeating},
-                {:segment, :VAR, :optional, :repeating}
-              ]}
-            ]}
+            {:group, :GOAL_ROLE, :optional, :repeating,
+             [
+               {:segment, :ROL, :required},
+               {:segment, :VAR, :optional, :repeating}
+             ]},
+            {:group, :GOAL_PATHWAY, :optional, :repeating,
+             [
+               {:segment, :PTH, :required},
+               {:segment, :VAR, :optional, :repeating}
+             ]},
+            {:group, :GOAL_OBSERVATION, :optional, :repeating,
+             [
+               {:segment, :OBX, :required},
+               {:segment, :NTE, :optional, :repeating}
+             ]},
+            {:group, :PROBLEM, :optional, :repeating,
+             [
+               {:segment, :PRB, :required},
+               {:segment, :NTE, :optional, :repeating},
+               {:segment, :VAR, :optional, :repeating},
+               {:group, :PROBLEM_ROLE, :optional, :repeating,
+                [
+                  {:segment, :ROL, :required},
+                  {:segment, :VAR, :optional, :repeating}
+                ]},
+               {:group, :PROBLEM_OBSERVATION, :optional, :repeating,
+                [
+                  {:segment, :OBX, :required},
+                  {:segment, :NTE, :optional, :repeating}
+                ]}
+             ]},
+            {:group, :ORDER, :optional, :repeating,
+             [
+               {:segment, :ORC, :required},
+               {:group, :ORDER_DETAIL, :optional,
+                [
+                  {:segment, :OBR, :required},
+                  {:segment, :NTE, :optional, :repeating},
+                  {:segment, :VAR, :optional, :repeating},
+                  {:group, :ORDER_OBSERVATION, :optional, :repeating,
+                   [
+                     {:segment, :OBX, :required},
+                     {:segment, :NTE, :optional, :repeating},
+                     {:segment, :VAR, :optional, :repeating}
+                   ]}
+                ]}
+             ]}
           ]}
-        ]}
-      ]}
+       ]}
     ]
   }
 
@@ -6206,29 +6219,50 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :ERR, :optional, :repeating},
       {:segment, :QAK, :optional},
       {:segment, :QRD, :required},
-      {:group, :PATIENT, :required, :repeating, [
-        {:segment, :PID, :required},
-        {:group, :PATIENT_VISIT, :optional, [{:segment, :PV1, :required}, {:segment, :PV2, :optional}]},
-        {:group, :PROBLEM, :required, :repeating, [
-          {:segment, :PRB, :required},
-          {:segment, :NTE, :optional, :repeating},
-          {:segment, :VAR, :optional, :repeating},
-          {:group, :PROBLEM_ROLE, :optional, :repeating, [{:segment, :ROL, :required}, {:segment, :VAR, :optional, :repeating}]},
-          {:group, :PROBLEM_PATHWAY, :optional, :repeating, [{:segment, :PTH, :required}, {:segment, :VAR, :optional, :repeating}]},
-          {:group, :PROBLEM_OBSERVATION, :optional, :repeating, [{:segment, :OBX, :required}, {:segment, :NTE, :optional, :repeating}]},
-          {:group, :GOAL, :optional, :repeating, [
-            {:segment, :GOL, :required},
+      {:group, :PATIENT, :required, :repeating,
+       [
+         {:segment, :PID, :required},
+         {:group, :PATIENT_VISIT, :optional,
+          [{:segment, :PV1, :required}, {:segment, :PV2, :optional}]},
+         {:group, :PROBLEM, :required, :repeating,
+          [
+            {:segment, :PRB, :required},
             {:segment, :NTE, :optional, :repeating},
             {:segment, :VAR, :optional, :repeating},
-            {:group, :GOAL_ROLE, :optional, :repeating, [{:segment, :ROL, :required}, {:segment, :VAR, :optional, :repeating}]},
-            {:group, :GOAL_OBSERVATION, :optional, :repeating, [{:segment, :OBX, :required}, {:segment, :NTE, :optional, :repeating}]}
-          ]},
-          {:group, :ORDER, :optional, :repeating, [
-            {:segment, :ORC, :required},
-            {:group, :ORDER_DETAIL, :optional, [{:segment, :OBR, :required}, {:segment, :NTE, :optional, :repeating}, {:segment, :VAR, :optional, :repeating}, {:group, :ORDER_OBSERVATION, :optional, :repeating, [{:segment, :OBX, :required}, {:segment, :NTE, :optional, :repeating}, {:segment, :VAR, :optional, :repeating}]}]}
+            {:group, :PROBLEM_ROLE, :optional, :repeating,
+             [{:segment, :ROL, :required}, {:segment, :VAR, :optional, :repeating}]},
+            {:group, :PROBLEM_PATHWAY, :optional, :repeating,
+             [{:segment, :PTH, :required}, {:segment, :VAR, :optional, :repeating}]},
+            {:group, :PROBLEM_OBSERVATION, :optional, :repeating,
+             [{:segment, :OBX, :required}, {:segment, :NTE, :optional, :repeating}]},
+            {:group, :GOAL, :optional, :repeating,
+             [
+               {:segment, :GOL, :required},
+               {:segment, :NTE, :optional, :repeating},
+               {:segment, :VAR, :optional, :repeating},
+               {:group, :GOAL_ROLE, :optional, :repeating,
+                [{:segment, :ROL, :required}, {:segment, :VAR, :optional, :repeating}]},
+               {:group, :GOAL_OBSERVATION, :optional, :repeating,
+                [{:segment, :OBX, :required}, {:segment, :NTE, :optional, :repeating}]}
+             ]},
+            {:group, :ORDER, :optional, :repeating,
+             [
+               {:segment, :ORC, :required},
+               {:group, :ORDER_DETAIL, :optional,
+                [
+                  {:segment, :OBR, :required},
+                  {:segment, :NTE, :optional, :repeating},
+                  {:segment, :VAR, :optional, :repeating},
+                  {:group, :ORDER_OBSERVATION, :optional, :repeating,
+                   [
+                     {:segment, :OBX, :required},
+                     {:segment, :NTE, :optional, :repeating},
+                     {:segment, :VAR, :optional, :repeating}
+                   ]}
+                ]}
+             ]}
           ]}
-        ]}
-      ]}
+       ]}
     ]
   }
 
@@ -6239,14 +6273,26 @@ defmodule HL7v2.Standard.MessageStructure do
   @qbp_z73 %{
     name: "QBP_Z73",
     description: "Information about Pending Events",
-    nodes: [{:segment, :MSH, :required}, {:segment, :SFT, :optional, :repeating}, {:segment, :QPD, :required}, {:segment, :RCP, :required}, {:segment, :DSC, :optional}]
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QPD, :required},
+      {:segment, :RCP, :required},
+      {:segment, :DSC, :optional}
+    ]
   }
 
   # QRY: Original-Style Query (generic, no qualifier)
   @qry %{
     name: "QRY",
     description: "Original-Style Query",
-    nodes: [{:segment, :MSH, :required}, {:segment, :SFT, :optional, :repeating}, {:segment, :QRD, :required}, {:segment, :QRF, :optional}, {:segment, :DSC, :optional}]
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:segment, :DSC, :optional}
+    ]
   }
 
   # RCL_I06: Request/Receipt of Clinical Data Listing
@@ -6259,10 +6305,11 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :MSA, :required},
       {:segment, :QRD, :required},
       {:segment, :QRF, :optional},
-      {:group, :PROVIDER, :required, :repeating, [
-        {:segment, :PRD, :required},
-        {:segment, :CTD, :optional, :repeating}
-      ]},
+      {:group, :PROVIDER, :required, :repeating,
+       [
+         {:segment, :PRD, :required},
+         {:segment, :CTD, :optional, :repeating}
+       ]},
       {:segment, :PID, :required},
       {:segment, :DG1, :optional, :repeating},
       {:segment, :DRG, :optional, :repeating},
@@ -6282,18 +6329,26 @@ defmodule HL7v2.Standard.MessageStructure do
       {:segment, :SFT, :optional, :repeating},
       {:segment, :MSA, :required},
       {:segment, :ERR, :optional, :repeating},
-      {:group, :DEFINITION, :required, :repeating, [
-        {:segment, :QRD, :required},
-        {:segment, :QRF, :optional},
-        {:group, :PATIENT, :optional, [{:segment, :PID, :required}, {:segment, :NTE, :optional, :repeating}]},
-        {:group, :ORDER, :required, :repeating, [
-          {:segment, :ORC, :required},
-          {:group, :ENCODING, :optional, [{:segment, :RXE, :required}, {:segment, :RXR, :required, :repeating}, {:segment, :RXC, :optional, :repeating}]},
-          {:segment, :RXG, :required, :repeating},
-          {:segment, :RXR, :required, :repeating},
-          {:segment, :RXC, :optional, :repeating}
-        ]}
-      ]},
+      {:group, :DEFINITION, :required, :repeating,
+       [
+         {:segment, :QRD, :required},
+         {:segment, :QRF, :optional},
+         {:group, :PATIENT, :optional,
+          [{:segment, :PID, :required}, {:segment, :NTE, :optional, :repeating}]},
+         {:group, :ORDER, :required, :repeating,
+          [
+            {:segment, :ORC, :required},
+            {:group, :ENCODING, :optional,
+             [
+               {:segment, :RXE, :required},
+               {:segment, :RXR, :required, :repeating},
+               {:segment, :RXC, :optional, :repeating}
+             ]},
+            {:segment, :RXG, :required, :repeating},
+            {:segment, :RXR, :required, :repeating},
+            {:segment, :RXC, :optional, :repeating}
+          ]}
+       ]},
       {:segment, :DSC, :optional}
     ]
   }
@@ -6302,7 +6357,17 @@ defmodule HL7v2.Standard.MessageStructure do
   @rtb_z74 %{
     name: "RTB_Z74",
     description: "Tabular Response — Pending Events",
-    nodes: [{:segment, :MSH, :required}, {:segment, :SFT, :optional, :repeating}, {:segment, :MSA, :required}, {:segment, :ERR, :optional}, {:segment, :QAK, :required}, {:segment, :QPD, :required}, {:segment, :RDF, :optional}, {:segment, :RDT, :optional, :repeating}, {:segment, :DSC, :optional}]
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional},
+      {:segment, :QAK, :required},
+      {:segment, :QPD, :required},
+      {:segment, :RDF, :optional},
+      {:segment, :RDT, :optional, :repeating},
+      {:segment, :DSC, :optional}
+    ]
   }
 
   @structures %{
