@@ -377,7 +377,16 @@ defmodule HL7v2.MessageDefinition do
     {"ADT", "A55"} => "ADT_A54",
     {"ADT", "A60"} => "ADT_A60",
     {"ADT", "A61"} => "ADT_A61",
-    {"ADT", "A62"} => "ADT_A61"
+    {"ADT", "A62"} => "ADT_A61",
+    # -- Remaining v2.5.1 structures --
+    {"EAN", "U09"} => "EAN_U09",
+    {"PPV", "PCA"} => "PPV_PCA",
+    {"PRR", "PC5"} => "PRR_PC5",
+    {"PTR", "PCF"} => "PTR_PCF",
+    {"QBP", "Z73"} => "QBP_Z73",
+    {"RCL", "I06"} => "RCL_I06",
+    {"RGR", "RGR"} => "RGR_RGR",
+    {"RTB", "Z74"} => "RTB_Z74"
   }
 
   @doc """

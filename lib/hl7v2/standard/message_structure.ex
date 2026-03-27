@@ -6115,6 +6115,196 @@ defmodule HL7v2.Standard.MessageStructure do
     ]
   }
 
+  # EAN_U09: Equipment Advisory Notification
+  @ean_u09 %{
+    name: "EAN_U09",
+    description: "Automated Equipment Notification",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :EQU, :required},
+      {:group, :NOTIFICATION, :required, :repeating, [
+        {:segment, :NDS, :required},
+        {:segment, :NTE, :optional}
+      ]},
+      {:segment, :ROL, :optional}
+    ]
+  }
+
+  # PPV_PCA: Patient Pathway (Goal-Oriented) Response
+  @ppv_pca %{
+    name: "PPV_PCA",
+    description: "Patient Goal Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :QAK, :optional},
+      {:segment, :QRD, :required},
+      {:group, :PATIENT, :required, :repeating, [
+        {:segment, :PID, :required},
+        {:group, :PATIENT_VISIT, :optional, [
+          {:segment, :PV1, :required},
+          {:segment, :PV2, :optional}
+        ]},
+        {:group, :GOAL, :required, :repeating, [
+          {:segment, :GOL, :required},
+          {:segment, :NTE, :optional, :repeating},
+          {:segment, :VAR, :optional, :repeating},
+          {:group, :GOAL_ROLE, :optional, :repeating, [
+            {:segment, :ROL, :required},
+            {:segment, :VAR, :optional, :repeating}
+          ]},
+          {:group, :GOAL_PATHWAY, :optional, :repeating, [
+            {:segment, :PTH, :required},
+            {:segment, :VAR, :optional, :repeating}
+          ]},
+          {:group, :GOAL_OBSERVATION, :optional, :repeating, [
+            {:segment, :OBX, :required},
+            {:segment, :NTE, :optional, :repeating}
+          ]},
+          {:group, :PROBLEM, :optional, :repeating, [
+            {:segment, :PRB, :required},
+            {:segment, :NTE, :optional, :repeating},
+            {:segment, :VAR, :optional, :repeating},
+            {:group, :PROBLEM_ROLE, :optional, :repeating, [
+              {:segment, :ROL, :required},
+              {:segment, :VAR, :optional, :repeating}
+            ]},
+            {:group, :PROBLEM_OBSERVATION, :optional, :repeating, [
+              {:segment, :OBX, :required},
+              {:segment, :NTE, :optional, :repeating}
+            ]}
+          ]},
+          {:group, :ORDER, :optional, :repeating, [
+            {:segment, :ORC, :required},
+            {:group, :ORDER_DETAIL, :optional, [
+              {:segment, :OBR, :required},
+              {:segment, :NTE, :optional, :repeating},
+              {:segment, :VAR, :optional, :repeating},
+              {:group, :ORDER_OBSERVATION, :optional, :repeating, [
+                {:segment, :OBX, :required},
+                {:segment, :NTE, :optional, :repeating},
+                {:segment, :VAR, :optional, :repeating}
+              ]}
+            ]}
+          ]}
+        ]}
+      ]}
+    ]
+  }
+
+  # PRR_PC5: Patient Problem Response
+  @prr_pc5 %{
+    name: "PRR_PC5",
+    description: "Patient Problem Response",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:segment, :QAK, :optional},
+      {:segment, :QRD, :required},
+      {:group, :PATIENT, :required, :repeating, [
+        {:segment, :PID, :required},
+        {:group, :PATIENT_VISIT, :optional, [{:segment, :PV1, :required}, {:segment, :PV2, :optional}]},
+        {:group, :PROBLEM, :required, :repeating, [
+          {:segment, :PRB, :required},
+          {:segment, :NTE, :optional, :repeating},
+          {:segment, :VAR, :optional, :repeating},
+          {:group, :PROBLEM_ROLE, :optional, :repeating, [{:segment, :ROL, :required}, {:segment, :VAR, :optional, :repeating}]},
+          {:group, :PROBLEM_PATHWAY, :optional, :repeating, [{:segment, :PTH, :required}, {:segment, :VAR, :optional, :repeating}]},
+          {:group, :PROBLEM_OBSERVATION, :optional, :repeating, [{:segment, :OBX, :required}, {:segment, :NTE, :optional, :repeating}]},
+          {:group, :GOAL, :optional, :repeating, [
+            {:segment, :GOL, :required},
+            {:segment, :NTE, :optional, :repeating},
+            {:segment, :VAR, :optional, :repeating},
+            {:group, :GOAL_ROLE, :optional, :repeating, [{:segment, :ROL, :required}, {:segment, :VAR, :optional, :repeating}]},
+            {:group, :GOAL_OBSERVATION, :optional, :repeating, [{:segment, :OBX, :required}, {:segment, :NTE, :optional, :repeating}]}
+          ]},
+          {:group, :ORDER, :optional, :repeating, [
+            {:segment, :ORC, :required},
+            {:group, :ORDER_DETAIL, :optional, [{:segment, :OBR, :required}, {:segment, :NTE, :optional, :repeating}, {:segment, :VAR, :optional, :repeating}, {:group, :ORDER_OBSERVATION, :optional, :repeating, [{:segment, :OBX, :required}, {:segment, :NTE, :optional, :repeating}, {:segment, :VAR, :optional, :repeating}]}]}
+          ]}
+        ]}
+      ]}
+    ]
+  }
+
+  # PTR_PCF: Pathway (Problem-Oriented) Response — same structure as PRR_PC5
+  @ptr_pcf %{@prr_pc5 | name: "PTR_PCF", description: "Patient Pathway Response"}
+
+  # QBP_Z73: Information about Pending Events Query
+  @qbp_z73 %{
+    name: "QBP_Z73",
+    description: "Information about Pending Events",
+    nodes: [{:segment, :MSH, :required}, {:segment, :SFT, :optional, :repeating}, {:segment, :QPD, :required}, {:segment, :RCP, :required}, {:segment, :DSC, :optional}]
+  }
+
+  # QRY: Original-Style Query (generic, no qualifier)
+  @qry %{
+    name: "QRY",
+    description: "Original-Style Query",
+    nodes: [{:segment, :MSH, :required}, {:segment, :SFT, :optional, :repeating}, {:segment, :QRD, :required}, {:segment, :QRF, :optional}, {:segment, :DSC, :optional}]
+  }
+
+  # RCL_I06: Request/Receipt of Clinical Data Listing
+  @rcl_i06 %{
+    name: "RCL_I06",
+    description: "Request Clinical Data Listing",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :QRD, :required},
+      {:segment, :QRF, :optional},
+      {:group, :PROVIDER, :required, :repeating, [
+        {:segment, :PRD, :required},
+        {:segment, :CTD, :optional, :repeating}
+      ]},
+      {:segment, :PID, :required},
+      {:segment, :DG1, :optional, :repeating},
+      {:segment, :DRG, :optional, :repeating},
+      {:segment, :AL1, :optional, :repeating},
+      {:segment, :NTE, :optional, :repeating},
+      {:segment, :DSP, :optional, :repeating},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RGR_RGR: Pharmacy/Treatment Dose Information
+  @rgr_rgr %{
+    name: "RGR_RGR",
+    description: "Pharmacy/Treatment Dose Information",
+    nodes: [
+      {:segment, :MSH, :required},
+      {:segment, :SFT, :optional, :repeating},
+      {:segment, :MSA, :required},
+      {:segment, :ERR, :optional, :repeating},
+      {:group, :DEFINITION, :required, :repeating, [
+        {:segment, :QRD, :required},
+        {:segment, :QRF, :optional},
+        {:group, :PATIENT, :optional, [{:segment, :PID, :required}, {:segment, :NTE, :optional, :repeating}]},
+        {:group, :ORDER, :required, :repeating, [
+          {:segment, :ORC, :required},
+          {:group, :ENCODING, :optional, [{:segment, :RXE, :required}, {:segment, :RXR, :required, :repeating}, {:segment, :RXC, :optional, :repeating}]},
+          {:segment, :RXG, :required, :repeating},
+          {:segment, :RXR, :required, :repeating},
+          {:segment, :RXC, :optional, :repeating}
+        ]}
+      ]},
+      {:segment, :DSC, :optional}
+    ]
+  }
+
+  # RTB_Z74: Information about Pending Events Response
+  @rtb_z74 %{
+    name: "RTB_Z74",
+    description: "Tabular Response — Pending Events",
+    nodes: [{:segment, :MSH, :required}, {:segment, :SFT, :optional, :repeating}, {:segment, :MSA, :required}, {:segment, :ERR, :optional}, {:segment, :QAK, :required}, {:segment, :QPD, :required}, {:segment, :RDF, :optional}, {:segment, :RDT, :optional, :repeating}, {:segment, :DSC, :optional}]
+  }
+
   @structures %{
     "ADR_A19" => @adr_a19,
     "ADT_A01" => @adt_a01,
@@ -6193,15 +6383,21 @@ defmodule HL7v2.Standard.MessageStructure do
     "PPG_PCG" => @ppg_pcg,
     "PPP_PCB" => @ppp_pcb,
     "PPR_PC1" => @ppr_pc1,
+    "PPV_PCA" => @ppv_pca,
+    "PRR_PC5" => @prr_pc5,
+    "PTR_PCF" => @ptr_pcf,
     "PPT_PCL" => @ppt_pcl,
     "QBP_Q21" => @qbp_q21,
+    "QBP_Z73" => @qbp_z73,
     "QCK_Q02" => @qck_q02,
     "QCN_J01" => @qcn_j01,
     "RAS_O17" => @ras_o17,
     "RDE_O11" => @rde_o11,
     "RDS_O13" => @rds_o13,
     "RDY_K15" => @rdy_k15,
+    "RCL_I06" => @rcl_i06,
     "REF_I12" => @ref_i12,
+    "RGR_RGR" => @rgr_rgr,
     "RGV_O15" => @rgv_o15,
     "RRA_O18" => @rra_o18,
     "RRD_O14" => @rrd_o14,
@@ -6210,6 +6406,7 @@ defmodule HL7v2.Standard.MessageStructure do
     "RRG_O16" => @rrg_o16,
     "RSP_K21" => @rsp_k21,
     "RTB_K13" => @rtb_k13,
+    "RTB_Z74" => @rtb_z74,
     "SIU_S12" => @siu_s12,
     "SRM_S01" => @srm_s01,
     "SRR_S01" => @srr_s01,
@@ -6312,6 +6509,7 @@ defmodule HL7v2.Standard.MessageStructure do
     "QRY_Q01" => @qry_q01,
     "QRY_Q02" => @qry_q02,
     "QRY_R02" => @qry_r02,
+    "QRY" => @qry,
     "QRY_PC4" => @qry_pc4,
     "OSQ_Q06" => @osq_q06,
     "OSR_Q06" => @osr_q06,
@@ -6342,6 +6540,7 @@ defmodule HL7v2.Standard.MessageStructure do
     "EHC_E15" => @ehc_e15,
     "EHC_E20" => @ehc_e20,
     "EHC_E21" => @ehc_e21,
+    "EAN_U09" => @ean_u09,
     "EHC_E24" => @ehc_e24,
     "ACK" => @ack
   }
