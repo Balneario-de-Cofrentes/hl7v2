@@ -141,8 +141,8 @@ defmodule HL7v2.Conformance.StructureTest do
       end
     end
 
-    test "structure count is at least 18" do
-      assert MessageStructure.count() >= 18
+    test "structure count is exactly 222" do
+      assert MessageStructure.count() == 222
     end
   end
 
@@ -176,9 +176,9 @@ defmodule HL7v2.Conformance.StructureTest do
       end
     end
 
-    test "unsupported segments exist" do
+    test "no unsupported segments remain" do
       unsupported = Coverage.unsupported_segments()
-      assert length(unsupported) >= 0
+      assert unsupported == [], "Expected 0 unsupported segments, got: #{inspect(unsupported)}"
     end
   end
 end
