@@ -83,12 +83,13 @@ defmodule HL7v2.Validation.FieldRules do
     {"DB1", :disabled_indicator} => {136, :scalar},
 
     # -- DG1 (Diagnosis) --
+    {"DG1", :diagnosis_coding_method} => {53, :scalar},
     {"DG1", :diagnosis_type} => {52, :scalar},
     {"DG1", :drg_approval_indicator} => {136, :scalar},
+    {"DG1", :diagnosis_priority} => {359, :scalar},
     {"DG1", :diagnosis_classification} => {228, :scalar},
     {"DG1", :confidential_indicator} => {136, :scalar},
     {"DG1", :diagnosis_action_code} => {323, :scalar},
-    {"DG1", :diagnosis_priority} => {359, :scalar},
 
     # -- DRG (Diagnosis Related Group) --
     {"DRG", :drg_approval_indicator} => {136, :scalar},
@@ -439,6 +440,7 @@ defmodule HL7v2.Validation.FieldRules do
 
     # -- UB1 (UB82 Data) --
     {"UB1", :priority} => {27, :scalar},
+    {"UB1", :special_program_code} => {348, :scalar},
 
     # -- URD (Results/Update Definition) --
     {"URD", :report_priority} => {109, :scalar},

@@ -2889,6 +2889,199 @@ defmodule HL7v2.Standard.Tables do
         "F" => "Film-with-patient",
         "N" => "Notify provider when ready"
       }
+    },
+    106 => %{
+      name: "Query/Response Format Code",
+      codes: %{
+        "D" => "Response is in display format",
+        "R" => "Response is in record-oriented format",
+        "T" => "Response is in tabular format"
+      }
+    },
+    107 => %{
+      name: "Deferred Response Type",
+      codes: %{
+        "B" => "Before the Date/Time specified",
+        "L" => "Later than the Date/Time specified"
+      }
+    },
+    108 => %{
+      name: "Query Results Level",
+      codes: %{
+        "O" => "Order plus order status",
+        "R" => "Results without bulk text",
+        "S" => "Status only",
+        "T" => "Full results"
+      }
+    },
+    109 => %{
+      name: "Report Priority",
+      codes: %{
+        "R" => "Routine",
+        "S" => "Stat"
+      }
+    },
+    124 => %{
+      name: "Transportation Mode",
+      codes: %{
+        "CART" => "Cart - Loss of Ambulatory",
+        "PORT" => "The ambulatory patient requires a wheelchair to enter building",
+        "WALK" => "Patient will walk to/from Lab",
+        "WHLC" => "Wheelchair"
+      }
+    },
+    156 => %{
+      name: "Which Date/Time Qualifier",
+      codes: %{
+        "ANY" => "Any date/time within a range",
+        "COL" => "Collection date/time, equivalent to film or study date",
+        "ORD" => "Order date/time",
+        "RCT" => "Specimen receipt date/time, receipt of specimen in filling lab",
+        "REP" => "Report date/time",
+        "SCHED" => "Schedule date/time"
+      }
+    },
+    157 => %{
+      name: "Which Date/Time Status Qualifier",
+      codes: %{
+        "ANY" => "Any status",
+        "CFN" => "Current final value, whether or not final has been set",
+        "COR" => "Corrected only (no strays)",
+        "FIN" => "Final only (no corrections)",
+        "PRE" => "Preliminary",
+        "REP" => "Report completion date/time"
+      }
+    },
+    158 => %{
+      name: "Date/Time Selection Qualifier",
+      codes: %{
+        "1ST" => "First value within range",
+        "ALL" => "All values within the range",
+        "LST" => "Last value within the range",
+        "REV" => "All values within the range returned in reverse chronological order"
+      }
+    },
+    178 => %{
+      name: "File Level Event Code",
+      codes: %{
+        "REP" =>
+          "Replace current version of this master file with the version contained in this message",
+        "UPD" => "Change file records as defined in the record-level event codes for each record"
+      }
+    },
+    179 => %{
+      name: "Response Level Code",
+      codes: %{
+        "AL" => "Always. All MFA segments (Acknowledgment Record Errors in MFN/MFK)",
+        "ER" => "Error/Reject conditions only. Only MFA segments denoting errors",
+        "NE" => "Never. No MFA segments",
+        "SU" => "Success. Only MFA segments denoting success"
+      }
+    },
+    191 => %{
+      name: "Type of Referenced Data",
+      codes: %{
+        "AP" => "Other application data (typically uninterpreted binary data)",
+        "AU" => "Audio data",
+        "FT" => "Formatted text",
+        "IM" => "Image data",
+        "multipart" => "MIME multipart package",
+        "NS" => "Non-scanned image (continuous tone)",
+        "SD" => "Scanned document (group 4 fax)",
+        "SI" => "Scanned image (2-color lineart)",
+        "TEXT" => "Machine readable text document"
+      }
+    },
+    224 => %{
+      name: "Transport Arranged",
+      codes: %{
+        "A" => "Arranged",
+        "N" => "Not Arranged",
+        "U" => "Unknown"
+      }
+    },
+    225 => %{
+      name: "Escort Required",
+      codes: %{
+        "N" => "Not Required",
+        "R" => "Required",
+        "U" => "Unknown"
+      }
+    },
+    321 => %{
+      name: "Dispense Method",
+      codes: %{
+        "AD" => "Automatic Dispensing",
+        "F" => "Floor Stock",
+        "TR" => "Traditional",
+        "UD" => "Unit Dose"
+      }
+    },
+    329 => %{
+      name: "Quantity Method",
+      codes: %{
+        "AD" => "Actual count",
+        "EX" => "Extrapolated from history"
+      }
+    },
+    332 => %{
+      name: "Source Type",
+      codes: %{
+        "A" => "Accept",
+        "I" => "Initiate"
+      }
+    },
+    355 => %{
+      name: "Primary Key Value Type",
+      codes: %{
+        "CE" => "Coded element",
+        "PL" => "Person location"
+      }
+    },
+    359 => %{
+      name: "Diagnosis Priority",
+      codes: %{
+        "0" => "Not included in diagnosis ranking",
+        "1" => "The primary diagnosis",
+        "2" => "For ranked secondary diagnoses"
+      }
+    },
+    398 => %{
+      name: "Continuation Style Code",
+      codes: %{
+        "F" => "Fragmentation",
+        "I" => "Interactive Continuation"
+      }
+    },
+    418 => %{
+      name: "Procedure Priority",
+      codes: %{
+        "0" => "The admitting procedure",
+        "1" => "The primary procedure",
+        "2" => "For ranked secondary procedures"
+      }
+    },
+    53 => %{
+      name: "Diagnosis Coding Method",
+      codes: %{
+        "I9" => "ICD-9",
+        "I9C" => "ICD-9-CM",
+        "I10" => "ICD-10"
+      }
+    },
+    348 => %{
+      name: "Special Program Code",
+      codes: %{
+        "01" => "EPSDT-CHAP",
+        "02" => "Physically Handicapped Children's Program",
+        "03" => "Special Federal Funding",
+        "04" => "Family Planning",
+        "05" => "Disability",
+        "06" => "PPV/Medicare 100% Payment",
+        "07" => "Induced Abortion-Danger to Life",
+        "08" => "Induced Abortion Victim Rape/Incest",
+        "09" => "Second Opinion or Surgery"
+      }
     }
   }
 
