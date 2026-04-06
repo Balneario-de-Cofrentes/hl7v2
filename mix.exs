@@ -1,7 +1,7 @@
 defmodule HL7v2.MixProject do
   use Mix.Project
 
-  @version "2.8.2"
+  @version "2.9.0"
   @source_url "https://github.com/Balneario-de-Cofrentes/hl7v2"
 
   def project do

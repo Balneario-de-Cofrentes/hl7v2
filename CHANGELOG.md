@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.9.0 — 2026-04-07
+
+### Generated Reference Docs + Structure Proof
+
+- **`mix hl7v2.gen_docs`** — generates all reference docs from code metadata
+- **message-structures.md**: 6,726 lines — all 222 structures with group notation
+- **segments.md**: 3,516 lines — all 152 segments with field tables
+- **data-types.md**: 1,162 lines — all 90 types with components
+- **444 generated structure validation tests** — positive + negative for every
+  structure. No more "selectively tested."
+- Conformance assertions tightened to exact counts
+- Stale moduledocs and roadmap fixed
+
+### Stats
+
+3,863 tests (472 doctests + 32 properties + 3,359 tests), 0 failures
+
 ## v2.8.2 — 2026-04-06
 
 ### Fixes
