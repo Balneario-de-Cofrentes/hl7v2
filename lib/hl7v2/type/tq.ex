@@ -58,9 +58,8 @@ defmodule HL7v2.Type.TQ do
   @doc """
   Parses a TQ from a list of components.
 
-  Components containing sub-components (CQ, TS, CE) are split by `&` and
-  parsed into their respective structs. RI (component 2) and OSD (component 10)
-  are preserved as raw strings.
+  Components containing sub-components (CQ, TS, CE, RI, OSD) are split by `&`
+  and parsed into their respective typed structs.
 
   ## Examples
 

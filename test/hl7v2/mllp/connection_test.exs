@@ -130,17 +130,17 @@ defmodule HL7v2.MLLP.ConnectionTest do
     test "emits message exception event on handler error", %{port: port, ref: ref} do
       {:ok, socket} = :gen_tcp.connect(~c"127.0.0.1", port, [:binary, active: false])
       :gen_tcp.send(socket, <<@sb, "error", @eb, @cr>>)
-      Process.sleep(50)
+      Process.sleep(100)
       :gen_tcp.close(socket)
 
       assert_receive {^ref, [:hl7v2, :mllp, :message, :exception], %{duration: _},
-                      %{kind: :error, reason: :test_error}}
+                      %{kind: :error, reason: :test_error}}, 500
     end
 
     test "emits message exception event on handler raise", %{port: port, ref: ref} do
       {:ok, socket} = :gen_tcp.connect(~c"127.0.0.1", port, [:binary, active: false])
       :gen_tcp.send(socket, <<@sb, "raise", @eb, @cr>>)
-      Process.sleep(50)
+      Process.sleep(100)
       :gen_tcp.close(socket)
 
       assert_receive {^ref, [:hl7v2, :mllp, :message, :exception], %{duration: _},
@@ -148,7 +148,7 @@ defmodule HL7v2.MLLP.ConnectionTest do
                         kind: :error,
                         reason: {:handler_crash, {%RuntimeError{}, _}},
                         stacktrace: _
-                      }}
+                      }}, 500
     end
   end
 

@@ -3,7 +3,7 @@ defmodule HL7v2.Segment.SCD do
   Anti-Microbial Cycle Data (SCD) segment -- HL7v2 v2.6 extension.
 
   Contains anti-microbial cycle data for sterilization.
-  36 fields per HL7 v2.5.1 specification.
+  36 fields.
   """
 
   use HL7v2.Segment,
