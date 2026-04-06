@@ -1,572 +1,6726 @@
 # HL7 v2.5.1 Message Structure Reference
 
-Comprehensive segment structure definitions for the HL7 v2.5.1 message types
-supported by this library. Sourced from the HL7 v2.5.1 standard (Chapters 2-3)
-and verified against [Caristix HL7-Definition](https://hl7-definition.caristix.com/v2/HL7v2.5.1/TriggerEvents).
+Complete segment structure definitions for all 222 message
+structures in the HL7 v2.5.1 standard as implemented by this library.
+
+**Generated from code metadata** -- do not edit by hand.
+Run `mix hl7v2.gen_docs` to regenerate.
 
 ## Notation
 
 | Symbol | Meaning |
 |--------|---------|
-| R | Required -- segment MUST be present |
-| O | Optional -- segment MAY be present |
-| C | Conditional -- segment presence depends on a condition |
-| `-` | Not repeatable (exactly 0 or 1 occurrence) |
-| `*` | Repeatable, unbounded |
-| `[...]` | Optional wrapper (0..1) |
-| `{...}` | Repeating wrapper (1..*) |
-| `[{...}]` | Optional + repeating (0..*) |
+| `MSH` | Required segment (bold in tree) |
+| `[SFT]` | Optional segment |
+| `*` | Repeating (0..* or 1..*) |
+| `GROUP { ... }` | Named segment group |
+| `[GROUP] { ... }` | Optional group |
+| Indentation | Nesting depth within groups |
 
-Indented segments belong to the group listed above them. The group's anchor
-segment (first segment in the group) marks the start of each repetition.
 
----
+## ACK
 
-## 1. ADT^A01 -- Admit/Visit Notification
+### ACK -- General Acknowledgment
 
-**Structure:** ADT_A01
-**Chapter:** 3 (Patient Administration)
-**Use case:** Patient undergoes the admission process and is assigned a bed. Signals the beginning of a patient's stay in a healthcare facility.
+Events: (direct)
 
-| # | Segment | Description | Opt | Repeat | Group |
-|---|---------|-------------|-----|--------|-------|
-| 1 | MSH | Message Header | R | - | -- |
-| 2 | SFT | Software Segment | O | * | -- |
-| 3 | EVN | Event Type | R | - | -- |
-| 4 | PID | Patient Identification | R | - | -- |
-| 5 | PD1 | Patient Additional Demographic | O | - | -- |
-| 6 | ROL | Role | O | * | -- |
-| 7 | NK1 | Next of Kin / Associated Parties | O | * | -- |
-| 8 | PV1 | Patient Visit | R | - | -- |
-| 9 | PV2 | Patient Visit - Additional Info | O | - | -- |
-| 10 | ROL | Role | O | * | -- |
-| 11 | DB1 | Disability | O | * | -- |
-| 12 | OBX | Observation/Result | O | * | -- |
-| 13 | AL1 | Patient Allergy Information | O | * | -- |
-| 14 | DG1 | Diagnosis | O | * | -- |
-| 15 | DRG | Diagnosis Related Group | O | - | -- |
-| -- | --- PROCEDURE (group) | | O | * | -- |
-| 16 | &nbsp; PR1 | Procedures | R | - | PROCEDURE |
-| 17 | &nbsp; ROL | Role | O | * | PROCEDURE |
-| 18 | GT1 | Guarantor | O | * | -- |
-| -- | --- INSURANCE (group) | | O | * | -- |
-| 19 | &nbsp; IN1 | Insurance | R | - | INSURANCE |
-| 20 | &nbsp; IN2 | Insurance Additional Info | O | - | INSURANCE |
-| 21 | &nbsp; IN3 | Insurance Additional Info - Cert. | O | * | INSURANCE |
-| 22 | &nbsp; ROL | Role | O | * | INSURANCE |
-| 23 | ACC | Accident | O | - | -- |
-| 24 | UB1 | UB82 Data | O | - | -- |
-| 25 | UB2 | UB92 Data | O | - | -- |
-| 26 | PDA | Patient Death and Autopsy | O | - | -- |
-
-**Notes:**
-- ROL at position 6 is for patient-level roles (e.g., primary care provider).
-- ROL at position 10 is for visit-level roles (e.g., attending physician).
-- PROCEDURE group: PR1 is the anchor; each repetition starts with PR1.
-- INSURANCE group: IN1 is the anchor; each repetition starts with IN1.
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+```
 
 ---
 
-## 2. ADT^A02 -- Transfer a Patient
 
-**Structure:** ADT_A02
-**Chapter:** 3 (Patient Administration)
-**Use case:** Patient changes assigned physical location (bed/ward transfer).
+## ADR
 
-| # | Segment | Description | Opt | Repeat | Group |
-|---|---------|-------------|-----|--------|-------|
-| 1 | MSH | Message Header | R | - | -- |
-| 2 | SFT | Software Segment | O | * | -- |
-| 3 | EVN | Event Type | R | - | -- |
-| 4 | PID | Patient Identification | R | - | -- |
-| 5 | PD1 | Patient Additional Demographic | O | - | -- |
-| 6 | ROL | Role | O | * | -- |
-| 7 | PV1 | Patient Visit | R | - | -- |
-| 8 | PV2 | Patient Visit - Additional Info | O | - | -- |
-| 9 | ROL | Role | O | * | -- |
-| 10 | DB1 | Disability | O | * | -- |
-| 11 | OBX | Observation/Result | O | * | -- |
-| 12 | PDA | Patient Death and Autopsy | O | - | -- |
+### ADR_A19 -- ADT Response
 
-**Notes:**
-- Simpler than A01: no NK1, AL1, DG1, DRG, PROCEDURE, GT1, INSURANCE, ACC, UB1, UB2.
-- PV1-3 (Assigned Patient Location) contains the NEW location.
-- PV1-6 (Prior Patient Location) contains the location being transferred FROM.
+Events: ADT^A19
 
----
-
-## 3. ADT^A03 -- Discharge/End Visit
-
-**Structure:** ADT_A03
-**Chapter:** 3 (Patient Administration)
-**Use case:** End of a patient's stay. Status changes to "discharged" and discharge date is recorded.
-
-| # | Segment | Description | Opt | Repeat | Group |
-|---|---------|-------------|-----|--------|-------|
-| 1 | MSH | Message Header | R | - | -- |
-| 2 | SFT | Software Segment | O | * | -- |
-| 3 | EVN | Event Type | R | - | -- |
-| 4 | PID | Patient Identification | R | - | -- |
-| 5 | PD1 | Patient Additional Demographic | O | - | -- |
-| 6 | ROL | Role | O | * | -- |
-| 7 | NK1 | Next of Kin / Associated Parties | O | * | -- |
-| 8 | PV1 | Patient Visit | R | - | -- |
-| 9 | PV2 | Patient Visit - Additional Info | O | - | -- |
-| 10 | ROL | Role | O | * | -- |
-| 11 | DB1 | Disability | O | * | -- |
-| 12 | AL1 | Patient Allergy Information | O | * | -- |
-| 13 | DG1 | Diagnosis | O | * | -- |
-| 14 | DRG | Diagnosis Related Group | O | - | -- |
-| -- | --- PROCEDURE (group) | | O | * | -- |
-| 15 | &nbsp; PR1 | Procedures | R | - | PROCEDURE |
-| 16 | &nbsp; ROL | Role | O | * | PROCEDURE |
-| 17 | OBX | Observation/Result | O | * | -- |
-| 18 | GT1 | Guarantor | O | * | -- |
-| -- | --- INSURANCE (group) | | O | * | -- |
-| 19 | &nbsp; IN1 | Insurance | R | - | INSURANCE |
-| 20 | &nbsp; IN2 | Insurance Additional Info | O | - | INSURANCE |
-| 21 | &nbsp; IN3 | Insurance Additional Info - Cert. | O | * | INSURANCE |
-| 22 | &nbsp; ROL | Role | O | * | INSURANCE |
-| 23 | ACC | Accident | O | - | -- |
-| 24 | PDA | Patient Death and Autopsy | O | - | -- |
-
-**Notes:**
-- Very similar to A01 but omits UB1 and UB2.
-- PV1-3 (Assigned Patient Location) contains the patient's location prior to discharge.
-- PV1-36 (Discharge Disposition) and PV1-37 (Discharged to Location) carry discharge details.
+```
+MSH
+MSA
+[ERR]
+[QAK]
+[QRD]
+[QRF]
+QUERY_RESPONSE* {
+  [EVN]
+  PID
+  [PD1]
+  [ROL*]
+  [NK1*]
+  PV1
+  [PV2]
+  [ROL*]
+  [DB1*]
+  [OBX*]
+  [AL1*]
+  [DG1*]
+  [DRG]
+  [PROCEDURE]* {
+    PR1
+    [ROL*]
+  }
+  [GT1*]
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3*]
+    [ROL*]
+  }
+  [ACC]
+  [UB1]
+  [UB2]
+}
+```
 
 ---
 
-## 4. ADT^A04 -- Register a Patient
 
-**Structure:** ADT_A01 (same abstract message structure as A01)
-**Chapter:** 3 (Patient Administration)
-**Use case:** Register an outpatient or pre-admit a patient. No bed assignment -- the patient does not need to be "admitted."
+## ADT
 
-Segment structure is **identical to ADT^A01** (see section 1 above).
+### ADT_A01 -- Admit/Visit Notification
 
-**Notes:**
-- A04 uses the ADT_A01 message structure.
-- Distinguished from A01 by MSH-9.2 (Trigger Event = A04).
-- Typically used for outpatient registration or emergency department registration.
+Events: ADT^A01, ADT^A04, ADT^A08, ADT^A13
 
----
-
-## 5. ADT^A08 -- Update Patient Information
-
-**Structure:** ADT_A01 (same abstract message structure as A01)
-**Chapter:** 3 (Patient Administration)
-**Use case:** Update patient demographic or visit information without a status change.
-
-Segment structure is **identical to ADT^A01** (see section 1 above).
-
-**Notes:**
-- A08 uses the ADT_A01 message structure.
-- No status change implied -- purely informational update.
-- Commonly used for address changes, insurance updates, next-of-kin changes, etc.
-
----
-
-## 6. ADT^A11 -- Cancel Admit/Visit Notification
-
-**Structure:** ADT_A09
-**Chapter:** 3 (Patient Administration)
-**Use case:** Cancel a previously-sent A01 admission. The patient's status reverts.
-
-| # | Segment | Description | Opt | Repeat | Group |
-|---|---------|-------------|-----|--------|-------|
-| 1 | MSH | Message Header | R | - | -- |
-| 2 | SFT | Software Segment | O | * | -- |
-| 3 | EVN | Event Type | R | - | -- |
-| 4 | PID | Patient Identification | R | - | -- |
-| 5 | PD1 | Patient Additional Demographic | O | - | -- |
-| 6 | PV1 | Patient Visit | R | - | -- |
-| 7 | PV2 | Patient Visit - Additional Info | O | - | -- |
-| 8 | DB1 | Disability | O | * | -- |
-| 9 | OBX | Observation/Result | O | * | -- |
-| 10 | DG1 | Diagnosis | O | * | -- |
-
-**Notes:**
-- Uses the ADT_A09 abstract message structure (shared with A09, A10, A11, A12).
-- Significantly simpler than A01 -- no ROL, NK1, AL1, DRG, PROCEDURE, GT1, INSURANCE, ACC, UB1, UB2, PDA.
-- EVN-2 (Recorded Date/Time) should reflect when the cancel was recorded.
+```
+MSH
+[SFT*]
+EVN
+PATIENT {
+  PID
+  [PD1]
+  [ROL*]
+  [NK1*]
+  VISIT {
+    PV1
+    [PV2]
+    [ROL*]
+  }
+  [DB1*]
+  [AL1*]
+  [DG1*]
+  [DRG]
+  [PROCEDURE]* {
+    PR1
+    [ROL*]
+  }
+  [GT1*]
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3*]
+    [ROL*]
+  }
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [ACC]
+  [UB1]
+  [UB2]
+  [PDA]
+}
+```
 
 ---
 
-## 7. ADT^A13 -- Cancel Discharge/End Visit
+### ADT_A02 -- Transfer a Patient
 
-**Structure:** ADT_A01 (same abstract message structure as A01)
-**Chapter:** 3 (Patient Administration)
-**Use case:** Cancel a previously-sent A03 discharge. The patient's status reverts to admitted.
+Events: ADT^A02
 
-Segment structure is **identical to ADT^A01** (see section 1 above).
-
-**Notes:**
-- A13 uses the ADT_A01 message structure.
-- Reverses the effects of A03: the patient is re-admitted.
-- The patient's location should be restored to the pre-discharge location.
-
----
-
-## 8. ADT^A28 -- Add Person Information
-
-**Structure:** ADT_A05
-**Chapter:** 3 (Patient Administration)
-**Use case:** Add demographic information for a person who may or may not be a patient yet. Used for Master Patient Index (MPI) operations.
-
-| # | Segment | Description | Opt | Repeat | Group |
-|---|---------|-------------|-----|--------|-------|
-| 1 | MSH | Message Header | R | - | -- |
-| 2 | SFT | Software Segment | O | * | -- |
-| 3 | EVN | Event Type | R | - | -- |
-| 4 | PID | Patient Identification | R | - | -- |
-| 5 | PD1 | Patient Additional Demographic | O | - | -- |
-| 6 | ROL | Role | O | * | -- |
-| 7 | NK1 | Next of Kin / Associated Parties | O | * | -- |
-| 8 | PV1 | Patient Visit | R | - | -- |
-| 9 | PV2 | Patient Visit - Additional Info | O | - | -- |
-| 10 | ROL | Role | O | * | -- |
-| 11 | DB1 | Disability | O | * | -- |
-| 12 | OBX | Observation/Result | O | * | -- |
-| 13 | AL1 | Patient Allergy Information | O | * | -- |
-| 14 | DG1 | Diagnosis | O | * | -- |
-| 15 | DRG | Diagnosis Related Group | O | - | -- |
-| -- | --- PROCEDURE (group) | | O | * | -- |
-| 16 | &nbsp; PR1 | Procedures | R | - | PROCEDURE |
-| 17 | &nbsp; ROL | Role | O | * | PROCEDURE |
-| 18 | GT1 | Guarantor | O | * | -- |
-| -- | --- INSURANCE (group) | | O | * | -- |
-| 19 | &nbsp; IN1 | Insurance | R | - | INSURANCE |
-| 20 | &nbsp; IN2 | Insurance Additional Info | O | - | INSURANCE |
-| 21 | &nbsp; IN3 | Insurance Additional Info - Cert. | O | * | INSURANCE |
-| 22 | &nbsp; ROL | Role | O | * | INSURANCE |
-| 23 | ACC | Accident | O | - | -- |
-| 24 | UB1 | UB82 Data | O | - | -- |
-| 25 | UB2 | UB92 Data | O | - | -- |
-
-**Notes:**
-- Uses the ADT_A05 abstract message structure (shared with A05, A14, A28, A31).
-- A28 is a non-visit event -- it adds person-level data to the MPI.
-- PV1 is required by the structure but PV1-2 (Patient Class) is typically set to "N" (not applicable).
-- Differs from A01 only in the absence of PDA.
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+[ROL*]
+PV1
+[PV2]
+[ROL*]
+[DB1*]
+[OBX*]
+[PDA]
+```
 
 ---
 
-## 9. ADT^A31 -- Update Person Information
+### ADT_A03 -- Discharge/End Visit
 
-**Structure:** ADT_A05 (same abstract message structure as A28)
-**Chapter:** 3 (Patient Administration)
-**Use case:** Update demographic information for a person in the MPI without changing visit status.
+Events: ADT^A03
 
-Segment structure is **identical to ADT^A28 / ADT_A05** (see section 8 above).
-
-**Notes:**
-- A31 uses the ADT_A05 message structure, same as A28.
-- Distinguished from A28 by MSH-9.2 (Trigger Event = A31).
-- A28 = new person record; A31 = update existing person record.
-
----
-
-## 10. ADT^A40 -- Merge Patient - Patient Identifier List
-
-**Structure:** ADT_A39
-**Chapter:** 3 (Patient Administration)
-**Use case:** Merge two patient records at the identifier level. The "incorrect" identifier (in MRG) is merged into the "correct" identifier (in PID).
-
-| # | Segment | Description | Opt | Repeat | Group |
-|---|---------|-------------|-----|--------|-------|
-| 1 | MSH | Message Header | R | - | -- |
-| 2 | SFT | Software Segment | O | * | -- |
-| 3 | EVN | Event Type | R | - | -- |
-| -- | --- PATIENT_ID (group) | | R | * | -- |
-| 4 | &nbsp; PID | Patient Identification | R | - | PATIENT_ID |
-| 5 | &nbsp; PD1 | Patient Additional Demographic | O | - | PATIENT_ID |
-| 6 | &nbsp; MRG | Merge Patient Information | R | - | PATIENT_ID |
-| 7 | &nbsp; PV1 | Patient Visit | O | - | PATIENT_ID |
-
-**Notes:**
-- PID contains the "correct" (surviving) patient identifier.
-- MRG-1 (Prior Patient Identifier List) contains the "incorrect" identifier being merged away.
-- The PATIENT_ID group repeats to allow batch merges in a single message.
-- PV1 is optional within the group -- used when the merge involves visit-level data.
-- PID is the anchor segment for the PATIENT_ID group.
-- After merge, the MRG identifier should never be referenced in future transactions.
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+[ROL*]
+[NK1*]
+VISIT {
+  PV1
+  [PV2]
+  [ROL*]
+}
+[DB1*]
+[AL1*]
+[DG1*]
+[DRG]
+[PROCEDURE]* {
+  PR1
+  [ROL*]
+}
+[GT1*]
+[INSURANCE]* {
+  IN1
+  [IN2]
+  [IN3*]
+  [ROL*]
+}
+[ACC]
+[PDA]
+```
 
 ---
 
-## 11. ORM^O01 -- General Order Message
+### ADT_A04 -- Register a Patient
 
-**Structure:** ORM_O01
-**Chapter:** 4 (Order Entry)
-**Use case:** Place, cancel, discontinue, hold, or otherwise manage orders. (Legacy -- OMG/OML/OMD/OMS/OMN/OMI/OMP are preferred for new implementations.)
+Events: (direct)
 
-| # | Segment | Description | Opt | Repeat | Group |
-|---|---------|-------------|-----|--------|-------|
-| 1 | MSH | Message Header | R | - | -- |
-| 2 | NTE | Notes and Comments | O | * | -- |
-| -- | --- PATIENT (group) | | O | - | -- |
-| 3 | &nbsp; PID | Patient Identification | R | - | PATIENT |
-| 4 | &nbsp; PD1 | Patient Additional Demographic | O | - | PATIENT |
-| 5 | &nbsp; NTE | Notes and Comments | O | * | PATIENT |
-| -- | &nbsp; --- PATIENT_VISIT (subgroup) | | O | - | PATIENT |
-| 6 | &nbsp;&nbsp; PV1 | Patient Visit | R | - | PATIENT_VISIT |
-| 7 | &nbsp;&nbsp; PV2 | Patient Visit - Additional Info | O | - | PATIENT_VISIT |
-| -- | &nbsp; --- INSURANCE (subgroup) | | O | * | PATIENT |
-| 8 | &nbsp;&nbsp; IN1 | Insurance | R | - | INSURANCE |
-| 9 | &nbsp;&nbsp; IN2 | Insurance Additional Info | O | - | INSURANCE |
-| 10 | &nbsp;&nbsp; IN3 | Insurance Additional Info - Cert. | O | - | INSURANCE |
-| 11 | &nbsp; GT1 | Guarantor | O | - | PATIENT |
-| 12 | &nbsp; AL1 | Patient Allergy Information | O | * | PATIENT |
-| -- | --- ORDER (group) | | R | * | -- |
-| 13 | &nbsp; ORC | Common Order | R | - | ORDER |
-| -- | &nbsp; --- ORDER_DETAIL (subgroup) | | O | - | ORDER |
-| 14 | &nbsp;&nbsp; OBR | Observation Request | R | - | ORDER_DETAIL |
-| 15 | &nbsp;&nbsp; RQD | Requisition Detail | R | - | ORDER_DETAIL |
-| 16 | &nbsp;&nbsp; RQ1 | Requisition Detail-1 | R | - | ORDER_DETAIL |
-| 17 | &nbsp;&nbsp; RXO | Pharmacy/Treatment Order | R | - | ORDER_DETAIL |
-| 18 | &nbsp;&nbsp; ODS | Dietary Orders, Supplements, Preferences | R | - | ORDER_DETAIL |
-| 19 | &nbsp;&nbsp; ODT | Diet Tray Instructions | R | - | ORDER_DETAIL |
-| 20 | &nbsp;&nbsp; NTE | Notes and Comments | O | * | ORDER_DETAIL |
-| 21 | &nbsp;&nbsp; CTD | Contact Data | O | - | ORDER_DETAIL |
-| 22 | &nbsp;&nbsp; DG1 | Diagnosis | O | * | ORDER_DETAIL |
-| -- | &nbsp;&nbsp; --- OBSERVATION (subgroup) | | O | * | ORDER_DETAIL |
-| 23 | &nbsp;&nbsp;&nbsp; OBX | Observation/Result | R | - | OBSERVATION |
-| 24 | &nbsp;&nbsp;&nbsp; NTE | Notes and Comments | O | * | OBSERVATION |
-| 25 | &nbsp; CTI | Clinical Trial Identification | O | * | ORDER |
-| 26 | &nbsp; BLG | Billing | O | - | ORDER |
-
-**Notes:**
-- ORDER_DETAIL choice: only ONE of OBR/RQD/RQ1/RXO/ODS/ODT is used per order, determined by the order type. For radiology/lab orders, OBR is the relevant segment.
-- ORC is the anchor for the ORDER group; each order repetition starts with ORC.
-- The PATIENT group is optional (patient context may come from a prior ADT or be implied).
-- PID is the anchor for the PATIENT group.
-- IN1 is the anchor for the INSURANCE subgroup.
-- This is a legacy message; prefer OML^O21, OMI^O23, etc. for new implementations.
+```
+MSH
+[SFT*]
+EVN
+PATIENT {
+  PID
+  [PD1]
+  [ROL*]
+  [NK1*]
+  VISIT {
+    PV1
+    [PV2]
+    [ROL*]
+  }
+  [DB1*]
+  [AL1*]
+  [DG1*]
+  [DRG]
+  [PROCEDURE]* {
+    PR1
+    [ROL*]
+  }
+  [GT1*]
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3*]
+    [ROL*]
+  }
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [ACC]
+  [UB1]
+  [UB2]
+  [PDA]
+}
+```
 
 ---
 
-## 12. ORU^R01 -- Unsolicited Observation Result
+### ADT_A05 -- Pre-admit a Patient
 
-**Structure:** ORU_R01
-**Chapter:** 7 (Observation Reporting)
-**Use case:** Transmit laboratory or other observation results to downstream systems.
+Events: ADT^A05, ADT^A14, ADT^A28, ADT^A31
 
-| # | Segment | Description | Opt | Repeat | Group |
-|---|---------|-------------|-----|--------|-------|
-| 1 | MSH | Message Header | R | - | -- |
-| 2 | SFT | Software Segment | O | * | -- |
-| -- | --- PATIENT_RESULT (group) | | R | * | -- |
-| -- | &nbsp; --- PATIENT (subgroup) | | O | - | PATIENT_RESULT |
-| 3 | &nbsp;&nbsp; PID | Patient Identification | R | - | PATIENT |
-| 4 | &nbsp;&nbsp; PD1 | Patient Additional Demographic | O | - | PATIENT |
-| 5 | &nbsp;&nbsp; NTE | Notes and Comments | O | * | PATIENT |
-| 6 | &nbsp;&nbsp; NK1 | Next of Kin / Associated Parties | O | * | PATIENT |
-| -- | &nbsp;&nbsp; --- VISIT (subgroup) | | O | - | PATIENT |
-| 7 | &nbsp;&nbsp;&nbsp; PV1 | Patient Visit | R | - | VISIT |
-| 8 | &nbsp;&nbsp;&nbsp; PV2 | Patient Visit - Additional Info | O | - | VISIT |
-| -- | &nbsp; --- ORDER_OBSERVATION (subgroup) | | R | * | PATIENT_RESULT |
-| 9 | &nbsp;&nbsp; ORC | Common Order | O | - | ORDER_OBSERVATION |
-| 10 | &nbsp;&nbsp; OBR | Observation Request | R | - | ORDER_OBSERVATION |
-| 11 | &nbsp;&nbsp; NTE | Notes and Comments | O | * | ORDER_OBSERVATION |
-| -- | &nbsp;&nbsp; --- TIMING_QTY (subgroup) | | O | * | ORDER_OBSERVATION |
-| 12 | &nbsp;&nbsp;&nbsp; TQ1 | Timing/Quantity | R | - | TIMING_QTY |
-| 13 | &nbsp;&nbsp;&nbsp; TQ2 | Timing/Quantity Relationship | O | * | TIMING_QTY |
-| 14 | &nbsp;&nbsp; CTD | Contact Data | O | - | ORDER_OBSERVATION |
-| -- | &nbsp;&nbsp; --- OBSERVATION (subgroup) | | O | * | ORDER_OBSERVATION |
-| 15 | &nbsp;&nbsp;&nbsp; OBX | Observation/Result | R | - | OBSERVATION |
-| 16 | &nbsp;&nbsp;&nbsp; NTE | Notes and Comments | O | * | OBSERVATION |
-| 17 | &nbsp;&nbsp; FT1 | Financial Transaction | O | * | ORDER_OBSERVATION |
-| 18 | &nbsp;&nbsp; CTI | Clinical Trial Identification | O | * | ORDER_OBSERVATION |
-| -- | &nbsp;&nbsp; --- SPECIMEN (subgroup) | | O | * | ORDER_OBSERVATION |
-| 19 | &nbsp;&nbsp;&nbsp; SPM | Specimen | R | - | SPECIMEN |
-| 20 | &nbsp;&nbsp;&nbsp; OBX | Observation/Result | O | * | SPECIMEN |
-| 21 | DSC | Continuation Pointer | O | - | -- |
-
-**Notes:**
-- PATIENT_RESULT is the top-level repeating group. Each repetition contains an optional PATIENT subgroup and one or more ORDER_OBSERVATION subgroups.
-- OBR is the anchor for each ORDER_OBSERVATION repetition.
-- OBX is the anchor for each OBSERVATION repetition.
-- ORC is optional at the ORU level (it is required at the ORM level).
-- For radiology results, OBR-4 (Universal Service ID) identifies the procedure, and OBX segments carry the report text (OBX-2 = "TX" or "FT").
-- SPM (Specimen) is new in v2.5; it replaces the use of OBR-15/16 for specimen info.
-- DSC is for continuation of large result sets (rarely used).
+```
+MSH
+[SFT*]
+EVN
+PATIENT {
+  PID
+  [PD1]
+  [ROL*]
+  [NK1*]
+  VISIT {
+    PV1
+    [PV2]
+    [ROL*]
+  }
+  [DB1*]
+  [AL1*]
+  [DG1*]
+  [DRG]
+  [PROCEDURE]* {
+    PR1
+    [ROL*]
+  }
+  [GT1*]
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3*]
+    [ROL*]
+  }
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [ACC]
+  [UB1]
+  [UB2]
+  [PDA]
+}
+```
 
 ---
 
-## 13. ACK -- General Acknowledgment
+### ADT_A06 -- Change an Outpatient to an Inpatient
 
-**Structure:** ACK
-**Chapter:** 2 (Control)
-**Use case:** Acknowledge receipt and acceptance/rejection of any HL7 message. Used when no application-specific ACK is defined, or when an error prevents application processing.
+Events: ADT^A06, ADT^A07
 
-| # | Segment | Description | Opt | Repeat | Group |
-|---|---------|-------------|-----|--------|-------|
-| 1 | MSH | Message Header | R | - | -- |
-| 2 | SFT | Software Segment | O | * | -- |
-| 3 | MSA | Message Acknowledgment | R | - | -- |
-| 4 | ERR | Error | O | * | -- |
-
-**Notes:**
-- MSH-9.2 (Trigger Event) echoes the trigger event of the message being acknowledged.
-- MSH-9.3 (Message Structure) is always "ACK".
-- MSA-1 (Acknowledgment Code): AA = accept, AE = error, AR = reject.
-- MSA-2 (Message Control ID) echoes MSH-10 of the original message.
-- ERR segment provides error location (segment, field, component) and error codes.
-- The simplest possible HL7 response message.
-
----
-
-## 14. SIU^S12 -- Notification of New Appointment Booking
-
-**Structure:** SIU_S12
-**Chapter:** 10 (Scheduling)
-**Use case:** Filler application notifies other systems that a new appointment has been booked.
-
-| # | Segment | Description | Opt | Repeat | Group |
-|---|---------|-------------|-----|--------|-------|
-| 1 | MSH | Message Header | R | - | -- |
-| 2 | SCH | Scheduling Activity Information | R | - | -- |
-| 3 | TQ1 | Timing/Quantity | O | * | -- |
-| 4 | NTE | Notes and Comments | O | * | -- |
-| -- | --- PATIENT (group) | | O | * | -- |
-| 5 | &nbsp; PID | Patient Identification | R | - | PATIENT |
-| 6 | &nbsp; PD1 | Patient Additional Demographic | O | - | PATIENT |
-| 7 | &nbsp; PV1 | Patient Visit | O | - | PATIENT |
-| 8 | &nbsp; PV2 | Patient Visit - Additional Info | O | - | PATIENT |
-| 9 | &nbsp; OBX | Observation/Result | O | * | PATIENT |
-| 10 | &nbsp; DG1 | Diagnosis | O | * | PATIENT |
-| -- | --- RESOURCES (group) | | R | * | -- |
-| 11 | &nbsp; RGS | Resource Group | R | - | RESOURCES |
-| -- | &nbsp; --- SERVICE (subgroup) | | O | * | RESOURCES |
-| 12 | &nbsp;&nbsp; AIS | Appointment Information - Service | R | - | SERVICE |
-| 13 | &nbsp;&nbsp; NTE | Notes and Comments | O | * | SERVICE |
-| -- | &nbsp; --- GENERAL_RESOURCE (subgroup) | | O | * | RESOURCES |
-| 14 | &nbsp;&nbsp; AIG | Appointment Information - General Resource | R | - | GENERAL_RESOURCE |
-| 15 | &nbsp;&nbsp; NTE | Notes and Comments | O | * | GENERAL_RESOURCE |
-| -- | &nbsp; --- LOCATION_RESOURCE (subgroup) | | O | * | RESOURCES |
-| 16 | &nbsp;&nbsp; AIL | Appointment Information - Location Resource | R | - | LOCATION_RESOURCE |
-| 17 | &nbsp;&nbsp; NTE | Notes and Comments | O | * | LOCATION_RESOURCE |
-| -- | &nbsp; --- PERSONNEL_RESOURCE (subgroup) | | O | * | RESOURCES |
-| 18 | &nbsp;&nbsp; AIP | Appointment Information - Personnel Resource | R | - | PERSONNEL_RESOURCE |
-| 19 | &nbsp;&nbsp; NTE | Notes and Comments | O | * | PERSONNEL_RESOURCE |
-
-**Notes:**
-- SCH contains the appointment details (placer/filler IDs, timing, duration, reason).
-- RGS is the anchor for the RESOURCES group; each resource group repetition starts with RGS.
-- Within RESOURCES, the four subgroups describe different resource types:
-  - SERVICE (AIS): the clinical service being performed
-  - GENERAL_RESOURCE (AIG): equipment or other general resources
-  - LOCATION_RESOURCE (AIL): rooms, exam lanes, etc.
-  - PERSONNEL_RESOURCE (AIP): physicians, technologists, etc.
-- PID is the anchor for the PATIENT group.
-- TQ1 at the message level specifies the timing of the scheduled activity.
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+[ROL*]
+[MRG]
+[NK1*]
+PV1
+[PV2]
+[ROL*]
+[DB1*]
+[AL1*]
+[DG1*]
+[DRG]
+[PROCEDURE]* {
+  PR1
+  [ROL*]
+}
+[GT1*]
+[INSURANCE]* {
+  IN1
+  [IN2]
+  [IN3*]
+  [ROL*]
+}
+[ACC]
+[UB1]
+[UB2]
+[NTE*]
+```
 
 ---
 
-## 15. SIU^S14 -- Notification of Appointment Modification
+### ADT_A08 -- Update Patient Information
 
-**Structure:** SIU_S12 (same abstract message structure as S12)
-**Chapter:** 10 (Scheduling)
-**Use case:** Filler application notifies other systems that an existing appointment has been modified.
+Events: (direct)
 
-Segment structure is **identical to SIU^S12** (see section 14 above).
-
-**Notes:**
-- S14 uses the SIU_S12 message structure.
-- Distinguished from S12 by MSH-9.2 (Trigger Event = S14).
-- SCH segment contains the updated appointment details.
-- Modifications may include time changes, resource changes, or status updates.
+```
+MSH
+[SFT*]
+EVN
+PATIENT {
+  PID
+  [PD1]
+  [ROL*]
+  [NK1*]
+  VISIT {
+    PV1
+    [PV2]
+    [ROL*]
+  }
+  [DB1*]
+  [AL1*]
+  [DG1*]
+  [DRG]
+  [PROCEDURE]* {
+    PR1
+    [ROL*]
+  }
+  [GT1*]
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3*]
+    [ROL*]
+  }
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [ACC]
+  [UB1]
+  [UB2]
+  [PDA]
+}
+```
 
 ---
 
-## 16. SIU^S15 -- Notification of Appointment Cancellation
+### ADT_A09 -- Patient Departing — Tracking
 
-**Structure:** SIU_S12 (same abstract message structure as S12)
-**Chapter:** 10 (Scheduling)
-**Use case:** Filler application notifies other systems that an existing appointment has been cancelled.
+Events: ADT^A09, ADT^A10, ADT^A11
 
-Segment structure is **identical to SIU^S12** (see section 14 above).
-
-**Notes:**
-- S15 uses the SIU_S12 message structure.
-- Distinguished from S12 by MSH-9.2 (Trigger Event = S15).
-- SCH-25 (Filler Status Code) typically reflects the cancelled status.
-- The appointment's resources should be released/freed.
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+PV1
+[PV2]
+[DB1*]
+[OBX*]
+[DG1*]
+```
 
 ---
+
+### ADT_A12 -- Cancel Transfer
+
+Events: ADT^A12
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+PV1
+[PV2]
+[DB1*]
+[OBX*]
+[DG1*]
+```
+
+---
+
+### ADT_A15 -- Pending Transfer
+
+Events: ADT^A15
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+[ROL*]
+PV1
+[PV2]
+[ROL*]
+[DB1*]
+[OBX*]
+[DG1*]
+```
+
+---
+
+### ADT_A16 -- Pending Discharge
+
+Events: ADT^A16
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+[ROL*]
+PV1
+[PV2]
+[ROL*]
+[DB1*]
+[OBX*]
+[DG1*]
+[DRG]
+```
+
+---
+
+### ADT_A17 -- Swap Patients
+
+Events: ADT^A17
+
+```
+MSH
+[SFT*]
+EVN
+PATIENT_1 {
+  PID
+  PV1
+  [PV2]
+  [DB1*]
+  [OBX*]
+}
+PATIENT_2 {
+  PID
+  PV1
+  [PV2]
+  [DB1*]
+  [OBX*]
+}
+```
+
+---
+
+### ADT_A18 -- Merge Patient Information
+
+Events: ADT^A18
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+MRG
+PV1
+```
+
+---
+
+### ADT_A20 -- Bed Status Update
+
+Events: ADT^A20
+
+```
+MSH
+[SFT*]
+EVN
+NPU
+```
+
+---
+
+### ADT_A21 -- Patient Goes on Leave of Absence
+
+Events: ADT^A21, ADT^A22, ADT^A23, ADT^A25, ADT^A26, ADT^A27, ADT^A29, ADT^A32, ADT^A33, ADT^A56
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+PV1
+[PV2]
+[DB1*]
+[OBX*]
+```
+
+---
+
+### ADT_A24 -- Link Patient Information
+
+Events: ADT^A24
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+[PV1]
+[DB1*]
+PID
+[PD1]
+[PV1]
+[DB1*]
+```
+
+---
+
+### ADT_A30 -- Merge Person Information
+
+Events: ADT^A30, ADT^A34, ADT^A35, ADT^A36, ADT^A46, ADT^A47, ADT^A48, ADT^A49
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+MRG
+```
+
+---
+
+### ADT_A37 -- Unlink Patient Information
+
+Events: ADT^A37
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+[PV1]
+PID
+[PD1]
+[PV1]
+```
+
+---
+
+### ADT_A38 -- Cancel Pre-admit
+
+Events: ADT^A38
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+PV1
+[PV2]
+[DB1*]
+[OBX*]
+[DG1*]
+[DRG]
+```
+
+---
+
+### ADT_A39 -- Merge Patient — Patient ID
+
+Events: ADT^A39, ADT^A40, ADT^A41, ADT^A42, ADT^A57
+
+```
+MSH
+[SFT*]
+EVN
+PATIENT* {
+  PID
+  [PD1]
+  MRG
+  [PV1]
+}
+```
+
+---
+
+### ADT_A43 -- Move Patient Information — Patient Identifier List
+
+Events: ADT^A43, ADT^A44
+
+```
+MSH
+[SFT*]
+EVN
+PATIENT* {
+  PID
+  [PD1]
+  MRG
+}
+```
+
+---
+
+### ADT_A45 -- Move Visit Information — Visit Number
+
+Events: ADT^A45
+
+```
+MSH
+[SFT*]
+EVN
+MERGE_INFO* {
+  PID
+  [PD1]
+  MRG
+  PV1
+}
+```
+
+---
+
+### ADT_A50 -- Change Visit Number
+
+Events: ADT^A50, ADT^A51, ADT^A53
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+MRG
+PV1
+```
+
+---
+
+### ADT_A52 -- Cancel Leave of Absence
+
+Events: ADT^A52
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+PV1
+[PV2]
+[DB1*]
+[OBX*]
+```
+
+---
+
+### ADT_A54 -- Change Attending Doctor
+
+Events: ADT^A54, ADT^A55
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+ROL*
+PV1
+[PV2]
+[ROL*]
+```
+
+---
+
+### ADT_A60 -- Update Allergy Information
+
+Events: ADT^A60
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PV1]
+[PV2]
+[IAM*]
+```
+
+---
+
+### ADT_A61 -- Change Consulting Doctor
+
+Events: ADT^A61, ADT^A62
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+[ROL*]
+PV1
+[PV2]
+[ROL*]
+```
+
+---
+
+
+## BAR
+
+### BAR_P01 -- Add Patient Account
+
+Events: BAR^P01
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+VISIT* {
+  [PV1]
+  [PV2]
+  [ROL*]
+  [DB1*]
+  [OBX*]
+  [AL1*]
+  [DG1*]
+  [DRG]
+  [PROCEDURE]* {
+    PR1
+    [ROL*]
+  }
+  [GT1*]
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3*]
+    [ROL*]
+  }
+  [ACC]
+  [UB1]
+  [UB2]
+}
+```
+
+---
+
+### BAR_P02 -- Purge Patient Account
+
+Events: BAR^P02
+
+```
+MSH
+[SFT*]
+EVN
+PATIENT* {
+  PID
+  PV1
+}
+```
+
+---
+
+### BAR_P05 -- Update Account
+
+Events: BAR^P05
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+VISIT* {
+  [PV1]
+  [PV2]
+  [ROL*]
+  [DB1*]
+  [OBX*]
+  [AL1*]
+  [DG1*]
+  [DRG]
+  [PROCEDURE]* {
+    PR1
+    [ROL*]
+  }
+  [GT1*]
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3*]
+    [ROL*]
+  }
+  [ACC]
+  [UB1]
+  [UB2]
+}
+```
+
+---
+
+### BAR_P06 -- End Account
+
+Events: BAR^P06
+
+```
+MSH
+[SFT*]
+EVN
+PATIENT* {
+  PID
+  PV1
+}
+```
+
+---
+
+### BAR_P10 -- Transmit Ambulance Billing
+
+Events: BAR^P10
+
+```
+MSH
+[SFT*]
+EVN
+PATIENT* {
+  PID
+  PV1
+  [DG1*]
+  [GP1]
+  [PROCEDURE]* {
+    PR1
+    [GP2*]
+  }
+}
+```
+
+---
+
+### BAR_P12 -- Update Diagnosis/Procedure
+
+Events: BAR^P12
+
+```
+MSH
+[SFT*]
+EVN
+PID
+PV1
+[DG1*]
+[PROCEDURE]* {
+  PR1
+  [ROL*]
+}
+```
+
+---
+
+
+## BPS
+
+### BPS_O29 -- Blood Product Dispense Status
+
+Events: BPS^O29
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+  }
+}
+ORDER* {
+  ORC
+  BPO
+  [NTE*]
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  PRODUCT* {
+    BPX
+    [NTE*]
+  }
+}
+```
+
+---
+
+
+## BRP
+
+### BRP_O30 -- Blood Product Dispense Status Ack
+
+Events: BRP^O30
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+  }
+  ORDER* {
+    ORC
+    [BPO]
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [BPX*]
+  }
+}
+```
+
+---
+
+
+## BRT
+
+### BRT_O32 -- Blood Product Transfusion/Disposition Ack
+
+Events: BRT^O32
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+```
+
+---
+
+
+## BTS
+
+### BTS_O31 -- Blood Product Transfusion/Disposition
+
+Events: BTS^O31
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+  }
+}
+ORDER* {
+  ORC
+  BPO
+  [NTE*]
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  PRODUCT_STATUS* {
+    BTX
+    [NTE*]
+  }
+}
+```
+
+---
+
+
+## CCF
+
+### CCF_I22 -- Collaborative Care Fetch
+
+Events: CCF^I22
+
+```
+MSH
+[SFT*]
+PID
+[REL*]
+```
+
+---
+
+
+## CCI
+
+### CCI_I22 -- Collaborative Care Information
+
+Events: CCI^I22
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+PID
+[PD1]
+[NK1*]
+[INSURANCE]* {
+  IN1
+  [IN2]
+  [IN3]
+}
+[CLINICAL_HISTORY]* {
+  ORC
+  [CLINICAL_HISTORY_DETAIL]* {
+    OBR
+    [OBX*]
+  }
+}
+PATIENT_VISITS* {
+  PV1
+  [PV2]
+}
+[MEDICATION_HISTORY]* {
+  ORC
+  [MEDICATION_ORDER_DETAIL] {
+    RXO
+    RXR*
+  }
+  [MEDICATION_ENCODING_DETAIL] {
+    RXE
+    RXR*
+  }
+  [MEDICATION_ADMINISTRATION_DETAIL]* {
+    RXA
+    RXR
+  }
+}
+[PROBLEM]* {
+  PRB
+  [VAR*]
+  [OBX*]
+}
+[GOAL]* {
+  GOL
+  [VAR*]
+  [OBX*]
+}
+[PATHWAY]* {
+  PTH
+  [VAR*]
+  [OBX*]
+}
+[REL*]
+```
+
+---
+
+
+## CCQ
+
+### CCQ_I19 -- Collaborative Care Query
+
+Events: CCQ^I19
+
+```
+MSH
+[SFT*]
+RF1
+[PROVIDER_CONTACT]* {
+  PRD
+  [CTD*]
+}
+[REL*]
+```
+
+---
+
+
+## CCR
+
+### CCR_I16 -- Collaborative Care Referral
+
+Events: CCR^I16, CCR^I17, CCR^I18
+
+```
+MSH
+[SFT*]
+RF1
+[PROVIDER_CONTACT]* {
+  PRD
+  [CTD*]
+}
+[CLINICAL_ORDER]* {
+  ORC
+  [CLINICAL_ORDER_TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  [CLINICAL_ORDER_DETAIL]* {
+    OBR
+    [OBX*]
+  }
+  [CTI*]
+}
+PATIENT* {
+  PID
+  [PD1]
+}
+[NK1*]
+[INSURANCE]* {
+  IN1
+  [IN2]
+  [IN3]
+}
+[APPOINTMENT_HISTORY]* {
+  SCH
+  [RESOURCES]* {
+    RGS
+    [RESOURCE_DETAIL]* {
+      AIS
+      [AIG]
+      [AIL]
+      [AIP]
+    }
+  }
+}
+[CLINICAL_HISTORY]* {
+  ORC
+  [CLINICAL_HISTORY_DETAIL]* {
+    OBR
+    [OBX*]
+  }
+  [ROLE_CLINICAL_HISTORY]* {
+    ROL
+    [VAR*]
+  }
+  [CTI*]
+}
+PATIENT_VISITS* {
+  PV1
+  [PV2]
+}
+[MEDICATION_HISTORY]* {
+  ORC
+  [MEDICATION_ORDER_DETAIL] {
+    RXO
+    RXR*
+    [RXC*]
+  }
+  [MEDICATION_ENCODING_DETAIL] {
+    RXE
+    RXR*
+  }
+  [MEDICATION_ADMINISTRATION_DETAIL]* {
+    RXA
+    RXR
+  }
+  [CTI*]
+}
+[PROBLEM]* {
+  PRB
+  [VAR*]
+  [ROLE_PROBLEM]* {
+    ROL
+    [VAR*]
+  }
+  [OBX*]
+}
+[GOAL]* {
+  GOL
+  [VAR*]
+  [ROLE_GOAL]* {
+    ROL
+    [VAR*]
+  }
+  [OBX*]
+}
+[PATHWAY]* {
+  PTH
+  [VAR*]
+  [ROLE_PATHWAY]* {
+    ROL
+    [VAR*]
+  }
+  [OBX*]
+}
+[REL*]
+```
+
+---
+
+
+## CCU
+
+### CCU_I20 -- Asynchronous Collaborative Care Update
+
+Events: CCU^I20, CCU^I21
+
+```
+MSH
+[SFT*]
+RF1
+[PROVIDER_CONTACT]* {
+  PRD
+  [CTD*]
+}
+PATIENT* {
+  PID
+  [PD1]
+}
+[NK1*]
+[INSURANCE]* {
+  IN1
+  [IN2]
+  [IN3]
+}
+[CLINICAL_HISTORY]* {
+  ORC
+  [CLINICAL_HISTORY_DETAIL]* {
+    OBR
+    [OBX*]
+  }
+}
+PATIENT_VISITS* {
+  PV1
+  [PV2]
+}
+[MEDICATION_HISTORY]* {
+  ORC
+  [MEDICATION_ORDER_DETAIL] {
+    RXO
+    RXR*
+  }
+  [MEDICATION_ENCODING_DETAIL] {
+    RXE
+    RXR*
+  }
+  [MEDICATION_ADMINISTRATION_DETAIL]* {
+    RXA
+    RXR
+  }
+}
+[PROBLEM]* {
+  PRB
+  [VAR*]
+  [OBX*]
+}
+[GOAL]* {
+  GOL
+  [VAR*]
+  [OBX*]
+}
+[PATHWAY]* {
+  PTH
+  [VAR*]
+  [OBX*]
+}
+[REL*]
+```
+
+---
+
+
+## CRM
+
+### CRM_C01 -- Clinical Study Registration
+
+Events: CRM^C01, CRM^C02, CRM^C03, CRM^C04, CRM^C05, CRM^C06, CRM^C07, CRM^C08
+
+```
+MSH
+[SFT*]
+PATIENT* {
+  PID
+  [PV1]
+  CSR
+  [CSP*]
+}
+```
+
+---
+
+
+## CSU
+
+### CSU_C09 -- Unsolicited Study Data
+
+Events: CSU^C09, CSU^C10, CSU^C11, CSU^C12
+
+```
+MSH
+[SFT*]
+PATIENT* {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  CSR
+  [STUDY_PHASE]* {
+    [CSP]
+    [STUDY_SCHEDULE]* {
+      [CSS]
+      [STUDY_OBSERVATION]* {
+        [ORC]
+        OBR
+        [TIMING_QTY]* {
+          TQ1
+          [TQ2*]
+        }
+        OBX*
+      }
+      [STUDY_PHARM]* {
+        [ORC]
+        RX_ADMIN* {
+          RXA
+          RXR
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+
+## DFT
+
+### DFT_P03 -- Post Detail Financial Transaction
+
+Events: DFT^P03
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+[ROL*]
+[VISIT] {
+  PV1
+  [PV2]
+  [ROL*]
+  [DB1*]
+}
+FINANCIAL* {
+  FT1
+  [NTE*]
+  [FINANCIAL_PROCEDURE]* {
+    PR1
+    [ROL*]
+  }
+  [FINANCIAL_INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3*]
+  }
+  [FINANCIAL_GUARANTOR]* {
+    GT1
+    [GUARANTOR_INSURANCE]* {
+      IN1
+      [IN2]
+      [IN3*]
+    }
+  }
+}
+```
+
+---
+
+### DFT_P11 -- Post Detail Financial Transaction — New
+
+Events: DFT^P11
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+[ROL*]
+[VISIT] {
+  PV1
+  [PV2]
+  [ROL*]
+  [DB1*]
+}
+FINANCIAL* {
+  FT1
+  [FINANCIAL_PROCEDURE]* {
+    PR1
+    [ROL*]
+  }
+  [FINANCIAL_INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3*]
+    [ROL*]
+  }
+  [FINANCIAL_GUARANTOR]* {
+    GT1
+  }
+}
+[DIAGNOSIS]* {
+  DG1
+  [DG1]
+}
+```
+
+---
+
+
+## DOC
+
+### DOC_T12 -- Document Response
+
+Events: DOC^T12
+
+```
+MSH
+MSA
+[ERR]
+[QRD]
+RESULT* {
+  EVN
+  PID
+  PV1
+  TXA
+  [OBX*]
+}
+```
+
+---
+
+
+## EAC
+
+### EAC_U07 -- Equipment Command
+
+Events: EAC^U07
+
+```
+MSH
+[SFT*]
+EQU
+ECD*
+[SAC]
+[CNS]
+[ROL]
+```
+
+---
+
+
+## EAN
+
+### EAN_U09 -- Automated Equipment Notification
+
+Events: EAN^U09
+
+```
+MSH
+[SFT*]
+EQU
+NOTIFICATION* {
+  NDS
+  [NTE]
+}
+[ROL]
+```
+
+---
+
+
+## EAR
+
+### EAR_U08 -- Equipment Command Response
+
+Events: EAR^U08
+
+```
+MSH
+[SFT*]
+EQU
+COMMAND_RESPONSE* {
+  ECD
+  [SAC]
+  [CNS]
+  ECR
+}
+[ROL]
+```
+
+---
+
+
+## EHC
+
+### EHC_E01 -- Submit Health Care Services Invoice
+
+Events: EHC^E01
+
+```
+MSH
+[SFT*]
+INVOICE_INFORMATION_SUBMIT* {
+  IVC
+  [CTD*]
+  [LOC*]
+  [ROL*]
+  PRODUCT_SERVICE_SECTION* {
+    PSS
+    PRODUCT_SERVICE_GROUP* {
+      PSG
+      PRODUCT_SERVICE_LINE_ITEM* {
+        PSL
+        [NTE*]
+        [ADJ*]
+        [ABS]
+        [LOC*]
+        [ROL*]
+      }
+    }
+  }
+}
+```
+
+---
+
+### EHC_E02 -- Cancel Health Care Services Invoice
+
+Events: EHC^E02
+
+```
+MSH
+[SFT*]
+INVOICE_INFORMATION_CANCEL* {
+  IVC
+  [CTD*]
+}
+```
+
+---
+
+### EHC_E04 -- Re-Assess Health Care Services Invoice Request
+
+Events: EHC^E04
+
+```
+MSH
+[SFT*]
+REASSESSMENT_REQUEST_INFO* {
+  IVC
+  [CTD*]
+  [NTE*]
+  PRODUCT_SERVICE_SECTION* {
+    PSS
+    PRODUCT_SERVICE_GROUP* {
+      PSG
+      PSL*
+    }
+  }
+}
+```
+
+---
+
+### EHC_E10 -- Edit/Adjudication Results
+
+Events: EHC^E10
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+INVOICE_PROCESSING_RESULTS_INFO* {
+  IVC
+  IPR
+  PRODUCT_SERVICE_SECTION* {
+    PSS
+    PRODUCT_SERVICE_GROUP* {
+      PSG
+      PRODUCT_SERVICE_LINE_ITEM* {
+        PSL
+        [ADJ*]
+      }
+    }
+  }
+}
+```
+
+---
+
+### EHC_E12 -- Request Additional Information
+
+Events: EHC^E12
+
+```
+MSH
+[SFT*]
+RFI
+[CTD*]
+IVC
+PSS
+PSG
+[PID]
+[PSL*]
+REQUEST* {
+  [CTD]
+  OBR
+  [NTE]
+  [OBX*]
+}
+```
+
+---
+
+### EHC_E13 -- Additional Information Response
+
+Events: EHC^E13
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+RFI
+[CTD*]
+IVC
+PSS
+PSG
+[PID]
+[PSL*]
+REQUEST* {
+  [CTD]
+  OBR
+  [NTE]
+  [OBX*]
+}
+```
+
+---
+
+### EHC_E15 -- Payment/Remittance Advice
+
+Events: EHC^E15
+
+```
+MSH
+[SFT*]
+PAYMENT_REMITTANCE_HEADER_INFO {
+  PMT
+  [PAYMENT_REMITTANCE_DETAIL_INFO]* {
+    IPR
+    IVC
+    PRODUCT_SERVICE_SECTION* {
+      PSS
+      PRODUCT_SERVICE_GROUP* {
+        PSG
+        [PSL*]
+        [ADJ*]
+      }
+    }
+  }
+}
+[ADJUSTMENT_PAYEE]* {
+  ADJ
+  [ROL]
+}
+```
+
+---
+
+### EHC_E20 -- Submit Authorization Request
+
+Events: EHC^E20
+
+```
+MSH
+[SFT*]
+AUTHORIZATION_REQUEST* {
+  IVC
+  [CTD*]
+  [LOC*]
+  [ROL*]
+  PAT_INFO* {
+    PID
+    [ACC]
+    INSURANCE* {
+      IN1
+      [IN2]
+    }
+    [DIAGNOSIS]* {
+      DG1
+      [NTE*]
+    }
+    [PROCEDURE]* {
+      PR1
+      [NTE*]
+    }
+  }
+}
+```
+
+---
+
+### EHC_E21 -- Cancel Authorization Request
+
+Events: EHC^E21
+
+```
+MSH
+[SFT*]
+AUTHORIZATION_REQUEST* {
+  IVC
+  [CTD*]
+}
+```
+
+---
+
+### EHC_E24 -- Authorization Response
+
+Events: EHC^E24
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+AUTHORIZATION_RESPONSE_INFO* {
+  IVC
+  [CTD*]
+}
+```
+
+---
+
+
+## ESR
+
+### ESR_U02 -- Equipment Status Request
+
+Events: ESR^U02
+
+```
+MSH
+[SFT*]
+EQU
+[ROL]
+```
+
+---
+
+
+## ESU
+
+### ESU_U01 -- Equipment Status Update
+
+Events: ESU^U01
+
+```
+MSH
+[SFT*]
+EQU
+[ISD*]
+[ROL]
+```
+
+---
+
+
+## INR
+
+### INR_U06 -- Inventory Request
+
+Events: INR^U06
+
+```
+MSH
+[SFT*]
+EQU
+INV*
+[ROL]
+```
+
+---
+
+
+## INU
+
+### INU_U05 -- Inventory Update
+
+Events: INU^U05
+
+```
+MSH
+[SFT*]
+EQU
+INV*
+[ROL]
+```
+
+---
+
+
+## LSU
+
+### LSU_U12 -- Equipment Log/Service Update
+
+Events: LSU^U12
+
+```
+MSH
+[SFT*]
+EQU
+EQP*
+[ROL]
+```
+
+---
+
+
+## MDM
+
+### MDM_T01 -- Original Document Notification
+
+Events: MDM^T01, MDM^T03, MDM^T05, MDM^T07, MDM^T09, MDM^T11
+
+```
+MSH
+[SFT*]
+EVN
+PID
+PV1
+TXA
+```
+
+---
+
+### MDM_T02 -- Original Document Notification and Content
+
+Events: MDM^T02, MDM^T04, MDM^T06, MDM^T08, MDM^T10
+
+```
+MSH
+[SFT*]
+EVN
+PID
+PV1
+TXA
+OBSERVATION* {
+  OBX
+  [NTE*]
+}
+```
+
+---
+
+### MDM_T03 -- Document Status Change Notification
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+EVN
+PID
+PV1
+TXA
+```
+
+---
+
+### MDM_T04 -- Document Status Change Notification and Content
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+EVN
+PID
+PV1
+TXA
+OBSERVATION* {
+  OBX
+  [NTE*]
+}
+```
+
+---
+
+### MDM_T05 -- Document Addendum Notification
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+EVN
+PID
+PV1
+TXA
+```
+
+---
+
+### MDM_T06 -- Document Addendum Notification and Content
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+EVN
+PID
+PV1
+TXA
+OBSERVATION* {
+  OBX
+  [NTE*]
+}
+```
+
+---
+
+### MDM_T07 -- Document Edit Notification
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+EVN
+PID
+PV1
+TXA
+```
+
+---
+
+### MDM_T08 -- Document Edit Notification and Content
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+EVN
+PID
+PV1
+TXA
+OBSERVATION* {
+  OBX
+  [NTE*]
+}
+```
+
+---
+
+### MDM_T09 -- Document Replacement Notification
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+EVN
+PID
+PV1
+TXA
+```
+
+---
+
+### MDM_T10 -- Document Replacement Notification and Content
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+EVN
+PID
+PV1
+TXA
+OBSERVATION* {
+  OBX
+  [NTE*]
+}
+```
+
+---
+
+### MDM_T11 -- Document Cancel Notification
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+EVN
+PID
+PV1
+TXA
+```
+
+---
+
+
+## MFK
+
+### MFK_M01 -- Master File Acknowledgment
+
+Events: MFK^M01, MFK^M02, MFK^M03, MFK^M04, MFK^M05, MFK^M06, MFK^M07, MFK^M08, MFK^M09, MFK^M10, MFK^M11, MFK^M12, MFK^M13
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+MFI
+[MFA*]
+```
+
+---
+
+
+## MFN
+
+### MFN_M01 -- Master File Not Otherwise Specified
+
+Events: MFN^M01, MFN^M03, MFN^M04, MFN^M06, MFN^M07, MFN^M08, MFN^M09, MFN^M10, MFN^M11, MFN^M12, MFN^M13
+
+```
+MSH
+[SFT*]
+MFI
+MF* {
+  MFE
+  [NTE*]
+}
+```
+
+---
+
+### MFN_M02 -- Staff/Practitioner Master File
+
+Events: MFN^M02
+
+```
+MSH
+[SFT*]
+MFI
+MF_STAFF* {
+  MFE
+  STF
+  [PRA]
+  [ORG]
+}
+```
+
+---
+
+### MFN_M03 -- Master File — Test/Observation
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+MFI
+MF_TEST* {
+  MFE
+  OM1
+  [NTE*]
+}
+```
+
+---
+
+### MFN_M04 -- Master File — Charge Description
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+MFI
+MF_CDM* {
+  MFE
+  CDM
+  [NTE*]
+}
+```
+
+---
+
+### MFN_M05 -- Patient Location Master File
+
+Events: MFN^M05
+
+```
+MSH
+[SFT*]
+MFI
+MF_LOCATION* {
+  MFE
+  LOC
+  [LCH*]
+  [LRL*]
+  [MF_LOC_DEPT]* {
+    LDP
+    [LCH*]
+    [LCC*]
+  }
+}
+```
+
+---
+
+### MFN_M06 -- Master File — Clinical Study
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+MFI
+MF_CLIN_STUDY* {
+  MFE
+  CM0
+  [CM1*]
+  [CM2*]
+}
+```
+
+---
+
+### MFN_M07 -- Master File — Observation — Numeric
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+MFI
+MF_OBS_ATTRIBUTES* {
+  MFE
+  OM1
+  [OM2]
+  [OM3]
+  [OM4]
+}
+```
+
+---
+
+### MFN_M08 -- Master File — Test/Observation Numeric
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+MFI
+MF_TEST_NUMERIC* {
+  MFE
+  OM1
+  [OM2]
+  [OM3]
+  [OM4]
+}
+```
+
+---
+
+### MFN_M09 -- Master File — Test/Observation Categorical
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+MFI
+MF_TEST_CATEGORICAL* {
+  MFE
+  OM1
+  [OM3]
+  [OM4*]
+}
+```
+
+---
+
+### MFN_M10 -- Master File — Test/Observation Batteries
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+MFI
+MF_TEST_BATTERIES* {
+  MFE
+  OM1
+  [OM5]
+  [OM4*]
+}
+```
+
+---
+
+### MFN_M11 -- Master File — Test/Calculated Observations
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+MFI
+MF_TEST_CALCULATED* {
+  MFE
+  OM1
+  [OM6]
+  OM2
+}
+```
+
+---
+
+### MFN_M12 -- Master File — Additional Observation Attributes
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+MFI
+MF_OBS_ATTRIBUTES* {
+  MFE
+  OM1
+  [OM7]
+}
+```
+
+---
+
+### MFN_M13 -- Master File — Inventory Item
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+MFI
+MF_INV_ITEM* {
+  MFE
+  IIM
+}
+```
+
+---
+
+### MFN_M15 -- Master File Notification — Inventory Item Enhanced
+
+Events: MFN^M15
+
+```
+MSH
+[SFT*]
+MFI
+MF_INV_ITEM* {
+  MFE
+  IIM
+}
+```
+
+---
+
+
+## MFQ
+
+### MFQ_M01 -- Master File Query
+
+Events: MFQ^M01
+
+```
+MSH
+[SFT*]
+QRD
+[QRF]
+```
+
+---
+
+
+## MFR
+
+### MFR_M01 -- Master File Query Response
+
+Events: MFR^M01
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+[QAK]
+QRD
+[QRF]
+MFI
+MF_QUERY* {
+  MFE
+  [NTE*]
+}
+[DSC]
+```
+
+---
+
+### MFR_M04 -- Master File Response — Charge Description
+
+Events: MFR^M04
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+[QAK]
+QRD
+[QRF]
+MFI
+MF_QUERY* {
+  MFE
+  CDM
+  [LOC*]
+  [PRC*]
+}
+[DSC]
+```
+
+---
+
+### MFR_M05 -- Master File Response — Patient Location
+
+Events: MFR^M05
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+[QAK]
+QRD
+[QRF]
+MFI
+MF_QUERY* {
+  MFE
+  LOC
+  [LCH*]
+  [LRL*]
+  [MF_LOC_DEPT]* {
+    LDP
+    [LCH*]
+    [LCC*]
+  }
+}
+[DSC]
+```
+
+---
+
+### MFR_M06 -- Master File Response — Clinical Study
+
+Events: MFR^M06
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+[QAK]
+QRD
+[QRF]
+MFI
+MF_QUERY* {
+  MFE
+  CM0
+  [CM1*]
+  [CM2*]
+}
+[DSC]
+```
+
+---
+
+### MFR_M07 -- Master File Response — Calendar/Campaign
+
+Events: MFR^M07
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+[QAK]
+QRD
+[QRF]
+MFI
+MF_QUERY* {
+  MFE
+  CM0
+}
+[DSC]
+```
+
+---
+
+
+## NMD
+
+### NMD_N02 -- Application Management Data
+
+Events: NMD^N02
+
+```
+MSH
+[SFT*]
+CLOCK_AND_STATS* {
+  NCK
+  [NTE]
+  [NST]
+  [NTE]
+  [NSC]
+  [NTE]
+}
+```
+
+---
+
+
+## NMQ
+
+### NMQ_N01 -- Application Management Query
+
+Events: NMQ^N01
+
+```
+MSH
+[SFT*]
+QRD
+[QRF]
+[CLOCK_AND_STATS]* {
+  NCK
+  [NTE]
+  [NST]
+  [NTE]
+  [NSC]
+  [NTE]
+}
+```
+
+---
+
+
+## NMR
+
+### NMR_N01 -- Application Management Response
+
+Events: NMR^N01
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+CLOCK_AND_STATS* {
+  NCK
+  [NTE]
+  [NST]
+  [NTE]
+  [NSC]
+  [NTE]
+}
+```
+
+---
+
+
+## OMB
+
+### OMB_O27 -- Blood Product Order
+
+Events: OMB^O27
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+  [GT1]
+  [AL1*]
+}
+ORDER* {
+  ORC
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  BPO
+  [SPM]
+  [NTE*]
+  [DG1*]
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [FT1*]
+  [BLG]
+}
+```
+
+---
+
+
+## OMD
+
+### OMD_O03 -- Dietary Order
+
+Events: OMD^O03
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+  [GT1]
+  [AL1*]
+}
+ORDER_DIET* {
+  ORC
+  [DIET] {
+    ODS*
+    [NTE*]
+  }
+  [ORDER_TRAY] {
+    ODT*
+    [NTE*]
+  }
+}
+```
+
+---
+
+
+## OMG
+
+### OMG_O19 -- General Clinical Order
+
+Events: OMG^O19
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+  [GT1]
+  [AL1*]
+}
+ORDER* {
+  ORC
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  OBR
+  [NTE*]
+  [CTD]
+  [DG1*]
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [PRIOR_RESULT]* {
+    ORDER_PRIOR* {
+      ORC
+      OBR
+      [NTE*]
+      [OBSERVATION_PRIOR]* {
+        OBX
+        [NTE*]
+      }
+    }
+  }
+  [FT1*]
+  [CTI*]
+  [BLG]
+}
+```
+
+---
+
+
+## OMI
+
+### OMI_O23 -- Imaging Order
+
+Events: OMI^O23
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+  [GT1]
+  [AL1*]
+}
+ORDER* {
+  ORC
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  OBR
+  [NTE*]
+  [CTD]
+  [DG1*]
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  IPC*
+}
+```
+
+---
+
+
+## OML
+
+### OML_O21 -- Laboratory Order
+
+Events: OML^O21
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+  [GT1]
+  [AL1*]
+}
+ORDER* {
+  ORC
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  [OBSERVATION_REQUEST] {
+    OBR
+    [TCD]
+    [NTE*]
+    [DG1*]
+    [OBSERVATION]* {
+      OBX
+      [TCD]
+      [NTE*]
+    }
+    [SPM]
+    [OBX*]
+    [PRIOR_RESULT]* {
+      [AL1*]
+      ORDER_PRIOR* {
+        ORC
+        OBR
+        [NTE*]
+        [OBSERVATION_PRIOR]* {
+          OBX
+          [NTE*]
+        }
+      }
+    }
+  }
+  [FT1*]
+  [CTI*]
+  [BLG]
+}
+```
+
+---
+
+### OML_O33 -- Laboratory Order — Multiple Orders Per Specimen
+
+Events: OML^O33
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+  [GT1]
+  [AL1*]
+}
+SPECIMEN* {
+  SPM
+  [OBX*]
+  [SAC*]
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [OBSERVATION_REQUEST] {
+      OBR
+      [TCD]
+      [NTE*]
+      [DG1*]
+      [OBSERVATION]* {
+        OBX
+        [TCD]
+        [NTE*]
+      }
+      [PRIOR_RESULT]* {
+        [AL1*]
+        ORDER_PRIOR* {
+          ORC
+          OBR
+          [NTE*]
+          [OBSERVATION_PRIOR]* {
+            OBX
+            [NTE*]
+          }
+        }
+      }
+    }
+    [FT1*]
+    [CTI*]
+    [BLG]
+  }
+}
+```
+
+---
+
+### OML_O35 -- Laboratory Order — Multiple Orders Per Container
+
+Events: OML^O35
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+  [GT1]
+  [AL1*]
+}
+SPECIMEN* {
+  SPM
+  [OBX*]
+  [SAC*]
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [OBSERVATION_REQUEST] {
+      OBR
+      [TCD]
+      [NTE*]
+      [DG1*]
+      [OBSERVATION]* {
+        OBX
+        [TCD]
+        [NTE*]
+      }
+    }
+    [FT1*]
+    [CTI*]
+    [BLG]
+  }
+}
+```
+
+---
+
+### OML_O39 -- Specimen Shipment Order
+
+Events: OML^O39
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+  [GT1]
+  [AL1*]
+}
+SPECIMEN* {
+  SPM
+  [OBX*]
+  [SAC*]
+  [ORDER]* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [OBSERVATION_REQUEST] {
+      OBR
+      [TCD]
+      [NTE*]
+      [DG1*]
+      [OBSERVATION]* {
+        OBX
+        [TCD]
+        [NTE*]
+      }
+    }
+    [FT1*]
+    [CTI*]
+    [BLG]
+  }
+}
+```
+
+---
+
+
+## OMN
+
+### OMN_O07 -- Non-Stock Requisition Order
+
+Events: OMN^O07
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+  [GT1]
+  [AL1*]
+}
+ORDER* {
+  ORC
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  RQD
+  [RQ1]
+  [NTE*]
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [BLG]
+}
+```
+
+---
+
+
+## OMP
+
+### OMP_O09 -- Pharmacy/Treatment Order
+
+Events: OMP^O09
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+  [GT1]
+}
+ORDER* {
+  ORC
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  RXO
+  [NTE*]
+  RXR*
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [FT1*]
+  [BLG]
+}
+```
+
+---
+
+
+## OMS
+
+### OMS_O05 -- Stock Requisition Order
+
+Events: OMS^O05
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+  [GT1]
+  [AL1*]
+}
+ORDER* {
+  ORC
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  RQD
+  [RQ1]
+  [NTE*]
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [BLG]
+}
+```
+
+---
+
+
+## ORA
+
+### ORA_R33 -- Observation Report Acknowledgment
+
+Events: ORA^R33
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+```
+
+---
+
+### ORA_R41 -- Observation Report Alert Acknowledgment
+
+Events: ORA^R41
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+```
+
+---
+
+
+## ORB
+
+### ORB_O28 -- Blood Product Order Acknowledgment
+
+Events: ORB^O28
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [BPO]
+  }
+}
+```
+
+---
+
+
+## ORD
+
+### ORD_O04 -- Dietary Order Acknowledgment
+
+Events: ORD^O04
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER_DIET* {
+    ORC
+    [TIMING_DIET]* {
+      TQ1
+      [TQ2*]
+    }
+    [ODS*]
+    [NTE*]
+  }
+  [ORDER_TRAY]* {
+    ORC
+    [TIMING_TRAY]* {
+      TQ1
+      [TQ2*]
+    }
+    [ODT*]
+    [NTE*]
+  }
+}
+```
+
+---
+
+
+## ORF
+
+### ORF_R04 -- Response to Query — Transmission of Requested Observation
+
+Events: ORF^R04
+
+```
+MSH
+MSA
+[QRD]
+[QRF]
+[QUERY_RESPONSE]* {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    [ORC]
+    OBR
+    [NTE*]
+    [TIMING_QTY]* {
+      TQ1
+      [TQ2*]
+    }
+    [OBSERVATION]* {
+      [OBX]
+      [NTE*]
+    }
+  }
+}
+[ERR*]
+[QAK]
+[DSC]
+```
+
+---
+
+
+## ORG
+
+### ORG_O20 -- General Clinical Order Response
+
+Events: ORG^O20
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [OBR]
+    [NTE*]
+    [CTI*]
+  }
+}
+```
+
+---
+
+
+## ORI
+
+### ORI_O24 -- Imaging Order Response
+
+Events: ORI^O24
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [OBR]
+    [NTE*]
+    [IPC*]
+  }
+}
+```
+
+---
+
+
+## ORL
+
+### ORL_O22 -- General Laboratory Order Response
+
+Events: ORL^O22
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [OBSERVATION_REQUEST] {
+      OBR
+      [SPM]
+      [SAC]
+    }
+  }
+}
+```
+
+---
+
+### ORL_O34 -- Laboratory Order Response — Specimen Oriented
+
+Events: ORL^O34
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+  }
+  SPECIMEN* {
+    SPM
+    [SAC*]
+    ORDER* {
+      ORC
+      [TIMING]* {
+        TQ1
+        [TQ2*]
+      }
+      [OBSERVATION_REQUEST] {
+        OBR
+        [SPM]
+      }
+    }
+  }
+}
+```
+
+---
+
+### ORL_O36 -- Laboratory Order Response — Container Oriented
+
+Events: ORL^O36
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+  }
+  SPECIMEN* {
+    SPM
+    [SAC*]
+    ORDER* {
+      ORC
+      [TIMING]* {
+        TQ1
+        [TQ2*]
+      }
+      [OBSERVATION_REQUEST] {
+        OBR
+      }
+    }
+  }
+}
+```
+
+---
+
+### ORL_O40 -- Specimen Shipment Order Response
+
+Events: ORL^O40
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+  }
+  SPECIMEN* {
+    SPM
+    [SAC*]
+    [ORDER]* {
+      ORC
+      [TIMING]* {
+        TQ1
+        [TQ2*]
+      }
+      [OBSERVATION_REQUEST] {
+        OBR
+      }
+    }
+  }
+}
+```
+
+---
+
+
+## ORM
+
+### ORM_O01 -- General Order Message
+
+Events: ORM^O01
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+  [GT1]
+}
+ORDER* {
+  ORC
+  [ORDER_DETAIL] {
+    OBR
+    [NTE*]
+    [CTD]
+    [DG1*]
+    [OBSERVATION]* {
+      OBX
+      [NTE*]
+    }
+  }
+  [FT1*]
+  [CTI*]
+  [BLG]
+}
+```
+
+---
+
+
+## ORN
+
+### ORN_O08 -- Non-Stock Requisition Acknowledgment
+
+Events: ORN^O08
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [RQD]
+    [RQ1]
+    [NTE*]
+  }
+}
+```
+
+---
+
+
+## ORP
+
+### ORP_O10 -- Pharmacy/Treatment Order Acknowledgment
+
+Events: ORP^O10
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [RXO]
+    [NTE*]
+    [RXR*]
+    [RXC*]
+  }
+}
+```
+
+---
+
+
+## ORR
+
+### ORR_O02 -- General Order Response
+
+Events: ORR^O02
+
+```
+MSH
+MSA
+[ERR*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [OBR]
+    [NTE*]
+  }
+}
+```
+
+---
+
+
+## ORS
+
+### ORS_O06 -- Stock Requisition Acknowledgment
+
+Events: ORS^O06
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [RQD]
+    [RQ1]
+    [NTE*]
+  }
+}
+```
+
+---
+
+
+## ORU
+
+### ORU_R01 -- Unsolicited Observation Result
+
+Events: ORU^R01
+
+```
+MSH
+[SFT*]
+PATIENT_RESULT* {
+  [PATIENT] {
+    PID
+    [PD1]
+    [NTE*]
+    [NK1*]
+    [VISIT] {
+      PV1
+      [PV2]
+    }
+  }
+  ORDER_OBSERVATION* {
+    [ORC]
+    OBR
+    [NTE*]
+    [TIMING_QTY]* {
+      TQ1
+      [TQ2*]
+    }
+    [CTD]
+    [OBSERVATION]* {
+      OBX
+      [NTE*]
+    }
+    [SPECIMEN]* {
+      SPM
+      [OBSERVATION]* {
+        OBX
+        [NTE*]
+      }
+    }
+    [FT1*]
+    [CTI*]
+  }
+}
+[DSC]
+```
+
+---
+
+### ORU_R30 -- Unsolicited Point-Of-Care Observation Without Existing Order
+
+Events: ORU^R30, ORU^R31, ORU^R32
+
+```
+MSH
+[SFT*]
+PID
+[PD1]
+[OBX*]
+ORDER_OBSERVATION* {
+  ORC
+  OBR
+  [NTE*]
+  [TIMING_QTY]* {
+    TQ1
+    [TQ2*]
+  }
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+}
+```
+
+---
+
+### ORU_R32 -- Unsolicited Pre-ordered Point-of-Care Observation
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+PID
+[PD1]
+[OBX*]
+ORDER_OBSERVATION* {
+  ORC
+  OBR
+  [NTE*]
+  [TIMING_QTY]* {
+    TQ1
+    [TQ2*]
+  }
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+}
+```
+
+---
+
+
+## OSQ
+
+### OSQ_Q06 -- Query for Order Status
+
+Events: OSQ^Q06
+
+```
+MSH
+[SFT*]
+QRD
+[QRF]
+[DSC]
+```
+
+---
+
+
+## OSR
+
+### OSR_Q06 -- Query Response for Order Status
+
+Events: OSR^Q06
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+QAK
+QRD
+[QRF]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [OBR]
+    [NTE*]
+  }
+}
+[DSC]
+```
+
+---
+
+
+## OUL
+
+### OUL_R21 -- Unsolicited Laboratory Observation
+
+Events: OUL^R21
+
+```
+MSH
+[SFT*]
+[NTE]
+[PATIENT] {
+  PID
+  [PD1]
+  [PV1]
+  [PV2]
+}
+ORDER_OBSERVATION* {
+  [ORC]
+  OBR
+  [NTE*]
+  [TIMING_QTY]* {
+    TQ1
+    [TQ2*]
+  }
+  [OBSERVATION]* {
+    [OBX]
+    [TCD]
+    [SID]
+    [NTE*]
+  }
+  [CTI*]
+}
+```
+
+---
+
+### OUL_R22 -- Unsolicited Specimen Oriented Observation
+
+Events: OUL^R22
+
+```
+MSH
+[SFT*]
+[NTE]
+[PATIENT] {
+  PID
+  [PD1]
+  [PV1]
+  [PV2]
+}
+SPECIMEN* {
+  SPM
+  [OBX*]
+  [CONTAINER]* {
+    SAC
+    [INV]
+  }
+  ORDER* {
+    OBR
+    [ORC]
+    [NTE*]
+    [TIMING_QTY]* {
+      TQ1
+      [TQ2*]
+    }
+    [RESULT]* {
+      OBX
+      [TCD]
+      [SID]
+      [NTE*]
+    }
+    [CTI*]
+  }
+}
+```
+
+---
+
+### OUL_R23 -- Unsolicited Specimen Container Oriented Observation
+
+Events: OUL^R23
+
+```
+MSH
+[SFT*]
+[NTE]
+[PATIENT] {
+  PID
+  [PD1]
+  [PV1]
+  [PV2]
+}
+SPECIMEN* {
+  SPM
+  [OBX*]
+  CONTAINER* {
+    SAC
+    [INV]
+    ORDER* {
+      OBR
+      [ORC]
+      [NTE*]
+      [TIMING_QTY]* {
+        TQ1
+        [TQ2*]
+      }
+      [RESULT]* {
+        OBX
+        [TCD]
+        [SID]
+        [NTE*]
+      }
+      [CTI*]
+    }
+  }
+}
+```
+
+---
+
+### OUL_R24 -- Unsolicited Order Oriented Observation
+
+Events: OUL^R24
+
+```
+MSH
+[SFT*]
+[NTE]
+[PATIENT] {
+  PID
+  [PD1]
+  [PV1]
+  [PV2]
+}
+ORDER* {
+  OBR
+  [ORC]
+  [NTE*]
+  [TIMING_QTY]* {
+    TQ1
+    [TQ2*]
+  }
+  [SPECIMEN]* {
+    SPM
+    [OBX*]
+    [CONTAINER]* {
+      SAC
+      [INV]
+    }
+  }
+  [RESULT]* {
+    OBX
+    [TCD]
+    [SID]
+    [NTE*]
+  }
+  [CTI*]
+}
+```
+
+---
+
+
+## PEX
+
+### PEX_P07 -- Product Experience
+
+Events: PEX^P07, PEX^P08
+
+```
+MSH
+[SFT*]
+EVN
+PID
+[PD1]
+[NTE*]
+EXPERIENCE* {
+  PES
+  PEX_OBSERVATION* {
+    PEO
+    PEX_CAUSE* {
+      PCR
+      [RX_ORDER] {
+        RXE
+        [TIMING_QTY]* {
+          TQ1
+          [TQ2*]
+        }
+        [RXR*]
+      }
+      [RX_ADMINISTRATION]* {
+        RXA
+        [RXR]
+      }
+      [PRB*]
+      [OBX*]
+      [NTE*]
+      [NK1_TIMING_QTY]* {
+        NK1
+        [TIMING_QTY]* {
+          TQ1
+          [TQ2*]
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+
+## PGL
+
+### PGL_PC6 -- Goal Add
+
+Events: PGL^PC6, PGL^PC7, PGL^PC8
+
+```
+MSH
+[SFT*]
+PID
+PATIENT_VISIT {
+  PV1
+  [PV2]
+}
+GOAL* {
+  GOL
+  [NTE*]
+  [VAR*]
+  [GOAL_ROLE]* {
+    ROL
+    [VAR*]
+  }
+  [PATHWAY]* {
+    PTH
+    [VAR*]
+  }
+  [GOAL_OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [PROBLEM]* {
+    PRB
+    [NTE*]
+    [VAR*]
+    [PROBLEM_ROLE]* {
+      ROL
+      [VAR*]
+    }
+    [PROBLEM_OBSERVATION]* {
+      OBX
+      [NTE*]
+    }
+  }
+  [ORDER]* {
+    ORC
+    [ORDER_DETAIL] {
+      OBR
+      [NTE*]
+      [VAR*]
+      [ORDER_OBSERVATION]* {
+        OBX
+        [NTE*]
+        [VAR*]
+      }
+    }
+  }
+}
+```
+
+---
+
+
+## PMU
+
+### PMU_B01 -- Add Personnel Record
+
+Events: PMU^B01, PMU^B02, PMU^B05, PMU^B06
+
+```
+MSH
+[SFT*]
+EVN
+STF
+[PRA*]
+[ORG*]
+[AFF*]
+[LAN*]
+[EDU*]
+[CER*]
+```
+
+---
+
+### PMU_B03 -- Delete Personnel Record
+
+Events: PMU^B03
+
+```
+MSH
+[SFT*]
+EVN
+STF
+```
+
+---
+
+### PMU_B04 -- Active Practicing Person
+
+Events: PMU^B04
+
+```
+MSH
+[SFT*]
+EVN
+STF
+[PRA*]
+[ORG*]
+```
+
+---
+
+### PMU_B07 -- Grant Certificate/Permission
+
+Events: PMU^B07
+
+```
+MSH
+[SFT*]
+EVN
+STF
+[PRA*]
+[CER*]
+```
+
+---
+
+### PMU_B08 -- Revoke Certificate/Permission
+
+Events: PMU^B08
+
+```
+MSH
+[SFT*]
+EVN
+STF
+[PRA*]
+[CER*]
+```
+
+---
+
+
+## PPG
+
+### PPG_PCG -- Goal Query Response
+
+Events: PPG^PCG, PPG^PCH, PPG^PCJ
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+[QAK]
+QRD
+PID
+PATIENT_VISIT {
+  PV1
+  [PV2]
+}
+GOAL* {
+  GOL
+  [NTE*]
+  [VAR*]
+  [GOAL_ROLE]* {
+    ROL
+    [VAR*]
+  }
+  [GOAL_OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [PROBLEM]* {
+    PRB
+    [NTE*]
+    [VAR*]
+    [PROBLEM_OBSERVATION]* {
+      OBX
+      [NTE*]
+    }
+    [ORDER]* {
+      ORC
+      [ORDER_DETAIL] {
+        OBR
+        [NTE*]
+        [VAR*]
+        [ORDER_OBSERVATION]* {
+          OBX
+          [NTE*]
+          [VAR*]
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+
+## PPP
+
+### PPP_PCB -- Pathway Add
+
+Events: PPP^PCB, PPP^PCC, PPP^PCD
+
+```
+MSH
+[SFT*]
+PID
+PATIENT_VISIT {
+  PV1
+  [PV2]
+}
+PATHWAY* {
+  PTH
+  [NTE*]
+  [VAR*]
+  [PATHWAY_ROLE]* {
+    ROL
+    [VAR*]
+  }
+  [PROBLEM]* {
+    PRB
+    [NTE*]
+    [VAR*]
+    [PROBLEM_ROLE]* {
+      ROL
+      [VAR*]
+    }
+    [PROBLEM_OBSERVATION]* {
+      OBX
+      [NTE*]
+    }
+    [GOAL]* {
+      GOL
+      [NTE*]
+      [VAR*]
+      [GOAL_ROLE]* {
+        ROL
+        [VAR*]
+      }
+      [GOAL_OBSERVATION]* {
+        OBX
+        [NTE*]
+      }
+    }
+    [ORDER]* {
+      ORC
+      [ORDER_DETAIL] {
+        OBR
+        [NTE*]
+        [VAR*]
+        [ORDER_OBSERVATION]* {
+          OBX
+          [NTE*]
+          [VAR*]
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+
+## PPR
+
+### PPR_PC1 -- Problem Add
+
+Events: PPR^PC1, PPR^PC2, PPR^PC3
+
+```
+MSH
+[SFT*]
+PID
+PATIENT_VISIT {
+  PV1
+  [PV2]
+}
+PROBLEM* {
+  PRB
+  [NTE*]
+  [VAR*]
+  [PROBLEM_ROLE]* {
+    ROL
+    [VAR*]
+  }
+  [PATHWAY]* {
+    PTH
+    [VAR*]
+  }
+  [PROBLEM_OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [GOAL]* {
+    GOL
+    [NTE*]
+    [VAR*]
+    [GOAL_ROLE]* {
+      ROL
+      [VAR*]
+    }
+    [GOAL_OBSERVATION]* {
+      OBX
+      [NTE*]
+    }
+  }
+  [ORDER]* {
+    ORC
+    [ORDER_DETAIL] {
+      OBR
+      [NTE*]
+      [VAR*]
+      [ORDER_OBSERVATION]* {
+        OBX
+        [NTE*]
+        [VAR*]
+      }
+    }
+  }
+}
+```
+
+---
+
+
+## PPT
+
+### PPT_PCL -- Pathway Query Response
+
+Events: PPT^PCL
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+[QAK]
+QRD
+PID
+PATIENT_VISIT {
+  PV1
+  [PV2]
+}
+PATHWAY* {
+  PTH
+  [NTE*]
+  [VAR*]
+  [PROBLEM]* {
+    PRB
+    [NTE*]
+    [VAR*]
+    [PROBLEM_OBSERVATION]* {
+      OBX
+      [NTE*]
+    }
+    [ORDER]* {
+      ORC
+      [ORDER_DETAIL] {
+        OBR
+        [NTE*]
+        [VAR*]
+        [ORDER_OBSERVATION]* {
+          OBX
+          [NTE*]
+          [VAR*]
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+
+## PPV
+
+### PPV_PCA -- Patient Goal Response
+
+Events: PPV^PCA
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+[QAK]
+QRD
+PATIENT* {
+  PID
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  GOAL* {
+    GOL
+    [NTE*]
+    [VAR*]
+    [GOAL_ROLE]* {
+      ROL
+      [VAR*]
+    }
+    [GOAL_PATHWAY]* {
+      PTH
+      [VAR*]
+    }
+    [GOAL_OBSERVATION]* {
+      OBX
+      [NTE*]
+    }
+    [PROBLEM]* {
+      PRB
+      [NTE*]
+      [VAR*]
+      [PROBLEM_ROLE]* {
+        ROL
+        [VAR*]
+      }
+      [PROBLEM_OBSERVATION]* {
+        OBX
+        [NTE*]
+      }
+    }
+    [ORDER]* {
+      ORC
+      [ORDER_DETAIL] {
+        OBR
+        [NTE*]
+        [VAR*]
+        [ORDER_OBSERVATION]* {
+          OBX
+          [NTE*]
+          [VAR*]
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+
+## PRR
+
+### PRR_PC5 -- Patient Problem Response
+
+Events: PRR^PC5
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+[QAK]
+QRD
+PATIENT* {
+  PID
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  PROBLEM* {
+    PRB
+    [NTE*]
+    [VAR*]
+    [PROBLEM_ROLE]* {
+      ROL
+      [VAR*]
+    }
+    [PROBLEM_PATHWAY]* {
+      PTH
+      [VAR*]
+    }
+    [PROBLEM_OBSERVATION]* {
+      OBX
+      [NTE*]
+    }
+    [GOAL]* {
+      GOL
+      [NTE*]
+      [VAR*]
+      [GOAL_ROLE]* {
+        ROL
+        [VAR*]
+      }
+      [GOAL_OBSERVATION]* {
+        OBX
+        [NTE*]
+      }
+    }
+    [ORDER]* {
+      ORC
+      [ORDER_DETAIL] {
+        OBR
+        [NTE*]
+        [VAR*]
+        [ORDER_OBSERVATION]* {
+          OBX
+          [NTE*]
+          [VAR*]
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+
+## PTR
+
+### PTR_PCF -- Patient Pathway Response
+
+Events: PTR^PCF
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+[QAK]
+QRD
+PATIENT* {
+  PID
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  PROBLEM* {
+    PRB
+    [NTE*]
+    [VAR*]
+    [PROBLEM_ROLE]* {
+      ROL
+      [VAR*]
+    }
+    [PROBLEM_PATHWAY]* {
+      PTH
+      [VAR*]
+    }
+    [PROBLEM_OBSERVATION]* {
+      OBX
+      [NTE*]
+    }
+    [GOAL]* {
+      GOL
+      [NTE*]
+      [VAR*]
+      [GOAL_ROLE]* {
+        ROL
+        [VAR*]
+      }
+      [GOAL_OBSERVATION]* {
+        OBX
+        [NTE*]
+      }
+    }
+    [ORDER]* {
+      ORC
+      [ORDER_DETAIL] {
+        OBR
+        [NTE*]
+        [VAR*]
+        [ORDER_OBSERVATION]* {
+          OBX
+          [NTE*]
+          [VAR*]
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+
+## QBP
+
+### QBP_Q11 -- Query by Parameter — Segment Pattern Response
+
+Events: QBP^Q11
+
+```
+MSH
+[SFT*]
+QPD
+RCP
+[DSC]
+```
+
+---
+
+### QBP_Q13 -- Query by Parameter — Tabular Response
+
+Events: QBP^Q13
+
+```
+MSH
+[SFT*]
+QPD
+[RDF]
+RCP
+[DSC]
+```
+
+---
+
+### QBP_Q15 -- Query by Parameter — Display Response
+
+Events: QBP^Q15
+
+```
+MSH
+[SFT*]
+QPD
+RCP
+[DSC]
+```
+
+---
+
+### QBP_Q21 -- Query by Parameter
+
+Events: QBP^Q21, QBP^Q22, QBP^Q23, QBP^Q24, QBP^Q25
+
+```
+MSH
+[SFT*]
+QPD
+RCP
+[DSC]
+```
+
+---
+
+### QBP_Z73 -- Information about Pending Events
+
+Events: QBP^Z73
+
+```
+MSH
+[SFT*]
+QPD
+RCP
+[DSC]
+```
+
+---
+
+
+## QCK
+
+### QCK_Q02 -- Cancel Query
+
+Events: QCK^Q02
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+[QAK]
+```
+
+---
+
+
+## QCN
+
+### QCN_J01 -- Cancel Subscription
+
+Events: QCN^J01
+
+```
+MSH
+[SFT*]
+QID
+```
+
+---
+
+
+## QRY
+
+### QRY -- Original-Style Query
+
+Events: (direct)
+
+```
+MSH
+[SFT*]
+QRD
+[QRF]
+[DSC]
+```
+
+---
+
+### QRY_A19 -- Patient Query
+
+Events: QRY^A19
+
+```
+MSH
+[SFT*]
+QRD
+[QRF]
+```
+
+---
+
+### QRY_PC4 -- Problem Query
+
+Events: QRY^PC4, QRY^PC5, QRY^PC9, QRY^PCE, QRY^PCK
+
+```
+MSH
+[SFT*]
+QRD
+[QRF]
+```
+
+---
+
+### QRY_Q01 -- Query Sent for Immediate Response
+
+Events: QRY^Q01
+
+```
+MSH
+[SFT*]
+QRD
+[QRF]
+[DSC]
+```
+
+---
+
+### QRY_Q02 -- Query Sent for Deferred Response
+
+Events: QRY^Q02
+
+```
+MSH
+[SFT*]
+QRD
+[QRF]
+[DSC]
+```
+
+---
+
+### QRY_R02 -- Query for Results of Observation
+
+Events: QRY^R02
+
+```
+MSH
+[SFT*]
+QRD
+[QRF]
+[DSC]
+```
+
+---
+
+
+## QSB
+
+### QSB_Q16 -- Create Subscription
+
+Events: QSB^Q16
+
+```
+MSH
+[SFT*]
+QPD
+RCP
+[DSC]
+```
+
+---
+
+
+## QVR
+
+### QVR_Q17 -- Query for Previous Events
+
+Events: QVR^Q17
+
+```
+MSH
+[SFT*]
+QPD
+RCP
+[DSC]
+```
+
+---
+
+
+## RAR
+
+### RAR_RAR -- Pharmacy Administration Information
+
+Events: RAR^RAR
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+DEFINITION* {
+  QRD
+  [QRF]
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [ADMINISTRATION]* {
+      RXA
+      RXR
+    }
+  }
+}
+```
+
+---
+
+
+## RAS
+
+### RAS_O17 -- Pharmacy/Treatment Administration
+
+Events: RAS^O17
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [AL1*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+}
+ORDER* {
+  ORC
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  ADMINISTRATION* {
+    RXA
+    RXR
+    [OBX*]
+  }
+  [CTI*]
+}
+```
+
+---
+
+
+## RCI
+
+### RCI_I05 -- Return Clinical Information
+
+Events: RCI^I05
+
+```
+MSH
+[SFT*]
+MSA
+QRD
+[QRF]
+PROVIDER* {
+  PRD
+  [CTD*]
+}
+PID
+[DG1*]
+[DRG*]
+[AL1*]
+[OBSERVATION]* {
+  OBR
+  [NTE*]
+  [RESULTS]* {
+    OBX
+    [NTE*]
+  }
+}
+[NTE*]
+```
+
+---
+
+
+## RCL
+
+### RCL_I06 -- Request Clinical Data Listing
+
+Events: RCL^I06
+
+```
+MSH
+[SFT*]
+MSA
+QRD
+[QRF]
+PROVIDER* {
+  PRD
+  [CTD*]
+}
+PID
+[DG1*]
+[DRG*]
+[AL1*]
+[NTE*]
+[DSP*]
+[DSC]
+```
+
+---
+
+
+## RDE
+
+### RDE_O11 -- Pharmacy/Treatment Encoded Order
+
+Events: RDE^O11
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+}
+ORDER* {
+  ORC
+  [TIMING_ENCODED]* {
+    TQ1
+    [TQ2*]
+  }
+  RXE
+  [NTE*]
+  RXR*
+  [RXC*]
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [FT1*]
+  [CTI*]
+}
+```
+
+---
+
+
+## RDR
+
+### RDR_RDR -- Pharmacy Dispense Information
+
+Events: RDR^RDR
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+DEFINITION* {
+  QRD
+  [QRF]
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [DISPENSE]* {
+      RXD
+      RXR*
+      [RXC*]
+    }
+  }
+}
+```
+
+---
+
+
+## RDS
+
+### RDS_O13 -- Pharmacy/Treatment Dispense
+
+Events: RDS^O13
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [PD1]
+  [NTE*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+  [INSURANCE]* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+}
+ORDER* {
+  ORC
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  RXD
+  [NTE*]
+  RXR*
+  [RXC*]
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+  [FT1*]
+}
+```
+
+---
+
+
+## RDY
+
+### RDY_K15 -- Display Based Response
+
+Events: RDY^K15
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[DISPLAY]* {
+  DSP
+}
+[DSC]
+```
+
+---
+
+
+## REF
+
+### REF_I12 -- Patient Referral
+
+Events: REF^I12, REF^I13, REF^I14, REF^I15
+
+```
+MSH
+[SFT*]
+[RF1]
+[AUTHORIZATION_CONTACT] {
+  AUT
+  [CTD]
+}
+PROVIDER_CONTACT* {
+  PRD
+  [CTD*]
+}
+PID
+[NK1*]
+[GT1*]
+[INSURANCE]* {
+  IN1
+  [IN2]
+  [IN3]
+}
+[ACC]
+[DG1*]
+[DRG*]
+[AL1*]
+[PROCEDURE]* {
+  PR1
+  [ROL*]
+}
+[OBSERVATION]* {
+  OBX
+  [NTE*]
+}
+[PATIENT_VISIT] {
+  PV1
+  [PV2]
+}
+[NTE*]
+```
+
+---
+
+
+## RER
+
+### RER_RER -- Pharmacy Encoded Order Information
+
+Events: RER^RER
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+DEFINITION* {
+  QRD
+  [QRF]
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    RXE
+    RXR*
+    [RXC*]
+  }
+}
+```
+
+---
+
+
+## RGR
+
+### RGR_RGR -- Pharmacy/Treatment Dose Information
+
+Events: RGR^RGR
+
+```
+MSH
+[SFT*]
+MSA
+[ERR*]
+DEFINITION* {
+  QRD
+  [QRF]
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [ENCODING] {
+      RXE
+      RXR*
+      [RXC*]
+    }
+    RXG*
+    RXR*
+    [RXC*]
+  }
+}
+[DSC]
+```
+
+---
+
+
+## RGV
+
+### RGV_O15 -- Pharmacy/Treatment Give
+
+Events: RGV^O15
+
+```
+MSH
+[SFT*]
+[NTE*]
+[PATIENT] {
+  PID
+  [NTE*]
+  [AL1*]
+  [PATIENT_VISIT] {
+    PV1
+    [PV2]
+  }
+}
+ORDER* {
+  ORC
+  [TIMING_GIVE]* {
+    TQ1
+    [TQ2*]
+  }
+  GIVE {
+    RXG
+    [TIMING_GIVE]* {
+      TQ1
+      [TQ2*]
+    }
+    RXR*
+    [RXC*]
+  }
+  [OBSERVATION]* {
+    [OBX]
+    [NTE*]
+  }
+}
+```
+
+---
+
+
+## ROR
+
+### ROR_ROR -- Pharmacy Prescription Order Information
+
+Events: ROR^ROR
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+DEFINITION* {
+  QRD
+  [QRF]
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    RXO
+    RXR*
+    [RXC*]
+  }
+}
+```
+
+---
+
+
+## RPA
+
+### RPA_I08 -- Request for Treatment Authorization Information Response
+
+Events: RPA^I08, RPA^I09, RPA^I10, RPA^I11
+
+```
+MSH
+[SFT*]
+MSA
+[RF1]
+[AUTHORIZATION] {
+  AUT
+  [CTD]
+}
+PROVIDER* {
+  PRD
+  [CTD*]
+}
+PID
+[NK1*]
+[GT1*]
+[INSURANCE]* {
+  IN1
+  [IN2]
+  [IN3]
+}
+[ACC]
+[DG1*]
+[DRG*]
+[AL1*]
+PROCEDURE* {
+  PR1
+  [ROL*]
+}
+[OBSERVATION]* {
+  OBR
+  [NTE*]
+  [RESULTS]* {
+    OBX
+    [NTE*]
+  }
+}
+[VISIT] {
+  PV1
+  [PV2]
+}
+[NTE*]
+```
+
+---
+
+
+## RPI
+
+### RPI_I01 -- Return Patient Information
+
+Events: RPI^I01
+
+```
+MSH
+[SFT*]
+MSA
+PROVIDER* {
+  PRD
+  [CTD*]
+}
+PID
+[NK1*]
+[GUARANTOR_INSURANCE] {
+  [GT1*]
+  INSURANCE* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+}
+[NTE*]
+```
+
+---
+
+### RPI_I04 -- Return Patient Information — Insurance
+
+Events: RPI^I04
+
+```
+MSH
+[SFT*]
+MSA
+PROVIDER* {
+  PRD
+  [CTD*]
+}
+PID
+[NK1*]
+[GUARANTOR_INSURANCE] {
+  [GT1*]
+  INSURANCE* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+}
+[NTE*]
+```
+
+---
+
+
+## RPL
+
+### RPL_I02 -- Return Patient Display List
+
+Events: RPL^I02
+
+```
+MSH
+[SFT*]
+MSA
+PROVIDER* {
+  PRD
+  [CTD*]
+}
+[NTE*]
+[DSP*]
+[DSC]
+```
+
+---
+
+
+## RPR
+
+### RPR_I03 -- Return Patient Subscription List
+
+Events: RPR^I03
+
+```
+MSH
+[SFT*]
+MSA
+PROVIDER* {
+  PRD
+  [CTD*]
+}
+[NTE*]
+```
+
+---
+
+
+## RQA
+
+### RQA_I08 -- Request for Treatment Authorization Information
+
+Events: RQA^I08, RQA^I09, RQA^I10, RQA^I11
+
+```
+MSH
+[SFT*]
+[RF1]
+[AUTHORIZATION] {
+  AUT
+  [CTD]
+}
+PROVIDER* {
+  PRD
+  [CTD*]
+}
+PID
+[NK1*]
+[GT1*]
+[INSURANCE]* {
+  IN1
+  [IN2]
+  [IN3]
+}
+[ACC]
+[DG1*]
+[DRG*]
+[AL1*]
+PROCEDURE* {
+  PR1
+  [ROL*]
+}
+[OBSERVATION]* {
+  OBR
+  [NTE*]
+  [RESULTS]* {
+    OBX
+    [NTE*]
+  }
+}
+[VISIT] {
+  PV1
+  [PV2]
+}
+[NTE*]
+```
+
+---
+
+
+## RQC
+
+### RQC_I05 -- Request for Patient Clinical Information
+
+Events: RQC^I05, RQC^I06
+
+```
+MSH
+[SFT*]
+QRD
+[QRF]
+PROVIDER* {
+  PRD
+  [CTD*]
+}
+PID
+[NK1*]
+[GT1*]
+[NTE*]
+```
+
+---
+
+
+## RQI
+
+### RQI_I01 -- Request for Insurance Information
+
+Events: RQI^I01, RQI^I02, RQI^I03
+
+```
+MSH
+[SFT*]
+PROVIDER* {
+  PRD
+  [CTD*]
+}
+PID
+[NK1*]
+[GUARANTOR_INSURANCE] {
+  [GT1*]
+  INSURANCE* {
+    IN1
+    [IN2]
+    [IN3]
+  }
+}
+[NTE*]
+```
+
+---
+
+
+## RQP
+
+### RQP_I04 -- Request for Patient Demographics
+
+Events: RQP^I04
+
+```
+MSH
+[SFT*]
+PROVIDER* {
+  PRD
+  [CTD*]
+}
+PID
+[NK1*]
+[GT1*]
+[NTE*]
+```
+
+---
+
+
+## RRA
+
+### RRA_O18 -- Pharmacy/Treatment Administration Acknowledgment
+
+Events: RRA^O18
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [ADMINISTRATION] {
+      [RXA*]
+      RXR
+    }
+  }
+}
+```
+
+---
+
+
+## RRD
+
+### RRD_O14 -- Pharmacy/Treatment Dispense Acknowledgment
+
+Events: RRD^O14
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [DISPENSE] {
+      RXD
+      [RXR*]
+      [RXC*]
+    }
+  }
+}
+```
+
+---
+
+
+## RRE
+
+### RRE_O12 -- Pharmacy/Treatment Encoded Order Acknowledgment
+
+Events: RRE^O12
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    RXE
+    [RXR*]
+    [RXC*]
+  }
+}
+```
+
+---
+
+
+## RRG
+
+### RRG_O16 -- Pharmacy/Treatment Give Acknowledgment
+
+Events: RRG^O16
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+[NTE*]
+[RESPONSE] {
+  [PATIENT] {
+    PID
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    [GIVE] {
+      RXG
+      [TIMING_GIVE]* {
+        TQ1
+        [TQ2*]
+      }
+      [RXR*]
+      [RXC*]
+    }
+  }
+}
+```
+
+---
+
+
+## RRI
+
+### RRI_I12 -- Return Referral Info
+
+Events: RRI^I12, RRI^I13, RRI^I14, RRI^I15
+
+```
+MSH
+MSA
+[SFT*]
+[RF1]
+[AUTHORIZATION_CONTACT] {
+  AUT
+  [CTD]
+}
+PROVIDER_CONTACT* {
+  PRD
+  [CTD*]
+}
+PID
+[NK1*]
+[GT1*]
+[INSURANCE]* {
+  IN1
+  [IN2]
+  [IN3]
+}
+[ACC]
+[DG1*]
+[DRG*]
+[AL1*]
+[PROCEDURE]* {
+  PR1
+  [ROL*]
+}
+[OBSERVATION]* {
+  OBX
+  [NTE*]
+}
+[PATIENT_VISIT] {
+  PV1
+  [PV2]
+}
+[NTE*]
+```
+
+---
+
+
+## RSP
+
+### RSP_K11 -- Segment Pattern Response in Response to QBP^Q11
+
+Events: RSP^K11
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[ROW_DEFINITION] {
+  RDF
+  [RDT*]
+}
+[DSC]
+```
+
+---
+
+### RSP_K13 -- Segment Pattern Response in Response to QBP^Q13
+
+Events: RSP^K13
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[ROW_DEFINITION] {
+  RDF
+  [RDT*]
+}
+[DSC]
+```
+
+---
+
+### RSP_K15 -- Display Based Response
+
+Events: RSP^K15
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[DSP*]
+[DSC]
+```
+
+---
+
+### RSP_K21 -- Segment Pattern Response
+
+Events: RSP^K21, RSP^K22
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[QUERY_RESPONSE]* {
+  PID
+  [PD1]
+  [NK1*]
+  [QRI]
+}
+[DSC]
+```
+
+---
+
+### RSP_K23 -- Allocate Identifiers Response
+
+Events: RSP^K23, RSP^K24
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[PID]
+[DSC]
+```
+
+---
+
+### RSP_K25 -- Personnel Information Response
+
+Events: RSP^K25
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[STAFF]* {
+  STF
+  [PRA]
+  [ORG*]
+  [AFF*]
+  [LAN*]
+  [EDU*]
+  [CER*]
+}
+[DSC]
+```
+
+---
+
+### RSP_K31 -- Pharmacy Information Comprehensive Response
+
+Events: RSP^K31
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[RCP]
+[RESPONSE]* {
+  [PATIENT] {
+    PID
+    [PD1]
+    [NTE*]
+    [AL1*]
+    [PATIENT_VISIT] {
+      PV1
+      [PV2]
+    }
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    RXD
+    RXR*
+    [RXC*]
+    [OBSERVATION]* {
+      [OBX]
+      [NTE*]
+    }
+  }
+}
+[DSC]
+```
+
+---
+
+### RSP_Q11 -- Segment Pattern Response
+
+Events: RSP^Q11
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[QUERY_RESPONSE]* {
+  PID
+  [PD1]
+  [NK1*]
+  [QRI]
+}
+[DSC]
+```
+
+---
+
+### RSP_Z82 -- Dispense History Response
+
+Events: RSP^Z82
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[RCP]
+[QUERY_RESPONSE]* {
+  [PATIENT] {
+    PID
+    [PD1]
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    RXD
+    RXR*
+    [RXC*]
+    [OBSERVATION]* {
+      [OBX]
+      [NTE*]
+    }
+  }
+}
+[DSC]
+```
+
+---
+
+### RSP_Z86 -- Pharmacy Information Comprehensive Response
+
+Events: RSP^Z86
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[QUERY_RESPONSE]* {
+  [PATIENT] {
+    PID
+    [PD1]
+    [NTE*]
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    RXE
+    RXR*
+    [RXC*]
+    [OBSERVATION]* {
+      [OBX]
+      [NTE*]
+    }
+  }
+}
+[DSC]
+```
+
+---
+
+### RSP_Z88 -- Pharmacy Encoded Order Response
+
+Events: RSP^Z88
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+RCP
+[QUERY_RESPONSE]* {
+  [PATIENT] {
+    PID
+    [PD1]
+    [NTE*]
+    [AL1*]
+  }
+  ORDER* {
+    ORC
+    [TIMING]* {
+      TQ1
+      [TQ2*]
+    }
+    RXE
+    RXR*
+    [RXC*]
+    [OBSERVATION]* {
+      [OBX]
+      [NTE*]
+    }
+  }
+}
+[DSC]
+```
+
+---
+
+### RSP_Z90 -- Lab Results History Response
+
+Events: RSP^Z90
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+RCP
+[QUERY_RESPONSE]* {
+  [PATIENT] {
+    PID
+    [PD1]
+    [NK1*]
+    [NTE*]
+    [VISIT] {
+      PV1
+      [PV2]
+    }
+  }
+  ORDER* {
+    [ORC]
+    OBR
+    [NTE*]
+    [TIMING_QTY]* {
+      TQ1
+      [TQ2*]
+    }
+    [OBSERVATION]* {
+      OBX
+      [NTE*]
+    }
+  }
+}
+[DSC]
+```
+
+---
+
+
+## RTB
+
+### RTB_K13 -- Tabular Response
+
+Events: RTB^K13
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[RDF]
+[ROW_DEFINITION]* {
+  RDT
+}
+[DSC]
+```
+
+---
+
+### RTB_Z74 -- Tabular Response — Pending Events
+
+Events: RTB^Z74
+
+```
+MSH
+[SFT*]
+MSA
+[ERR]
+QAK
+QPD
+[RDF]
+[RDT*]
+[DSC]
+```
+
+---
+
+
+## SIU
+
+### SIU_S12 -- Notification of New Appointment Booking
+
+Events: SIU^S12, SIU^S13, SIU^S14, SIU^S15, SIU^S16, SIU^S17, SIU^S18, SIU^S19, SIU^S20, SIU^S21, SIU^S22, SIU^S23, SIU^S24, SIU^S26
+
+```
+MSH
+SCH
+[TQ1*]
+[NTE*]
+[PATIENT]* {
+  PID
+  [PD1]
+  [PV1]
+  [PV2]
+  [DG1*]
+}
+RESOURCES* {
+  RGS
+  [SERVICE]* {
+    AIS
+    [NTE*]
+  }
+  [GENERAL_RESOURCE]* {
+    AIG
+    [NTE*]
+  }
+  [LOCATION_RESOURCE]* {
+    AIL
+    [NTE*]
+  }
+  [PERSONNEL_RESOURCE]* {
+    AIP
+    [NTE*]
+  }
+}
+```
+
+---
+
+
+## SQM
+
+### SQM_S25 -- Schedule Query Message
+
+Events: SQM^S25
+
+```
+MSH
+[SFT*]
+QRD
+[QRF]
+[REQUEST] {
+  ARQ
+  [APR]
+  RESOURCES* {
+    RGS
+    [SERVICE]* {
+      AIS
+      [APR]
+    }
+    [GENERAL_RESOURCE]* {
+      AIG
+      [APR]
+    }
+    [PERSONNEL_RESOURCE]* {
+      AIP
+      [APR]
+    }
+    [LOCATION_RESOURCE]* {
+      AIL
+      [APR]
+    }
+  }
+}
+```
+
+---
+
+
+## SQR
+
+### SQR_S25 -- Schedule Query Response
+
+Events: SQR^S25
+
+```
+MSH
+MSA
+[ERR*]
+[SFT*]
+QAK
+[SCHEDULE]* {
+  SCH
+  [TQ1*]
+  [NTE*]
+  [PATIENT] {
+    PID
+    [PV1]
+    [PV2]
+    [DG1*]
+  }
+  RESOURCES* {
+    RGS
+    [SERVICE]* {
+      AIS
+      [NTE*]
+    }
+    [GENERAL_RESOURCE]* {
+      AIG
+      [NTE*]
+    }
+    [PERSONNEL_RESOURCE]* {
+      AIP
+      [NTE*]
+    }
+    [LOCATION_RESOURCE]* {
+      AIL
+      [NTE*]
+    }
+  }
+}
+```
+
+---
+
+
+## SRM
+
+### SRM_S01 -- Schedule Request
+
+Events: SRM^S01, SRM^S02, SRM^S03, SRM^S04, SRM^S05, SRM^S06, SRM^S07, SRM^S08, SRM^S09, SRM^S10, SRM^S11
+
+```
+MSH
+ARQ
+[APR]
+[NTE*]
+[PATIENT]* {
+  PID
+  [PV1]
+  [PV2]
+  [DG1*]
+  RESOURCES* {
+    RGS
+    [SERVICE]* {
+      AIS
+      [APR]
+      [NTE*]
+    }
+    [GENERAL_RESOURCE]* {
+      AIG
+      [APR]
+      [NTE*]
+    }
+    [LOCATION_RESOURCE]* {
+      AIL
+      [APR]
+      [NTE*]
+    }
+    [PERSONNEL_RESOURCE]* {
+      AIP
+      [APR]
+      [NTE*]
+    }
+  }
+}
+```
+
+---
+
+
+## SRR
+
+### SRR_S01 -- Schedule Response
+
+Events: SRR^S01, SRR^S02, SRR^S03, SRR^S04, SRR^S05, SRR^S06, SRR^S07, SRR^S08, SRR^S09, SRR^S10, SRR^S11
+
+```
+MSH
+MSA
+[ERR*]
+[SCHEDULE] {
+  SCH
+  [TQ1*]
+  [NTE*]
+  [PATIENT]* {
+    PID
+    [PV1]
+    [PV2]
+    [DG1*]
+  }
+  RESOURCES* {
+    RGS
+    [SERVICE]* {
+      AIS
+      [NTE*]
+    }
+    [GENERAL_RESOURCE]* {
+      AIG
+      [NTE*]
+    }
+    [LOCATION_RESOURCE]* {
+      AIL
+      [NTE*]
+    }
+    [PERSONNEL_RESOURCE]* {
+      AIP
+      [NTE*]
+    }
+  }
+}
+```
+
+---
+
+
+## SSR
+
+### SSR_U04 -- Specimen Status Request
+
+Events: SSR^U04
+
+```
+MSH
+[SFT*]
+EQU
+[ROL]
+```
+
+---
+
+
+## SSU
+
+### SSU_U03 -- Specimen Status Update
+
+Events: SSU^U03
+
+```
+MSH
+[SFT*]
+EQU
+SPECIMEN_CONTAINER* {
+  SAC
+  [SPM]
+  [OBX*]
+}
+```
+
+---
+
+
+## SUR
+
+### SUR_P09 -- Summary Product Experience
+
+Events: SUR^P09
+
+```
+MSH
+FACILITY* {
+  FAC
+  PRODUCT* {
+    PSH
+    PDC
+  }
+}
+```
+
+---
+
+
+## TCU
+
+### TCU_U10 -- Test Code Settings Update
+
+Events: TCU^U10
+
+```
+MSH
+[SFT*]
+EQU
+TCC*
+[ROL]
+```
+
+---
+
+
+## UDM
+
+### UDM_Q05 -- Unsolicited Display Update
+
+Events: UDM^Q05
+
+```
+MSH
+[SFT*]
+URD
+[URS]
+DSP*
+[DSC]
+```
+
+---
+
+
+## VXQ
+
+### VXQ_V01 -- Query for Vaccination Record
+
+Events: VXQ^V01
+
+```
+MSH
+[SFT*]
+QRD
+[QRF]
+```
+
+---
+
+
+## VXR
+
+### VXR_V03 -- Vaccination Record Response
+
+Events: VXR^V03
+
+```
+MSH
+MSA
+[SFT*]
+[ERR]
+QRD
+[QRF]
+PID
+[PD1]
+[NK1*]
+[ORDER]* {
+  ORC
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  RXA
+  [RXR]
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+}
+```
+
+---
+
+
+## VXU
+
+### VXU_V04 -- Vaccination Update
+
+Events: VXU^V04
+
+```
+MSH
+[SFT*]
+PID
+[PD1]
+[NK1*]
+[GT1*]
+[INSURANCE] {
+  IN1
+  [IN2]
+  [IN3]
+}
+[ORDER]* {
+  ORC
+  [TIMING]* {
+    TQ1
+    [TQ2*]
+  }
+  RXA
+  [RXR]
+  [OBSERVATION]* {
+    OBX
+    [NTE*]
+  }
+}
+```
+
+---
+
+
+## VXX
+
+### VXX_V02 -- Response to Vaccination Query with Multiple PID Matches
+
+Events: VXX^V02
+
+```
+MSH
+MSA
+[SFT*]
+QRD
+[QRF]
+PATIENT* {
+  PID
+  [NK1*]
+}
+```
+
+---
+
 
 ## Abstract Message Structure Sharing Summary
 
-Multiple trigger events share the same abstract message structure. This is important for parser implementation -- the parser maps by structure, not by trigger event.
+Multiple trigger events share the same abstract message structure.
 
-| Abstract Structure | Trigger Events Using It |
-|-------------------|------------------------|
-| ADT_A01 | A01, A04, A08, A13 |
-| ADT_A02 | A02 |
-| ADT_A03 | A03 |
-| ADT_A05 | A05, A14, A28, A31 |
-| ADT_A09 | A09, A10, A11, A12 |
-| ADT_A39 | A39, A40, A41, A42 |
-| ORM_O01 | O01 |
-| ORU_R01 | R01 |
-| ACK | (general) |
-| SIU_S12 | S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22, S23, S24, S26 |
+| Structure | Trigger Events |
+|-----------|----------------|
+| ADT_A01 | ADT^A01, ADT^A04, ADT^A08, ADT^A13 |
+| ADT_A05 | ADT^A05, ADT^A14, ADT^A28, ADT^A31 |
+| ADT_A06 | ADT^A06, ADT^A07 |
+| ADT_A09 | ADT^A09, ADT^A10, ADT^A11 |
+| ADT_A21 | ADT^A21, ADT^A22, ADT^A23, ADT^A25, ADT^A26, ADT^A27, ADT^A29, ADT^A32, ADT^A33, ADT^A56 |
+| ADT_A30 | ADT^A30, ADT^A34, ADT^A35, ADT^A36, ADT^A46, ADT^A47, ADT^A48, ADT^A49 |
+| ADT_A39 | ADT^A39, ADT^A40, ADT^A41, ADT^A42, ADT^A57 |
+| ADT_A43 | ADT^A43, ADT^A44 |
+| ADT_A50 | ADT^A50, ADT^A51, ADT^A53 |
+| ADT_A54 | ADT^A54, ADT^A55 |
+| ADT_A61 | ADT^A61, ADT^A62 |
+| CCR_I16 | CCR^I16, CCR^I17, CCR^I18 |
+| CCU_I20 | CCU^I20, CCU^I21 |
+| CRM_C01 | CRM^C01, CRM^C02, CRM^C03, CRM^C04, CRM^C05, CRM^C06, CRM^C07, CRM^C08 |
+| CSU_C09 | CSU^C09, CSU^C10, CSU^C11, CSU^C12 |
+| MDM_T01 | MDM^T01, MDM^T03, MDM^T05, MDM^T07, MDM^T09, MDM^T11 |
+| MDM_T02 | MDM^T02, MDM^T04, MDM^T06, MDM^T08, MDM^T10 |
+| MFK_M01 | MFK^M01, MFK^M02, MFK^M03, MFK^M04, MFK^M05, MFK^M06, MFK^M07, MFK^M08, MFK^M09, MFK^M10, MFK^M11, MFK^M12, MFK^M13 |
+| MFN_M01 | MFN^M01, MFN^M03, MFN^M04, MFN^M06, MFN^M07, MFN^M08, MFN^M09, MFN^M10, MFN^M11, MFN^M12, MFN^M13 |
+| ORU_R30 | ORU^R30, ORU^R31, ORU^R32 |
+| PEX_P07 | PEX^P07, PEX^P08 |
+| PGL_PC6 | PGL^PC6, PGL^PC7, PGL^PC8 |
+| PMU_B01 | PMU^B01, PMU^B02, PMU^B05, PMU^B06 |
+| PPG_PCG | PPG^PCG, PPG^PCH, PPG^PCJ |
+| PPP_PCB | PPP^PCB, PPP^PCC, PPP^PCD |
+| PPR_PC1 | PPR^PC1, PPR^PC2, PPR^PC3 |
+| QBP_Q21 | QBP^Q21, QBP^Q22, QBP^Q23, QBP^Q24, QBP^Q25 |
+| QRY_PC4 | QRY^PC4, QRY^PC5, QRY^PC9, QRY^PCE, QRY^PCK |
+| REF_I12 | REF^I12, REF^I13, REF^I14, REF^I15 |
+| RPA_I08 | RPA^I08, RPA^I09, RPA^I10, RPA^I11 |
+| RQA_I08 | RQA^I08, RQA^I09, RQA^I10, RQA^I11 |
+| RQC_I05 | RQC^I05, RQC^I06 |
+| RQI_I01 | RQI^I01, RQI^I02, RQI^I03 |
+| RRI_I12 | RRI^I12, RRI^I13, RRI^I14, RRI^I15 |
+| RSP_K21 | RSP^K21, RSP^K22 |
+| RSP_K23 | RSP^K23, RSP^K24 |
+| SIU_S12 | SIU^S12, SIU^S13, SIU^S14, SIU^S15, SIU^S16, SIU^S17, SIU^S18, SIU^S19, SIU^S20, SIU^S21, SIU^S22, SIU^S23, SIU^S24, SIU^S26 |
+| SRM_S01 | SRM^S01, SRM^S02, SRM^S03, SRM^S04, SRM^S05, SRM^S06, SRM^S07, SRM^S08, SRM^S09, SRM^S10, SRM^S11 |
+| SRR_S01 | SRR^S01, SRR^S02, SRR^S03, SRR^S04, SRR^S05, SRR^S06, SRR^S07, SRR^S08, SRR^S09, SRR^S10, SRR^S11 |
 
-## Segment Full Names Quick Reference
+---
+
+
+## Segment Quick Reference
 
 | Code | Full Name |
 |------|-----------|
+| ABS | Abstract |
 | ACC | Accident |
-| AIG | Appointment Information - General Resource |
-| AIL | Appointment Information - Location Resource |
-| AIP | Appointment Information - Personnel Resource |
-| AIS | Appointment Information - Service |
+| ADJ | ADJ |
+| AFF | Professional Affiliation |
+| AIG | Appointment Information — General Resource |
+| AIL | Appointment Information — Location Resource |
+| AIP | Appointment Information — Personnel Resource |
+| AIS | Appointment Information — Service |
 | AL1 | Patient Allergy Information |
+| APR | Appointment Preferences |
+| ARQ | Appointment Request |
+| AUT | Authorization Information |
 | BLG | Billing |
+| BPO | Blood Product Order |
+| BPX | Blood Product Dispense Status |
+| BTX | Blood Product Transfusion/Disposition |
+| CDM | Charge Description Master |
+| CER | Certificate Detail |
+| CM0 | Clinical Study Master |
+| CM1 | Clinical Study Phase Master |
+| CM2 | Clinical Study Schedule Master |
+| CNS | Clear Notification |
+| CSP | Clinical Study Phase |
+| CSR | Clinical Study Registration |
+| CSS | Clinical Study Data Schedule Segment |
 | CTD | Contact Data |
 | CTI | Clinical Trial Identification |
 | DB1 | Disability |
 | DG1 | Diagnosis |
 | DRG | Diagnosis Related Group |
 | DSC | Continuation Pointer |
+| DSP | Display Data |
+| ECD | Equipment Command |
+| ECR | Equipment Command Response |
+| EDU | Educational Detail |
+| EQP | Equipment/log Service |
+| EQU | Equipment Detail |
 | ERR | Error |
 | EVN | Event Type |
+| FAC | Facility |
 | FT1 | Financial Transaction |
+| GOL | Goal Detail |
+| GP1 | Grouping/Reimbursement — Visit |
+| GP2 | Grouping/Reimbursement — Procedure Line Item |
 | GT1 | Guarantor |
+| IAM | Patient Adverse Reaction Information |
+| IIM | Inventory Item Master |
 | IN1 | Insurance |
 | IN2 | Insurance Additional Information |
-| IN3 | Insurance Additional Information - Certification |
+| IN3 | Insurance Additional Information, Certification |
+| INV | Inventory Detail |
+| IPC | Imaging Procedure Control Segment |
+| IPR | IPR |
+| ISD | Interaction Status Detail |
+| IVC | IVC |
+| LAN | Language Detail |
+| LCC | Location Charge Code |
+| LCH | Location Characteristic |
+| LDP | Location Department |
+| LOC | Location Identification |
+| LRL | Location Relationship |
+| MFA | Master File Acknowledgment |
+| MFE | Master File Entry |
+| MFI | Master File Identification |
 | MRG | Merge Patient Information |
 | MSA | Message Acknowledgment |
 | MSH | Message Header |
+| NCK | System Clock |
+| NDS | Notification Detail |
 | NK1 | Next of Kin / Associated Parties |
+| NPU | Bed Status Update |
+| NSC | Application Status Change |
+| NST | Application Control Level Statistics |
 | NTE | Notes and Comments |
 | OBR | Observation Request |
 | OBX | Observation/Result |
 | ODS | Dietary Orders, Supplements, and Preferences |
 | ODT | Diet Tray Instructions |
+| OM1 | General Segment |
+| OM2 | Numeric Observation |
+| OM3 | Categorical Service/Test/Observation |
+| OM4 | Observations that Require Specimens |
+| OM5 | Observation Batteries (Sets) |
+| OM6 | Observations Calculated from Other Observations |
+| OM7 | Additional Basic Attributes |
 | ORC | Common Order |
+| ORG | Practitioner Organization Unit |
+| PCR | Possible Causal Relationship |
 | PD1 | Patient Additional Demographic |
 | PDA | Patient Death and Autopsy |
+| PDC | Product Detail Country |
+| PEO | Product Experience Observation |
+| PES | Product Experience Sender |
 | PID | Patient Identification |
+| PMT | PMT |
 | PR1 | Procedures |
+| PRA | Practitioner Detail |
+| PRB | Problem Details |
+| PRC | Pricing |
+| PRD | Provider Data |
+| PSG | PSG |
+| PSH | Product Summary Header |
+| PSL | PSL |
+| PSS | PSS |
+| PTH | Pathway |
 | PV1 | Patient Visit |
-| PV2 | Patient Visit - Additional Information |
+| PV2 | Patient Visit — Additional Information |
+| QAK | Query Acknowledgment |
+| QID | Query Identification |
+| QPD | Query Parameter Definition |
+| QRD | Original-Style Query Definition |
+| QRF | Original Style Query Filter |
+| QRI | Query Response Instance |
+| RCP | Response Control Parameter |
+| RDF | Table Row Definition |
+| RDT | Table Row Data |
+| REL | REL |
+| RF1 | Referral Information |
+| RFI | RFI |
 | RGS | Resource Group |
 | ROL | Role |
 | RQ1 | Requisition Detail-1 |
 | RQD | Requisition Detail |
+| RXA | Pharmacy/Treatment Administration |
+| RXC | Pharmacy/Treatment Component Order |
+| RXD | Pharmacy/Treatment Dispense |
+| RXE | Pharmacy/Treatment Encoded Order |
+| RXG | Pharmacy/Treatment Give |
 | RXO | Pharmacy/Treatment Order |
+| RXR | Pharmacy/Treatment Route |
+| SAC | Specimen Container Detail |
 | SCH | Scheduling Activity Information |
 | SFT | Software Segment |
+| SID | Substance Identifier |
 | SPM | Specimen |
+| STF | Staff Identification |
+| TCC | Test Code Configuration |
+| TCD | Test Code Detail |
 | TQ1 | Timing/Quantity |
 | TQ2 | Timing/Quantity Relationship |
-| UB1 | UB82 Data |
+| TXA | Transcription Document Header |
+| UB1 | UB82 |
 | UB2 | UB92 Data |
+| URD | Results/Update Definition |
+| URS | Unsolicited Selection |
+| VAR | Variance |
+
+---
 
 ## Sources
 
-- HL7 v2.5.1 Standard: Chapter 2 (Control), Chapter 3 (Patient Administration), Chapter 4 (Order Entry), Chapter 7 (Observation Reporting), Chapter 10 (Scheduling)
-- [Caristix HL7-Definition V2 - HL7 v2.5.1 Trigger Events](https://hl7-definition.caristix.com/v2/HL7v2.5.1/TriggerEvents)
-- HL7 International: [https://www.hl7.org/implement/standards/product_brief.cfm?product_id=144](https://www.hl7.org/implement/standards/product_brief.cfm?product_id=144)
+- HL7 v2.5.1 Standard
+- [Caristix HL7-Definition V2](https://hl7-definition.caristix.com/v2/HL7v2.5.1/TriggerEvents)
+- [HL7 Europe v2.5.1 Message Structures](https://www.hl7.eu/HL7v2x/v251/hl7v251msgstruct.htm)
