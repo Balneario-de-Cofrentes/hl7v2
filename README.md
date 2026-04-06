@@ -49,7 +49,7 @@ msg = HL7v2.Message.new("ADT", "A01", sending_application: "PHAOS")
 
 ```elixir
 def deps do
-  [{:hl7v2, "~> 2.7"}]
+  [{:hl7v2, "~> 2.8"}]
 end
 ```
 
@@ -176,10 +176,10 @@ Elixir module. Run `mix hl7v2.coverage --detail` for per-segment field completen
 Validation is opt-in (`HL7v2.validate/2`) and layered:
 
 ```
- Structural  positional order/group/cardinality for all 186 structures
+ Structural  positional order/group/cardinality for all 186 official structures
  Fields      required-field checks, bounded repetition enforcement
- Tables      108 HL7 coded-value tables, 80 field bindings (opt-in: validate_tables: true)
- Conditional 17 segment-specific inter-field rules (OBX, MSH, ORC, OBR, PID, NK1, ...)
+ Tables      189 HL7 coded-value tables, 255 field bindings (opt-in: validate_tables: true)
+ Conditional 23 segment-specific inter-field rules (all segments with :c fields)
 ```
 
 ### Transport
