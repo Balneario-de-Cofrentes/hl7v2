@@ -6,13 +6,17 @@ defmodule HL7v2.Type.RPT do
   More expressive than RI, supporting calendar-aligned and phase-based
   patterns.
 
-  6 components (of 10 defined in v2.5.1; remaining 4 are rarely used):
+  10 components per HL7 v2.5.1:
   1. Repeat Pattern Code (CWE) -- sub-components delimited by `&`, Table 0335
-  2. Calendar Alignment (ID) -- Table 0527: e.g., "DY" (day), "WK" (week), "MY" (month)
-  3. Phase Range Begin Value (NM) -- start of phase range
-  4. Phase Range End Value (NM) -- end of phase range
-  5. Period Quantity (NM) -- number of period units
-  6. Period Units (IS) -- Table 0xxx: e.g., "s" (seconds), "min", "h", "d", "wk", "mo"
+  2. Calendar Alignment (ID) -- Table 0527
+  3. Phase Range Begin Value (NM)
+  4. Phase Range End Value (NM)
+  5. Period Quantity (NM)
+  6. Period Units (IS)
+  7. Institution Specified Time (ID) -- Table 0136 (Y/N)
+  8. Event (ID) -- Table 0528
+  9. Event Offset Quantity (NM)
+  10. Event Offset Units (IS)
   """
 
   @behaviour HL7v2.Type
@@ -26,7 +30,11 @@ defmodule HL7v2.Type.RPT do
     :phase_range_begin_value,
     :phase_range_end_value,
     :period_quantity,
-    :period_units
+    :period_units,
+    :institution_specified_time,
+    :event,
+    :event_offset_quantity,
+    :event_offset_units
   ]
 
   @type t :: %__MODULE__{
@@ -35,7 +43,11 @@ defmodule HL7v2.Type.RPT do
           phase_range_begin_value: NM.t() | nil,
           phase_range_end_value: NM.t() | nil,
           period_quantity: NM.t() | nil,
-          period_units: binary() | nil
+          period_units: binary() | nil,
+          institution_specified_time: binary() | nil,
+          event: binary() | nil,
+          event_offset_quantity: NM.t() | nil,
+          event_offset_units: binary() | nil
         }
 
   @doc """
@@ -68,7 +80,11 @@ defmodule HL7v2.Type.RPT do
       phase_range_begin_value: components |> Type.get_component(2) |> NM.parse(),
       phase_range_end_value: components |> Type.get_component(3) |> NM.parse(),
       period_quantity: components |> Type.get_component(4) |> NM.parse(),
-      period_units: Type.get_component(components, 5)
+      period_units: Type.get_component(components, 5),
+      institution_specified_time: Type.get_component(components, 6),
+      event: Type.get_component(components, 7),
+      event_offset_quantity: components |> Type.get_component(8) |> NM.parse(),
+      event_offset_units: Type.get_component(components, 9)
     }
   end
 
@@ -103,7 +119,11 @@ defmodule HL7v2.Type.RPT do
       NM.encode(rpt.phase_range_begin_value),
       NM.encode(rpt.phase_range_end_value),
       NM.encode(rpt.period_quantity),
-      rpt.period_units || ""
+      rpt.period_units || "",
+      rpt.institution_specified_time || "",
+      rpt.event || "",
+      NM.encode(rpt.event_offset_quantity),
+      rpt.event_offset_units || ""
     ]
     |> Type.trim_trailing()
   end

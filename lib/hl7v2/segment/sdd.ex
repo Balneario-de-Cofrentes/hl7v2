@@ -1,6 +1,6 @@
 defmodule HL7v2.Segment.SDD do
   @moduledoc """
-  Sterilization Device Data (SDD) segment -- HL7v2 v2.5.1.
+  Sterilization Device Data (SDD) segment -- HL7v2 v2.6 extension.
 
   Contains sterilization device data.
   7 fields per HL7 v2.5.1 specification.

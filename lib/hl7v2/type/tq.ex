@@ -7,7 +7,7 @@ defmodule HL7v2.Type.TQ do
 
   12 components:
   1. Quantity (CQ) -- sub-components delimited by `&`
-  2. Interval (RI) -- `:raw`, RI not yet implemented
+  2. Interval (RI)
   3. Duration (ST)
   4. Start Date/Time (TS) -- sub-components delimited by `&`
   5. End Date/Time (TS) -- sub-components delimited by `&`
@@ -15,7 +15,7 @@ defmodule HL7v2.Type.TQ do
   7. Condition (ST)
   8. Text (TX)
   9. Conjunction (ID) -- Table 0472: S (synchronous), A (asynchronous)
-  10. Order Sequencing (OSD) -- `:raw`, OSD not yet implemented
+  10. Order Sequencing (OSD)
   11. Occurrence Duration (CE) -- sub-components delimited by `&`
   12. Total Occurrences (NM)
   """
@@ -23,7 +23,7 @@ defmodule HL7v2.Type.TQ do
   @behaviour HL7v2.Type
 
   alias HL7v2.Type
-  alias HL7v2.Type.{CQ, CE, TS}
+  alias HL7v2.Type.{CQ, CE, TS, RI, OSD}
 
   defstruct [
     :quantity,
@@ -42,7 +42,7 @@ defmodule HL7v2.Type.TQ do
 
   @type t :: %__MODULE__{
           quantity: CQ.t() | nil,
-          interval: binary() | nil,
+          interval: RI.t() | nil,
           duration: binary() | nil,
           start_date_time: TS.t() | nil,
           end_date_time: TS.t() | nil,
@@ -50,7 +50,7 @@ defmodule HL7v2.Type.TQ do
           condition: binary() | nil,
           text: binary() | nil,
           conjunction: binary() | nil,
-          order_sequencing: binary() | nil,
+          order_sequencing: OSD.t() | nil,
           occurrence_duration: CE.t() | nil,
           total_occurrences: binary() | nil
         }
@@ -79,7 +79,7 @@ defmodule HL7v2.Type.TQ do
   def parse(components) when is_list(components) do
     %__MODULE__{
       quantity: Type.parse_sub(CQ, Type.get_component(components, 0)),
-      interval: Type.get_component(components, 1),
+      interval: Type.parse_sub(RI, Type.get_component(components, 1)),
       duration: Type.get_component(components, 2),
       start_date_time: Type.parse_sub_ts(Type.get_component(components, 3)),
       end_date_time: Type.parse_sub_ts(Type.get_component(components, 4)),
@@ -87,7 +87,7 @@ defmodule HL7v2.Type.TQ do
       condition: Type.get_component(components, 6),
       text: Type.get_component(components, 7),
       conjunction: Type.get_component(components, 8),
-      order_sequencing: Type.get_component(components, 9),
+      order_sequencing: Type.parse_sub(OSD, Type.get_component(components, 9)),
       occurrence_duration: Type.parse_sub(CE, Type.get_component(components, 10)),
       total_occurrences: Type.get_component(components, 11)
     }
@@ -114,7 +114,7 @@ defmodule HL7v2.Type.TQ do
   def encode(%__MODULE__{} = tq) do
     [
       Type.encode_sub(CQ, tq.quantity),
-      tq.interval || "",
+      Type.encode_sub(RI, tq.interval),
       tq.duration || "",
       Type.encode_sub_ts(tq.start_date_time),
       Type.encode_sub_ts(tq.end_date_time),
@@ -122,7 +122,7 @@ defmodule HL7v2.Type.TQ do
       tq.condition || "",
       tq.text || "",
       tq.conjunction || "",
-      tq.order_sequencing || "",
+      Type.encode_sub(OSD, tq.order_sequencing),
       Type.encode_sub(CE, tq.occurrence_duration),
       tq.total_occurrences || ""
     ]

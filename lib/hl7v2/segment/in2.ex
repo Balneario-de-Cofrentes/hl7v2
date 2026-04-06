@@ -3,8 +3,7 @@ defmodule HL7v2.Segment.IN2 do
   Insurance Additional Information (IN2) segment — HL7v2 v2.5.1.
 
   Contains extended insurance coverage details beyond the IN1 segment.
-  72 fields per HL7 v2.5.1 specification. First 30 fields are typed,
-  fields 31-72 are preserved as :raw for lossless round-trip.
+  72 fields per HL7 v2.5.1 specification.
   """
 
   use HL7v2.Segment,

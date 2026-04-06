@@ -32,7 +32,8 @@ defmodule HL7v2.Segment.RXGTest do
 
       result = RXG.parse(raw)
 
-      assert %{quantity: %HL7v2.Type.CQ{quantity: "1"}, interval: "QD"} = result.quantity_timing
+      assert %{quantity: %HL7v2.Type.CQ{quantity: "1"}} = result.quantity_timing
+      assert %HL7v2.Type.RI{repeat_pattern: "QD"} = result.quantity_timing.interval
     end
 
     test "parses give_code, give_amount_minimum/maximum, give_units" do

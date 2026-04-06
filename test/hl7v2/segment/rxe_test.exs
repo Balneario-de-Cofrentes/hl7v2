@@ -24,7 +24,7 @@ defmodule HL7v2.Segment.RXETest do
 
       assert %RXE{} = result
       assert %CQ{quantity: "1"} = result.quantity_timing.quantity
-      assert result.quantity_timing.interval == "QD"
+      assert %HL7v2.Type.RI{repeat_pattern: "QD"} = result.quantity_timing.interval
     end
 
     test "parses give_code, give_amount_minimum/maximum, give_units" do

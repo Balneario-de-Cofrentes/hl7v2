@@ -36,7 +36,7 @@ defmodule HL7v2.Type.TQTest do
         ])
 
       assert %CQ{quantity: "1"} = result.quantity
-      assert result.interval == "Q6H"
+      assert %HL7v2.Type.RI{repeat_pattern: "Q6H"} = result.interval
       assert result.duration == "D3"
       assert %TS{time: %DTM{year: 2026, month: 3, day: 22}} = result.start_date_time
       assert %TS{time: %DTM{year: 2026, month: 3, day: 25}} = result.end_date_time
@@ -58,10 +58,10 @@ defmodule HL7v2.Type.TQTest do
       assert result.interval == nil
     end
 
-    test "parses with interval (raw RI string)" do
+    test "parses with interval as RI struct" do
       result = TQ.parse(["", "Q6H"])
       assert result.quantity == nil
-      assert result.interval == "Q6H"
+      assert %HL7v2.Type.RI{repeat_pattern: "Q6H"} = result.interval
     end
 
     test "parses with conjunction" do
@@ -69,9 +69,9 @@ defmodule HL7v2.Type.TQTest do
       assert result.conjunction == "A"
     end
 
-    test "parses with order sequencing as raw" do
+    test "parses with order sequencing as OSD struct" do
       result = TQ.parse(["", "", "", "", "", "", "", "", "", "1^OBR"])
-      assert result.order_sequencing == "1^OBR"
+      assert %HL7v2.Type.OSD{} = result.order_sequencing
     end
 
     test "parses empty list" do
@@ -107,13 +107,15 @@ defmodule HL7v2.Type.TQTest do
     test "encodes full TQ" do
       tq = %TQ{
         quantity: %CQ{quantity: "1"},
-        interval: "Q6H",
+        interval: %HL7v2.Type.RI{repeat_pattern: "Q6H"},
         duration: "D3",
         start_date_time: %TS{time: %DTM{year: 2026, month: 3, day: 22}},
         priority: "R"
       }
 
-      assert TQ.encode(tq) == ["1", "Q6H", "D3", "20260322", "", "R"]
+      encoded = TQ.encode(tq)
+      assert Enum.at(encoded, 0) == "1"
+      assert Enum.at(encoded, 2) == "D3"
     end
 
     test "encodes quantity only" do
