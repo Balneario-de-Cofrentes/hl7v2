@@ -160,29 +160,32 @@ end
 
 ## Coverage
 
+### Schema Coverage
+
+Every official HL7 v2.5.1 segment, data type, and message structure has a typed
+Elixir module. Run `mix hl7v2.coverage --detail` for per-segment field completeness.
+
 ```
- Segments    152 standard + generic ZXX
-              152 of 152 v2.5.1 segments (100%) + generic Z-segment pass-through
-              149 fully typed, 3 with intentional raw holes (RDT, QPD, OBX)
-              Run `mix hl7v2.coverage` for the full list
+ Segments    152 of 152 v2.5.1 segments + generic ZXX
+ Types       89 official v2.5.1 data types + legacy TN
+ Structures  186 of 186 official v2.5.1 abstract structures (222 total with aliases)
+```
 
- Types       89 v2.5.1 data types + legacy TN (100% of official catalog)
+### Validation Coverage
 
- Structures  222 message structure definitions (186/186 official v2.5.1 + aliases)
-              ADT, BAR, BPS/BRP/BRT/BTS, CRM, CSU, DFT, MDM, MFN/MFK/MFR,
-              OML/OMG/OMD/OMP/OMS/OMI/OMN/OMB, ORU/OUL/ORA, ORM/ORR/ORG/ORL/ORP/ORD/ORS/ORN/ORI/ORB,
-              RDE/RDS/RGV/RAS, RRE/RRD/RRG/RRA, REF/RRI, SIU/SRM/SRR,
-              PGL/PPG/PPP/PPR/PPT, QBP/QSB/QVR/RSP/RTB/RDY, PMU, PEX/SUR,
-              CCR/CCI/CCU/CCQ/CCF, EHC, RQI/RQA/RQC/RQP/RPA/RPI/RPL/RPR/RCI,
-              RER/RDR/RAR/ROR, VXU/VXQ/VXR/VXX, DOC, UDM, ACK + more
+Validation is opt-in (`HL7v2.validate/2`) and layered:
 
- Transport   MLLP framing, Ranch 2.x listener, GenServer client,
-              TLS/mTLS, telemetry instrumentation
+```
+ Structural  positional order/group/cardinality for all 186 structures
+ Fields      required-field checks, bounded repetition enforcement
+ Tables      108 HL7 coded-value tables, 80 field bindings (opt-in: validate_tables: true)
+ Conditional 17 segment-specific inter-field rules (OBX, MSH, ORC, OBR, PID, NK1, ...)
+```
 
- Validation  structural (order/groups/cardinality) + opt-in table checking
-              108 HL7 tables, 80 coded fields validated, conditional field rules
+### Transport
 
- Speed       <1s full suite
+```
+ MLLP        Ranch 2.x listener, GenServer client, TLS/mTLS, telemetry
 ```
 
 ## Scope

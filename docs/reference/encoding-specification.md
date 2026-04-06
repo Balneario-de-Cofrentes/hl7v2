@@ -3,8 +3,8 @@
 Reference document for implementing a conformant HL7 v2.x parser, encoder, MLLP transport,
 and ACK/NAK responder. This reference covers versions 2.3 through 2.8.2 for completeness;
 the library implementation targets **v2.5.1** with partial tolerance for other versions.
-Features specific to v2.7+ (truncation character, MSH-22..28) are documented here but
-**not yet implemented** in the library.
+The truncation character (v2.7+) is supported. MSH-22..28 are parsed and preserved
+but not semantically enforced.
 
 Sources: HL7 Standard Chapters 2 (Control) and 2C (Code Tables), versions 2.5.1 / 2.7.1 /
 2.8.2; Transport Specification: MLLP Release 1 (Rene Spronk, HL7 v3 Standard, 2003);

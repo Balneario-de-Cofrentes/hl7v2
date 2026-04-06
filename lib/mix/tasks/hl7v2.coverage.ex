@@ -26,7 +26,7 @@ defmodule Mix.Tasks.Hl7v2.Coverage do
 
     Segments:  #{summary.typed_segment_count} / #{summary.total_segment_count} standard (#{summary.segment_coverage_pct}%)
                #{length(fully)} fully typed, #{length(partial)} with raw holes
-    Types:     #{summary.typed_type_count} / #{summary.total_type_count} standard (#{summary.type_coverage_pct}%)
+    Types:     #{summary.typed_type_count - 1} official v2.5.1 + 1 legacy TN (#{summary.typed_type_count} total)
     Fields:    #{summary.total_typed_fields} declared across typed segments
     Raw holes: #{summary.raw_hole_count}
     """)

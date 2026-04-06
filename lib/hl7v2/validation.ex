@@ -29,7 +29,7 @@ defmodule HL7v2.Validation do
   Runs three validation passes:
   1. **Message rules** — MSH presence, required MSH fields
   2. **Structural rules** — segment ordering, group anchors, cardinality
-     for 190 supported message structures. Unsupported structures produce a
+     for all 186 official v2.5.1 message structures. Unsupported structures produce a
      warning in lenient mode or an error in strict mode.
   3. **Field rules** — required fields, max repetitions per segment
 
