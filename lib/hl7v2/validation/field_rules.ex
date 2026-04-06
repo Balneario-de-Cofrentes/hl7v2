@@ -19,6 +19,153 @@ defmodule HL7v2.Validation.FieldRules do
   # :processing_id — extract the :processing_id component from a PT struct
   # :version_id — extract the :version_id component from a VID struct
   @table_bindings %{
+    # -- ABS (Abstract) --
+    {"ABS", :caesarian_section_indicator} => {136, :scalar},
+
+    # -- ACC (Accident) --
+    {"ACC", :accident_job_related_indicator} => {136, :scalar},
+    {"ACC", :accident_death_indicator} => {136, :scalar},
+    {"ACC", :police_notified_indicator} => {136, :scalar},
+
+    # -- AIG (Appointment Information — General Resource) --
+    {"AIG", :segment_action_code} => {206, :scalar},
+    {"AIG", :allow_substitution_code} => {279, :scalar},
+    {"AIG", :filler_status_code} => {278, :identifier},
+
+    # -- AIL (Appointment Information — Location Resource) --
+    {"AIL", :segment_action_code} => {206, :scalar},
+    {"AIL", :allow_substitution_code} => {279, :scalar},
+    {"AIL", :filler_status_code} => {278, :identifier},
+
+    # -- AIP (Appointment Information — Personnel Resource) --
+    {"AIP", :segment_action_code} => {206, :scalar},
+    {"AIP", :allow_substitution_code} => {279, :scalar},
+    {"AIP", :filler_status_code} => {278, :identifier},
+
+    # -- AIS (Appointment Information — Service) --
+    {"AIS", :segment_action_code} => {206, :scalar},
+    {"AIS", :allow_substitution_code} => {279, :scalar},
+    {"AIS", :filler_status_code} => {278, :identifier},
+
+    # -- AL1 (Allergy Information) --
+    {"AL1", :allergen_type_code} => {127, :identifier},
+    {"AL1", :allergy_severity_code} => {128, :identifier},
+
+    # -- BLG (Billing) --
+    {"BLG", :charge_type} => {122, :scalar},
+
+    # -- BPO (Blood Product Order) --
+    {"BPO", :bp_informed_consent_indicator} => {136, :scalar},
+
+    # -- BPX (Blood Product Dispense Status) --
+    {"BPX", :bp_status} => {511, :scalar},
+
+    # -- BTX (Blood Product Transfusion/Disposition) --
+    {"BTX", :bp_message_status} => {513, :scalar},
+
+    # -- CDM (Charge Description Master) --
+    {"CDM", :active_inactive_flag} => {183, :scalar},
+    {"CDM", :room_fee_indicator} => {136, :scalar},
+
+    # -- CER (Certificate Detail) --
+    {"CER", :granting_country} => {399, :scalar},
+    {"CER", :basic_constraint} => {136, :scalar},
+    {"CER", :jurisdiction_country} => {399, :scalar},
+
+    # -- CON (Consent) --
+    {"CON", :subject_competence_indicator} => {136, :scalar},
+    {"CON", :translator_assistance_indicator} => {136, :scalar},
+    {"CON", :language_translated_to} => {399, :scalar},
+    {"CON", :informational_material_supplied_indicator} => {136, :scalar},
+    {"CON", :consent_disclosure_level} => {500, :scalar},
+
+    # -- DB1 (Disability) --
+    {"DB1", :disabled_indicator} => {136, :scalar},
+
+    # -- DG1 (Diagnosis) --
+    {"DG1", :diagnosis_type} => {52, :scalar},
+    {"DG1", :drg_approval_indicator} => {136, :scalar},
+    {"DG1", :diagnosis_classification} => {228, :scalar},
+    {"DG1", :confidential_indicator} => {136, :scalar},
+    {"DG1", :diagnosis_action_code} => {323, :scalar},
+    {"DG1", :diagnosis_priority} => {359, :scalar},
+
+    # -- DRG (Diagnosis Related Group) --
+    {"DRG", :drg_approval_indicator} => {136, :scalar},
+    {"DRG", :drg_payor} => {229, :scalar},
+    {"DRG", :confidential_indicator} => {136, :scalar},
+
+    # -- DSC (Continuation Pointer) --
+    {"DSC", :continuation_style} => {398, :scalar},
+
+    # -- ECD (Equipment Command) --
+    {"ECD", :response_required} => {136, :scalar},
+
+    # -- EQL (Embedded Query Language) --
+    {"EQL", :query_response_format_code} => {106, :scalar},
+
+    # -- ERR (Error) --
+    {"ERR", :severity} => {516, :scalar},
+
+    # -- EVN (Event Type) --
+    {"EVN", :event_type_code} => {3, :scalar},
+
+    # -- FAC (Facility) --
+    {"FAC", :facility_type} => {331, :scalar},
+
+    # -- FT1 (Financial Transaction) --
+    {"FT1", :transaction_type} => {17, :scalar},
+    {"FT1", :patient_type} => {18, :scalar},
+
+    # -- GOL (Goal Detail) --
+    {"GOL", :action_code} => {287, :scalar},
+
+    # -- GT1 (Guarantor) --
+    {"GT1", :guarantor_billing_hold_flag} => {136, :scalar},
+    {"GT1", :guarantor_death_flag} => {136, :scalar},
+    {"GT1", :protection_indicator} => {136, :scalar},
+
+    # -- IAM (Patient Adverse Reaction) --
+    {"IAM", :allergen_type_code} => {127, :identifier},
+    {"IAM", :allergy_severity_code} => {128, :identifier},
+
+    # -- IN1 (Insurance) --
+    {"IN1", :insureds_administrative_sex} => {1, :scalar},
+    {"IN1", :insureds_relationship_to_patient} => {63, :identifier},
+    {"IN1", :notice_of_admission_flag} => {136, :scalar},
+    {"IN1", :report_of_eligibility_flag} => {136, :scalar},
+
+    # -- IN2 (Insurance Additional) --
+    {"IN2", :military_non_avail_cert_on_file} => {136, :scalar},
+    {"IN2", :baby_coverage} => {136, :scalar},
+    {"IN2", :combine_baby_bill} => {136, :scalar},
+    {"IN2", :protection_indicator} => {136, :scalar},
+    {"IN2", :suspend_flag} => {136, :scalar},
+    {"IN2", :copay_limit_flag} => {136, :scalar},
+    {"IN2", :stoploss_limit_flag} => {136, :scalar},
+
+    # -- IN3 (Insurance Additional — Certification) --
+    {"IN3", :certification_required} => {136, :scalar},
+
+    # -- LDP (Location Department) --
+    {"LDP", :active_inactive_flag} => {183, :scalar},
+
+    # -- MFA (Master File Acknowledgment) --
+    {"MFA", :record_level_event_code} => {180, :scalar},
+    {"MFA", :primary_key_value_type_mfe} => {355, :scalar},
+
+    # -- MFE (Master File Entry) --
+    {"MFE", :record_level_event_code} => {180, :scalar},
+    {"MFE", :primary_key_value_type} => {355, :scalar},
+
+    # -- MFI (Master File Identification) --
+    {"MFI", :file_level_event_code} => {178, :scalar},
+    {"MFI", :response_level_code} => {179, :scalar},
+
+    # -- MSA (Acknowledgment) --
+    {"MSA", :acknowledgment_code} => {8, :scalar},
+    {"MSA", :delayed_acknowledgment_type} => {102, :scalar},
+
     # -- MSH (Message Header) --
     {"MSH", :message_type} => {76, :message_code},
     {"MSH", :processing_id} => {103, :processing_id},
@@ -26,16 +173,106 @@ defmodule HL7v2.Validation.FieldRules do
     {"MSH", :accept_acknowledgment_type} => {155, :scalar},
     {"MSH", :application_acknowledgment_type} => {155, :scalar},
     {"MSH", :country_code} => {399, :scalar},
+    {"MSH", :character_set} => {211, :scalar},
     {"MSH", :alternate_character_set_handling_scheme} => {356, :scalar},
 
-    # -- MSA (Acknowledgment) --
-    {"MSA", :acknowledgment_code} => {8, :scalar},
+    # -- NK1 (Next of Kin) --
+    {"NK1", :relationship} => {63, :identifier},
+    {"NK1", :contact_role} => {131, :identifier},
+    {"NK1", :administrative_sex} => {1, :scalar},
+    {"NK1", :marital_status} => {2, :identifier},
+    {"NK1", :religion} => {6, :identifier},
+    {"NK1", :protection_indicator} => {136, :scalar},
+    {"NK1", :handicap} => {295, :scalar},
 
-    # -- EVN (Event Type) --
-    {"EVN", :event_type_code} => {3, :scalar},
+    # -- NST (Application Control Level Statistics) --
+    {"NST", :statistics_available} => {136, :scalar},
+    {"NST", :source_type} => {332, :scalar},
 
-    # -- ERR (Error) --
-    {"ERR", :severity} => {516, :scalar},
+    # -- NTE (Notes and Comments) --
+    {"NTE", :source_of_comment} => {105, :scalar},
+    {"NTE", :comment_type} => {364, :identifier},
+
+    # -- OBR (Observation Request) --
+    {"OBR", :priority} => {27, :scalar},
+    {"OBR", :specimen_action_code} => {65, :scalar},
+    {"OBR", :diagnostic_serv_sect_id} => {74, :scalar},
+    {"OBR", :result_status} => {123, :scalar},
+    {"OBR", :transportation_mode} => {124, :scalar},
+    {"OBR", :transport_arranged} => {224, :scalar},
+    {"OBR", :escort_required} => {225, :scalar},
+
+    # -- OBX (Observation/Result) --
+    {"OBX", :value_type} => {125, :scalar},
+    {"OBX", :observation_result_status} => {85, :scalar},
+    {"OBX", :nature_of_abnormal_test} => {80, :scalar},
+
+    # -- ODS (Dietary Orders, Supplements, and Preferences) --
+    {"ODS", :type} => {159, :scalar},
+
+    # -- OM1 (General Segment) --
+    {"OM1", :permitted_data_types} => {125, :scalar},
+    {"OM1", :specimen_required} => {136, :scalar},
+    {"OM1", :orderability} => {136, :scalar},
+    {"OM1", :portable_device_indicator} => {136, :scalar},
+    {"OM1", :processing_priority} => {168, :scalar},
+    {"OM1", :reporting_priority} => {169, :scalar},
+
+    # -- OM3 (Categorical Service/Test/Observation) --
+    {"OM3", :value_type} => {125, :scalar},
+
+    # -- OM4 (Observations that Require Specimens) --
+    {"OM4", :derived_specimen} => {170, :scalar},
+    {"OM4", :specimen_priorities} => {27, :scalar},
+
+    # -- OM7 (Additional Basic Attributes) --
+    {"OM7", :consent_indicator} => {136, :scalar},
+    {"OM7", :special_order_indicator} => {136, :scalar},
+
+    # -- ORC (Common Order) --
+    {"ORC", :order_control} => {119, :scalar},
+    {"ORC", :order_status} => {38, :scalar},
+    {"ORC", :response_flag} => {121, :scalar},
+
+    # -- ORG (Practitioner Organization Unit) --
+    {"ORG", :primary_org_unit_indicator} => {136, :scalar},
+    {"ORG", :board_approval_indicator} => {136, :scalar},
+    {"ORG", :primary_care_physician_indicator} => {136, :scalar},
+
+    # -- PCR (Possible Causal Relationship) --
+    {"PCR", :evaluated_product_source} => {248, :scalar},
+    {"PCR", :device_operator_qualifications} => {242, :scalar},
+    {"PCR", :relatedness_assessment} => {250, :scalar},
+    {"PCR", :action_taken_in_response_to_the_event} => {251, :scalar},
+    {"PCR", :event_causality_observations} => {252, :scalar},
+    {"PCR", :indirect_exposure_mechanism} => {253, :scalar},
+
+    # -- PD1 (Patient Additional Demographic) --
+    {"PD1", :protection_indicator} => {136, :scalar},
+    {"PD1", :separate_bill} => {136, :scalar},
+
+    # -- PDA (Patient Death and Autopsy) --
+    {"PDA", :death_certified_indicator} => {136, :scalar},
+    {"PDA", :autopsy_indicator} => {136, :scalar},
+    {"PDA", :coroner_indicator} => {136, :scalar},
+
+    # -- PDC (Product Detail Country) --
+    {"PDC", :marketing_basis} => {330, :scalar},
+
+    # -- PEO (Product Experience Observation) --
+    {"PEO", :event_qualification} => {237, :scalar},
+    {"PEO", :event_serious} => {238, :scalar},
+    {"PEO", :event_expected} => {239, :scalar},
+    {"PEO", :event_outcome} => {240, :scalar},
+    {"PEO", :patient_outcome} => {241, :scalar},
+    {"PEO", :primary_observers_qualification} => {242, :scalar},
+    {"PEO", :confirmation_provided_by} => {242, :scalar},
+    {"PEO", :primary_observers_identity_may_be_divulged} => {243, :scalar},
+
+    # -- PES (Product Experience Sender) --
+    {"PES", :event_report_timing_type} => {234, :scalar},
+    {"PES", :event_report_source} => {235, :scalar},
+    {"PES", :event_reported_to} => {236, :scalar},
 
     # -- PID (Patient Identification) --
     {"PID", :administrative_sex} => {1, :scalar},
@@ -49,6 +286,27 @@ defmodule HL7v2.Validation.FieldRules do
     {"PID", :patient_death_indicator} => {136, :scalar},
     {"PID", :identity_unknown_indicator} => {136, :scalar},
     {"PID", :production_class_code} => {429, :identifier},
+
+    # -- PR1 (Procedures) --
+    {"PR1", :procedure_priority} => {418, :scalar},
+    {"PR1", :procedure_action_code} => {323, :scalar},
+
+    # -- PRA (Practitioner Detail) --
+    {"PRA", :provider_billing} => {187, :scalar},
+
+    # -- PRB (Problem Detail) --
+    {"PRB", :action_code} => {287, :scalar},
+
+    # -- PRC (Pricing) --
+    {"PRC", :chargeable_flag} => {136, :scalar},
+    {"PRC", :active_inactive_flag} => {183, :scalar},
+
+    # -- PSH (Product Summary Header) --
+    {"PSH", :quantity_distributed_method} => {329, :scalar},
+    {"PSH", :quantity_in_use_method} => {329, :scalar},
+
+    # -- PTH (Pathway) --
+    {"PTH", :action_code} => {287, :scalar},
 
     # -- PV1 (Patient Visit) --
     {"PV1", :patient_class} => {4, :scalar},
@@ -64,86 +322,135 @@ defmodule HL7v2.Validation.FieldRules do
 
     # -- PV2 (Patient Visit — Additional) --
     {"PV2", :visit_user_code} => {130, :scalar},
+    {"PV2", :retention_indicator} => {136, :scalar},
     {"PV2", :visit_priority_code} => {217, :scalar},
-    {"PV2", :employment_illness_related_indicator} => {136, :scalar},
+    {"PV2", :visit_protection_indicator} => {136, :scalar},
+    {"PV2", :billing_media_code} => {136, :scalar},
+    {"PV2", :military_partnership_code} => {136, :scalar},
+    {"PV2", :military_non_availability_code} => {136, :scalar},
     {"PV2", :newborn_baby_indicator} => {136, :scalar},
+    {"PV2", :baby_detained_indicator} => {136, :scalar},
+    {"PV2", :employment_illness_related_indicator} => {136, :scalar},
 
-    # -- NK1 (Next of Kin) --
-    {"NK1", :relationship} => {63, :identifier},
-    {"NK1", :contact_role} => {131, :identifier},
-    {"NK1", :administrative_sex} => {1, :scalar},
-    {"NK1", :marital_status} => {2, :identifier},
-    {"NK1", :religion} => {6, :identifier},
-    {"NK1", :handicap} => {295, :scalar},
+    # -- QAK (Query Acknowledgment) --
+    {"QAK", :query_response_status} => {208, :scalar},
 
-    # -- AL1 (Allergy Information) --
-    {"AL1", :allergen_type_code} => {127, :identifier},
-    {"AL1", :allergy_severity_code} => {128, :identifier},
+    # -- QRD (Original-Style Query Definition) --
+    {"QRD", :query_format_code} => {106, :scalar},
+    {"QRD", :query_priority} => {91, :scalar},
+    {"QRD", :deferred_response_type} => {107, :scalar},
+    {"QRD", :query_results_level} => {108, :scalar},
 
-    # -- IAM (Patient Adverse Reaction) --
-    {"IAM", :allergen_type_code} => {127, :identifier},
-    {"IAM", :allergy_severity_code} => {128, :identifier},
+    # -- QRF (Original Style Query Filter) --
+    {"QRF", :which_date_time_qualifier} => {156, :scalar},
+    {"QRF", :which_date_time_status_qualifier} => {157, :scalar},
+    {"QRF", :date_time_selection_qualifier} => {158, :scalar},
 
-    # -- DG1 (Diagnosis) --
-    {"DG1", :diagnosis_type} => {52, :scalar},
-    {"DG1", :diagnosis_classification} => {228, :scalar},
-    {"DG1", :diagnosis_action_code} => {323, :scalar},
+    # -- RCP (Response Control Parameter) --
+    {"RCP", :query_priority} => {91, :scalar},
+    {"RCP", :modify_indicator} => {395, :scalar},
 
-    # -- DRG (Diagnosis Related Group) --
-    {"DRG", :drg_payor} => {229, :scalar},
+    # -- RGS (Resource Group) --
+    {"RGS", :segment_action_code} => {206, :scalar},
 
-    # -- NTE (Notes and Comments) --
-    {"NTE", :source_of_comment} => {105, :scalar},
-    {"NTE", :comment_type} => {364, :identifier},
+    # -- ROL (Role) --
+    {"ROL", :action_code} => {287, :scalar},
 
-    # -- ORC (Common Order) --
-    {"ORC", :order_control} => {119, :scalar},
-    {"ORC", :order_status} => {38, :scalar},
-    {"ORC", :response_flag} => {121, :scalar},
+    # -- RQ1 (Requisition Detail-1) --
+    {"RQ1", :taxable} => {136, :scalar},
+    {"RQ1", :substitute_allowed} => {136, :scalar},
 
-    # -- OBR (Observation Request) --
-    {"OBR", :specimen_action_code} => {65, :scalar},
-    {"OBR", :result_status} => {123, :scalar},
-    {"OBR", :diagnostic_serv_sect_id} => {74, :scalar},
+    # -- RXA (Pharmacy/Treatment Administration) --
+    {"RXA", :completion_status} => {322, :scalar},
+    {"RXA", :action_code} => {323, :scalar},
+    {"RXA", :pharmacy_order_type} => {480, :scalar},
 
-    # -- OBX (Observation/Result) --
-    {"OBX", :value_type} => {125, :scalar},
-    {"OBX", :observation_result_status} => {85, :scalar},
-    {"OBX", :nature_of_abnormal_test} => {80, :scalar},
+    # -- RXC (Pharmacy/Treatment Component Order) --
+    {"RXC", :rx_component_type} => {166, :scalar},
 
-    # -- IN1 (Insurance) --
-    {"IN1", :insureds_administrative_sex} => {1, :scalar},
-    {"IN1", :insureds_relationship_to_patient} => {63, :identifier},
-    {"IN1", :notice_of_admission_flag} => {136, :scalar},
-    {"IN1", :report_of_eligibility_flag} => {136, :scalar},
+    # -- RXD (Pharmacy/Treatment Dispense) --
+    {"RXD", :substitution_status} => {167, :scalar},
+    {"RXD", :needs_human_review} => {136, :scalar},
+    {"RXD", :dispense_package_method} => {321, :scalar},
+    {"RXD", :pharmacy_order_type} => {480, :scalar},
 
-    # -- FT1 (Financial Transaction) --
-    {"FT1", :transaction_type} => {17, :scalar},
-    {"FT1", :patient_type} => {18, :scalar},
+    # -- RXE (Pharmacy/Treatment Encoded Order) --
+    {"RXE", :substitution_status} => {167, :scalar},
+    {"RXE", :needs_human_review} => {136, :scalar},
+    {"RXE", :dispense_package_method} => {321, :scalar},
+    {"RXE", :formulary_status} => {136, :scalar},
+    {"RXE", :pharmacy_order_type} => {480, :scalar},
 
-    # -- TXA (Transcription Document Header) --
-    {"TXA", :document_completion_status} => {271, :scalar},
-    {"TXA", :document_confidentiality_status} => {272, :scalar},
-    {"TXA", :document_availability_status} => {273, :scalar},
-    {"TXA", :document_storage_status} => {275, :scalar},
+    # -- RXG (Pharmacy/Treatment Give) --
+    {"RXG", :substitution_status} => {167, :scalar},
+    {"RXG", :needs_human_review} => {136, :scalar},
+    {"RXG", :pharmacy_order_type} => {480, :scalar},
+
+    # -- RXO (Pharmacy/Treatment Order) --
+    {"RXO", :allow_substitutions} => {161, :scalar},
+    {"RXO", :needs_human_review} => {136, :scalar},
+
+    # -- RXR (Pharmacy Route) --
+    {"RXR", :route} => {162, :identifier},
 
     # -- SCH (Scheduling Activity) --
     {"SCH", :filler_status_code} => {278, :identifier},
     {"SCH", :appointment_reason} => {276, :identifier},
     {"SCH", :appointment_type} => {277, :identifier},
 
-    # -- AIS (Appointment Information — Service) --
-    {"AIS", :segment_action_code} => {206, :scalar},
-    {"AIS", :filler_status_code} => {278, :identifier},
-    {"AIS", :allow_substitution_code} => {279, :scalar},
+    # -- SPM (Specimen) --
+    {"SPM", :specimen_availability} => {136, :scalar},
 
-    # -- AIG (Appointment Information — General Resource) --
-    {"AIG", :segment_action_code} => {206, :scalar},
-    {"AIG", :filler_status_code} => {278, :identifier},
-    {"AIG", :allow_substitution_code} => {279, :scalar},
+    # -- SPR (Stored Procedure Request) --
+    {"SPR", :query_response_format_code} => {106, :scalar},
 
-    # -- RXR (Pharmacy Route) --
-    {"RXR", :route} => {162, :identifier}
+    # -- STF (Staff Identification) --
+    {"STF", :active_inactive_flag} => {183, :scalar},
+    {"STF", :additional_insured_on_auto} => {136, :scalar},
+    {"STF", :copy_auto_ins} => {136, :scalar},
+    {"STF", :re_activation_approval_indicator} => {136, :scalar},
+    {"STF", :death_indicator} => {136, :scalar},
+    {"STF", :generic_classification_indicator} => {136, :scalar},
+
+    # -- TCC (Test Code Configuration) --
+    {"TCC", :automatic_rerun_allowed} => {136, :scalar},
+    {"TCC", :automatic_repeat_allowed} => {136, :scalar},
+    {"TCC", :automatic_reflex_allowed} => {136, :scalar},
+
+    # -- TCD (Test Code Detail) --
+    {"TCD", :automatic_repeat_allowed} => {136, :scalar},
+    {"TCD", :reflex_allowed} => {136, :scalar},
+
+    # -- TQ1 (Timing/Quantity) --
+    {"TQ1", :conjunction} => {472, :scalar},
+
+    # -- TQ2 (Timing/Quantity Relationship) --
+    {"TQ2", :sequence_results_flag} => {503, :scalar},
+    {"TQ2", :sequence_condition_code} => {504, :scalar},
+    {"TQ2", :cyclic_entry_exit_indicator} => {505, :scalar},
+    {"TQ2", :special_service_request_relationship} => {506, :scalar},
+
+    # -- TXA (Transcription Document Header) --
+    {"TXA", :document_content_presentation} => {191, :scalar},
+    {"TXA", :document_completion_status} => {271, :scalar},
+    {"TXA", :document_confidentiality_status} => {272, :scalar},
+    {"TXA", :document_availability_status} => {273, :scalar},
+    {"TXA", :document_storage_status} => {275, :scalar},
+
+    # -- UB1 (UB82 Data) --
+    {"UB1", :priority} => {27, :scalar},
+
+    # -- URD (Results/Update Definition) --
+    {"URD", :report_priority} => {109, :scalar},
+    {"URD", :r_u_results_level} => {108, :scalar},
+
+    # -- URS (Unsolicited Selection) --
+    {"URS", :r_u_which_date_time_qualifier} => {156, :scalar},
+    {"URS", :r_u_which_date_time_status_qualifier} => {157, :scalar},
+    {"URS", :r_u_date_time_selection_qualifier} => {158, :scalar},
+
+    # -- VTQ (Virtual Table Query Request) --
+    {"VTQ", :query_response_format_code} => {106, :scalar}
   }
 
   @doc """
@@ -619,6 +926,261 @@ defmodule HL7v2.Validation.FieldRules do
           field: :mfn_control_id,
           message:
             "conditional field mfn_control_id should be populated for master file operations"
+        }
+      ]
+    else
+      []
+    end
+  end
+
+  # BPX: Blood Product Dispense Status — donation vs commercial product mutual exclusion
+  # BPX-5 (bc_donation_id) required when BPX-8 (cp_commercial_product) is not populated
+  # BPX-6 (bc_component) required when BPX-5 (bc_donation_id) is populated
+  # BPX-8 (cp_commercial_product) required when BPX-5 (bc_donation_id) is not populated
+  # BPX-9 (cp_manufacturer) required when BPX-8 (cp_commercial_product) is populated
+  # BPX-10 (cp_lot_number) required when BPX-8 (cp_commercial_product) is populated
+  def conditional_errors(%HL7v2.Segment.BPX{} = bpx, location, mode) do
+    cond_level = if mode == :strict, do: :error, else: :warning
+    donation? = not semantic_blank?(bpx.bc_donation_id)
+    commercial? = not semantic_blank?(bpx.cp_commercial_product)
+
+    donation_when_no_commercial =
+      if not donation? and not commercial? do
+        [
+          %{
+            level: cond_level,
+            location: location,
+            field: :bc_donation_id,
+            message:
+              "conditional: at least one of bc_donation_id (BPX-5) or cp_commercial_product (BPX-8) must be populated"
+          }
+        ]
+      else
+        []
+      end
+
+    component_when_donation =
+      if donation? and semantic_blank?(bpx.bc_component) do
+        [
+          %{
+            level: cond_level,
+            location: location,
+            field: :bc_component,
+            message: "conditional field bc_component is required when bc_donation_id is populated"
+          }
+        ]
+      else
+        []
+      end
+
+    manufacturer_when_commercial =
+      if commercial? and semantic_blank?(bpx.cp_manufacturer) do
+        [
+          %{
+            level: cond_level,
+            location: location,
+            field: :cp_manufacturer,
+            message:
+              "conditional field cp_manufacturer is required when cp_commercial_product is populated"
+          }
+        ]
+      else
+        []
+      end
+
+    lot_number_when_commercial =
+      if commercial? and semantic_blank?(bpx.cp_lot_number) do
+        [
+          %{
+            level: cond_level,
+            location: location,
+            field: :cp_lot_number,
+            message:
+              "conditional field cp_lot_number is required when cp_commercial_product is populated"
+          }
+        ]
+      else
+        []
+      end
+
+    donation_when_no_commercial ++
+      component_when_donation ++ manufacturer_when_commercial ++ lot_number_when_commercial
+  end
+
+  # BTX: Blood Product Transfusion — same donation vs commercial pattern as BPX
+  # BTX-2 (bc_donation_id) required when BTX-5 (cp_commercial_product) is not populated
+  # BTX-3 (bc_component) required when BTX-2 (bc_donation_id) is populated
+  # BTX-5 (cp_commercial_product) required when BTX-2 (bc_donation_id) is not populated
+  # BTX-6 (cp_manufacturer) required when BTX-5 (cp_commercial_product) is populated
+  # BTX-7 (cp_lot_number) required when BTX-5 (cp_commercial_product) is populated
+  # BTX-20 (bp_unique_id) required when message status indicates completion
+  def conditional_errors(%HL7v2.Segment.BTX{} = btx, location, mode) do
+    cond_level = if mode == :strict, do: :error, else: :warning
+    donation? = not semantic_blank?(btx.bc_donation_id)
+    commercial? = not semantic_blank?(btx.cp_commercial_product)
+
+    donation_when_no_commercial =
+      if not donation? and not commercial? do
+        [
+          %{
+            level: cond_level,
+            location: location,
+            field: :bc_donation_id,
+            message:
+              "conditional: at least one of bc_donation_id (BTX-2) or cp_commercial_product (BTX-5) must be populated"
+          }
+        ]
+      else
+        []
+      end
+
+    component_when_donation =
+      if donation? and semantic_blank?(btx.bc_component) do
+        [
+          %{
+            level: cond_level,
+            location: location,
+            field: :bc_component,
+            message: "conditional field bc_component is required when bc_donation_id is populated"
+          }
+        ]
+      else
+        []
+      end
+
+    manufacturer_when_commercial =
+      if commercial? and semantic_blank?(btx.cp_manufacturer) do
+        [
+          %{
+            level: cond_level,
+            location: location,
+            field: :cp_manufacturer,
+            message:
+              "conditional field cp_manufacturer is required when cp_commercial_product is populated"
+          }
+        ]
+      else
+        []
+      end
+
+    lot_number_when_commercial =
+      if commercial? and semantic_blank?(btx.cp_lot_number) do
+        [
+          %{
+            level: cond_level,
+            location: location,
+            field: :cp_lot_number,
+            message:
+              "conditional field cp_lot_number is required when cp_commercial_product is populated"
+          }
+        ]
+      else
+        []
+      end
+
+    donation_when_no_commercial ++
+      component_when_donation ++ manufacturer_when_commercial ++ lot_number_when_commercial
+  end
+
+  # CSP: Clinical Study Phase — study_phase_evaluability required at end of phase
+  # CSP-4 (study_phase_evaluability) required when CSP-3 (date_time_study_phase_ended) is populated
+  def conditional_errors(%HL7v2.Segment.CSP{} = csp, location, mode) do
+    cond_level = if mode == :strict, do: :error, else: :warning
+
+    if not semantic_blank?(csp.date_time_study_phase_ended) and
+         semantic_blank?(csp.study_phase_evaluability) do
+      [
+        %{
+          level: cond_level,
+          location: location,
+          field: :study_phase_evaluability,
+          message:
+            "conditional field study_phase_evaluability is required when date_time_study_phase_ended is populated (end of phase)"
+        }
+      ]
+    else
+      []
+    end
+  end
+
+  # CSR: Clinical Study Registration
+  # CSR-10 (patient_study_eligibility_status) required when registration is complete
+  #   (indicated by date_time_of_patient_study_registration being populated)
+  # CSR-14 (patient_evaluability_status) required when study is complete
+  #   (indicated by date_time_ended_study being populated)
+  def conditional_errors(%HL7v2.Segment.CSR{} = csr, location, mode) do
+    cond_level = if mode == :strict, do: :error, else: :warning
+
+    eligibility_when_registered =
+      if not semantic_blank?(csr.date_time_of_patient_study_registration) and
+           semantic_blank?(csr.patient_study_eligibility_status) do
+        [
+          %{
+            level: cond_level,
+            location: location,
+            field: :patient_study_eligibility_status,
+            message:
+              "conditional field patient_study_eligibility_status is required when date_time_of_patient_study_registration is populated"
+          }
+        ]
+      else
+        []
+      end
+
+    evaluability_when_ended =
+      if not semantic_blank?(csr.date_time_ended_study) and
+           semantic_blank?(csr.patient_evaluability_status) do
+        [
+          %{
+            level: cond_level,
+            location: location,
+            field: :patient_evaluability_status,
+            message:
+              "conditional field patient_evaluability_status is required when date_time_ended_study is populated"
+          }
+        ]
+      else
+        []
+      end
+
+    eligibility_when_registered ++ evaluability_when_ended
+  end
+
+  # SID: Substance Identifier — at least one of SID-1 or SID-4 required
+  def conditional_errors(%HL7v2.Segment.SID{} = sid, location, mode) do
+    cond_level = if mode == :strict, do: :error, else: :warning
+
+    if semantic_blank?(sid.application_method_identifier) and
+         semantic_blank?(sid.substance_manufacturer_identifier) do
+      [
+        %{
+          level: cond_level,
+          location: location,
+          field: :application_method_identifier,
+          message:
+            "conditional: at least one of application_method_identifier (SID-1) or substance_manufacturer_identifier (SID-4) must be populated"
+        }
+      ]
+    else
+      []
+    end
+  end
+
+  # STF: Staff Identification — primary_key_value required for MFN messages
+  # Since we can't know message context, we flag when staff_identifier_list is populated
+  # (indicating an active record) but primary_key_value is missing
+  def conditional_errors(%HL7v2.Segment.STF{} = stf, location, mode) do
+    cond_level = if mode == :strict, do: :error, else: :warning
+
+    if not semantic_blank?(stf.staff_identifier_list) and
+         semantic_blank?(stf.primary_key_value) do
+      [
+        %{
+          level: cond_level,
+          location: location,
+          field: :primary_key_value,
+          message:
+            "conditional field primary_key_value should be populated (required for MFN messages)"
         }
       ]
     else

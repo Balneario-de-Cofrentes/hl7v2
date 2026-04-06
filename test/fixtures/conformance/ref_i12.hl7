@@ -1,0 +1,6 @@
+MSH|^~\&|HIS|HOSP|SPEC|CLINIC|20260406160000||REF^I12^REF_I12|MSG016|P|2.5.1
+RF1|A^Active|R^Routine|MED^Medical||I^Inpatient|REF001
+PRD|RP^Referring Provider|Jones^Robert^J
+PID|1||12345^^^MRN^MR||Smith^John||19800315|M
+DG1|1||I10^Essential Hypertension^I10|||A
+NTE|1||Referral for cardiology evaluation

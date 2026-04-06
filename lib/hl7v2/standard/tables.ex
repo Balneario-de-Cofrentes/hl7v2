@@ -2230,6 +2230,665 @@ defmodule HL7v2.Standard.Tables do
         "P" => "Persistent",
         "R" => "Representative"
       }
+    },
+
+    # --- Tables added for full ID field coverage ---
+
+    27 => %{
+      name: "Priority",
+      codes: %{
+        "A" => "As soon as possible",
+        "P" => "Preoperative",
+        "R" => "Routine",
+        "S" => "Stat",
+        "T" => "Timing critical"
+      }
+    },
+    122 => %{
+      name: "Charge Type",
+      codes: %{
+        "CH" => "Charge",
+        "CO" => "Contract",
+        "CR" => "Credit",
+        "DP" => "Department",
+        "GR" => "Grant",
+        "NC" => "No Charge",
+        "PC" => "Professional",
+        "RS" => "Research"
+      }
+    },
+    161 => %{
+      name: "Allow Substitution",
+      codes: %{
+        "G" => "Allow generic substitutions",
+        "N" => "Substitutions are NOT authorized",
+        "T" => "Allow therapeutic substitutions"
+      }
+    },
+    167 => %{
+      name: "Substitution Status",
+      codes: %{
+        "0" => "No substitute was dispensed",
+        "1" => "A pharmaceutical substance was dispensed as a therapeutic substitute",
+        "2" => "A pharmaceutical substance was dispensed as a generic substitute",
+        "3" => "A pharmaceutical substance was dispensed as a prescribed product",
+        "4" => "A teletherapy was dispensed in place of mail order pharmacy",
+        "5" => "A brand name was dispensed when the order called for generic",
+        "7" => "A generic was dispensed when the order specified a different formulation",
+        "8" => "A prescribed product was dispensed as a generic pharmaceutical substance"
+      }
+    },
+    168 => %{
+      name: "Processing Priority",
+      codes: %{
+        "A" => "As soon as possible (a]waiting)",
+        "B" => "Do at bedside or portable (may also be used for outpatient)",
+        "C" => "Measure continuously (e.g., arterial line blood pressure)",
+        "P" => "Preoperative (to be done prior to surgery)",
+        "R" => "Routine",
+        "S" => "Stat (do immediately)",
+        "T" => "Timing critical (do as near as possible to requested time)"
+      }
+    },
+    169 => %{
+      name: "Reporting Priority",
+      codes: %{
+        "C" => "Call back results",
+        "R" => "Rush reporting"
+      }
+    },
+    170 => %{
+      name: "Derived Specimen",
+      codes: %{
+        "C" => "Child observation",
+        "N" => "Not applicable",
+        "P" => "Parent observation"
+      }
+    },
+    187 => %{
+      name: "Provider Billing",
+      codes: %{
+        "I" => "Institution bills for provider",
+        "P" => "Provider does own billing"
+      }
+    },
+    230 => %{
+      name: "Procedure Functional Type",
+      codes: %{
+        "A" => "Anesthesia",
+        "D" => "Diagnostic procedure",
+        "I" => "Invasive procedure not classified elsewhere",
+        "P" => "Procedure for treatment"
+      }
+    },
+    235 => %{
+      name: "Report Source",
+      codes: %{
+        "C" => "Clinical trial",
+        "D" => "Database/registry/poison control center",
+        "E" => "Distributor",
+        "H" => "Health professional",
+        "L" => "Literature",
+        "M" => "Manufacturer/marketing authority holder",
+        "N" => "Non-healthcare professional",
+        "O" => "Other",
+        "P" => "Patient",
+        "R" => "Regulatory agency"
+      }
+    },
+    236 => %{
+      name: "Event Reported To",
+      codes: %{
+        "D" => "Distributor",
+        "L" => "Local facility/user facility",
+        "M" => "Manufacturer",
+        "R" => "Regulatory agency"
+      }
+    },
+    237 => %{
+      name: "Event Qualification",
+      codes: %{
+        "A" => "Abuse",
+        "B" => "Unexpected beneficial effect",
+        "D" => "Dependency",
+        "I" => "Interaction",
+        "L" => "Lack of expect therapeutic effect",
+        "M" => "Misuse",
+        "O" => "Overdose",
+        "W" => "Drug withdrawal"
+      }
+    },
+    238 => %{
+      name: "Event Seriousness",
+      codes: %{
+        "N" => "No",
+        "S" => "Significant",
+        "Y" => "Yes"
+      }
+    },
+    239 => %{
+      name: "Event Expected",
+      codes: %{
+        "N" => "No",
+        "U" => "Unknown",
+        "Y" => "Yes"
+      }
+    },
+    240 => %{
+      name: "Event Consequence",
+      codes: %{
+        "C" => "Congenital anomaly/birth defect",
+        "D" => "Death",
+        "H" => "Caused hospitalized",
+        "I" => "Incapacity which is significant, persistent or permanent",
+        "J" => "Disability which is significant, persistent or permanent",
+        "L" => "Life threatening",
+        "O" => "Other",
+        "P" => "Prolonged hospitalization",
+        "R" => "Required intervention to prevent permanent impairment/damage"
+      }
+    },
+    241 => %{
+      name: "Patient Outcome",
+      codes: %{
+        "D" => "Died",
+        "F" => "Fully recovered",
+        "N" => "Not recovering/unchanged",
+        "R" => "Recovering",
+        "S" => "Sequelae",
+        "U" => "Unknown",
+        "W" => "Worsening"
+      }
+    },
+    242 => %{
+      name: "Primary Observer's Qualification",
+      codes: %{
+        "C" => "Health care consumer/patient",
+        "H" => "Other health professional",
+        "L" => "Lawyer/attorney",
+        "M" => "Mid-level professional (PA, NP, CNS, CNM)",
+        "O" => "Other non-health professional",
+        "P" => "Physician (osteopath, homeopath)",
+        "R" => "Pharmacist"
+      }
+    },
+    243 => %{
+      name: "Identity May Be Divulged",
+      codes: %{
+        "N" => "No",
+        "NA" => "Not applicable",
+        "Y" => "Yes"
+      }
+    },
+    246 => %{
+      name: "Product Available for Inspection",
+      codes: %{
+        "N" => "No",
+        "U" => "Unknown",
+        "Y" => "Yes"
+      }
+    },
+    247 => %{
+      name: "Status of Evaluation",
+      codes: %{
+        "A" => "Evaluation anticipated, but not yet begun",
+        "C" => "Product received in condition which made analysis impossible",
+        "D" => "Product discarded -- Loss of product",
+        "I" => "Product is involved but results are not yet available",
+        "K" => "Problem already known, no evaluation necessary",
+        "O" => "Other",
+        "P" => "Evaluation in progress",
+        "Q" => "Product not available for follow up investigation",
+        "R" => "Product evaluated -- results given below",
+        "U" => "Product not evaluated -- reason not specified",
+        "X" => "Product not available for follow up investigation -- Loss of product",
+        "Y" => "Product not evaluated (unable to evaluate)"
+      }
+    },
+    248 => %{
+      name: "Product Source",
+      codes: %{
+        "A" => "Actual product involved in incident was evaluated",
+        "L" => "A product from the same lot as the actual product involved was evaluated",
+        "N" => "A product from a controlled/non-related inventory was evaluated",
+        "R" => "A product from a reserve sample was evaluated"
+      }
+    },
+    250 => %{
+      name: "Relatedness Assessment",
+      codes: %{
+        "H" => "Highly probable",
+        "I" => "Improbable",
+        "M" => "Moderately probable",
+        "N" => "Not Related",
+        "S" => "Somewhat probable"
+      }
+    },
+    251 => %{
+      name: "Action Taken in Response to the Event",
+      codes: %{
+        "DI" => "Product dose or frequency of use increased",
+        "DR" => "Product dose or frequency of use reduced",
+        "N" => "None",
+        "OT" => "Other",
+        "WP" => "Product withdrawn permanently",
+        "WT" => "Product withdrawn temporarily"
+      }
+    },
+    252 => %{
+      name: "Causality Observations",
+      codes: %{
+        "AW" => "Abatement of event after product withdrawn",
+        "BE" => "Event recurred after product reintroduced",
+        "DR" => "Dose response observed",
+        "EX" => "Alternative explanations for the event available",
+        "IN" => "Event occurred after product introduced",
+        "LI" => "Literature reports association of product with event",
+        "OE" => "Occurrence of event was confirmed by objective evidence",
+        "OT" => "Other",
+        "PL" => "Effect observed when patient receives placebo",
+        "SE" => "Similar events in past for this patient",
+        "TC" => "Toxic levels of product documented in blood or body fluids"
+      }
+    },
+    253 => %{
+      name: "Indirect Exposure Mechanism",
+      codes: %{
+        "B" => "Breast milk",
+        "F" => "Father",
+        "O" => "Other",
+        "P" => "Transplacental",
+        "X" => "Blood product"
+      }
+    },
+    257 => %{
+      name: "Nature of Challenge",
+      codes: %{
+        "CFOOD" => "Fasting (no calorie intake) for the period specified",
+        "FFOOD" => "No fluid intake for the period specified in the time component",
+        "NFOOD" => "No food intake for the period specified",
+        "OVRN" => "Overnight fast"
+      }
+    },
+    331 => %{
+      name: "Facility Type",
+      codes: %{
+        "A" => "Agent for a foreign manufacturer",
+        "D" => "Distributor",
+        "M" => "Manufacturer",
+        "U" => "User"
+      }
+    },
+    368 => %{
+      name: "Remote Control Command",
+      codes: %{
+        "AB" => "Abort",
+        "CL" => "Clear",
+        "CN" => "Clear Notification",
+        "DI" => "Disable Sending Events",
+        "EN" => "Enable Sending Events",
+        "ES" => "Emergency -Loss of Power/Stop",
+        "EX" => "Execute (command specified in field)",
+        "IN" => "Initialize/Initiate",
+        "LC" => "Local Control Request",
+        "LK" => "Lock",
+        "LO" => "Load",
+        "PA" => "Pause",
+        "RC" => "Remote Control Request",
+        "RE" => "Resume",
+        "SA" => "Sampling",
+        "SU" => "Setup",
+        "TS" => "Transport",
+        "UC" => "Unlock",
+        "UN" => "Unload"
+      }
+    },
+    472 => %{
+      name: "TQ Conjunction ID",
+      codes: %{
+        "A" => "Separator: independent timing specs are separated by Asynchronous",
+        "C" => "Actuation Time: the time the service should be started",
+        "S" => "Synchronous: do not start until the previous one is completed"
+      }
+    },
+    480 => %{
+      name: "Pharmacy Order Types",
+      codes: %{
+        "M" => "Medication (default)",
+        "O" => "Other solution as medication orders",
+        "S" => "Supply"
+      }
+    },
+    503 => %{
+      name: "Sequence/Results Flag",
+      codes: %{
+        "C" => "Cyclical",
+        "R" => "Reserved for possible future use",
+        "S" => "Sequential"
+      }
+    },
+    504 => %{
+      name: "Sequence Condition Code",
+      codes: %{
+        "EE" => "End related start or end",
+        "ES" => "End related start or start",
+        "SE" => "Start related start or end",
+        "SS" => "Start related start or start"
+      }
+    },
+    505 => %{
+      name: "Cyclic Entry/Exit Indicator",
+      codes: %{
+        "#" => "The last service request in a cyclic group",
+        "*" => "The first service request in a cyclic group"
+      }
+    },
+    506 => %{
+      name: "Service Request Relationship",
+      codes: %{
+        "C" => "Compound",
+        "E" => "Exclusive",
+        "N" => "Nurse prerogative",
+        "S" => "Simultaneous",
+        "T" => "Tapering"
+      }
+    },
+    249 => %{
+      name: "Generic Product",
+      codes: %{
+        "N" => "No",
+        "Y" => "Yes"
+      }
+    },
+    270 => %{
+      name: "Document Type",
+      codes: %{
+        "AR" => "Autopsy Report",
+        "CD" => "Cardiodiagnostics",
+        "CN" => "Consultation",
+        "DI" => "Diagnostic Imaging",
+        "DS" => "Discharge Summary",
+        "ED" => "Emergency Department Report",
+        "HP" => "History and Physical Examination",
+        "OP" => "Operative Report",
+        "PC" => "Psychiatric Consultation",
+        "PH" => "Psychiatric History and Physical Examination",
+        "PN" => "Procedure Note",
+        "PR" => "Progress Note",
+        "SP" => "Surgical Pathology",
+        "TS" => "Transfer Summary"
+      }
+    },
+    166 => %{
+      name: "RX Component Type",
+      codes: %{
+        "A" => "Additive",
+        "B" => "Base"
+      }
+    },
+    159 => %{
+      name: "Diet Code Specification Type",
+      codes: %{
+        "D" => "Diet",
+        "P" => "Preference",
+        "S" => "Supplement"
+      }
+    },
+    183 => %{
+      name: "Active/Inactive",
+      codes: %{
+        "A" => "Active Staff",
+        "I" => "Inactive Staff"
+      }
+    },
+    269 => %{
+      name: "Charge On Indicator",
+      codes: %{
+        "O" => "Charge on Order",
+        "R" => "Charge on Result"
+      }
+    },
+    268 => %{
+      name: "Override",
+      codes: %{
+        "A" => "Override allowed",
+        "R" => "Override required",
+        "X" => "Override not allowed"
+      }
+    },
+    336 => %{
+      name: "Referral Reason",
+      codes: %{
+        "O" => "Provider Ordered",
+        "P" => "Patient Preference",
+        "S" => "Second Opinion"
+      }
+    },
+    335 => %{
+      name: "Repeat Pattern",
+      codes: %{
+        "A" => "Ante (before)",
+        "BID" => "twice a day at institution-specified times",
+        "C" => "service is provided continuously between start time and stop time",
+        "D" => "Cibus Diurnus (lunch)",
+        "M" => "Cibus Matutinus (breakfast)",
+        "P" => "Post (after)",
+        "PRN" => "given as needed",
+        "Q1H" => "every hour",
+        "Q2H" => "every 2 hours",
+        "Q3H" => "every 3 hours",
+        "Q4H" => "every 4 hours",
+        "Q6H" => "every 6 hours",
+        "Q8H" => "every 8 hours",
+        "QAM" => "in the morning at institution-specified time",
+        "QD" => "every day",
+        "QHS" => "every day before the hour of sleep",
+        "QID" => "four times a day at institution-specified times",
+        "QOD" => "every other day",
+        "QPM" => "in the evening at institution-specified time",
+        "TID" => "three times a day at institution-specified times",
+        "V" => "Cibus Vespertinus (dinner)"
+      }
+    },
+    330 => %{
+      name: "Marketing Basis",
+      codes: %{
+        "510K" => "510 (K)",
+        "510KE" => "510 (K) Exempt",
+        "PMA" => "Premarket Authorization",
+        "PRE" => "Preamendment",
+        "TXN" => "Transitional"
+      }
+    },
+    261 => %{
+      name: "Location Equipment",
+      codes: %{
+        "INF" => "Infusion pump",
+        "IVP" => "IV pump",
+        "OXY" => "Oxygen",
+        "SUC" => "Suction",
+        "VEN" => "Ventilator"
+      }
+    },
+    532 => %{
+      name: "Expanded Yes/No Indicator",
+      codes: %{
+        "ASKU" => "Asked but Unknown",
+        "N" => "No",
+        "NA" => "Not applicable",
+        "NASK" => "Not Asked",
+        "NI" => "No Information",
+        "QS" => "Quantity Sufficient",
+        "TRC" => "Trace",
+        "UNK" => "Unknown",
+        "Y" => "Yes"
+      }
+    },
+    259 => %{
+      name: "Modality",
+      codes: %{
+        "AS" => "Angioscopy",
+        "BS" => "Biomagnetic imaging",
+        "CD" => "Color flow Doppler",
+        "CP" => "Colposcopy",
+        "CR" => "Computed Radiography",
+        "CS" => "Cystoscopy",
+        "CT" => "Computed Tomography",
+        "DD" => "Duplex Doppler",
+        "DG" => "Diapanography",
+        "DM" => "Digital Microscopy",
+        "EC" => "Echocardiography",
+        "ES" => "Endoscopy",
+        "FA" => "Fluorescein Angiography",
+        "FS" => "Fundoscopy",
+        "LP" => "Laparoscopy",
+        "LS" => "Laser surface scan",
+        "MA" => "Magnetic Resonance Angiography",
+        "MR" => "Magnetic Resonance",
+        "MS" => "Magnetic Resonance Spectroscopy",
+        "NM" => "Nuclear Medicine (Radioisotope study)",
+        "OT" => "Other",
+        "PT" => "Positron Emission Tomography (PET)",
+        "RF" => "Radio Fluoroscopy",
+        "ST" => "Single Photon Emission Computed Tomography (SPECT)",
+        "TG" => "Thermography",
+        "US" => "Ultrasound",
+        "XA" => "X-Ray Angiography"
+      }
+    },
+    508 => %{
+      name: "Blood Product Processing Requirements",
+      codes: %{
+        "AU" => "Autologous Unit",
+        "CM" => "CMV Negative",
+        "CS" => "CMV Safe",
+        "DI" => "Directed Unit",
+        "FR" => "Fresh unit",
+        "HB" => "Hemoglobin S Negative",
+        "HL" => "HLA Matched",
+        "IG" => "IgA Deficient",
+        "IR" => "Irradiated",
+        "LR" => "Leukoreduced",
+        "WA" => "Washed"
+      }
+    },
+    511 => %{
+      name: "BP Observation Status Codes Interpretation",
+      codes: %{
+        "C" => "Record coming over is a correction and replaces a final status",
+        "D" => "Deletes the BPX record",
+        "F" => "Final status; can only be changed with a corrected status",
+        "O" => "Order detail description only (no status)",
+        "P" => "Preliminary status",
+        "W" => "Post original as wrong, e.g., transmitted for wrong patient"
+      }
+    },
+    513 => %{
+      name: "Blood Product Transfusion/Disposition Status",
+      codes: %{
+        "RA" => "Returned unused/no longer needed",
+        "RL" => "Returned unused/linked to patient",
+        "TR" => "Transfused with adverse reaction",
+        "TX" => "Transfused",
+        "WA" => "Wasted (product no longer viable)"
+      }
+    },
+    509 => %{
+      name: "Consent Identifier",
+      codes: %{
+        "ALT" => "Alternate (second) opinion",
+        "CON" => "Consent given",
+        "DEN" => "Denial of consent",
+        "LIM" => "Consent with limitation(s)",
+        "OPT" => "Opt out",
+        "RCV" => "Consent received",
+        "WDR" => "Withdrawn/revocation of prior consent"
+      }
+    },
+    498 => %{
+      name: "Consent Status",
+      codes: %{
+        "A" => "Active — Consent has been granted",
+        "B" => "Bypassed (Consent not sought)",
+        "L" => "Limited — Consent has been granted with limitations",
+        "P" => "Pending — Consent has not yet been sought",
+        "R" => "Refused — Consent has been refused",
+        "X" => "Rescinded — Consent was initially granted, but was subsequently revoked or ended"
+      }
+    },
+    499 => %{
+      name: "Consent Bypass Reason",
+      codes: %{
+        "E" => "Emergency",
+        "PJ" => "Professional Judgment"
+      }
+    },
+    497 => %{
+      name: "Consent Type",
+      codes: %{
+        "001" =>
+          "Release of Information/MR / Authorization to Disclosure Protected Health Information",
+        "002" => "Medical Procedure (Invasive)",
+        "003" => "Acknowledge Receipt of Privacy Notice",
+        "004" => "Abortion",
+        "005" => "Organ Donation",
+        "006" => "Brain Death Determination Procedure",
+        "007" => "Immunization",
+        "008" => "Medical Treatment (Incl. Surgery/Anesthesia)"
+      }
+    },
+    500 => %{
+      name: "Consent Disclosure Level",
+      codes: %{
+        "F" => "Full Disclosure",
+        "N" => "No Disclosure",
+        "P" => "Partial Disclosure"
+      }
+    },
+    501 => %{
+      name: "Consent Non-Disclosure Reason",
+      codes: %{
+        "E" => "Emergency",
+        "PI" => "Patient Request - information only",
+        "RX" => "Patient Request - no further discussion"
+      }
+    },
+    502 => %{
+      name: "Non-Subject Consenter Reason",
+      codes: %{
+        "LM" => "Legally mandated",
+        "MIN" => "Subject is a minor",
+        "NC" => "Subject is not competent to consent"
+      }
+    },
+    495 => %{
+      name: "Body Site Modifier",
+      codes: %{
+        "ANT" => "Anterior",
+        "BIL" => "Bilateral",
+        "DIS" => "Distal",
+        "EXT" => "External",
+        "L" => "Left",
+        "LAT" => "Lateral",
+        "LLQ" => "Quadrant, Left Lower",
+        "LOW" => "Lower",
+        "LUQ" => "Quadrant, Left Upper",
+        "MED" => "Medial",
+        "POS" => "Posterior",
+        "PRO" => "Proximal",
+        "R" => "Right",
+        "RLQ" => "Quadrant, Right Lower",
+        "RUQ" => "Quadrant, Right Upper",
+        "SUP" => "Superior",
+        "UPP" => "Upper"
+      }
+    },
+    507 => %{
+      name: "Observation Result Handling",
+      codes: %{
+        "F" => "Film-with-patient",
+        "N" => "Notify provider when ready"
+      }
     }
   }
 

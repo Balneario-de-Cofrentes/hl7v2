@@ -1,0 +1,5 @@
+MSH|^~\&|HIS|HOSP|HIS|HOSP|20260406190000||PPR^PC1^PPR_PC1|MSG020|P|2.5.1
+PID|1||12345^^^MRN^MR||Smith^John||19800315|M
+PV1|1|I|W^389^1
+PRB|AD|20260406190000|I10^Essential Hypertension^I10|PRB001
+NTE|1||Chronic condition requiring ongoing management

@@ -62,6 +62,58 @@ defmodule HL7v2.Conformance.RoundTripTest do
     test "ACK" do
       assert_fixture_round_trip("ack.hl7")
     end
+
+    test "BAR_P01 (billing)" do
+      assert_fixture_round_trip("bar_p01.hl7")
+    end
+
+    test "DFT_P03 (financial transaction)" do
+      assert_fixture_round_trip("dft_p03.hl7")
+    end
+
+    test "RDE_O11 (pharmacy encoded order)" do
+      assert_fixture_round_trip("rde_o11.hl7")
+    end
+
+    test "MDM_T02 (medical document)" do
+      assert_fixture_round_trip("mdm_t02.hl7")
+    end
+
+    test "MFN_M02 (master file - staff)" do
+      assert_fixture_round_trip("mfn_m02.hl7")
+    end
+
+    test "VXU_V04 (vaccination)" do
+      assert_fixture_round_trip("vxu_v04.hl7")
+    end
+
+    test "REF_I12 (referral)" do
+      assert_fixture_round_trip("ref_i12.hl7")
+    end
+
+    test "QBP_Q21 (query by parameter)" do
+      assert_fixture_round_trip("qbp_q21.hl7")
+    end
+
+    test "RSP_K21 (query response)" do
+      assert_fixture_round_trip("rsp_k21.hl7")
+    end
+
+    test "RGV_O15 (pharmacy give)" do
+      assert_fixture_round_trip("rgv_o15.hl7")
+    end
+
+    test "PPR_PC1 (patient problem)" do
+      assert_fixture_round_trip("ppr_pc1.hl7")
+    end
+
+    test "SRM_S01 (scheduling request)" do
+      assert_fixture_round_trip("srm_s01.hl7")
+    end
+
+    test "PMU_B01 (personnel management)" do
+      assert_fixture_round_trip("pmu_b01.hl7")
+    end
   end
 
   describe "non-default delimiters" do

@@ -792,6 +792,353 @@ defmodule HL7v2.ValidationTest do
       cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
       assert cond_errors == []
     end
+
+    # -- BPX conditional rules --
+
+    test "BPX: warns when neither donation nor commercial product is populated" do
+      bpx = %HL7v2.Segment.BPX{
+        set_id: "1",
+        bp_dispense_status: %HL7v2.Type.CWE{identifier: "RA"},
+        bp_status: "A",
+        bp_date_time_of_status: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 6}
+        },
+        bp_quantity: "1",
+        bc_donation_id: nil,
+        cp_commercial_product: nil
+      }
+
+      errors = FieldRules.check(bpx, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :bc_donation_id and err.level == :warning
+             end)
+    end
+
+    test "BPX: warns when donation is populated but component is missing" do
+      bpx = %HL7v2.Segment.BPX{
+        set_id: "1",
+        bp_dispense_status: %HL7v2.Type.CWE{identifier: "RA"},
+        bp_status: "A",
+        bp_date_time_of_status: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 6}
+        },
+        bp_quantity: "1",
+        bc_donation_id: %HL7v2.Type.EI{entity_identifier: "D001"},
+        bc_component: nil
+      }
+
+      errors = FieldRules.check(bpx, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :bc_component and err.level == :warning
+             end)
+    end
+
+    test "BPX: warns when commercial product populated but manufacturer/lot missing" do
+      bpx = %HL7v2.Segment.BPX{
+        set_id: "1",
+        bp_dispense_status: %HL7v2.Type.CWE{identifier: "RA"},
+        bp_status: "A",
+        bp_date_time_of_status: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 6}
+        },
+        bp_quantity: "1",
+        cp_commercial_product: %HL7v2.Type.CWE{identifier: "PROD1"},
+        cp_manufacturer: nil,
+        cp_lot_number: nil
+      }
+
+      errors = FieldRules.check(bpx, mode: :strict)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :cp_manufacturer and err.level == :error
+             end)
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :cp_lot_number and err.level == :error
+             end)
+    end
+
+    test "BPX: no conditional warnings when donation path is complete" do
+      bpx = %HL7v2.Segment.BPX{
+        set_id: "1",
+        bp_dispense_status: %HL7v2.Type.CWE{identifier: "RA"},
+        bp_status: "A",
+        bp_date_time_of_status: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 6}
+        },
+        bp_quantity: "1",
+        bc_donation_id: %HL7v2.Type.EI{entity_identifier: "D001"},
+        bc_component: %HL7v2.Type.CNE{identifier: "RBC"}
+      }
+
+      errors = FieldRules.check(bpx)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    # -- BTX conditional rules --
+
+    test "BTX: warns when neither donation nor commercial product is populated" do
+      btx = %HL7v2.Segment.BTX{
+        set_id: "1",
+        bp_quantity: "1",
+        bp_transfusion_disposition_status: %HL7v2.Type.CWE{identifier: "TX"},
+        bp_message_status: "A",
+        bp_date_time_of_status: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 6}
+        },
+        bc_donation_id: nil,
+        cp_commercial_product: nil
+      }
+
+      errors = FieldRules.check(btx, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :bc_donation_id and err.level == :warning
+             end)
+    end
+
+    test "BTX: warns when donation populated but component missing" do
+      btx = %HL7v2.Segment.BTX{
+        set_id: "1",
+        bp_quantity: "1",
+        bp_transfusion_disposition_status: %HL7v2.Type.CWE{identifier: "TX"},
+        bp_message_status: "A",
+        bp_date_time_of_status: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 6}
+        },
+        bc_donation_id: %HL7v2.Type.EI{entity_identifier: "D001"},
+        bc_component: nil
+      }
+
+      errors = FieldRules.check(btx, mode: :strict)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :bc_component and err.level == :error
+             end)
+    end
+
+    test "BTX: no conditional warnings when commercial path is complete" do
+      btx = %HL7v2.Segment.BTX{
+        set_id: "1",
+        bp_quantity: "1",
+        bp_transfusion_disposition_status: %HL7v2.Type.CWE{identifier: "TX"},
+        bp_message_status: "A",
+        bp_date_time_of_status: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 6}
+        },
+        cp_commercial_product: %HL7v2.Type.CWE{identifier: "PROD1"},
+        cp_manufacturer: %HL7v2.Type.XON{organization_name: "MFG"},
+        cp_lot_number: %HL7v2.Type.EI{entity_identifier: "LOT001"}
+      }
+
+      errors = FieldRules.check(btx)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    # -- CSP conditional rules --
+
+    test "CSP: warns when phase ended but evaluability missing" do
+      csp = %HL7v2.Segment.CSP{
+        study_phase_identifier: %HL7v2.Type.CE{identifier: "PHASE1"},
+        date_time_study_phase_began: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 1, day: 1}
+        },
+        date_time_study_phase_ended: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 1}
+        },
+        study_phase_evaluability: nil
+      }
+
+      errors = FieldRules.check(csp, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :study_phase_evaluability and err.level == :warning
+             end)
+    end
+
+    test "CSP: no conditional warning when phase not ended" do
+      csp = %HL7v2.Segment.CSP{
+        study_phase_identifier: %HL7v2.Type.CE{identifier: "PHASE1"},
+        date_time_study_phase_began: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 1, day: 1}
+        },
+        date_time_study_phase_ended: nil,
+        study_phase_evaluability: nil
+      }
+
+      errors = FieldRules.check(csp)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "CSP: no conditional warning when phase ended and evaluability present" do
+      csp = %HL7v2.Segment.CSP{
+        study_phase_identifier: %HL7v2.Type.CE{identifier: "PHASE1"},
+        date_time_study_phase_began: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 1, day: 1}
+        },
+        date_time_study_phase_ended: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 1}
+        },
+        study_phase_evaluability: %HL7v2.Type.CE{identifier: "EVAL"}
+      }
+
+      errors = FieldRules.check(csp)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    # -- CSR conditional rules --
+
+    test "CSR: warns when registered but eligibility status missing" do
+      csr = %HL7v2.Segment.CSR{
+        sponsor_study_id: %HL7v2.Type.EI{entity_identifier: "STUDY1"},
+        sponsor_patient_id: %HL7v2.Type.CX{id: "PAT001"},
+        study_authorizing_provider: [%HL7v2.Type.XCN{id_number: "DOC1"}],
+        date_time_of_patient_study_registration: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 3, day: 1}
+        },
+        patient_study_eligibility_status: nil
+      }
+
+      errors = FieldRules.check(csr, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :patient_study_eligibility_status and err.level == :warning
+             end)
+    end
+
+    test "CSR: warns when study ended but evaluability status missing" do
+      csr = %HL7v2.Segment.CSR{
+        sponsor_study_id: %HL7v2.Type.EI{entity_identifier: "STUDY1"},
+        sponsor_patient_id: %HL7v2.Type.CX{id: "PAT001"},
+        study_authorizing_provider: [%HL7v2.Type.XCN{id_number: "DOC1"}],
+        date_time_ended_study: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 6, day: 1}
+        },
+        patient_evaluability_status: nil
+      }
+
+      errors = FieldRules.check(csr, mode: :strict)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :patient_evaluability_status and err.level == :error
+             end)
+    end
+
+    test "CSR: no conditional warning when neither registered nor ended" do
+      csr = %HL7v2.Segment.CSR{
+        sponsor_study_id: %HL7v2.Type.EI{entity_identifier: "STUDY1"},
+        sponsor_patient_id: %HL7v2.Type.CX{id: "PAT001"},
+        study_authorizing_provider: [%HL7v2.Type.XCN{id_number: "DOC1"}]
+      }
+
+      errors = FieldRules.check(csr)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    # -- SID conditional rules --
+
+    test "SID: warns when both identifiers are missing" do
+      sid = %HL7v2.Segment.SID{
+        application_method_identifier: nil,
+        substance_manufacturer_identifier: nil
+      }
+
+      errors = FieldRules.check(sid, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :application_method_identifier and err.level == :warning
+             end)
+    end
+
+    test "SID: no conditional warning when application_method_identifier is present" do
+      sid = %HL7v2.Segment.SID{
+        application_method_identifier: %HL7v2.Type.CE{identifier: "APP1"},
+        substance_manufacturer_identifier: nil
+      }
+
+      errors = FieldRules.check(sid)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "SID: no conditional warning when substance_manufacturer_identifier is present" do
+      sid = %HL7v2.Segment.SID{
+        application_method_identifier: nil,
+        substance_manufacturer_identifier: %HL7v2.Type.CE{identifier: "MFG1"}
+      }
+
+      errors = FieldRules.check(sid)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "SID: errors in strict mode when both identifiers are missing" do
+      sid = %HL7v2.Segment.SID{
+        application_method_identifier: nil,
+        substance_manufacturer_identifier: nil
+      }
+
+      errors = FieldRules.check(sid, mode: :strict)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :application_method_identifier and err.level == :error
+             end)
+    end
+
+    # -- STF conditional rules --
+
+    test "STF: warns when staff_identifier_list is populated but primary_key_value is missing" do
+      stf = %HL7v2.Segment.STF{
+        staff_identifier_list: [%HL7v2.Type.CX{id: "STAFF001"}],
+        primary_key_value: nil
+      }
+
+      errors = FieldRules.check(stf, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :primary_key_value and err.level == :warning
+             end)
+    end
+
+    test "STF: no conditional warning when primary_key_value is populated" do
+      stf = %HL7v2.Segment.STF{
+        staff_identifier_list: [%HL7v2.Type.CX{id: "STAFF001"}],
+        primary_key_value: %HL7v2.Type.CE{identifier: "KEY1"}
+      }
+
+      errors = FieldRules.check(stf)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "STF: no conditional warning when staff_identifier_list is empty" do
+      stf = %HL7v2.Segment.STF{
+        staff_identifier_list: nil,
+        primary_key_value: nil
+      }
+
+      errors = FieldRules.check(stf)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
   end
 
   # -- Helpers --
