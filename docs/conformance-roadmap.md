@@ -1,10 +1,12 @@
-# HL7v2 Conformance Roadmap
+# HL7v2 Conformance Roadmap (Historical)
 
-## Current State (v1.4.x)
+> This roadmap tracked the library's evolution from v0.5 through v2.8.
+> All milestones M1-M6 are complete. For current state, run `mix hl7v2.coverage`.
 
-Strong raw round-trip core. Typed support for ADT/ORM/ORU/SIU/RDE/RDS/MDM/ACK with
-positional structural validation and opt-in HL7 table checking. 52 standard segments,
-54 v2.5.1 types, 23 group-aware message structure definitions, 20 coded-value tables.
+## Current State (v2.8.x)
+
+152/152 v2.5.1 segments, 90 types, 222 message structures (186/186 official),
+189 tables, 255 field bindings, 23 conditional rule sets, 18 conformance fixtures.
 Run `mix hl7v2.coverage` for exact counts.
 
 ## Milestones

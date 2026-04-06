@@ -20,12 +20,9 @@ defmodule HL7v2.Standard.MessageStructure do
   - `optionality` is `:required` or `:optional`
   - `children` is a list of nested nodes
 
-  ## Limitations
-
-  These definitions cover segments within 100+ supported message structures.
-  Most referenced segments are typed; a few less-common ones (e.g., OSD, RMC,
-  DDI) remain as `:raw` field types within their segments. Run
-  `mix hl7v2.coverage --detail` for per-segment field completeness.
+  222 structure definitions covering all 186 official v2.5.1 abstract message
+  structures plus aliases and response variants. Run `mix hl7v2.gen_docs` to
+  regenerate reference documentation from these definitions.
 
   Source: HL7 v2.5.1 abstract message definitions via
   https://www.hl7.eu/HL7v2x/v251/hl7v251msgstruct.htm and
