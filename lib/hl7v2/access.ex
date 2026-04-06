@@ -54,8 +54,7 @@ defmodule HL7v2.Access do
   @spec get(TypedMessage.t(), binary() | Path.t()) :: term()
   def get(%TypedMessage{} = msg, %Path{} = path) do
     case resolve(msg, path_to_map(path)) do
-      :invalid_repetition -> nil
-      :invalid_component -> nil
+      sentinel when sentinel in [:invalid_repetition, :invalid_component, :repetition_out_of_range] -> nil
       value -> value
     end
   end
@@ -64,8 +63,7 @@ defmodule HL7v2.Access do
     case parse_path(path) do
       {:ok, parsed} ->
         case resolve(msg, parsed) do
-          :invalid_repetition -> nil
-          :invalid_component -> nil
+          sentinel when sentinel in [:invalid_repetition, :invalid_component, :repetition_out_of_range] -> nil
           value -> value
         end
 
@@ -268,6 +266,7 @@ defmodule HL7v2.Access do
   defp unwrap_and_select(value, max_reps, %{repetition: rep, component: comp}) do
     case select_repetition(value, max_reps, rep) do
       :invalid_repetition -> :invalid_repetition
+      :repetition_out_of_range -> :repetition_out_of_range
       selected -> select_component(selected, comp)
     end
   end
@@ -281,7 +280,7 @@ defmodule HL7v2.Access do
 
   defp select_repetition(value, _max_reps, rep) when is_list(value) do
     if rep != nil do
-      Enum.at(value, rep - 1)
+      if rep > length(value), do: :repetition_out_of_range, else: Enum.at(value, rep - 1)
     else
       List.first(value)
     end
@@ -398,6 +397,7 @@ defmodule HL7v2.Access do
         case result do
           :invalid_repetition -> {:error, :invalid_repetition}
           :invalid_component -> {:error, :invalid_component}
+          :repetition_out_of_range -> {:error, :repetition_out_of_range}
           nil when path.component != nil and value != nil -> {:error, :component_not_found}
           _ -> {:ok, result}
         end

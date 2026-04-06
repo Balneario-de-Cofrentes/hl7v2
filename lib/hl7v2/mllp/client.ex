@@ -91,7 +91,8 @@ defmodule HL7v2.MLLP.Client do
            socket: socket,
            transport: transport,
            timeout: timeout,
-           max_message_size: max_message_size
+           max_message_size: max_message_size,
+           buffer: <<>>
          }}
 
       {:error, reason} ->
@@ -106,9 +107,12 @@ defmodule HL7v2.MLLP.Client do
 
     case transport_send(transport, socket, framed) do
       :ok ->
-        case recv_response(transport, socket, timeout, state.max_message_size) do
-          {:ok, response} -> {:reply, {:ok, response}, state}
-          {:error, reason} -> {:reply, {:error, reason}, state}
+        case recv_response(transport, socket, state.buffer, timeout, state.max_message_size) do
+          {:ok, response, remaining} ->
+            {:reply, {:ok, response}, %{state | buffer: remaining}}
+
+          {:error, reason} ->
+            {:reply, {:error, reason}, state}
         end
 
       {:error, reason} ->
@@ -150,8 +154,15 @@ defmodule HL7v2.MLLP.Client do
   defp transport_close(:tcp, socket), do: :gen_tcp.close(socket)
   defp transport_close(:ssl, socket), do: :ssl.close(socket)
 
-  defp recv_response(transport, socket, timeout, max_message_size) do
-    recv_loop(transport, socket, <<>>, timeout, max_message_size)
+  defp recv_response(transport, socket, initial_buffer, timeout, max_message_size) do
+    # Check if the buffer already contains a complete message from a previous call
+    case HL7v2.MLLP.extract_messages(initial_buffer) do
+      {[message | _], remaining} ->
+        {:ok, message, remaining}
+
+      _ ->
+        recv_loop(transport, socket, initial_buffer, timeout, max_message_size)
+    end
   end
 
   defp recv_loop(transport, socket, buffer, timeout, max_message_size) do
@@ -163,18 +174,8 @@ defmodule HL7v2.MLLP.Client do
           {:error, :message_too_large}
         else
           case HL7v2.MLLP.extract_messages(new_buffer) do
-            {[message], _remaining} ->
-              {:ok, message}
-
-            {[message | extra], _remaining} ->
-              require Logger
-
-              Logger.warning(
-                "MLLP client received #{1 + length(extra)} frames in one response, " <>
-                  "returning first and discarding #{length(extra)} extra"
-              )
-
-              {:ok, message}
+            {[message | _], remaining} ->
+              {:ok, message, remaining}
 
             {[], _remaining} ->
               recv_loop(transport, socket, new_buffer, timeout, max_message_size)
