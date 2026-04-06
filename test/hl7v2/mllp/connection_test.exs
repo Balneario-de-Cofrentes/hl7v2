@@ -134,7 +134,8 @@ defmodule HL7v2.MLLP.ConnectionTest do
       :gen_tcp.close(socket)
 
       assert_receive {^ref, [:hl7v2, :mllp, :message, :exception], %{duration: _},
-                      %{kind: :error, reason: :test_error}}, 500
+                      %{kind: :error, reason: :test_error}},
+                     500
     end
 
     test "emits message exception event on handler raise", %{port: port, ref: ref} do
@@ -148,7 +149,8 @@ defmodule HL7v2.MLLP.ConnectionTest do
                         kind: :error,
                         reason: {:handler_crash, {%RuntimeError{}, _}},
                         stacktrace: _
-                      }}, 500
+                      }},
+                     500
     end
   end
 
