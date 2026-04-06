@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.8.2 — 2026-04-06
+
+### Fixes
+
+- **Flaky MLLP test** — increased sleep and assert_receive timeouts for telemetry
+  exception events (was timing-sensitive under CI load)
+- **TQ moduledoc** — removed stale "RI/OSD preserved as raw strings" (now typed)
+- **SCD/SDD moduledoc** — removed contradictory "per HL7 v2.5.1 specification"
+
 ## v2.8.1 — 2026-04-06
 
 ### Fixes
