@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.8.1 — 2026-04-06
+
+### Fixes
+
+- **RPT data loss** — all 10 v2.5.1 components now parsed and encoded (was 6,
+  silently dropping components 7-10)
+- **TQ depth** — `interval` parsed as RI struct, `order_sequencing` as OSD struct
+  (were raw strings despite typed modules existing)
+- **Stale moduledocs** — IN2, SCD, SDD corrected
+
+## v2.8.0 — 2026-04-06
+
+### Full Conformance Expansion
+
+- **189 HL7 tables** (was 108) — coded-value tables across all v2.5.1 domains
+- **255 field bindings** (was 80) — 100% of ID-typed fields bound to tables
+- **23/23 conditional rules** — all segments with `:c` fields have enforcement
+- **18 conformance fixtures** — end-to-end round-trip + validation per family
+- **222 message structures** (186/186 official v2.5.1 + aliases)
+
 ## v2.7.1 — 2026-03-27
 
 ### Fixes
