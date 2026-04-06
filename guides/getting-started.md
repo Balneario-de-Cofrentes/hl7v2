@@ -7,7 +7,7 @@ Add `hl7v2` to your dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:hl7v2, "~> 2.8"}
+    {:hl7v2, "~> 2.9"}
   ]
 end
 ```
