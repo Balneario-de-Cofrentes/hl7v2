@@ -54,8 +54,12 @@ defmodule HL7v2.Access do
   @spec get(TypedMessage.t(), binary() | Path.t()) :: term()
   def get(%TypedMessage{} = msg, %Path{} = path) do
     case resolve(msg, path_to_map(path)) do
-      sentinel when sentinel in [:invalid_repetition, :invalid_component, :repetition_out_of_range] -> nil
-      value -> value
+      sentinel
+      when sentinel in [:invalid_repetition, :invalid_component, :repetition_out_of_range] ->
+        nil
+
+      value ->
+        value
     end
   end
 
@@ -63,8 +67,12 @@ defmodule HL7v2.Access do
     case parse_path(path) do
       {:ok, parsed} ->
         case resolve(msg, parsed) do
-          sentinel when sentinel in [:invalid_repetition, :invalid_component, :repetition_out_of_range] -> nil
-          value -> value
+          sentinel
+          when sentinel in [:invalid_repetition, :invalid_component, :repetition_out_of_range] ->
+            nil
+
+          value ->
+            value
         end
 
       {:error, _} ->

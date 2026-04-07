@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.9.1 — 2026-04-07
+
+### Fixes
+
+- **MLLP client frame buffering** — leftover frames from multi-frame responses
+  are now buffered in GenServer state and consumed on the next `send_message`
+  call (was silently discarding extra frames)
+- **fetch/2 out-of-range repetitions** — `PID-3[3]` with only 2 reps now returns
+  `{:error, :repetition_out_of_range}` instead of `{:ok, nil}`
+
 ## v2.9.0 — 2026-04-07
 
 ### Generated Reference Docs + Structure Proof
