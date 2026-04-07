@@ -1139,6 +1139,96 @@ defmodule HL7v2.ValidationTest do
       cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
       assert cond_errors == []
     end
+
+    # -- PV2 conditional rules --
+
+    test "PV2: warns when discharge date set but disposition missing" do
+      pv2 = %HL7v2.Segment.PV2{
+        expected_discharge_date_time: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 10}
+        },
+        expected_discharge_disposition: nil
+      }
+
+      errors = FieldRules.check(pv2, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :expected_discharge_disposition and err.level == :warning
+             end)
+    end
+
+    test "PV2: no conditional warning when both discharge date and disposition present" do
+      pv2 = %HL7v2.Segment.PV2{
+        expected_discharge_date_time: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 10}
+        },
+        expected_discharge_disposition: "01"
+      }
+
+      errors = FieldRules.check(pv2)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "PV2: no conditional warning when discharge date not set" do
+      pv2 = %HL7v2.Segment.PV2{}
+
+      errors = FieldRules.check(pv2)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "PV2: strict mode produces error" do
+      pv2 = %HL7v2.Segment.PV2{
+        expected_discharge_date_time: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 10}
+        },
+        expected_discharge_disposition: nil
+      }
+
+      errors = FieldRules.check(pv2, mode: :strict)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :expected_discharge_disposition and err.level == :error
+             end)
+    end
+
+    # -- QAK conditional rules --
+
+    test "QAK: warns when query_tag present but query_response_status missing" do
+      qak = %HL7v2.Segment.QAK{
+        query_tag: "QRY001",
+        query_response_status: nil
+      }
+
+      errors = FieldRules.check(qak, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :query_response_status and err.level == :warning
+             end)
+    end
+
+    test "QAK: no conditional warning when both query_tag and status present" do
+      qak = %HL7v2.Segment.QAK{
+        query_tag: "QRY001",
+        query_response_status: "OK"
+      }
+
+      errors = FieldRules.check(qak)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
+
+    test "QAK: no conditional warning when query_tag is absent" do
+      qak = %HL7v2.Segment.QAK{}
+
+      errors = FieldRules.check(qak)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+      assert cond_errors == []
+    end
   end
 
   # -- Helpers --

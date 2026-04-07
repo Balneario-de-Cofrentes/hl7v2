@@ -157,8 +157,8 @@ defmodule HL7v2.MLLP.Client do
   defp recv_response(transport, socket, initial_buffer, timeout, max_message_size) do
     # Check if the buffer already contains a complete message from a previous call
     case HL7v2.MLLP.extract_messages(initial_buffer) do
-      {[message | _], remaining} ->
-        {:ok, message, remaining}
+      {[message | rest], remaining} ->
+        {:ok, message, rebuffer(rest, remaining)}
 
       _ ->
         recv_loop(transport, socket, initial_buffer, timeout, max_message_size)
@@ -174,8 +174,8 @@ defmodule HL7v2.MLLP.Client do
           {:error, :message_too_large}
         else
           case HL7v2.MLLP.extract_messages(new_buffer) do
-            {[message | _], remaining} ->
-              {:ok, message, remaining}
+            {[message | rest], remaining} ->
+              {:ok, message, rebuffer(rest, remaining)}
 
             {[], _remaining} ->
               recv_loop(transport, socket, new_buffer, timeout, max_message_size)
@@ -198,4 +198,13 @@ defmodule HL7v2.MLLP.Client do
   defp host_to_charlist(host) when is_binary(host), do: String.to_charlist(host)
   defp host_to_charlist(host) when is_list(host), do: host
   defp host_to_charlist(host) when is_atom(host), do: Atom.to_charlist(host)
+
+  # Re-frame unconsumed extracted messages back into the raw buffer so they
+  # are available on the next send_message call.
+  defp rebuffer([], remaining), do: remaining
+
+  defp rebuffer(extra_messages, remaining) do
+    reframed = extra_messages |> Enum.map(&HL7v2.MLLP.frame/1) |> IO.iodata_to_binary()
+    <<reframed::binary, remaining::binary>>
+  end
 end

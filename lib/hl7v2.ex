@@ -41,7 +41,8 @@ defmodule HL7v2 do
   ## Options
 
   - `:mode` — `:raw` (default) or `:typed`
-  - `:validate` — `true` to validate after parsing (default `false`)
+  - `:validate` — `true` to validate after parsing (default `false`).
+    Requires `mode: :typed`; silently ignored in `:raw` mode.
   - `:copy` — `true` to copy all parsed binaries (prevents GC reference to original
     message binary). Use when storing parsed messages long-term. Default `false`.
 

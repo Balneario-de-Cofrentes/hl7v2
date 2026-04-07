@@ -301,7 +301,8 @@ defmodule HL7v2.Access do
   defp select_component(value, nil), do: value
 
   defp select_component(values, comp) when is_list(values) do
-    Enum.map(values, &select_component(&1, comp))
+    results = Enum.map(values, &select_component(&1, comp))
+    if Enum.all?(results, &(&1 == :invalid_component)), do: :invalid_component, else: results
   end
 
   defp select_component(value, comp) when is_struct(value) do
@@ -311,7 +312,7 @@ defmodule HL7v2.Access do
         |> Enum.map(& &1.field)
 
       case Enum.at(ordered_keys, comp - 1) do
-        nil -> nil
+        nil -> :invalid_component
         key -> Map.get(value, key)
       end
     else

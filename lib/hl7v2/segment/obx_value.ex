@@ -44,7 +44,16 @@ defmodule HL7v2.Segment.OBXValue do
     "TN" => HL7v2.Type.TN,
     "SN" => HL7v2.Type.SN,
     "ED" => HL7v2.Type.ED,
-    "RP" => HL7v2.Type.RP
+    "RP" => HL7v2.Type.RP,
+    # Table 0125 types with existing type modules
+    "AD" => HL7v2.Type.AD,
+    "MA" => HL7v2.Type.MA,
+    "NA" => HL7v2.Type.NA,
+    "NDL" => HL7v2.Type.NDL,
+    "PL" => HL7v2.Type.PL,
+    "PPN" => HL7v2.Type.PPN,
+    "SPS" => HL7v2.Type.SPS,
+    "VR" => HL7v2.Type.VR
   }
 
   @doc """

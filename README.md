@@ -179,7 +179,7 @@ Validation is opt-in (`HL7v2.validate/2`) and layered:
  Structural  positional order/group/cardinality for all 186 official structures
  Fields      required-field checks, bounded repetition enforcement
  Tables      189 HL7 coded-value tables, 255 field bindings (opt-in: validate_tables: true)
- Conditional 23 segment-specific inter-field rules (all segments with :c fields)
+ Conditional 25 segment-specific inter-field rules (all segments with :c fields)
 ```
 
 ### Transport

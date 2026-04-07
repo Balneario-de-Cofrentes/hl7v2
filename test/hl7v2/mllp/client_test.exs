@@ -97,20 +97,21 @@ defmodule HL7v2.MLLP.ClientTest do
   end
 
   test "recv error when server closes during receive", %{port: _port} do
-    # Start a listener with a very short timeout so it closes connections quickly
+    # Start a listener with a very short timeout so it closes connections quickly.
+    # Use 1ms timeout + 300ms wait for a 300x margin to eliminate flake.
     {:ok, short_listener} =
       Listener.start_link(
         port: 0,
         handler: HL7v2.Test.EchoHandler,
-        timeout: 50
+        timeout: 1
       )
 
     short_port = Listener.port(short_listener)
 
     {:ok, client} = Client.start_link(host: "127.0.0.1", port: short_port)
 
-    # Wait for the server-side timeout to close the connection
-    Process.sleep(100)
+    # Wait well past server timeout for TCP close to propagate
+    Process.sleep(300)
 
     # Sending after server closed should return an error
     result = Client.send_message(client, "test")
@@ -118,5 +119,49 @@ defmodule HL7v2.MLLP.ClientTest do
 
     Client.close(client)
     Listener.stop(short_listener)
+  end
+
+  test "multi-frame: extra frames in one TCP payload are not lost", %{port: _port} do
+    # Stand up a raw TCP server that sends two MLLP frames in a single write
+    # in response to each client request.
+    {:ok, listen} = :gen_tcp.listen(0, [:binary, active: false, reuseaddr: true])
+    {:ok, tcp_port} = :inet.port(listen)
+
+    spawn_link(fn ->
+      {:ok, sock} = :gen_tcp.accept(listen, 5_000)
+
+      # Read two requests, each time replying with two MLLP frames in one write
+      for _ <- 1..2 do
+        {:ok, _data} = recv_mllp_frame(sock)
+        ack1 = HL7v2.MLLP.frame("ACK1")
+        ack2 = HL7v2.MLLP.frame("ACK2")
+        :ok = :gen_tcp.send(sock, <<ack1::binary, ack2::binary>>)
+      end
+
+      :gen_tcp.close(sock)
+    end)
+
+    # Connect — this triggers the accept in the spawned process
+    {:ok, client} = Client.start_link(host: "127.0.0.1", port: tcp_port)
+
+    # First send_message should get ACK1 from the first two-frame response
+    assert {:ok, "ACK1"} = Client.send_message(client, "req1")
+
+    # Second send_message should consume the buffered ACK2 (from first response)
+    assert {:ok, "ACK2"} = Client.send_message(client, "req2")
+
+    Client.close(client)
+    :gen_tcp.close(listen)
+  end
+
+  # Helper: read one complete MLLP frame from a raw TCP socket
+  defp recv_mllp_frame(sock, buf \\ <<>>) do
+    {:ok, data} = :gen_tcp.recv(sock, 0, 5_000)
+    buf = <<buf::binary, data::binary>>
+
+    case HL7v2.MLLP.extract_messages(buf) do
+      {[msg | _], _} -> {:ok, msg}
+      _ -> recv_mllp_frame(sock, buf)
+    end
   end
 end

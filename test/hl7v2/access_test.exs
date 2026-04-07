@@ -130,7 +130,7 @@ defmodule HL7v2.AccessTest do
       assert Access.get(msg, "PV1-3.3") == "1"
     end
 
-    test "out-of-range component returns nil", %{msg: msg} do
+    test "out-of-range component returns nil via get", %{msg: msg} do
       assert Access.get(msg, "MSH-9.99") == nil
     end
   end
@@ -200,6 +200,15 @@ defmodule HL7v2.AccessTest do
     test "HL7v2.fetch/2 delegation works", %{msg: msg} do
       assert {:ok, _} = HL7v2.fetch(msg, "PID")
       assert {:error, :segment_not_found} = HL7v2.fetch(msg, "ZZZ")
+    end
+
+    test "fetch/2 returns error for out-of-range component on composite", %{msg: msg} do
+      assert {:error, :invalid_component} = Access.fetch(msg, "MSH-9.99")
+    end
+
+    test "fetch/2 returns error for out-of-range component with wildcard repetition", %{msg: msg} do
+      # PID-3 is repeating CX — component 99 doesn't exist
+      assert {:error, :invalid_component} = Access.fetch(msg, "PID-3.99[*]")
     end
   end
 

@@ -238,6 +238,17 @@ defmodule HL7v2.Segment.OBXValueTest do
       assert OBXValue.type_for("RP") == HL7v2.Type.RP
     end
 
+    test "returns module for expanded Table 0125 types" do
+      assert OBXValue.type_for("AD") == HL7v2.Type.AD
+      assert OBXValue.type_for("MA") == HL7v2.Type.MA
+      assert OBXValue.type_for("NA") == HL7v2.Type.NA
+      assert OBXValue.type_for("NDL") == HL7v2.Type.NDL
+      assert OBXValue.type_for("PL") == HL7v2.Type.PL
+      assert OBXValue.type_for("PPN") == HL7v2.Type.PPN
+      assert OBXValue.type_for("SPS") == HL7v2.Type.SPS
+      assert OBXValue.type_for("VR") == HL7v2.Type.VR
+    end
+
     test "returns nil for unknown types" do
       assert OBXValue.type_for("FAKE") == nil
     end
@@ -259,6 +270,11 @@ defmodule HL7v2.Segment.OBXValueTest do
       assert "SN" in types
       assert "ED" in types
       assert "RP" in types
+    end
+
+    test "includes expanded Table 0125 types" do
+      types = OBXValue.known_types()
+      for code <- ~w(AD MA NA NDL PL PPN SPS VR), do: assert(code in types)
     end
 
     test "does not include unknown types" do

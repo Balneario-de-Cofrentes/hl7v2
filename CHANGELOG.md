@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.10.0 — 2026-04-07
+
+### Fixes
+
+- **MLLP client multi-frame safety** — extra complete frames in a single TCP
+  read are now re-framed back into the buffer instead of silently dropped;
+  previous fix only preserved partial-frame remainders
+- **fetch/2 component out-of-range on composites** — `MSH-9.99` and
+  `PID-3.99[*]` now return `{:error, :invalid_component}` instead of
+  `{:ok, nil}` or `{:ok, [nil, nil]}`
+- **Flaky MLLP client test** — server-close test uses 1ms timeout + 300ms
+  margin (was 50ms/100ms race)
+- **parse/2 docs** — `validate: true` now documented as typed-mode only
+
+### Added
+
+- **8 new OBX-5 value types** — AD, MA, NA, NDL, PL, PPN, SPS, VR added to
+  the dispatch map (41 types total, up from 33)
+- **PV2 conditional rule** — warns when `expected_discharge_date_time` is set
+  without `expected_discharge_disposition`
+- **QAK conditional rule** — warns when `query_tag` is present without
+  `query_response_status`
+
+### Stats
+
+3,875 tests (472 doctests + 32 properties + 3,371 tests), 0 failures
+
 ## v2.9.1 — 2026-04-07
 
 ### Fixes

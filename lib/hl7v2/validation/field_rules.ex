@@ -909,11 +909,49 @@ defmodule HL7v2.Validation.FieldRules do
     end
   end
 
-  # PV2: prior_pending_location conditional on transfer events
-  def conditional_errors(%HL7v2.Segment.PV2{} = _pv2, _location, _mode), do: []
+  # PV2: expected_discharge_disposition (PV2-27) should be populated when
+  # expected_discharge_date_time (PV2-9) is set.
+  # Note: prior_pending_location (PV2-1) is conditional on transfer event context,
+  # which requires message-level trigger event — not available at segment scope.
+  def conditional_errors(%HL7v2.Segment.PV2{} = pv2, location, mode) do
+    cond_level = if mode == :strict, do: :error, else: :warning
 
-  # QAK: query_tag conditional — should match original query tag
-  def conditional_errors(%HL7v2.Segment.QAK{} = _qak, _location, _mode), do: []
+    if not semantic_blank?(pv2.expected_discharge_date_time) and
+         semantic_blank?(pv2.expected_discharge_disposition) do
+      [
+        %{
+          level: cond_level,
+          location: location,
+          field: :expected_discharge_disposition,
+          message:
+            "conditional field expected_discharge_disposition should be populated when expected_discharge_date_time is set"
+        }
+      ]
+    else
+      []
+    end
+  end
+
+  # QAK: query_response_status (QAK-2) should be populated when query_tag (QAK-1) is present.
+  # Note: query_tag should also match the original query's QPD-2, but that requires
+  # cross-segment context not available at segment scope.
+  def conditional_errors(%HL7v2.Segment.QAK{} = qak, location, mode) do
+    cond_level = if mode == :strict, do: :error, else: :warning
+
+    if not semantic_blank?(qak.query_tag) and semantic_blank?(qak.query_response_status) do
+      [
+        %{
+          level: cond_level,
+          location: location,
+          field: :query_response_status,
+          message:
+            "conditional field query_response_status should be populated when query_tag is present"
+        }
+      ]
+    else
+      []
+    end
+  end
 
   # MFE/MFA: mfn_control_id conditional on master file operations
   def conditional_errors(%mod{} = seg, location, mode)
