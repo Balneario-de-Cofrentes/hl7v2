@@ -132,27 +132,37 @@ defmodule HL7v2.Conformance.Fixtures do
   Compares the compile-time-frozen fixture list against the current on-disk
   state of the fixture directory.
 
-  Returns `:ok` if they match, or `{:stale, [on_disk_only]: [...], [frozen_only]: [...]}`
+  Returns `:ok` if they match, or `{:stale, on_disk_only: [...], frozen_only: [...]}`
   when a mismatch is detected. Useful for dev/test guards to catch
   compile-time-frozen snapshots that lag the on-disk corpus after a file
   was added or removed without recompiling this module.
 
-  Note: this touches the filesystem and is **not** safe to rely on inside
-  installed Hex artifacts where the fixture directory may not be present.
+  Accepts options for dependency injection in tests:
+
+  - `:dir` — override the directory to compare against (default: compile-time
+    `@fixture_dir`)
+  - `:frozen` — override the frozen list (default: compile-time `@fixtures`)
+
+  Note: when called without options, this touches the filesystem and returns
+  `:ok` if the fixture directory is not accessible (installed Hex artifact
+  case with no corpus shipped).
   """
-  @spec check_freshness() :: :ok | {:stale, keyword()}
-  def check_freshness do
-    case File.ls(@fixture_dir) do
+  @spec check_freshness(keyword()) :: :ok | {:stale, keyword()}
+  def check_freshness(opts \\ []) do
+    dir = Keyword.get(opts, :dir, @fixture_dir)
+    frozen = Keyword.get(opts, :frozen, @fixtures)
+
+    case File.ls(dir) do
       {:ok, entries} ->
         on_disk =
           entries
           |> Enum.filter(&String.ends_with?(&1, ".hl7"))
           |> MapSet.new()
 
-        frozen = MapSet.new(@fixtures)
+        frozen_set = MapSet.new(frozen)
 
-        on_disk_only = MapSet.difference(on_disk, frozen) |> MapSet.to_list() |> Enum.sort()
-        frozen_only = MapSet.difference(frozen, on_disk) |> MapSet.to_list() |> Enum.sort()
+        on_disk_only = MapSet.difference(on_disk, frozen_set) |> MapSet.to_list() |> Enum.sort()
+        frozen_only = MapSet.difference(frozen_set, on_disk) |> MapSet.to_list() |> Enum.sort()
 
         if on_disk_only == [] and frozen_only == [] do
           :ok
@@ -161,8 +171,8 @@ defmodule HL7v2.Conformance.Fixtures do
         end
 
       _ ->
-        # Fixture dir not accessible (e.g. installed Hex artifact) — nothing
-        # to compare against, so treat as fresh.
+        # Fixture dir not accessible (e.g. installed Hex artifact with no
+        # corpus shipped) — nothing to compare against, so treat as fresh.
         :ok
     end
   end

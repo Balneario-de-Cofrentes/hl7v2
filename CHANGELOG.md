@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.3.3 — 2026-04-08
+
+### Fixes
+
+- **Fixture corpus now ships in the Hex package** — `test/fixtures/conformance`
+  is included in `files:`, so installed artifacts compile against the same
+  110 .hl7 fixtures as the source tree and report identical counts.
+  Verified via `mix hex.build` (110 conformance fixtures present in the
+  tarball). Previously, an installed user's
+  `HL7v2.Conformance.Fixtures.coverage()` returned `%{files: 0, canonical: 0}`
+  while README claimed parity.
+- **`guides/getting-started.md`** — install snippet bumped from `~> 2.9` to
+  `~> 3.0`.
+- **`check_freshness/1`** is now **testable** via `:dir` and `:frozen`
+  keyword options. Automated stale-case tests cover: matching dir+frozen,
+  on-disk additions, frozen removals, simultaneous drift, non-.hl7 filtering,
+  and missing-dir (installed Hex artifact case).
+- **Strict-clean suite freshness guard** now delegates to
+  `Fixtures.check_freshness/1` instead of reimplementing the comparison —
+  regressions in the helper fail the guard.
+
+### Stats
+
+4,671 tests (472 doctests + 32 properties + 4,167 tests), 0 failures
+
 ## v3.3.2 — 2026-04-08
 
 ### Fixes

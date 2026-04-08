@@ -65,9 +65,62 @@ defmodule HL7v2.Conformance.FixturesTest do
     end
   end
 
-  describe "check_freshness/0" do
-    test "returns :ok when compile-time snapshot matches on-disk fixtures" do
+  describe "check_freshness/1" do
+    setup do
+      # Use a temp dir with injected fixture list for isolated stale-case tests
+      tmp = System.tmp_dir!() |> Path.join("hl7v2_freshness_test_#{:rand.uniform(1_000_000)}")
+      File.mkdir_p!(tmp)
+      on_exit(fn -> File.rm_rf!(tmp) end)
+      %{tmp: tmp}
+    end
+
+    test "returns :ok when compile-time snapshot matches live on-disk state" do
       assert Fixtures.check_freshness() == :ok
+    end
+
+    test "returns :ok when dir + frozen list match exactly", %{tmp: tmp} do
+      File.write!(Path.join(tmp, "a.hl7"), "")
+      File.write!(Path.join(tmp, "b.hl7"), "")
+
+      assert Fixtures.check_freshness(dir: tmp, frozen: ["a.hl7", "b.hl7"]) == :ok
+    end
+
+    test "flags files that exist on disk but not in frozen list", %{tmp: tmp} do
+      File.write!(Path.join(tmp, "a.hl7"), "")
+      File.write!(Path.join(tmp, "new.hl7"), "")
+
+      assert {:stale, on_disk_only: ["new.hl7"], frozen_only: []} =
+               Fixtures.check_freshness(dir: tmp, frozen: ["a.hl7"])
+    end
+
+    test "flags files that exist in frozen list but not on disk", %{tmp: tmp} do
+      File.write!(Path.join(tmp, "a.hl7"), "")
+
+      assert {:stale, on_disk_only: [], frozen_only: ["removed.hl7"]} =
+               Fixtures.check_freshness(dir: tmp, frozen: ["a.hl7", "removed.hl7"])
+    end
+
+    test "flags both additions and removals simultaneously", %{tmp: tmp} do
+      File.write!(Path.join(tmp, "kept.hl7"), "")
+      File.write!(Path.join(tmp, "added.hl7"), "")
+
+      assert {:stale, on_disk_only: ["added.hl7"], frozen_only: ["gone.hl7"]} =
+               Fixtures.check_freshness(dir: tmp, frozen: ["kept.hl7", "gone.hl7"])
+    end
+
+    test "ignores non-.hl7 files on disk", %{tmp: tmp} do
+      File.write!(Path.join(tmp, "a.hl7"), "")
+      File.write!(Path.join(tmp, "README.md"), "")
+      File.write!(Path.join(tmp, "notes.txt"), "")
+
+      assert Fixtures.check_freshness(dir: tmp, frozen: ["a.hl7"]) == :ok
+    end
+
+    test "returns :ok when dir is missing (installed Hex artifact case)" do
+      missing = System.tmp_dir!() |> Path.join("does_not_exist_#{:rand.uniform(1_000_000)}")
+      refute File.exists?(missing)
+
+      assert Fixtures.check_freshness(dir: missing, frozen: ["a.hl7"]) == :ok
     end
   end
 

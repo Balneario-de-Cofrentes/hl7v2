@@ -1,7 +1,7 @@
 defmodule HL7v2.MixProject do
   use Mix.Project
 
-  @version "3.3.2"
+  @version "3.3.3"
   @source_url "https://github.com/Balneario-de-Cofrentes/hl7v2"
 
   def project do
@@ -53,7 +53,8 @@ defmodule HL7v2.MixProject do
         "Docs" => "https://hexdocs.pm/hl7v2",
         "Changelog" => "#{@source_url}/blob/main/CHANGELOG.md"
       },
-      files: ~w(lib .formatter.exs mix.exs README.md LICENSE CHANGELOG.md guides docs/reference)
+      files:
+        ~w(lib .formatter.exs mix.exs README.md LICENSE CHANGELOG.md guides docs/reference test/fixtures/conformance)
     ]
   end
 

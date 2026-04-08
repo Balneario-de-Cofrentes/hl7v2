@@ -533,27 +533,19 @@ defmodule HL7v2.Conformance.RoundTripTest do
     end
 
     test "compile-time frozen corpus stays in sync with on-disk fixtures" do
-      frozen =
-        HL7v2.Conformance.Fixtures.list_fixtures()
-        |> MapSet.new()
+      # Delegate to the canonical helper so a regression in Fixtures.check_freshness/1
+      # is caught here instead of at a parallel reimplementation.
+      case HL7v2.Conformance.Fixtures.check_freshness() do
+        :ok ->
+          :ok
 
-      on_disk =
-        @fixture_dir
-        |> File.ls!()
-        |> Enum.filter(&String.ends_with?(&1, ".hl7"))
-        |> MapSet.new()
-
-      missing_from_frozen = MapSet.difference(on_disk, frozen)
-      extra_in_frozen = MapSet.difference(frozen, on_disk)
-
-      assert MapSet.size(missing_from_frozen) == 0,
-             "fixtures on disk but missing from compile-time frozen list " <>
-               "(recompile HL7v2.Conformance.Fixtures): " <>
-               "#{inspect(MapSet.to_list(missing_from_frozen))}"
-
-      assert MapSet.size(extra_in_frozen) == 0,
-             "fixtures in frozen list but missing from disk: " <>
-               "#{inspect(MapSet.to_list(extra_in_frozen))}"
+        {:stale, on_disk_only: on_disk_only, frozen_only: frozen_only} ->
+          flunk(
+            "compile-time frozen corpus drifted from on-disk fixtures " <>
+              "(recompile HL7v2.Conformance.Fixtures): " <>
+              "on_disk_only=#{inspect(on_disk_only)} frozen_only=#{inspect(frozen_only)}"
+          )
+      end
     end
   end
 
