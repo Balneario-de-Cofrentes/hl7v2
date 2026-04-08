@@ -1,0 +1,6 @@
+MSH|^~\&|REG|HOSP|MPI|HOSP|20260408210000||MFN^M01^MFN_M01|MSG042|P|2.5.1
+MFI|CDM^Charge Description Master^HL70175||UPD|||AL
+MFE|MAD|MFE001||CHG001^IV Start^LOCAL|CE
+NTE|1||New charge code for IV start procedure
+MFE|MAD|MFE002||CHG002^IV Maintenance^LOCAL|CE
+NTE|1||New charge code for IV maintenance

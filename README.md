@@ -204,11 +204,13 @@ and dispatched at runtime via OBX-2 (41 value types supported). QPD-3 (user para
 and RDT-1 (column value) are query-specific and cannot be statically typed. These are
 the three remaining standard gaps in the typed coverage model.
 
-**Conditional validation is segment-local.** The 25 conditional rules approximate HL7
-inter-field conditions without access to the message trigger event. Rules that depend
-on trigger context (e.g., PV2 transfer events, AIS/AIG modification events) use
-heuristic checks and emit warnings rather than errors. Pass `mode: :strict` for
-error-level enforcement.
+**Conditional validation is mostly segment-local.** The 25 conditional rules check HL7
+inter-field dependencies. Scheduling segments (AIS, AIG, AIL, AIP, RGS) and PV2
+transfer rules are trigger-aware: when the message trigger event is available (extracted
+from MSH-9), modification triggers (S03-S11) and transfer triggers (A02, A06, A07, etc.)
+produce definitive checks instead of heuristic warnings. Without trigger context
+(e.g., when calling `conditional_errors/3` directly), the original heuristic fallback
+is preserved. Pass `mode: :strict` for error-level enforcement.
 
 - Every v2.5.1 segment and data type has a typed Elixir module
 - Raw mode is lossless after successful MSH/separator detection

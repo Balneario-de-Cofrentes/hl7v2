@@ -1229,6 +1229,204 @@ defmodule HL7v2.ValidationTest do
       cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
       assert cond_errors == []
     end
+
+    # -- Trigger-aware AIS conditional rules --
+
+    test "AIS: warns when trigger is a modification event and segment_action_code is blank" do
+      ais = %HL7v2.Segment.AIS{
+        set_id: "1",
+        universal_service_identifier: %HL7v2.Type.CE{identifier: "CONSULT"},
+        segment_action_code: nil
+      }
+
+      errors = FieldRules.check(ais, mode: :lenient, context: %{trigger_event: "S03"})
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :segment_action_code and err.level == :warning and
+                 err.message =~ "required for modification event S03"
+             end)
+    end
+
+    test "AIS: errors in strict mode when trigger is a modification event and segment_action_code is blank" do
+      ais = %HL7v2.Segment.AIS{
+        set_id: "1",
+        universal_service_identifier: %HL7v2.Type.CE{identifier: "CONSULT"},
+        segment_action_code: nil
+      }
+
+      errors = FieldRules.check(ais, mode: :strict, context: %{trigger_event: "S07"})
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :segment_action_code and err.level == :error and
+                 err.message =~ "required for modification event S07"
+             end)
+    end
+
+    test "AIS: no warning when trigger is NOT a modification event" do
+      ais = %HL7v2.Segment.AIS{
+        set_id: "1",
+        universal_service_identifier: %HL7v2.Type.CE{identifier: "CONSULT"},
+        start_date_time: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 8}
+        },
+        segment_action_code: nil
+      }
+
+      # S12 is a new appointment notification, not a modification
+      errors = FieldRules.check(ais, mode: :lenient, context: %{trigger_event: "S12"})
+      cond_errors = Enum.filter(errors, &(&1.message =~ "segment_action_code"))
+      assert cond_errors == []
+    end
+
+    test "AIS: no warning when trigger is modification but segment_action_code is populated" do
+      ais = %HL7v2.Segment.AIS{
+        set_id: "1",
+        universal_service_identifier: %HL7v2.Type.CE{identifier: "CONSULT"},
+        segment_action_code: "U"
+      }
+
+      errors = FieldRules.check(ais, mode: :strict, context: %{trigger_event: "S03"})
+      cond_errors = Enum.filter(errors, &(&1.message =~ "segment_action_code"))
+      assert cond_errors == []
+    end
+
+    test "AIS: falls back to heuristic when no trigger context provided" do
+      ais = %HL7v2.Segment.AIS{
+        set_id: "1",
+        universal_service_identifier: %HL7v2.Type.CE{identifier: "CONSULT"},
+        start_date_time: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 8}
+        },
+        segment_action_code: nil
+      }
+
+      errors = FieldRules.check(ais, mode: :lenient)
+      cond_errors = Enum.filter(errors, &(&1.message =~ "may be required"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :segment_action_code and err.level == :warning
+             end)
+    end
+
+    # -- Trigger-aware AIG/AIL/AIP conditional rules --
+
+    test "AIG: warns when trigger is modification event and segment_action_code is blank" do
+      aig = %HL7v2.Segment.AIG{
+        set_id: "1",
+        resource_type: %HL7v2.Type.CE{identifier: "ROOM"},
+        segment_action_code: nil
+      }
+
+      errors = FieldRules.check(aig, mode: :lenient, context: %{trigger_event: "S04"})
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :segment_action_code and err.level == :warning and
+                 err.message =~ "required for modification event S04"
+             end)
+    end
+
+    test "AIG: no warning when trigger is not a modification event" do
+      aig = %HL7v2.Segment.AIG{
+        set_id: "1",
+        resource_type: %HL7v2.Type.CE{identifier: "ROOM"},
+        segment_action_code: nil
+      }
+
+      errors = FieldRules.check(aig, mode: :lenient, context: %{trigger_event: "S12"})
+      cond_errors = Enum.filter(errors, &(&1.message =~ "segment_action_code"))
+      assert cond_errors == []
+    end
+
+    # -- Trigger-aware RGS conditional rules --
+
+    test "RGS: warns when trigger is modification event and segment_action_code is blank" do
+      rgs = %HL7v2.Segment.RGS{
+        set_id: "1",
+        segment_action_code: nil
+      }
+
+      errors = FieldRules.check(rgs, mode: :lenient, context: %{trigger_event: "S05"})
+      cond_errors = Enum.filter(errors, &(&1.message =~ "conditional"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :segment_action_code and err.level == :warning and
+                 err.message =~ "required for modification event S05"
+             end)
+    end
+
+    test "RGS: no warning when trigger is not a modification event" do
+      rgs = %HL7v2.Segment.RGS{
+        set_id: "1",
+        segment_action_code: nil
+      }
+
+      errors = FieldRules.check(rgs, mode: :strict, context: %{trigger_event: "S12"})
+      cond_errors = Enum.filter(errors, &(&1.message =~ "segment_action_code"))
+      assert cond_errors == []
+    end
+
+    # -- Trigger-aware PV2 transfer rules --
+
+    test "PV2: warns when trigger is a transfer event and prior_pending_location is blank" do
+      pv2 = %HL7v2.Segment.PV2{
+        prior_pending_location: nil
+      }
+
+      errors = FieldRules.check(pv2, mode: :lenient, context: %{trigger_event: "A02"})
+      cond_errors = Enum.filter(errors, &(&1.message =~ "prior_pending_location"))
+
+      assert Enum.any?(cond_errors, fn err ->
+               err.field == :prior_pending_location and err.level == :warning and
+                 err.message =~ "transfer event A02"
+             end)
+    end
+
+    test "PV2: warns for other transfer triggers (A06, A07)" do
+      pv2 = %HL7v2.Segment.PV2{prior_pending_location: nil}
+
+      for trigger <- ~w(A06 A07 A12 A15 A25 A26 A27 A28 A31) do
+        errors = FieldRules.check(pv2, mode: :lenient, context: %{trigger_event: trigger})
+
+        assert Enum.any?(errors, fn err ->
+                 err.field == :prior_pending_location and
+                   err.message =~ "transfer event #{trigger}"
+               end),
+               "expected warning for transfer trigger #{trigger}"
+      end
+    end
+
+    test "PV2: no prior_pending_location warning when trigger is not a transfer event" do
+      pv2 = %HL7v2.Segment.PV2{
+        prior_pending_location: nil
+      }
+
+      errors = FieldRules.check(pv2, mode: :lenient, context: %{trigger_event: "A01"})
+      transfer_errors = Enum.filter(errors, &(&1.message =~ "prior_pending_location"))
+      assert transfer_errors == []
+    end
+
+    test "PV2: no prior_pending_location warning when prior_pending_location is populated" do
+      pv2 = %HL7v2.Segment.PV2{
+        prior_pending_location: %HL7v2.Type.PL{point_of_care: "3W"}
+      }
+
+      errors = FieldRules.check(pv2, mode: :lenient, context: %{trigger_event: "A02"})
+      transfer_errors = Enum.filter(errors, &(&1.message =~ "prior_pending_location"))
+      assert transfer_errors == []
+    end
+
+    test "PV2: no prior_pending_location warning without trigger context" do
+      pv2 = %HL7v2.Segment.PV2{
+        prior_pending_location: nil
+      }
+
+      errors = FieldRules.check(pv2, mode: :lenient)
+      transfer_errors = Enum.filter(errors, &(&1.message =~ "prior_pending_location"))
+      assert transfer_errors == []
+    end
   end
 
   # -- Helpers --

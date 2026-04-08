@@ -114,6 +114,62 @@ defmodule HL7v2.Conformance.RoundTripTest do
     test "PMU_B01 (personnel management)" do
       assert_fixture_round_trip("pmu_b01.hl7")
     end
+
+    test "ADT_A08 (update patient)" do
+      assert_fixture_round_trip("adt_a08.hl7")
+    end
+
+    test "ADT_A04 (register patient)" do
+      assert_fixture_round_trip("adt_a04.hl7")
+    end
+
+    test "ADT_A02 (transfer patient)" do
+      assert_fixture_round_trip("adt_a02.hl7")
+    end
+
+    test "ORU_R30 (unsolicited point-of-care observation)" do
+      assert_fixture_round_trip("oru_r30.hl7")
+    end
+
+    test "OML_O21 (laboratory order)" do
+      assert_fixture_round_trip("oml_o21.hl7")
+    end
+
+    test "OMI_O23 (imaging order)" do
+      assert_fixture_round_trip("omi_o23.hl7")
+    end
+
+    test "OMS_O05 (stock requisition order)" do
+      assert_fixture_round_trip("oms_o05.hl7")
+    end
+
+    test "RDS_O13 (pharmacy dispense)" do
+      assert_fixture_round_trip("rds_o13.hl7")
+    end
+
+    test "RAS_O17 (pharmacy administration)" do
+      assert_fixture_round_trip("ras_o17.hl7")
+    end
+
+    test "ORU_R01 multi-OBR (multiple order groups)" do
+      assert_fixture_round_trip("oru_r01_multi.hl7")
+    end
+
+    test "ADT_A17 (swap patients)" do
+      assert_fixture_round_trip("adt_a17.hl7")
+    end
+
+    test "BPS_O29 (blood product order)" do
+      assert_fixture_round_trip("bps_o29.hl7")
+    end
+
+    test "MFN_M01 (master file notification)" do
+      assert_fixture_round_trip("mfn_m01.hl7")
+    end
+
+    test "SIU_S14 (modify appointment)" do
+      assert_fixture_round_trip("siu_s14.hl7")
+    end
   end
 
   describe "non-default delimiters" do

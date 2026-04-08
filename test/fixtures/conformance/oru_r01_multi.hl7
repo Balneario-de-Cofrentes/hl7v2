@@ -1,0 +1,28 @@
+MSH|^~\&|LAB|HOSP|HIS|HOSP|20260408180000||ORU^R01^ORU_R01|MSG039|P|2.5.1
+PID|1||12345^^^MRN^MR||Smith^John||19800315|M
+PV1|1|I|W^389^1
+ORC|RE||ORD801|||||20260408
+OBR|1||ORD801|CBC^Complete Blood Count^LN|||20260408
+OBX|1|NM|WBC^White Blood Cell^LN||7.5|10*3/uL|4.0-11.0|N|||F
+OBX|2|NM|RBC^Red Blood Cell^LN||4.8|10*6/uL|4.2-5.9|N|||F
+OBX|3|NM|HGB^Hemoglobin^LN||14.2|g/dL|12.0-17.0|N|||F
+OBX|4|NM|HCT^Hematocrit^LN||42.1|%|36.0-48.0|N|||F
+OBX|5|NM|PLT^Platelet Count^LN||245|10*3/uL|150-400|N|||F
+NTE|1||Normal CBC results
+ORC|RE||ORD802|||||20260408
+OBR|2||ORD802|BMP^Basic Metabolic Panel^LN|||20260408
+OBX|1|NM|GLU^Glucose^LN||95|mg/dL|70-100|N|||F
+OBX|2|NM|BUN^Blood Urea Nitrogen^LN||15|mg/dL|7-20|N|||F
+OBX|3|NM|CRE^Creatinine^LN||1.0|mg/dL|0.6-1.2|N|||F
+OBX|4|NM|NA^Sodium^LN||140|mmol/L|136-145|N|||F
+OBX|5|NM|K^Potassium^LN||4.2|mmol/L|3.5-5.1|N|||F
+OBX|6|NM|CL^Chloride^LN||102|mmol/L|98-106|N|||F
+OBX|7|NM|CO2^Carbon Dioxide^LN||24|mmol/L|21-32|N|||F
+NTE|1||All values within normal range
+ORC|RE||ORD803|||||20260408
+OBR|3||ORD803|LIP^Lipid Panel^LN|||20260408
+OBX|1|NM|CHOL^Total Cholesterol^LN||210|mg/dL|<200|H|||F
+OBX|2|NM|TRIG^Triglycerides^LN||150|mg/dL|<150|N|||F
+OBX|3|NM|HDL^HDL Cholesterol^LN||55|mg/dL|>40|N|||F
+OBX|4|NM|LDL^LDL Cholesterol^LN||125|mg/dL|<100|H|||F
+NTE|1||Total cholesterol and LDL mildly elevated

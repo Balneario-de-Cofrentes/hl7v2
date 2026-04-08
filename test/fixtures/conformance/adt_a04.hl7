@@ -1,0 +1,8 @@
+MSH|^~\&|ADM|HOSP|LAB|LAB|20260408100000||ADT^A04^ADT_A01|MSG031|P|2.5.1
+EVN|A04|20260408100000
+PID|1||54321^^^MRN^MR||Chen^Wei^H||19901105|M|||789 Pine Rd^^Portland^OR^97201||555-4321
+NK1|1|Chen^Li|MTH^Mother
+PV1|1|O|ER^101^A|||3456^Patel^Raj|||ER|||A0
+AL1|1||LATEX
+DG1|1||R10.9^Unspecified abdominal pain^I10|||A
+IN1|1|3|UHC^United Healthcare||||||||||20260101

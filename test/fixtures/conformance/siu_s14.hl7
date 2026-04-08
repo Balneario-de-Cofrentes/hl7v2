@@ -1,0 +1,9 @@
+MSH|^~\&|SCH|HOSP|HIS|HOSP|20260408220000||SIU^S14^SIU_S12|MSG043|P|2.5.1
+SCH|2|||||ROUTINE^Routine^HL70276|||60^MIN||Routine^Routine^HL70277|||||7890^Martinez^Ana||||7890^Martinez^Ana
+PID|1||44444^^^MRN^MR||Robinson^David^P||19920811|M
+PV1|1|O
+RGS|1
+AIS|1||99214^Office Visit Level 4^CPT
+NTE|1||Appointment modified from 30 to 60 minutes
+AIG|1|||PROVIDER^Physician^HL70182|||1
+AIL|1||CLINIC^301^A

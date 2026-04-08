@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.0.0 — 2026-04-08
+
+### Breaking
+
+- **MLLP protocol desync is now a fatal error** — `send_message/3` returns
+  `{:error, :protocol_desync}` and closes the connection if any stale bytes
+  (complete or partial frames) are found in the buffer at a send boundary.
+  Previously, complete stale frames were silently discarded and partial bytes
+  were carried forward, potentially corrupting the next response.
+
+### Added
+
+- **Trigger-aware conditional validation** — scheduling segments (AIS, AIG,
+  AIL, AIP, RGS) now check the message trigger event from MSH-9.2. Modification
+  triggers (S03-S11) produce definitive checks; non-modification triggers skip
+  the heuristic. PV2 `prior_pending_location` is validated against transfer
+  triggers (A02, A06, A07, etc.). Without trigger context, the original
+  heuristic fallback is preserved for backwards compatibility.
+- **14 new conformance fixtures** — ADT_A02/A04/A08/A17, ORU_R01 multi-OBR,
+  ORU_R30, OML_O21, OMI_O23, OMS_O05, RDS_O13, RAS_O17, BPS_O29, MFN_M01,
+  SIU_S14. Total: 32 fixture round-trips covering 30% of official structures
+  (up from 17%).
+- **OBX-5 runtime-dispatched** in coverage reporting — `mix hl7v2.coverage`
+  now distinguishes between true raw gaps (QPD-3, RDT-1) and intentionally
+  runtime-typed fields (OBX-5 VARIES via OBXValue dispatch).
+
+### Stats
+
+3,904 tests (472 doctests + 32 properties + 3,400 tests), 0 failures
+
 ## v2.12.0 — 2026-04-08
 
 ### Fixes

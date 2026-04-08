@@ -4,9 +4,18 @@ defmodule HL7v2.Standard.Coverage do
 
   Reports which segments, types, and structures are typed, raw, or unsupported,
   and identifies specific fields that fall back to `:raw` within typed segments.
+
+  Fields listed in `@runtime_dispatched` are intentionally declared as `:raw`
+  because their concrete type is resolved at runtime (e.g. OBX-5 whose type
+  depends on OBX-2 Value Type). These are reported separately from true raw
+  gaps so coverage reports reflect genuine implementation work remaining.
   """
 
   alias HL7v2.Standard
+
+  # Fields intentionally typed as `:raw` because their concrete type is
+  # determined at runtime rather than statically from the segment definition.
+  @runtime_dispatched [{"OBX", :observation_value, 5}]
 
   @doc """
   Returns all typed segment IDs.
@@ -82,10 +91,34 @@ defmodule HL7v2.Standard.Coverage do
 
   @doc """
   Returns specific segment fields that are typed as `:raw` within
-  otherwise typed segments — the "raw holes."
+  otherwise typed segments — true raw gaps that need implementation.
+
+  Fields listed in `@runtime_dispatched` (e.g. OBX-5) are excluded because
+  their `:raw` typing is intentional. Use `runtime_dispatched/0` to inspect those.
   """
   @spec raw_holes() :: [{binary(), atom(), pos_integer()}]
   def raw_holes do
+    all_raw_holes()
+    |> Enum.reject(fn hole -> hole in @runtime_dispatched end)
+  end
+
+  @doc """
+  Returns fields that are intentionally declared as `:raw` because their
+  concrete type is resolved at runtime (e.g. OBX-5 whose type depends on
+  OBX-2 Value Type).
+
+  Only fields present in both `@runtime_dispatched` and the actual segment
+  definitions are returned (i.e. the allowlist is intersected with reality).
+  """
+  @spec runtime_dispatched() :: [{binary(), atom(), pos_integer()}]
+  def runtime_dispatched do
+    all = MapSet.new(all_raw_holes())
+    Enum.filter(@runtime_dispatched, fn entry -> MapSet.member?(all, entry) end)
+  end
+
+  # Returns every `:raw` field across typed segments, without filtering.
+  @spec all_raw_holes() :: [{binary(), atom(), pos_integer()}]
+  defp all_raw_holes do
     Standard.typed_segment_ids()
     |> Enum.flat_map(fn seg_id ->
       module = Standard.segment_module(seg_id)
@@ -113,6 +146,7 @@ defmodule HL7v2.Standard.Coverage do
     typed_typs = typed_types()
     all_typs = Standard.type_codes()
     holes = raw_holes()
+    dispatched = runtime_dispatched()
 
     total_fields =
       typed_segs
@@ -129,7 +163,9 @@ defmodule HL7v2.Standard.Coverage do
       type_coverage_pct: Float.round(length(typed_typs) / length(all_typs) * 100, 1),
       total_typed_fields: total_fields,
       raw_hole_count: length(holes),
-      raw_holes: holes
+      raw_holes: holes,
+      runtime_dispatched_count: length(dispatched),
+      runtime_dispatched: dispatched
     }
   end
 end

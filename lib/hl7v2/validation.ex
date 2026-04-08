@@ -50,7 +50,12 @@ defmodule HL7v2.Validation do
   @spec validate(TypedMessage.t(), keyword()) :: :ok | {:error, [map()]} | {:ok, [map()]}
   def validate(%TypedMessage{} = msg, opts \\ []) do
     mode = Keyword.get(opts, :mode, :lenient)
-    field_opts = Keyword.take(opts, [:validate_tables, :mode]) |> Keyword.put(:mode, mode)
+    context = extract_trigger_context(msg.segments)
+
+    field_opts =
+      Keyword.take(opts, [:validate_tables, :mode])
+      |> Keyword.put(:mode, mode)
+      |> Keyword.put(:context, context)
 
     all =
       MessageRules.check(msg) ++
@@ -109,6 +114,12 @@ defmodule HL7v2.Validation do
 
   defp infer_structure(code, _event) when is_binary(code), do: code
   defp infer_structure(_code, _event), do: nil
+
+  defp extract_trigger_context([%HL7v2.Segment.MSH{message_type: %HL7v2.Type.MSG{} = msg} | _]) do
+    %{trigger_event: msg.trigger_event, message_code: msg.message_code}
+  end
+
+  defp extract_trigger_context(_), do: %{}
 
   defp extract_segment_ids(segments) do
     Enum.map(segments, fn

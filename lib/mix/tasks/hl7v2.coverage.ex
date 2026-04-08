@@ -28,7 +28,7 @@ defmodule Mix.Tasks.Hl7v2.Coverage do
                #{length(fully)} fully typed, #{length(partial)} with raw holes
     Types:     #{summary.typed_type_count - 1} official v2.5.1 + 1 legacy TN (#{summary.typed_type_count} total)
     Fields:    #{summary.total_typed_fields} declared across typed segments
-    Raw holes: #{summary.raw_hole_count}
+    Raw holes: #{summary.raw_hole_count} true gaps#{runtime_dispatched_label(summary)}
     """)
 
     if "--detail" in args do
@@ -51,6 +51,16 @@ defmodule Mix.Tasks.Hl7v2.Coverage do
       Mix.shell().info("")
     end
 
+    if summary.runtime_dispatched_count > 0 do
+      Mix.shell().info("  Runtime-dispatched (intentionally raw):")
+
+      for {seg, field, seq} <- summary.runtime_dispatched do
+        Mix.shell().info("    #{seg}-#{seq} :#{field}")
+      end
+
+      Mix.shell().info("")
+    end
+
     if summary.raw_hole_count > 0 and "--detail" not in args do
       Mix.shell().info("  Run with --detail for per-segment field completeness")
       Mix.shell().info("")
@@ -64,4 +74,9 @@ defmodule Mix.Tasks.Hl7v2.Coverage do
 
     Mix.shell().info("")
   end
+
+  defp runtime_dispatched_label(%{runtime_dispatched_count: 0}), do: ""
+
+  defp runtime_dispatched_label(%{runtime_dispatched_count: n}),
+    do: ", #{n} runtime-dispatched"
 end

@@ -478,6 +478,7 @@ defmodule HL7v2.Validation.FieldRules do
     field_defs = module.fields()
     validate_tables? = Keyword.get(opts, :validate_tables, false)
     mode = Keyword.get(opts, :mode, :lenient)
+    context = Keyword.get(opts, :context, %{})
 
     field_errors =
       Enum.flat_map(field_defs, fn {_seq, name, _type, optionality, max_reps} ->
@@ -488,7 +489,7 @@ defmodule HL7v2.Validation.FieldRules do
           table_errors(location, name, value, validate_tables?)
       end)
 
-    field_errors ++ conditional_errors(segment, location, mode)
+    field_errors ++ conditional_errors(segment, location, mode, context)
   end
 
   defp required_errors(location, name, :r, value) do
@@ -628,17 +629,42 @@ defmodule HL7v2.Validation.FieldRules do
   # Conditional field rules — checks for :c (conditional) fields
   # ---------------------------------------------------------------------------
 
+  # Scheduling modification triggers (SIU Chapter 10):
+  # S03=Notification of appointment modification, S04=Notification of appointment cancellation,
+  # S05=Notification of appointment discontinuation, S06=Notification of appointment deletion,
+  # S07=Notification of filler appointment modification, S08=Notification of filler appointment cancellation,
+  # S09=Notification of filler appointment discontinuation, S10=Notification of filler appointment deletion,
+  # S11=Notification of appointment placement
+  @scheduling_modification_triggers MapSet.new(~w(S03 S04 S05 S06 S07 S08 S09 S10 S11))
+
+  # Transfer triggers (ADT Chapter 3): events where prior_pending_location (PV2-1) is conditional
+  @transfer_triggers MapSet.new(~w(A02 A06 A07 A12 A15 A25 A26 A27 A28 A31))
+
   @doc """
   Returns a list of conditional-rule errors/warnings for a segment.
 
   Conditional rules are HL7-specified dependencies between fields. In strict
   mode they produce `:error`, in lenient mode `:warning`.
+
+  An optional `context` map may contain `:trigger_event` and `:message_code`
+  extracted from MSH-9. When provided, trigger-aware rules (e.g., scheduling
+  modification segments, PV2 transfer events) use definitive checks instead
+  of heuristic approximations.
+
+  ## Examples
+
+      # Without context (backwards compatible)
+      conditional_errors(segment, "AIS", :lenient)
+
+      # With trigger context
+      conditional_errors(segment, "AIS", :strict, %{trigger_event: "S03", message_code: "SIU"})
+
   """
-  @spec conditional_errors(struct(), String.t(), atom()) :: [map()]
-  def conditional_errors(segment, location, mode)
+  @spec conditional_errors(struct(), String.t(), atom(), map()) :: [map()]
+  def conditional_errors(segment, location, mode, context \\ %{})
 
   # OBX: value_type (OBX-2) is required when observation_value (OBX-5) is populated
-  def conditional_errors(%HL7v2.Segment.OBX{} = obx, location, mode) do
+  def conditional_errors(%HL7v2.Segment.OBX{} = obx, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     obx2_when_obx5 =
@@ -661,7 +687,7 @@ defmodule HL7v2.Validation.FieldRules do
 
   # MSH: accept_acknowledgment_type (MSH-15) and application_acknowledgment_type (MSH-16)
   # must be both populated or both empty
-  def conditional_errors(%HL7v2.Segment.MSH{} = msh, location, mode) do
+  def conditional_errors(%HL7v2.Segment.MSH{} = msh, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     a15 = not semantic_blank?(msh.accept_acknowledgment_type)
@@ -685,7 +711,7 @@ defmodule HL7v2.Validation.FieldRules do
   end
 
   # NK1: nk_name (NK1-2) should be populated when set_id (NK1-1) is present
-  def conditional_errors(%HL7v2.Segment.NK1{} = nk1, location, mode) do
+  def conditional_errors(%HL7v2.Segment.NK1{} = nk1, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if not semantic_blank?(nk1.set_id) and semantic_blank?(nk1.nk_name) do
@@ -704,7 +730,7 @@ defmodule HL7v2.Validation.FieldRules do
 
   # ORC: order_control (ORC-1) is marked :r, but reinforce conditional logic:
   # placer_order_number (ORC-2) or filler_order_number (ORC-3) should be populated
-  def conditional_errors(%HL7v2.Segment.ORC{} = orc, location, mode) do
+  def conditional_errors(%HL7v2.Segment.ORC{} = orc, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if semantic_blank?(orc.placer_order_number) and semantic_blank?(orc.filler_order_number) do
@@ -724,7 +750,7 @@ defmodule HL7v2.Validation.FieldRules do
 
   # OBR: observation_date_time (OBR-7) required for results
   # result_status (OBR-25) conditionally required for result messages
-  def conditional_errors(%HL7v2.Segment.OBR{} = obr, location, mode) do
+  def conditional_errors(%HL7v2.Segment.OBR{} = obr, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     # If result_status is present (this is a result), observation_date_time should be populated
@@ -763,7 +789,7 @@ defmodule HL7v2.Validation.FieldRules do
   end
 
   # SCH: placer_appointment_id (SCH-1) or filler_appointment_id (SCH-2) must be present
-  def conditional_errors(%HL7v2.Segment.SCH{} = sch, location, mode) do
+  def conditional_errors(%HL7v2.Segment.SCH{} = sch, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if semantic_blank?(sch.placer_appointment_id) and semantic_blank?(sch.filler_appointment_id) do
@@ -782,78 +808,158 @@ defmodule HL7v2.Validation.FieldRules do
   end
 
   # AIS: segment_action_code (AIS-2) required for modification events
-  def conditional_errors(%HL7v2.Segment.AIS{} = ais, location, mode) do
-    cond_level = if mode == :strict, do: :error, else: :warning
+  def conditional_errors(%HL7v2.Segment.AIS{} = ais, location, mode, context) do
+    trigger = Map.get(context, :trigger_event)
 
-    # segment_action_code is required when segment is used in an update/modification message
-    # Since we can't always know the context, we check: if universal_service_identifier is
-    # populated but segment_action_code is not, it could indicate a missing conditional field.
-    # Only flag if both start_date_time and universal_service_identifier are present (active AIS).
-    if not semantic_blank?(ais.universal_service_identifier) and
-         not semantic_blank?(ais.start_date_time) and
-         semantic_blank?(ais.segment_action_code) do
-      [
-        %{
-          level: cond_level,
-          location: location,
-          field: :segment_action_code,
-          message:
-            "conditional field segment_action_code may be required for modification messages"
-        }
-      ]
-    else
-      []
+    cond do
+      # Trigger is a known scheduling modification event: definitive check
+      is_binary(trigger) and MapSet.member?(@scheduling_modification_triggers, trigger) ->
+        if semantic_blank?(ais.segment_action_code) do
+          level = if mode == :strict, do: :error, else: :warning
+
+          [
+            %{
+              level: level,
+              location: location,
+              field: :segment_action_code,
+              message:
+                "conditional field segment_action_code is required for modification event #{trigger}"
+            }
+          ]
+        else
+          []
+        end
+
+      # Trigger is known but NOT a modification event: skip entirely
+      is_binary(trigger) ->
+        []
+
+      # No trigger context: fall back to heuristic (backwards compat)
+      true ->
+        if not semantic_blank?(ais.universal_service_identifier) and
+             not semantic_blank?(ais.start_date_time) and
+             semantic_blank?(ais.segment_action_code) do
+          cond_level = if mode == :strict, do: :error, else: :warning
+
+          [
+            %{
+              level: cond_level,
+              location: location,
+              field: :segment_action_code,
+              message:
+                "conditional field segment_action_code may be required for modification messages"
+            }
+          ]
+        else
+          []
+        end
     end
   end
 
   # AIG/AIL/AIP: segment_action_code required for modification events (same pattern as AIS)
-  def conditional_errors(%mod{} = seg, location, mode)
+  def conditional_errors(%mod{} = seg, location, mode, context)
       when mod in [HL7v2.Segment.AIG, HL7v2.Segment.AIL, HL7v2.Segment.AIP] do
-    cond_level = if mode == :strict, do: :error, else: :warning
+    trigger = Map.get(context, :trigger_event)
 
-    has_content? =
-      case mod do
-        HL7v2.Segment.AIG -> not semantic_blank?(seg.resource_type)
-        HL7v2.Segment.AIL -> not semantic_blank?(seg.location_resource_id)
-        HL7v2.Segment.AIP -> not semantic_blank?(seg.personnel_resource_id)
-      end
+    cond do
+      # Trigger is a known scheduling modification event: definitive check
+      is_binary(trigger) and MapSet.member?(@scheduling_modification_triggers, trigger) ->
+        if semantic_blank?(seg.segment_action_code) do
+          level = if mode == :strict, do: :error, else: :warning
 
-    if has_content? and semantic_blank?(seg.segment_action_code) do
-      [
-        %{
-          level: cond_level,
-          location: location,
-          field: :segment_action_code,
-          message:
-            "conditional field segment_action_code may be required for modification messages"
-        }
-      ]
-    else
-      []
+          [
+            %{
+              level: level,
+              location: location,
+              field: :segment_action_code,
+              message:
+                "conditional field segment_action_code is required for modification event #{trigger}"
+            }
+          ]
+        else
+          []
+        end
+
+      # Trigger is known but NOT a modification event: skip entirely
+      is_binary(trigger) ->
+        []
+
+      # No trigger context: fall back to heuristic
+      true ->
+        has_content? =
+          case mod do
+            HL7v2.Segment.AIG -> not semantic_blank?(seg.resource_type)
+            HL7v2.Segment.AIL -> not semantic_blank?(seg.location_resource_id)
+            HL7v2.Segment.AIP -> not semantic_blank?(seg.personnel_resource_id)
+          end
+
+        if has_content? and semantic_blank?(seg.segment_action_code) do
+          cond_level = if mode == :strict, do: :error, else: :warning
+
+          [
+            %{
+              level: cond_level,
+              location: location,
+              field: :segment_action_code,
+              message:
+                "conditional field segment_action_code may be required for modification messages"
+            }
+          ]
+        else
+          []
+        end
     end
   end
 
   # RGS: segment_action_code conditional on modification context
-  def conditional_errors(%HL7v2.Segment.RGS{} = rgs, location, mode) do
-    cond_level = if mode == :strict, do: :error, else: :warning
+  def conditional_errors(%HL7v2.Segment.RGS{} = rgs, location, mode, context) do
+    trigger = Map.get(context, :trigger_event)
 
-    if not semantic_blank?(rgs.set_id) and semantic_blank?(rgs.segment_action_code) do
-      [
-        %{
-          level: cond_level,
-          location: location,
-          field: :segment_action_code,
-          message:
-            "conditional field segment_action_code may be required for modification messages"
-        }
-      ]
-    else
-      []
+    cond do
+      # Trigger is a known scheduling modification event: definitive check
+      is_binary(trigger) and MapSet.member?(@scheduling_modification_triggers, trigger) ->
+        if semantic_blank?(rgs.segment_action_code) do
+          level = if mode == :strict, do: :error, else: :warning
+
+          [
+            %{
+              level: level,
+              location: location,
+              field: :segment_action_code,
+              message:
+                "conditional field segment_action_code is required for modification event #{trigger}"
+            }
+          ]
+        else
+          []
+        end
+
+      # Trigger is known but NOT a modification event: skip entirely
+      is_binary(trigger) ->
+        []
+
+      # No trigger context: fall back to heuristic
+      true ->
+        if not semantic_blank?(rgs.set_id) and semantic_blank?(rgs.segment_action_code) do
+          cond_level = if mode == :strict, do: :error, else: :warning
+
+          [
+            %{
+              level: cond_level,
+              location: location,
+              field: :segment_action_code,
+              message:
+                "conditional field segment_action_code may be required for modification messages"
+            }
+          ]
+        else
+          []
+        end
     end
   end
 
   # ARQ: filler_appointment_id conditional — at least one of placer/filler required
-  def conditional_errors(%HL7v2.Segment.ARQ{} = arq, location, mode) do
+  def conditional_errors(%HL7v2.Segment.ARQ{} = arq, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if semantic_blank?(arq.placer_appointment_id) and semantic_blank?(arq.filler_appointment_id) do
@@ -872,7 +978,7 @@ defmodule HL7v2.Validation.FieldRules do
   end
 
   # DG1: diagnosis_action_code conditional when used in update messages
-  def conditional_errors(%HL7v2.Segment.DG1{} = dg1, location, mode) do
+  def conditional_errors(%HL7v2.Segment.DG1{} = dg1, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if not semantic_blank?(dg1.diagnosis_identifier) and
@@ -892,7 +998,7 @@ defmodule HL7v2.Validation.FieldRules do
   end
 
   # PID: species_code/breed_code conditional — breed requires species
-  def conditional_errors(%HL7v2.Segment.PID{} = pid, location, mode) do
+  def conditional_errors(%HL7v2.Segment.PID{} = pid, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if not semantic_blank?(pid.breed_code) and semantic_blank?(pid.species_code) do
@@ -911,31 +1017,51 @@ defmodule HL7v2.Validation.FieldRules do
 
   # PV2: expected_discharge_disposition (PV2-27) should be populated when
   # expected_discharge_date_time (PV2-9) is set.
-  # Note: prior_pending_location (PV2-1) is conditional on transfer event context,
-  # which requires message-level trigger event — not available at segment scope.
-  def conditional_errors(%HL7v2.Segment.PV2{} = pv2, location, mode) do
+  # PV2-1 (prior_pending_location) is conditional on transfer event context.
+  def conditional_errors(%HL7v2.Segment.PV2{} = pv2, location, mode, context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
-    if not semantic_blank?(pv2.expected_discharge_date_time) and
-         semantic_blank?(pv2.expected_discharge_disposition) do
-      [
-        %{
-          level: cond_level,
-          location: location,
-          field: :expected_discharge_disposition,
-          message:
-            "conditional field expected_discharge_disposition should be populated when expected_discharge_date_time is set"
-        }
-      ]
-    else
-      []
-    end
+    discharge_errors =
+      if not semantic_blank?(pv2.expected_discharge_date_time) and
+           semantic_blank?(pv2.expected_discharge_disposition) do
+        [
+          %{
+            level: cond_level,
+            location: location,
+            field: :expected_discharge_disposition,
+            message:
+              "conditional field expected_discharge_disposition should be populated when expected_discharge_date_time is set"
+          }
+        ]
+      else
+        []
+      end
+
+    trigger = Map.get(context, :trigger_event)
+
+    transfer_errors =
+      if is_binary(trigger) and MapSet.member?(@transfer_triggers, trigger) and
+           semantic_blank?(pv2.prior_pending_location) do
+        [
+          %{
+            level: :warning,
+            location: location,
+            field: :prior_pending_location,
+            message:
+              "conditional field prior_pending_location should be populated for transfer event #{trigger}"
+          }
+        ]
+      else
+        []
+      end
+
+    discharge_errors ++ transfer_errors
   end
 
   # QAK: query_response_status (QAK-2) should be populated when query_tag (QAK-1) is present.
   # Note: query_tag should also match the original query's QPD-2, but that requires
   # cross-segment context not available at segment scope.
-  def conditional_errors(%HL7v2.Segment.QAK{} = qak, location, mode) do
+  def conditional_errors(%HL7v2.Segment.QAK{} = qak, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if not semantic_blank?(qak.query_tag) and semantic_blank?(qak.query_response_status) do
@@ -954,7 +1080,7 @@ defmodule HL7v2.Validation.FieldRules do
   end
 
   # MFE/MFA: mfn_control_id conditional on master file operations
-  def conditional_errors(%mod{} = seg, location, mode)
+  def conditional_errors(%mod{} = seg, location, mode, _context)
       when mod in [HL7v2.Segment.MFE, HL7v2.Segment.MFA] do
     cond_level = if mode == :strict, do: :error, else: :warning
 
@@ -979,7 +1105,7 @@ defmodule HL7v2.Validation.FieldRules do
   # BPX-8 (cp_commercial_product) required when BPX-5 (bc_donation_id) is not populated
   # BPX-9 (cp_manufacturer) required when BPX-8 (cp_commercial_product) is populated
   # BPX-10 (cp_lot_number) required when BPX-8 (cp_commercial_product) is populated
-  def conditional_errors(%HL7v2.Segment.BPX{} = bpx, location, mode) do
+  def conditional_errors(%HL7v2.Segment.BPX{} = bpx, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
     donation? = not semantic_blank?(bpx.bc_donation_id)
     commercial? = not semantic_blank?(bpx.cp_commercial_product)
@@ -1054,7 +1180,7 @@ defmodule HL7v2.Validation.FieldRules do
   # BTX-6 (cp_manufacturer) required when BTX-5 (cp_commercial_product) is populated
   # BTX-7 (cp_lot_number) required when BTX-5 (cp_commercial_product) is populated
   # BTX-20 (bp_unique_id) required when message status indicates completion
-  def conditional_errors(%HL7v2.Segment.BTX{} = btx, location, mode) do
+  def conditional_errors(%HL7v2.Segment.BTX{} = btx, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
     donation? = not semantic_blank?(btx.bc_donation_id)
     commercial? = not semantic_blank?(btx.cp_commercial_product)
@@ -1124,7 +1250,7 @@ defmodule HL7v2.Validation.FieldRules do
 
   # CSP: Clinical Study Phase — study_phase_evaluability required at end of phase
   # CSP-4 (study_phase_evaluability) required when CSP-3 (date_time_study_phase_ended) is populated
-  def conditional_errors(%HL7v2.Segment.CSP{} = csp, location, mode) do
+  def conditional_errors(%HL7v2.Segment.CSP{} = csp, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if not semantic_blank?(csp.date_time_study_phase_ended) and
@@ -1148,7 +1274,7 @@ defmodule HL7v2.Validation.FieldRules do
   #   (indicated by date_time_of_patient_study_registration being populated)
   # CSR-14 (patient_evaluability_status) required when study is complete
   #   (indicated by date_time_ended_study being populated)
-  def conditional_errors(%HL7v2.Segment.CSR{} = csr, location, mode) do
+  def conditional_errors(%HL7v2.Segment.CSR{} = csr, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     eligibility_when_registered =
@@ -1187,7 +1313,7 @@ defmodule HL7v2.Validation.FieldRules do
   end
 
   # SID: Substance Identifier — at least one of SID-1 or SID-4 required
-  def conditional_errors(%HL7v2.Segment.SID{} = sid, location, mode) do
+  def conditional_errors(%HL7v2.Segment.SID{} = sid, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if semantic_blank?(sid.application_method_identifier) and
@@ -1209,7 +1335,7 @@ defmodule HL7v2.Validation.FieldRules do
   # STF: Staff Identification — primary_key_value required for MFN messages
   # Since we can't know message context, we flag when staff_identifier_list is populated
   # (indicating an active record) but primary_key_value is missing
-  def conditional_errors(%HL7v2.Segment.STF{} = stf, location, mode) do
+  def conditional_errors(%HL7v2.Segment.STF{} = stf, location, mode, _context) do
     cond_level = if mode == :strict, do: :error, else: :warning
 
     if not semantic_blank?(stf.staff_identifier_list) and
@@ -1229,5 +1355,5 @@ defmodule HL7v2.Validation.FieldRules do
   end
 
   # Default: no conditional rules for segments without specific rules
-  def conditional_errors(_segment, _location, _mode), do: []
+  def conditional_errors(_segment, _location, _mode, _context), do: []
 end
