@@ -102,18 +102,34 @@ defmodule HL7v2.Validation do
   end
 
   defp extract_message_structure([%HL7v2.Segment.MSH{message_type: %HL7v2.Type.MSG{} = msg} | _]) do
-    msg.message_structure || infer_structure(msg.message_code, msg.trigger_event)
+    # Always canonicalize via message_code + trigger_event first. MSH-9.3 may
+    # carry a non-canonical alias (e.g., "SIU_S14" instead of "SIU_S12") that
+    # won't match the structure registry. Fall back to MSH-9.3 only when
+    # canonical resolution yields a default "CODE_EVENT" that isn't registered.
+    canonical = canonicalize_structure(msg.message_code, msg.trigger_event)
+
+    cond do
+      canonical != nil -> canonical
+      msg.message_structure != nil -> msg.message_structure
+      true -> nil
+    end
   end
 
   defp extract_message_structure(_), do: nil
 
-  # When MSH-9.3 is absent, infer from message_code + trigger_event using canonical
-  # structure resolution (e.g., "ADT" + "A28" -> "ADT_A05", not "ADT_A28").
-  defp infer_structure(code, event) when is_binary(code) and is_binary(event),
-    do: MessageDefinition.canonical_structure(code, event)
+  defp canonicalize_structure(code, event) when is_binary(code) and is_binary(event) do
+    resolved = MessageDefinition.canonical_structure(code, event)
 
-  defp infer_structure(code, _event) when is_binary(code), do: code
-  defp infer_structure(_code, _event), do: nil
+    # If canonical_structure returned the literal "CODE_EVENT" fallback,
+    # check whether it actually exists in the structure registry.
+    if HL7v2.Standard.MessageStructure.get(resolved) != nil do
+      resolved
+    else
+      nil
+    end
+  end
+
+  defp canonicalize_structure(_code, _event), do: nil
 
   defp extract_trigger_context([%HL7v2.Segment.MSH{message_type: %HL7v2.Type.MSG{} = msg} | _]) do
     %{trigger_event: msg.trigger_event, message_code: msg.message_code}

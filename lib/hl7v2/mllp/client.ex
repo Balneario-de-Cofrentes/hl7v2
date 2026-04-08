@@ -50,8 +50,10 @@ defmodule HL7v2.MLLP.Client do
   Sends an HL7v2 message and waits for the response.
 
   MLLP is strictly request/response — one message sent, one ACK received.
-  If leftover frames from a previous exchange are buffered (misbehaving peer),
-  they are discarded before the new request is sent to maintain 1:1 pairing.
+  If any stale bytes (complete or partial frames) remain in the buffer from
+  a previous exchange, this returns `{:error, :protocol_desync}`, closes the
+  connection, and stops the client process. The caller must start a new client
+  to continue communicating.
 
   The message is MLLP-framed before sending. The response is returned
   with MLLP framing stripped.

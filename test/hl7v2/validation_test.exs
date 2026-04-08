@@ -249,6 +249,41 @@ defmodule HL7v2.ValidationTest do
     test "top-level HL7v2.validate/1 returns :not_a_typed_message for non-typed input" do
       assert {:error, :not_a_typed_message} = HL7v2.validate(:not_a_message)
     end
+
+    test "non-canonical MSH-9.3 alias is resolved to canonical structure" do
+      # SIU^S14^SIU_S14 should validate structurally as SIU_S12
+      wire =
+        "MSH|^~\\&|S|F||R|20260408||SIU^S14^SIU_S14|1|P|2.5.1\r" <>
+          "SCH|1|||||ROUTINE^Routine^HL70276|||60^MIN|||||||1234^Smith^Jane||||1234^Smith^Jane\r" <>
+          "PID|1||12345^^^MRN||Doe^John\r" <>
+          "PV1|1|O\r" <>
+          "RGS|1\r" <>
+          "AIS|1||99214^Visit^CPT\r"
+
+      {:ok, typed} = HL7v2.parse(wire, mode: :typed)
+
+      case HL7v2.validate(typed) do
+        :ok -> :ok
+        {:ok, warnings} -> refute Enum.any?(warnings, &(&1.message =~ "structure not checked"))
+        {:error, errors} -> flunk("Validation failed: #{inspect(errors)}")
+      end
+    end
+
+    test "ADT^A28^ADT_A28 alias resolves to ADT_A05 for structural validation" do
+      wire =
+        "MSH|^~\\&|S|F||R|20260408||ADT^A28^ADT_A28|1|P|2.5.1\r" <>
+          "EVN|A28|20260408\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|O\r"
+
+      {:ok, typed} = HL7v2.parse(wire, mode: :typed)
+
+      case HL7v2.validate(typed) do
+        :ok -> :ok
+        {:ok, warnings} -> refute Enum.any?(warnings, &(&1.message =~ "structure not checked"))
+        {:error, errors} -> flunk("Validation failed: #{inspect(errors)}")
+      end
+    end
   end
 
   describe "FieldRules bounded max_reps" do

@@ -49,9 +49,13 @@ msg = HL7v2.Message.new("ADT", "A01", sending_application: "PHAOS")
 
 ```elixir
 def deps do
-  [{:hl7v2, "~> 2.9"}]
+  [{:hl7v2, "~> 3.0"}]
 end
 ```
+
+> **Upgrading from 2.x?** `send_message/3` now returns `{:error, :protocol_desync}`
+> and terminates the client when stale bytes are detected in the MLLP buffer.
+> See [CHANGELOG](CHANGELOG.md) for the full breaking change description.
 
 ## Quick Start
 

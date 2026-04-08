@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.0.1 — 2026-04-08
+
+### Fixes
+
+- **Structural validation skipped for non-canonical MSH-9.3 aliases** — messages
+  with alias structures in MSH-9.3 (e.g., `SIU_S14`, `ADT_A28`, `REF_I13`) now
+  canonicalize to the correct registered structure (SIU_S12, ADT_A05, REF_I12)
+  before structural validation. Previously these returned "structure not checked"
+  warnings despite having known canonical mappings.
+- **MLLP client docs** — `send_message/3` docs now correctly state that protocol
+  desync is terminal (closes connection, stops client process). Previously still
+  described the old drain-and-continue behavior.
+- **README install snippet** — updated from `~> 2.9` to `~> 3.0` with upgrade
+  note about the breaking desync change.
+- **Conformance roadmap** — current state updated to reflect 32 fixtures, 25
+  trigger-aware conditional rules, and accurate raw gap counts.
+
+### Stats
+
+3,906 tests (472 doctests + 32 properties + 3,402 tests), 0 failures
+
 ## v3.0.0 — 2026-04-08
 
 ### Breaking
