@@ -3,10 +3,11 @@
 > This roadmap tracked the library's evolution from v0.5 through v2.8.
 > All milestones M1-M6 are complete. For current state, run `mix hl7v2.coverage`.
 
-## Current State (v2.8.x)
+## Current State
 
 152/152 v2.5.1 segments, 90 types, 222 message structures (186/186 official),
-189 tables, 255 field bindings, 23 conditional rule sets, 18 conformance fixtures.
+189 tables, 255 field bindings, 25 conditional rule sets, 18 conformance fixtures.
+3 fields remain raw-typed (OBX-5, QPD-3, RDT-1). See README Known Limitations.
 Run `mix hl7v2.coverage` for exact counts.
 
 ## Milestones
@@ -80,7 +81,7 @@ Run `mix hl7v2.coverage` for exact counts.
 |---------|---------|--------|
 | M1 | Core fixes, accurate framing | DONE (v0.5.x) |
 | M3 | Real structural validation for supported structures | DONE (v0.7.0) |
-| M4 | Strong practical interoperability (no raw holes) | DONE (v0.8.0) |
+| M4 | Strong practical interoperability (3 raw holes remain) | DONE (v0.8.0) |
 | M5 | Broad clinical segment coverage | DONE (v0.9.0) |
 | M6 | Table validation + conformance platform | DONE (v1.0.0) |
 

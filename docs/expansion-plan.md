@@ -1,6 +1,9 @@
-# HL7v2 Library Expansion Plan
+# HL7v2 Library Expansion Plan (Historical)
 
-## Current State (v1.3.0)
+> **This document is historical.** It reflects the state at v1.3.0.
+> For current coverage, run `mix hl7v2.coverage`. For known limitations, see README.md.
+
+## State at v1.3.0
 
 - 43/136 segments (31.6%), 54/89 types (60.7%), 20 structures
 - Supported families: ADT, ORM_O01, ORU_R01, SIU_S12, ACK

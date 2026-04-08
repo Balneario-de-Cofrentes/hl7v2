@@ -108,30 +108,38 @@ defmodule HL7v2.MLLP.Client do
   def handle_call({:send, message, timeout}, _from, state) do
     %{socket: socket, transport: transport} = state
 
-    # Drain any stale frames from a previous exchange before sending.
-    # In strict MLLP request/response, the buffer should be empty between
-    # exchanges. Leftover frames indicate a misbehaving peer; discard them
-    # to maintain 1:1 request/response pairing.
-    state = drain_stale_buffer(state)
+    # In strict MLLP request/response, the buffer MUST be empty between
+    # exchanges. Any leftover bytes (complete frames or partial data)
+    # indicate a protocol violation by the peer.
+    if state.buffer != <<>> do
+      require Logger
+      Logger.error("MLLP protocol desync: #{byte_size(state.buffer)} stale byte(s) in buffer")
+      transport_close(transport, socket)
+      {:stop, :normal, {:error, :protocol_desync}, %{state | buffer: <<>>, socket: nil}}
+    else
+      framed = HL7v2.MLLP.frame(message)
 
-    framed = HL7v2.MLLP.frame(message)
+      case transport_send(transport, socket, framed) do
+        :ok ->
+          case recv_response(transport, socket, <<>>, timeout, state.max_message_size) do
+            {:ok, response, remaining} ->
+              {:reply, {:ok, response}, %{state | buffer: remaining}}
 
-    case transport_send(transport, socket, framed) do
-      :ok ->
-        case recv_response(transport, socket, state.buffer, timeout, state.max_message_size) do
-          {:ok, response, remaining} ->
-            {:reply, {:ok, response}, %{state | buffer: remaining}}
+            {:error, reason} ->
+              {:reply, {:error, reason}, state}
+          end
 
-          {:error, reason} ->
-            {:reply, {:error, reason}, state}
-        end
-
-      {:error, reason} ->
-        {:reply, {:error, reason}, state}
+        {:error, reason} ->
+          {:reply, {:error, reason}, state}
+      end
     end
   end
 
   @impl GenServer
+  def terminate(_reason, %{socket: nil}) do
+    :ok
+  end
+
   def terminate(_reason, %{socket: socket, transport: transport}) do
     transport_close(transport, socket)
     :ok
@@ -210,27 +218,8 @@ defmodule HL7v2.MLLP.Client do
   defp host_to_charlist(host) when is_list(host), do: host
   defp host_to_charlist(host) when is_atom(host), do: Atom.to_charlist(host)
 
-  # Discard any complete MLLP frames left in the buffer from a previous
-  # exchange. In strict request/response MLLP, the buffer should be empty
-  # (or contain only a partial frame) between exchanges.
-  defp drain_stale_buffer(%{buffer: buffer} = state) do
-    case HL7v2.MLLP.extract_messages(buffer) do
-      {[], _} ->
-        state
-
-      {stale, remaining} ->
-        require Logger
-
-        Logger.warning(
-          "MLLP client discarding #{length(stale)} stale frame(s) from buffer before send"
-        )
-
-        %{state | buffer: remaining}
-    end
-  end
-
-  # Re-frame unconsumed extracted messages back into the raw buffer so they
-  # are available within the same recv_response call (multi-frame TCP read).
+  # Re-frame unconsumed extracted messages back into the raw buffer.
+  # Any leftover will trigger a :protocol_desync error on the next send.
   defp rebuffer([], remaining), do: remaining
 
   defp rebuffer(extra_messages, remaining) do

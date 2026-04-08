@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.12.0 — 2026-04-08
+
+### Fixes
+
+- **MLLP protocol desync** — any non-empty buffer at a send boundary now returns
+  `{:error, :protocol_desync}` and closes the connection. Previously, stale
+  complete frames were silently discarded (hiding protocol violations) and
+  partial stale bytes could corrupt the next response by concatenating with it.
+  MLLP is strictly 1:1 request/response; leftover bytes of any kind are now
+  treated as a fatal protocol violation.
+- **Stale secondary docs** — `docs/expansion-plan.md` marked as historical
+  (was showing v1.3.0 state); `docs/conformance-roadmap.md` corrected to
+  reflect the 3 remaining raw holes and current conditional rule count.
+
+### Stats
+
+3,876 tests (472 doctests + 32 properties + 3,372 tests), 0 failures
+
 ## v2.11.0 — 2026-04-08
 
 ### Fixes
