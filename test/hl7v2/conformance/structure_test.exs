@@ -192,44 +192,119 @@ defmodule HL7v2.Conformance.StructureTest do
   end
 
   describe "conditional rule count" do
-    # Count unique segments that have a non-default conditional_errors clause.
-    # This must match the README claim of 23 segment-specific conditional rules.
-    @conditional_segments [
-      HL7v2.Segment.OBX,
-      HL7v2.Segment.MSH,
-      HL7v2.Segment.NK1,
-      HL7v2.Segment.ORC,
-      HL7v2.Segment.OBR,
-      HL7v2.Segment.SCH,
-      HL7v2.Segment.AIS,
-      HL7v2.Segment.AIG,
-      HL7v2.Segment.AIL,
-      HL7v2.Segment.AIP,
-      HL7v2.Segment.RGS,
-      HL7v2.Segment.ARQ,
-      HL7v2.Segment.DG1,
-      HL7v2.Segment.PID,
-      HL7v2.Segment.PV2,
-      HL7v2.Segment.QAK,
-      HL7v2.Segment.MFE,
-      HL7v2.Segment.MFA,
-      HL7v2.Segment.BPX,
-      HL7v2.Segment.BTX,
-      HL7v2.Segment.CSP,
-      HL7v2.Segment.CSR,
-      HL7v2.Segment.SID,
-      HL7v2.Segment.STF
+    # Each entry: {module, trigger_data} where trigger_data is a struct that
+    # MUST produce at least one conditional error/warning when checked. This
+    # proves the segment-specific clause exists — a blank struct hitting the
+    # default catch-all would return [].
+    @conditional_triggers [
+      {HL7v2.Segment.OBX, %HL7v2.Segment.OBX{observation_value: "present", value_type: nil}},
+      {HL7v2.Segment.MSH,
+       %HL7v2.Segment.MSH{
+         accept_acknowledgment_type: "AL",
+         application_acknowledgment_type: nil
+       }},
+      {HL7v2.Segment.NK1, %HL7v2.Segment.NK1{set_id: "1", nk_name: nil}},
+      {HL7v2.Segment.ORC, %HL7v2.Segment.ORC{placer_order_number: nil, filler_order_number: nil}},
+      {HL7v2.Segment.OBR,
+       %HL7v2.Segment.OBR{
+         universal_service_identifier: %HL7v2.Type.CE{identifier: "CBC"},
+         result_status: "F",
+         observation_date_time: nil
+       }},
+      {HL7v2.Segment.SCH,
+       %HL7v2.Segment.SCH{placer_appointment_id: nil, filler_appointment_id: nil}},
+      {HL7v2.Segment.AIS,
+       %HL7v2.Segment.AIS{
+         universal_service_identifier: %HL7v2.Type.CE{identifier: "CONSULT"},
+         start_date_time: %HL7v2.Type.TS{time: %HL7v2.Type.DTM{year: 2026}},
+         segment_action_code: nil
+       }},
+      {HL7v2.Segment.AIG,
+       %HL7v2.Segment.AIG{
+         resource_type: %HL7v2.Type.CE{identifier: "PROV"},
+         segment_action_code: nil
+       }},
+      {HL7v2.Segment.AIL,
+       %HL7v2.Segment.AIL{
+         location_resource_id: %HL7v2.Type.PL{point_of_care: "W"},
+         segment_action_code: nil
+       }},
+      {HL7v2.Segment.AIP,
+       %HL7v2.Segment.AIP{
+         personnel_resource_id: [%HL7v2.Type.XCN{id_number: "1"}],
+         segment_action_code: nil
+       }},
+      {HL7v2.Segment.RGS, %HL7v2.Segment.RGS{set_id: "1", segment_action_code: nil}},
+      {HL7v2.Segment.ARQ,
+       %HL7v2.Segment.ARQ{placer_appointment_id: nil, filler_appointment_id: nil}},
+      {HL7v2.Segment.DG1,
+       %HL7v2.Segment.DG1{
+         diagnosis_identifier: %HL7v2.Type.CE{identifier: "I10"},
+         diagnosis_action_code: nil
+       }},
+      {HL7v2.Segment.PID,
+       %HL7v2.Segment.PID{breed_code: %HL7v2.Type.CE{identifier: "DOG"}, species_code: nil}},
+      {HL7v2.Segment.PV2,
+       %HL7v2.Segment.PV2{
+         expected_discharge_date_time: %HL7v2.Type.TS{time: %HL7v2.Type.DTM{year: 2026}},
+         expected_discharge_disposition: nil
+       }},
+      {HL7v2.Segment.QAK, %HL7v2.Segment.QAK{query_tag: "QRY001", query_response_status: nil}},
+      {HL7v2.Segment.MFE, %HL7v2.Segment.MFE{mfn_control_id: nil}},
+      {HL7v2.Segment.MFA, %HL7v2.Segment.MFA{mfn_control_id: nil}},
+      {HL7v2.Segment.BPX,
+       %HL7v2.Segment.BPX{
+         set_id: "1",
+         bp_dispense_status: %HL7v2.Type.CWE{identifier: "RA"},
+         bc_donation_id: nil,
+         cp_commercial_product: nil
+       }},
+      {HL7v2.Segment.BTX,
+       %HL7v2.Segment.BTX{
+         set_id: "1",
+         bp_quantity: "1",
+         bp_transfusion_disposition_status: %HL7v2.Type.CWE{identifier: "TX"},
+         bc_donation_id: nil,
+         cp_commercial_product: nil
+       }},
+      {HL7v2.Segment.CSP,
+       %HL7v2.Segment.CSP{
+         study_phase_identifier: %HL7v2.Type.CE{identifier: "P1"},
+         date_time_study_phase_began: %HL7v2.Type.TS{time: %HL7v2.Type.DTM{year: 2026}},
+         date_time_study_phase_ended: %HL7v2.Type.TS{time: %HL7v2.Type.DTM{year: 2026}},
+         study_phase_evaluability: nil
+       }},
+      {HL7v2.Segment.CSR,
+       %HL7v2.Segment.CSR{
+         sponsor_study_id: %HL7v2.Type.EI{entity_identifier: "S1"},
+         sponsor_patient_id: %HL7v2.Type.CX{id: "P1"},
+         date_time_of_patient_study_registration: %HL7v2.Type.TS{
+           time: %HL7v2.Type.DTM{year: 2026}
+         },
+         patient_study_eligibility_status: nil
+       }},
+      {HL7v2.Segment.SID,
+       %HL7v2.Segment.SID{
+         application_method_identifier: nil,
+         substance_manufacturer_identifier: nil
+       }},
+      {HL7v2.Segment.STF,
+       %HL7v2.Segment.STF{
+         staff_identifier_list: [%HL7v2.Type.CX{id: "STAFF001"}],
+         primary_key_value: nil
+       }}
     ]
 
-    test "exact conditional rule count is 23 segments (matches README)" do
-      # Verify each listed segment has a non-empty conditional_errors clause
-      for mod <- @conditional_segments do
-        struct = struct(mod)
-        errors = HL7v2.Validation.FieldRules.conditional_errors(struct, "TEST", :lenient)
-        assert is_list(errors), "#{inspect(mod)} conditional_errors returned non-list"
+    test "each of the 24 segments produces a non-empty conditional result" do
+      for {mod, trigger} <- @conditional_triggers do
+        errors =
+          HL7v2.Validation.FieldRules.conditional_errors(trigger, "TEST", :lenient)
+
+        assert length(errors) > 0,
+               "#{inspect(mod)} with trigger data returned [] — clause may have been removed"
       end
 
-      assert length(@conditional_segments) == 24
+      assert length(@conditional_triggers) == 24
     end
 
     test "default catch-all returns empty list for unlisted segments" do

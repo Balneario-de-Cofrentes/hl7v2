@@ -3,6 +3,12 @@ defmodule HL7v2.MLLP.ConnectionTest do
 
   alias HL7v2.MLLP.{Client, Listener}
 
+  # Named handler function to avoid telemetry "local function" warnings.
+  # Receives {pid, ref} as config and forwards events to the test process.
+  def handle_telemetry_event(event, measurements, metadata, %{pid: pid, ref: ref}) do
+    send(pid, {ref, event, measurements, metadata})
+  end
+
   @sb 0x0B
   @eb 0x1C
   @cr 0x0D
@@ -78,9 +84,7 @@ defmodule HL7v2.MLLP.ConnectionTest do
           [:hl7v2, :mllp, :message, :stop],
           [:hl7v2, :mllp, :message, :exception]
         ],
-        fn event, measurements, metadata, %{pid: pid, ref: ref} ->
-          send(pid, {ref, event, measurements, metadata})
-        end,
+        &__MODULE__.handle_telemetry_event/4,
         %{pid: self(), ref: ref}
       )
 
@@ -254,9 +258,7 @@ defmodule HL7v2.MLLP.ConnectionTest do
       :telemetry.attach_many(
         handler_id,
         [[:hl7v2, :mllp, :message, :exception]],
-        fn event, measurements, metadata, %{pid: pid, ref: ref} ->
-          send(pid, {ref, event, measurements, metadata})
-        end,
+        &__MODULE__.handle_telemetry_event/4,
         %{pid: self(), ref: ref}
       )
 

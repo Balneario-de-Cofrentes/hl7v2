@@ -43,20 +43,19 @@ defmodule HL7v2.Conformance.PackagingTest do
 
   describe "built tarball includes conformance corpus" do
     @tag timeout: 60_000
-    test "mix hex.build tarball contains .hl7 fixture files" do
+    test "mix hex.build tarball contains exactly the frozen fixture count" do
       project_dir = Mix.Project.config()[:lockfile] |> Path.dirname()
+      version = Mix.Project.config()[:version]
+      expected_tarball = "hl7v2-#{version}.tar"
+
       {_output, 0} = System.cmd("mix", ["hex.build"], cd: project_dir)
 
-      # Find the built tarball
-      tarball =
-        project_dir
-        |> File.ls!()
-        |> Enum.find(&String.match?(&1, ~r/^hl7v2-.*\.tar$/))
+      tarball_path = Path.join(project_dir, expected_tarball)
 
-      assert tarball, "mix hex.build did not produce a .tar file"
-      tarball_path = Path.join(project_dir, tarball)
+      assert File.exists?(tarball_path),
+             "expected #{expected_tarball} but it was not produced by mix hex.build"
 
-      # Pipe: extract contents.tar.gz from outer tar, then list its entries
+      # Extract contents.tar.gz from outer tar, then list its entries
       tmp = Path.join(System.tmp_dir!(), "hl7v2_pkg_#{:rand.uniform(1_000_000)}.tar.gz")
       {_, 0} = System.cmd("sh", ["-c", "tar -xOf #{tarball_path} contents.tar.gz > #{tmp}"])
       {listing, 0} = System.cmd("tar", ["-tzf", tmp])
@@ -68,12 +67,14 @@ defmodule HL7v2.Conformance.PackagingTest do
           String.contains?(line, "conformance/") and String.ends_with?(line, ".hl7")
         end)
 
+      frozen_count = length(HL7v2.Conformance.Fixtures.list_fixtures())
+
       # Clean up
       File.rm(tmp)
       File.rm(tarball_path)
 
-      assert hl7_count >= 110,
-             "tarball contains #{hl7_count} .hl7 files, expected >= 110"
+      assert hl7_count == frozen_count,
+             "tarball contains #{hl7_count} .hl7 files but frozen list has #{frozen_count}"
     end
   end
 end
