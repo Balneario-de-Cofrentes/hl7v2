@@ -545,6 +545,12 @@ defmodule HL7v2.Conformance.RoundTripTest do
               "(recompile HL7v2.Conformance.Fixtures): " <>
               "on_disk_only=#{inspect(on_disk_only)} frozen_only=#{inspect(frozen_only)}"
           )
+
+        {:error, :fixture_dir_unavailable} ->
+          flunk(
+            "fixture dir is not accessible — packaging/pathing regression. " <>
+              "check mix.exs files: includes test/fixtures/conformance"
+          )
       end
     end
   end

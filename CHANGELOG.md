@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.3.4 — 2026-04-08
+
+### Fixes
+
+- **`check_freshness/1` is now strict-by-default on missing fixture dir** —
+  returns `{:error, :fixture_dir_unavailable}` instead of silently passing
+  as `:ok`. Since v3.3.3 ships the corpus in the Hex package, a missing
+  directory is itself a packaging/pathing regression and should fail loudly.
+  Pass `allow_missing: true` to opt back into the lenient behavior.
+- **Strict-clean suite freshness guard** now flunks on
+  `{:error, :fixture_dir_unavailable}` with a packaging-hint error message.
+- **Release-surface test pins** — four new tests in
+  `HL7v2.Conformance.FixturesTest` lock the documented minimums
+  (`@min_fixture_files`, `@min_canonical_structures`, `@min_pct`) and
+  cross-check that `list_fixtures/0` and `unique_canonical_structures/0`
+  sizes match `coverage/0`. Silent corpus shrinkage now fails CI with a
+  clear message.
+- **Removed duplicate `groups_for_extras`** in `mix.exs` — the second
+  (inert) block was shadowed by the first and would have silently absorbed
+  future edits. Only the `Guides` + `Reference` block remains.
+
+### Stats
+
+4,676 tests (472 doctests + 32 properties + 4,172 tests), 0 failures
+
 ## v3.3.3 — 2026-04-08
 
 ### Fixes

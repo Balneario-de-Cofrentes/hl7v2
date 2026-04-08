@@ -25,6 +25,54 @@ defmodule HL7v2.Conformance.FixturesTest do
     end
   end
 
+  # Release-surface pins: these assertions lock the headline numbers that
+  # appear in README, CHANGELOG, and GitHub release notes. They do two things:
+  #
+  #   1. Guard against silent corpus shrinkage that would go unnoticed in
+  #      CI (e.g. a fixture file gets deleted or a rename makes it invisible
+  #      to the frozen @external_resource tracker).
+  #   2. Force any intentional corpus change to also update the tests, which
+  #      means the release numbers in docs won't drift from reality again.
+  #
+  # When adding fixtures, update @min_fixture_files and @min_canonical_structures
+  # to the new minimums. The tests use >= rather than == so additions are
+  # celebrated, but removals fail loudly.
+  describe "release-surface (headline numbers)" do
+    # Minimums tracked in docs/README. Update when expanding the corpus.
+    @min_fixture_files 110
+    @min_canonical_structures 101
+    @min_pct 54.3
+
+    test "fixture count is at or above the documented minimum" do
+      cov = Fixtures.coverage()
+
+      assert cov.files >= @min_fixture_files,
+             "corpus shrank: expected >= #{@min_fixture_files} files, got #{cov.files}. " <>
+               "Update the minimum in fixtures_test.exs if this was intentional."
+    end
+
+    test "unique canonical structures >= documented minimum" do
+      cov = Fixtures.coverage()
+
+      assert cov.canonical >= @min_canonical_structures,
+             "canonical coverage shrank: expected >= #{@min_canonical_structures}, " <>
+               "got #{cov.canonical}. Update the minimum if intentional."
+    end
+
+    test "percentage of 186 official >= documented minimum" do
+      cov = Fixtures.coverage()
+
+      assert cov.pct >= @min_pct,
+             "corpus percentage shrank: expected >= #{@min_pct}%, got #{cov.pct}%"
+    end
+
+    test "list_fixtures and unique_canonical_structures sizes match coverage/0" do
+      cov = Fixtures.coverage()
+      assert length(Fixtures.list_fixtures()) == cov.files
+      assert length(Fixtures.unique_canonical_structures()) == cov.canonical
+    end
+  end
+
   describe "list_fixtures/0" do
     test "returns sorted .hl7 files" do
       files = Fixtures.list_fixtures()
@@ -116,11 +164,20 @@ defmodule HL7v2.Conformance.FixturesTest do
       assert Fixtures.check_freshness(dir: tmp, frozen: ["a.hl7"]) == :ok
     end
 
-    test "returns :ok when dir is missing (installed Hex artifact case)" do
+    test "returns :error for missing dir by default (strict regression guard)" do
       missing = System.tmp_dir!() |> Path.join("does_not_exist_#{:rand.uniform(1_000_000)}")
       refute File.exists?(missing)
 
-      assert Fixtures.check_freshness(dir: missing, frozen: ["a.hl7"]) == :ok
+      assert {:error, :fixture_dir_unavailable} =
+               Fixtures.check_freshness(dir: missing, frozen: ["a.hl7"])
+    end
+
+    test "returns :ok for missing dir when allow_missing: true (opt-out)" do
+      missing = System.tmp_dir!() |> Path.join("does_not_exist_#{:rand.uniform(1_000_000)}")
+      refute File.exists?(missing)
+
+      assert Fixtures.check_freshness(dir: missing, frozen: ["a.hl7"], allow_missing: true) ==
+               :ok
     end
   end
 

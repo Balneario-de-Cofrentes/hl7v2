@@ -1,7 +1,7 @@
 defmodule HL7v2.MixProject do
   use Mix.Project
 
-  @version "3.3.3"
+  @version "3.3.4"
   @source_url "https://github.com/Balneario-de-Cofrentes/hl7v2"
 
   def project do
@@ -97,9 +97,6 @@ defmodule HL7v2.MixProject do
         Validation: ~r/HL7v2\.Validation.*/,
         "MLLP Transport": ~r/HL7v2\.MLLP.*/,
         Telemetry: [HL7v2.Telemetry]
-      ],
-      groups_for_extras: [
-        Guides: ~r/guides\/.*/
       ],
       nest_modules_by_prefix: [
         HL7v2.Type,

@@ -132,25 +132,31 @@ defmodule HL7v2.Conformance.Fixtures do
   Compares the compile-time-frozen fixture list against the current on-disk
   state of the fixture directory.
 
-  Returns `:ok` if they match, or `{:stale, on_disk_only: [...], frozen_only: [...]}`
-  when a mismatch is detected. Useful for dev/test guards to catch
-  compile-time-frozen snapshots that lag the on-disk corpus after a file
-  was added or removed without recompiling this module.
+  Returns:
 
-  Accepts options for dependency injection in tests:
+  - `:ok` — frozen list matches on-disk state
+  - `{:stale, on_disk_only: [...], frozen_only: [...]}` — drift detected
+  - `{:error, :fixture_dir_unavailable}` — the fixture directory does not
+    exist or is unreadable (e.g. the corpus was not shipped in a Hex
+    artifact). As of v3.3.3 the corpus ships in the Hex package, so a
+    missing directory is itself a release-surface regression and is
+    reported loudly by default.
+
+  Options for dependency injection in tests and opt-out for edge cases:
 
   - `:dir` — override the directory to compare against (default: compile-time
     `@fixture_dir`)
   - `:frozen` — override the frozen list (default: compile-time `@fixtures`)
-
-  Note: when called without options, this touches the filesystem and returns
-  `:ok` if the fixture directory is not accessible (installed Hex artifact
-  case with no corpus shipped).
+  - `:allow_missing` — when `true`, return `:ok` instead of
+    `{:error, :fixture_dir_unavailable}` when the directory is not
+    readable. Default: `false`.
   """
-  @spec check_freshness(keyword()) :: :ok | {:stale, keyword()}
+  @spec check_freshness(keyword()) ::
+          :ok | {:stale, keyword()} | {:error, :fixture_dir_unavailable}
   def check_freshness(opts \\ []) do
     dir = Keyword.get(opts, :dir, @fixture_dir)
     frozen = Keyword.get(opts, :frozen, @fixtures)
+    allow_missing = Keyword.get(opts, :allow_missing, false)
 
     case File.ls(dir) do
       {:ok, entries} ->
@@ -171,9 +177,7 @@ defmodule HL7v2.Conformance.Fixtures do
         end
 
       _ ->
-        # Fixture dir not accessible (e.g. installed Hex artifact with no
-        # corpus shipped) — nothing to compare against, so treat as fresh.
-        :ok
+        if allow_missing, do: :ok, else: {:error, :fixture_dir_unavailable}
     end
   end
 end
