@@ -7,8 +7,9 @@ defmodule HL7v2.Conformance.Fixtures do
   file. This means:
 
   - `coverage/0`, `list_fixtures/0`, and `unique_canonical_structures/0` return
-    identical results whether running from source or from an installed Hex
-    artifact (no runtime disk access required).
+    compile-time-frozen results with no runtime disk access. The fixture files
+    ship inside the Hex package, and CI verifies the tarball fixture count
+    matches the frozen list.
   - Changing any fixture file triggers recompilation via `@external_resource`.
   - Canonical resolution uses the same fallback logic as
     `HL7v2.Validation` — if the trigger-specific structure is unregistered,

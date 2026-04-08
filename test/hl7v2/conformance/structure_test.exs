@@ -182,12 +182,17 @@ defmodule HL7v2.Conformance.StructureTest do
       assert unsupported == [], "Expected 0 unsupported segments, got: #{inspect(unsupported)}"
     end
 
-    test "raw hole count is exactly 2 (QPD-3, RDT-1)" do
-      assert length(Coverage.raw_holes()) == 2
+    test "raw holes are exactly QPD-3 and RDT-1" do
+      assert Coverage.raw_holes() == [
+               {"QPD", :user_parameters_in_successive_fields, 3},
+               {"RDT", :column_value, 1}
+             ]
     end
 
-    test "runtime-dispatched count is exactly 1 (OBX-5)" do
-      assert length(Coverage.runtime_dispatched()) == 1
+    test "runtime-dispatched is exactly OBX-5" do
+      assert Coverage.runtime_dispatched() == [
+               {"OBX", :observation_value, 5}
+             ]
     end
   end
 

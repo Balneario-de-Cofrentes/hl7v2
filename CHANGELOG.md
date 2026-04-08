@@ -7,8 +7,9 @@ All notable changes to this project will be documented in this file.
 ### Fixes
 
 - **Tarball-level packaging smoke test** — `mix hex.build` is run in CI and
-  the built tarball is unpacked to assert ≥ 110 `.hl7` fixture files are
-  present. Previously only project config was checked, not the actual artifact.
+  the built tarball is unpacked to assert the `.hl7` fixture count exactly
+  equals the compile-time frozen list. Previously only project config was
+  checked, not the actual artifact.
 - **OBX value type count pinned** — `length(OBXValue.known_types()) == 41`
   asserted (matches README claim).
 - **Conditional rule count corrected and pinned** — actual count is 24
