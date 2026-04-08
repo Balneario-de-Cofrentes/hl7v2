@@ -46,5 +46,43 @@ defmodule HL7v2.Conformance.FixturesTest do
       assert "ADT_A01" in canonical
       assert "ORU_R01" in canonical
     end
+
+    test "ACK^A01^ACK_A01 fixture resolves to bare ACK structure, not ACK_A01" do
+      # The unregistered ACK_A01 alias must fall back to the registered ACK
+      # structure — mirroring the same fallback HL7v2.Validation uses.
+      canonical = Fixtures.unique_canonical_structures()
+      assert "ACK" in canonical
+      refute "ACK_A01" in canonical
+    end
+
+    test "every entry is a registered structure in the MessageStructure registry" do
+      canonical = Fixtures.unique_canonical_structures()
+
+      for name <- canonical do
+        assert HL7v2.Standard.MessageStructure.get(name) != nil,
+               "canonical '#{name}' returned by Fixtures is not registered"
+      end
+    end
+  end
+
+  describe "families/0" do
+    test "returns sorted family prefixes" do
+      families = Fixtures.families()
+      assert families == Enum.sort(families)
+      assert Enum.all?(families, &is_binary/1)
+    end
+
+    test "includes ADT, ORU, MFN" do
+      families = Fixtures.families()
+      assert "ADT" in families
+      assert "ORU" in families
+      assert "MFN" in families
+    end
+
+    test "does NOT include ORI (not in current corpus)" do
+      # Guards against hand-curated family lists drifting from actual corpus
+      families = Fixtures.families()
+      refute "ORI" in families
+    end
   end
 end

@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.3.1 — 2026-04-08
+
+### Fixes
+
+- **`HL7v2.Conformance.Fixtures` ACK fallback** — `unique_canonical_structures/0`
+  now uses the same alias fallback as `HL7v2.Validation`: when the
+  trigger-specific structure (e.g. `ACK_A01`) is unregistered, it falls back to
+  the bare message_code (`ACK`). Previously the helper returned the unregistered
+  alias as a "canonical" entry.
+- **Corpus stats are now compile-time frozen** — fixture filenames, canonical
+  structures, and families are computed at compile time by walking the fixture
+  directory and extracting MSH-9 via lightweight string parsing.
+  `coverage/0`/`list_fixtures/0`/`unique_canonical_structures/0` return
+  identical results whether running from source or from an installed Hex
+  artifact. `@external_resource` ensures recompilation when any fixture
+  changes.
+- **`mix hl7v2.coverage` no longer emits telemetry noise** — the task starts
+  the `:telemetry` application before running and, more importantly, no longer
+  parses fixtures at runtime (they're compile-time frozen).
+- **README family list is now live-derived** — the hand-curated (and stale)
+  family enumeration was replaced with a pointer to
+  `HL7v2.Conformance.Fixtures.families/0`, which cannot drift from the actual
+  corpus.
+
+### Added
+
+- **`HL7v2.Conformance.Fixtures.families/0`** — returns the sorted list of
+  message family prefixes (`ADT`, `ORU`, `MFN`, ...) covered by the corpus,
+  derived at compile time from canonical structure names.
+- **5 new tests** in `HL7v2.Conformance.FixturesTest`: ACK fallback guard,
+  registry validity check (every entry must be in `MessageStructure`),
+  families accessors, and an explicit "ORI is NOT in corpus" regression to
+  prevent future hand-curated drift.
+
+### Stats
+
+4,772 tests (472 doctests + 32 properties + 4,268 tests), 0 failures
+
 ## v3.3.0 — 2026-04-08
 
 ### Fixes

@@ -200,14 +200,23 @@ strict validation with zero warnings):
 ```
  Fixtures    110 wire files covering 101 unique canonical structures
  Breadth     101 of 186 official v2.5.1 structures (54.3%)
- Families    ADT, ORU, ORM, OML, OMI, OMB, OMD, OMG, OMN, OMP, OMS, ORB,
-             ORD, ORF, ORG, ORI, ORL, RAS, RDE, RDS, RGV, BPS, BAR, DFT,
-             MDM, MFN, MFK, DOC, PMU, PPR, QBP, QRY, RSP, REF, SIU, SRM,
-             SSU, VXU, ACK, and more
 ```
 
-Run `mix hl7v2.coverage` for the live count — `HL7v2.Conformance.Fixtures`
-is the single source of truth and reads the fixture directory at runtime.
+The corpus is computed at **compile time** from the fixture directory and
+frozen into `HL7v2.Conformance.Fixtures` — both source builds and installed
+Hex artifacts report identical counts, with no runtime disk access required.
+Fixture filenames, canonical structures, and family prefixes are exposed via:
+
+```elixir
+HL7v2.Conformance.Fixtures.coverage()
+HL7v2.Conformance.Fixtures.list_fixtures()
+HL7v2.Conformance.Fixtures.unique_canonical_structures()
+HL7v2.Conformance.Fixtures.families()
+```
+
+Canonical resolution uses the same alias fallback as `HL7v2.Validation` — an
+`ACK^A01^ACK_A01` fixture correctly reports as covering the registered `ACK`
+structure, not the unregistered `ACK_A01`.
 
 ## Scope
 

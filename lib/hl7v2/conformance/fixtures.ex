@@ -1,15 +1,82 @@
 defmodule HL7v2.Conformance.Fixtures do
   @moduledoc """
-  Runtime helper that computes conformance fixture corpus statistics from
-  the on-disk fixture directory.
+  Conformance fixture corpus statistics.
 
-  This exists as a single source of truth for fixture coverage numbers
-  reported in docs, CHANGELOG, and `mix hl7v2.coverage` — so the published
-  counts cannot drift from actual evidence on disk.
+  The canonical structure list and fixture filenames are **frozen at compile
+  time** by walking the fixture directory and extracting MSH-9 from each wire
+  file. This means:
+
+  - `coverage/0`, `list_fixtures/0`, and `unique_canonical_structures/0` return
+    identical results whether running from source or from an installed Hex
+    artifact (no runtime disk access required).
+  - Changing any fixture file triggers recompilation via `@external_resource`.
+  - Canonical resolution uses the same fallback logic as
+    `HL7v2.Validation` — if the trigger-specific structure is unregistered,
+    the bare message_code is tried before giving up. This correctly reports
+    `ACK` for `ACK^A01^ACK_A01`, not the unregistered `ACK_A01`.
+
+  This module is the single source of truth for fixture corpus counts
+  reported in docs, CHANGELOG, and `mix hl7v2.coverage`.
   """
 
   @fixture_dir Path.expand("../../../test/fixtures/conformance", __DIR__)
   @total_official 186
+
+  @fixtures (case File.ls(@fixture_dir) do
+               {:ok, entries} ->
+                 entries |> Enum.filter(&String.ends_with?(&1, ".hl7")) |> Enum.sort()
+
+               _ ->
+                 []
+             end)
+
+  # Recompile this module whenever any fixture file changes.
+  for file <- @fixtures do
+    @external_resource Path.join(@fixture_dir, file)
+  end
+
+  # Compile-time canonical resolution. Extracts MSH-9 via lightweight string
+  # parsing (no dependency on the full parser at compile time) and applies
+  # the same alias fallback as the validator.
+  @frozen_canonical @fixtures
+                    |> Enum.map(fn file ->
+                      path = Path.join(@fixture_dir, file)
+                      {:ok, content} = File.read(path)
+
+                      first_line =
+                        content
+                        |> String.split(["\r", "\n"], trim: true)
+                        |> List.first() || ""
+
+                      fields = String.split(first_line, "|")
+                      msh9 = Enum.at(fields, 8, "")
+                      parts = String.split(msh9, "^")
+                      code = Enum.at(parts, 0, "")
+                      event = Enum.at(parts, 1, "")
+
+                      resolved = HL7v2.MessageDefinition.canonical_structure(code, event)
+
+                      cond do
+                        HL7v2.Standard.MessageStructure.get(resolved) != nil ->
+                          resolved
+
+                        HL7v2.Standard.MessageStructure.get(code) != nil ->
+                          code
+
+                        true ->
+                          nil
+                      end
+                    end)
+                    |> Enum.reject(&is_nil/1)
+                    |> Enum.uniq()
+                    |> Enum.sort()
+
+  @frozen_families @frozen_canonical
+                   |> Enum.map(fn name ->
+                     name |> String.split("_") |> List.first()
+                   end)
+                   |> Enum.uniq()
+                   |> Enum.sort()
 
   @type coverage :: %{
           files: non_neg_integer(),
@@ -21,65 +88,43 @@ defmodule HL7v2.Conformance.Fixtures do
   @doc """
   Returns a map summarizing the conformance fixture corpus.
 
-  - `:files` — number of `.hl7` fixture files on disk
+  - `:files` — number of `.hl7` fixture files
   - `:canonical` — number of unique canonical message structures covered
   - `:total_official` — 186 (HL7 v2.5.1 official structures)
   - `:pct` — canonical / total_official as a percentage, rounded to 1 decimal
   """
   @spec coverage() :: coverage()
   def coverage do
-    files = list_fixtures()
-    canonical = unique_canonical_structures(files)
-    pct = Float.round(length(canonical) / @total_official * 100, 1)
-
     %{
-      files: length(files),
-      canonical: length(canonical),
+      files: length(@fixtures),
+      canonical: length(@frozen_canonical),
       total_official: @total_official,
-      pct: pct
+      pct: Float.round(length(@frozen_canonical) / @total_official * 100, 1)
     }
   end
 
   @doc """
-  Returns the sorted list of fixture filenames on disk.
+  Returns the sorted list of fixture filenames included in the corpus.
   """
   @spec list_fixtures() :: [binary()]
-  def list_fixtures do
-    case File.ls(@fixture_dir) do
-      {:ok, entries} ->
-        entries
-        |> Enum.filter(&String.ends_with?(&1, ".hl7"))
-        |> Enum.sort()
-
-      _ ->
-        []
-    end
-  end
+  def list_fixtures, do: @fixtures
 
   @doc """
-  Returns the sorted list of unique canonical structures covered by the
-  on-disk fixture corpus.
+  Returns the sorted deduplicated list of canonical message structures
+  covered by the corpus. Uses the same alias fallback as validation, so
+  `ACK^A01^ACK_A01` resolves to the registered `ACK` structure rather than
+  the unregistered `ACK_A01`.
+
+  The `files` argument is ignored and kept for backwards compatibility —
+  the result is frozen at compile time regardless of input.
   """
   @spec unique_canonical_structures([binary()]) :: [binary()]
-  def unique_canonical_structures(files \\ list_fixtures()) do
-    files
-    |> Enum.map(&canonical_for_file/1)
-    |> Enum.reject(&is_nil/1)
-    |> Enum.uniq()
-    |> Enum.sort()
-  end
+  def unique_canonical_structures(_files \\ nil), do: @frozen_canonical
 
-  defp canonical_for_file(file) do
-    path = Path.join(@fixture_dir, file)
-
-    with {:ok, wire} <- File.read(path),
-         {:ok, msg} <- HL7v2.parse(String.replace(wire, "\n", "\r"), mode: :typed) do
-      msh = hd(msg.segments)
-      type = msh.message_type
-
-      HL7v2.MessageDefinition.canonical_structure(type.message_code, type.trigger_event)
-    else
-      _ -> nil
-    end
-  end
+  @doc """
+  Returns the sorted list of message family prefixes covered by the corpus
+  (e.g. `"ADT"`, `"ORU"`, `"MFN"`). Derived from canonical structure names.
+  """
+  @spec families() :: [binary()]
+  def families, do: @frozen_families
 end

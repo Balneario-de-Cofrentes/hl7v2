@@ -15,6 +15,10 @@ defmodule Mix.Tasks.Hl7v2.Coverage do
 
   @impl Mix.Task
   def run(args) do
+    # Start :telemetry so any runtime paths that emit telemetry events
+    # (parser, MLLP, validation) don't log "handlers not found" warnings.
+    {:ok, _} = Application.ensure_all_started(:telemetry)
+
     summary = HL7v2.Standard.Coverage.coverage_summary()
     fully = HL7v2.Standard.Coverage.fully_typed_segments()
     partial = HL7v2.Standard.Coverage.partially_typed_segments()
