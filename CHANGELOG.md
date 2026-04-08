@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.3.2 — 2026-04-08
+
+### Fixes
+
+- **Strict-clean fixture suite is now runtime-discovered** — previously, the
+  `describe "strict-clean fixture corpus"` block expanded `Path.wildcard` at
+  compile time, so newly added fixture files were silently ignored until the
+  test module recompiled. The suite now enumerates fixtures at runtime via
+  `File.ls` inside a single test, so additions and removals are picked up
+  on every test run without recompilation.
+- **Freshness guard test** — a new test in the strict-clean suite fails if
+  the compile-time-frozen `HL7v2.Conformance.Fixtures.list_fixtures/0` drifts
+  from the on-disk corpus. This catches stale `@external_resource` snapshots
+  that would otherwise pass silently.
+- **README wording narrowed** — explicit caveat that `@external_resource`
+  only tracks files present at compile time, with instructions to call
+  `HL7v2.Conformance.Fixtures.check_freshness/0` in dev/test.
+
+### Added
+
+- **`HL7v2.Conformance.Fixtures.check_freshness/0`** — returns `:ok` or
+  `{:stale, on_disk_only: [...], frozen_only: [...]}` comparing the
+  compile-time snapshot against the current on-disk fixture directory.
+  Returns `:ok` when the directory is not accessible (installed Hex artifact
+  case).
+- Test for `check_freshness/0` in `HL7v2.Conformance.FixturesTest`.
+
+### Verified
+
+Ran the new drift guard against a temporary `zzz_probe_drift.hl7` fixture —
+the guard correctly reported:
+`fixtures on disk but missing from compile-time frozen list: ["zzz_probe_drift.hl7"]`.
+Probe file removed after verification.
+
+### Stats
+
+4,665 tests (472 doctests + 32 properties + 4,161 tests), 0 failures
+
 ## v3.3.1 — 2026-04-08
 
 ### Fixes

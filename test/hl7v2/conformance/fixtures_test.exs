@@ -65,6 +65,12 @@ defmodule HL7v2.Conformance.FixturesTest do
     end
   end
 
+  describe "check_freshness/0" do
+    test "returns :ok when compile-time snapshot matches on-disk fixtures" do
+      assert Fixtures.check_freshness() == :ok
+    end
+  end
+
   describe "families/0" do
     test "returns sorted family prefixes" do
       families = Fixtures.families()

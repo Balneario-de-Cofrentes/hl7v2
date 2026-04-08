@@ -127,4 +127,43 @@ defmodule HL7v2.Conformance.Fixtures do
   """
   @spec families() :: [binary()]
   def families, do: @frozen_families
+
+  @doc """
+  Compares the compile-time-frozen fixture list against the current on-disk
+  state of the fixture directory.
+
+  Returns `:ok` if they match, or `{:stale, [on_disk_only]: [...], [frozen_only]: [...]}`
+  when a mismatch is detected. Useful for dev/test guards to catch
+  compile-time-frozen snapshots that lag the on-disk corpus after a file
+  was added or removed without recompiling this module.
+
+  Note: this touches the filesystem and is **not** safe to rely on inside
+  installed Hex artifacts where the fixture directory may not be present.
+  """
+  @spec check_freshness() :: :ok | {:stale, keyword()}
+  def check_freshness do
+    case File.ls(@fixture_dir) do
+      {:ok, entries} ->
+        on_disk =
+          entries
+          |> Enum.filter(&String.ends_with?(&1, ".hl7"))
+          |> MapSet.new()
+
+        frozen = MapSet.new(@fixtures)
+
+        on_disk_only = MapSet.difference(on_disk, frozen) |> MapSet.to_list() |> Enum.sort()
+        frozen_only = MapSet.difference(frozen, on_disk) |> MapSet.to_list() |> Enum.sort()
+
+        if on_disk_only == [] and frozen_only == [] do
+          :ok
+        else
+          {:stale, on_disk_only: on_disk_only, frozen_only: frozen_only}
+        end
+
+      _ ->
+        # Fixture dir not accessible (e.g. installed Hex artifact) — nothing
+        # to compare against, so treat as fresh.
+        :ok
+    end
+  end
 end

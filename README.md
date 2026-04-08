@@ -203,8 +203,18 @@ strict validation with zero warnings):
 ```
 
 The corpus is computed at **compile time** from the fixture directory and
-frozen into `HL7v2.Conformance.Fixtures` — both source builds and installed
-Hex artifacts report identical counts, with no runtime disk access required.
+frozen into `HL7v2.Conformance.Fixtures`. Source builds and installed Hex
+artifacts report identical counts, with no runtime disk access required.
+
+> **Freshness caveat.** `@external_resource` only tracks files that existed at
+> compile time — adding or removing fixtures from the source tree requires
+> recompiling the module before the helper picks them up. The strict-clean
+> test suite (`test/hl7v2/conformance/round_trip_test.exs`) enumerates
+> fixtures at runtime via `File.ls` and includes a freshness guard test that
+> fails if the frozen list drifts from the on-disk corpus. Call
+> `HL7v2.Conformance.Fixtures.check_freshness/0` in dev/test to assert the
+> compile-time snapshot matches current disk state.
+
 Fixture filenames, canonical structures, and family prefixes are exposed via:
 
 ```elixir

@@ -42,22 +42,6 @@ defmodule HL7v2.Conformance.RoundTripTest do
     end
   end
 
-  defp assert_fixture_strict_clean(file) do
-    wire = read_fixture(file)
-    assert {:ok, typed} = HL7v2.parse(wire, mode: :typed)
-
-    case HL7v2.validate(typed, mode: :strict) do
-      :ok ->
-        :ok
-
-      {:ok, warnings} ->
-        flunk("Strict validation produced warnings: #{inspect(Enum.map(warnings, & &1.message))}")
-
-      {:error, errors} ->
-        flunk("Strict validation failed: #{inspect(Enum.map(errors, & &1.message))}")
-    end
-  end
-
   describe "fixture round-trips" do
     test "ADT_A01" do
       assert_fixture_round_trip("adt_a01.hl7")
@@ -513,13 +497,93 @@ defmodule HL7v2.Conformance.RoundTripTest do
   # (it exercises structural + field + conditional checks end-to-end), but its
   # breadth is bounded by the corpus — currently far narrower than the full
   # 186 official v2.5.1 structures. See `mix hl7v2.coverage` for exact breadth.
-  describe "strict-clean fixture corpus" do
-    for file <- Path.wildcard(Path.join(@fixture_dir, "*.hl7")) do
-      name = Path.basename(file, ".hl7")
+  #
+  # This suite enumerates fixtures at RUNTIME via File.ls so newly added
+  # fixture files are automatically exercised without requiring this test
+  # module to recompile. A freshness guard test below verifies the disk
+  # matches what the compile-time-frozen HL7v2.Conformance.Fixtures helper
+  # reports.
+  describe "strict-clean fixture corpus (runtime discovered)" do
+    test "every .hl7 fixture on disk passes strict validation with zero warnings" do
+      files =
+        @fixture_dir
+        |> File.ls!()
+        |> Enum.filter(&String.ends_with?(&1, ".hl7"))
+        |> Enum.sort()
 
-      test "#{name} passes strict validation" do
-        assert_fixture_strict_clean(unquote(name) <> ".hl7")
+      assert files != [], "no fixtures found in #{@fixture_dir}"
+
+      failures =
+        for file <- files, reduce: [] do
+          acc ->
+            case try_strict_clean(file) do
+              :ok -> acc
+              {:error, reason} -> [{file, reason} | acc]
+            end
+        end
+
+      if failures != [] do
+        report =
+          failures
+          |> Enum.reverse()
+          |> Enum.map_join("\n", fn {file, reason} -> "  #{file}: #{reason}" end)
+
+        flunk("Strict validation failed for #{length(failures)} fixture(s):\n#{report}")
       end
+    end
+
+    test "compile-time frozen corpus stays in sync with on-disk fixtures" do
+      frozen =
+        HL7v2.Conformance.Fixtures.list_fixtures()
+        |> MapSet.new()
+
+      on_disk =
+        @fixture_dir
+        |> File.ls!()
+        |> Enum.filter(&String.ends_with?(&1, ".hl7"))
+        |> MapSet.new()
+
+      missing_from_frozen = MapSet.difference(on_disk, frozen)
+      extra_in_frozen = MapSet.difference(frozen, on_disk)
+
+      assert MapSet.size(missing_from_frozen) == 0,
+             "fixtures on disk but missing from compile-time frozen list " <>
+               "(recompile HL7v2.Conformance.Fixtures): " <>
+               "#{inspect(MapSet.to_list(missing_from_frozen))}"
+
+      assert MapSet.size(extra_in_frozen) == 0,
+             "fixtures in frozen list but missing from disk: " <>
+               "#{inspect(MapSet.to_list(extra_in_frozen))}"
+    end
+  end
+
+  defp try_strict_clean(file) do
+    wire = read_fixture(file)
+
+    with {:ok, typed} <- HL7v2.parse(wire, mode: :typed),
+         :ok <- run_strict(typed) do
+      :ok
+    else
+      {:error, reason} -> {:error, reason}
+      other -> {:error, "unexpected result: #{inspect(other)}"}
+    end
+  rescue
+    exception -> {:error, Exception.message(exception)}
+  end
+
+  defp run_strict(typed) do
+    case HL7v2.validate(typed, mode: :strict) do
+      :ok ->
+        :ok
+
+      {:ok, warnings} when warnings != [] ->
+        {:error, "warnings: #{inspect(Enum.map(warnings, & &1.message))}"}
+
+      {:ok, _} ->
+        :ok
+
+      {:error, errors} ->
+        {:error, "errors: #{inspect(Enum.map(errors, & &1.message))}"}
     end
   end
 
