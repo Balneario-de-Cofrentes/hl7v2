@@ -40,10 +40,8 @@ defmodule HL7v2.Conformance.StructureTest do
       end
     end
 
-    test "catalog has realistic segment count" do
-      count = Standard.segment_count()
-      assert count >= 100, "Expected 100+ standard segments, got #{count}"
-      assert count <= 200, "Expected <200 standard segments, got #{count}"
+    test "segment count is exactly 152 (v2.5.1)" do
+      assert Standard.segment_count() == 152
     end
   end
 
@@ -58,10 +56,8 @@ defmodule HL7v2.Conformance.StructureTest do
       end
     end
 
-    test "catalog has realistic type count" do
-      count = Standard.type_count()
-      assert count >= 70, "Expected 70+ standard types, got #{count}"
-      assert count <= 120, "Expected <120 standard types, got #{count}"
+    test "type count is exactly 90 (89 official v2.5.1 + legacy TN)" do
+      assert Standard.type_count() == 90
     end
   end
 
@@ -151,16 +147,21 @@ defmodule HL7v2.Conformance.StructureTest do
       assert Coverage.typed_segments() == Standard.typed_segment_ids()
     end
 
-    test "coverage_summary returns valid structure" do
+    test "coverage_summary returns valid structure with exact counts" do
       summary = Coverage.coverage_summary()
-      assert is_integer(summary.typed_segment_count)
-      assert is_integer(summary.total_segment_count)
-      assert is_float(summary.segment_coverage_pct)
-      assert is_integer(summary.typed_type_count)
-      assert is_integer(summary.total_type_count)
-      assert is_float(summary.type_coverage_pct)
+
+      # Exact counts that match README claims
+      assert summary.typed_segment_count == 152
+      assert summary.total_segment_count == 152
+      assert summary.segment_coverage_pct == 100.0
+      assert summary.typed_type_count == 90
+      assert summary.total_type_count == 90
+      assert summary.type_coverage_pct == 100.0
+
+      # Shape checks for less-pinnable fields
       assert is_integer(summary.total_typed_fields)
-      assert is_integer(summary.raw_hole_count)
+      assert summary.total_typed_fields > 2000
+      assert summary.raw_hole_count == 2
       assert is_list(summary.raw_holes)
     end
 

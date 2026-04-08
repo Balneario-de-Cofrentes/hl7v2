@@ -71,6 +71,37 @@ defmodule HL7v2.Conformance.FixturesTest do
       assert length(Fixtures.list_fixtures()) == cov.files
       assert length(Fixtures.unique_canonical_structures()) == cov.canonical
     end
+
+    # Exact pins — fail on BOTH shrinkage and expansion-without-doc-update.
+    # When adding fixtures, update these constants AND the README/CHANGELOG
+    # in the same commit.
+    @exact_fixture_files 110
+    @exact_canonical 101
+    @exact_pct 54.3
+
+    test "fixture count is exactly the published number" do
+      cov = Fixtures.coverage()
+
+      assert cov.files == @exact_fixture_files,
+             "fixture count changed from published #{@exact_fixture_files} to #{cov.files}. " <>
+               "Update @exact_fixture_files in fixtures_test.exs AND README/CHANGELOG."
+    end
+
+    test "unique canonical structures is exactly the published number" do
+      cov = Fixtures.coverage()
+
+      assert cov.canonical == @exact_canonical,
+             "canonical count changed from published #{@exact_canonical} to #{cov.canonical}. " <>
+               "Update @exact_canonical in fixtures_test.exs AND README/CHANGELOG."
+    end
+
+    test "percentage is exactly the published number" do
+      cov = Fixtures.coverage()
+
+      assert cov.pct == @exact_pct,
+             "pct changed from published #{@exact_pct} to #{cov.pct}. " <>
+               "Update @exact_pct in fixtures_test.exs AND README/CHANGELOG."
+    end
   end
 
   describe "list_fixtures/0" do

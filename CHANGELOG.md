@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.3.5 — 2026-04-09
+
+### Fixes
+
+- **Schema coverage claims pinned by exact tests** — segment count (152),
+  type count (90), structure count (222), and `coverage_summary` fields are
+  now asserted as exact values, not ranges. Shrinkage or expansion without
+  updating tests fails CI.
+- **Corpus breadth pinned with exact equality** — three new tests assert
+  `@exact_fixture_files`, `@exact_canonical`, `@exact_pct` alongside the
+  existing minimums. Any fixture add/remove now requires updating both the
+  test pins AND the README/CHANGELOG in the same commit. This closes the
+  final claim-proof drift gap: expansion no longer silently passes CI while
+  published numbers go stale.
+- **Packaging smoke test** — new `HL7v2.Conformance.PackagingTest` asserts
+  `mix.exs` `package()[:files]` includes `test/fixtures/conformance`, the
+  directory exists with `.hl7` files, and the on-disk count matches the
+  frozen list. A `package()[:files]` regression now fails CI before reaching
+  Hex.
+
+### Stats
+
+4,682 tests (472 doctests + 32 properties + 4,178 tests), 0 failures
+
 ## v3.3.4 — 2026-04-08
 
 ### Fixes
