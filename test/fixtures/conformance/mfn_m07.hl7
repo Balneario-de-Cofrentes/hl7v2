@@ -1,0 +1,5 @@
+MSH|^~\&|LAB|HOSP|LIS|HOSP|20260408100000||MFN^M07^MFN_M07|MSG105|P|2.5.1
+MFI|OMx^Observation Master^HL70175||UPD|||AL
+MFE|MAD|MSG105|20260408|NA^Sodium^LN|CE
+OM1|1|NA^Sodium^LN||Y|LAB^Clinical Lab^HL70361|||Sodium^Na||||||||||A
+OM2|1|mmol/L^millimoles per liter^UCUM|2|mmol/L^millimoles per liter^UCUM

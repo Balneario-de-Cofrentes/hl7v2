@@ -1,0 +1,6 @@
+MSH|^~\&|CTMS|HOSP|LIS|HOSP|20260408094500||MFN^M06^MFN_M06|MSG104|P|2.5.1
+MFI|CMA^Clinical Study Master^HL70175||UPD|||AL
+MFE|MAD|MSG104|20260408|STUDY001^Phase III Trial^LOCAL|CE
+CM0||STUDY001^SPONSOR^L|ALT001^NIH^L|Phase III Diabetes Trial
+CM1|1|PHASE1^Screening^LOCAL|Initial screening phase for study subjects
+CM2|1|TP01^Day 0 Baseline^LOCAL|Baseline visit at day zero|3

@@ -1,0 +1,8 @@
+MSH|^~\&|PHARM|HOSP|HIS|HOSP|20260408171200||RSP^Z86^RSP_Z86|MSG112|P|2.5.1
+MSA|AA|MSG112REQ
+QAK|QRY112|OK|Pharmacy Information^Pharmacy Information^HL7|1|1|0
+QPD|Pharmacy Information^Pharmacy Information^HL7|QRY112|@PID.3^12345
+PID|1||12345^^^MRN^MR||Smith^John||19800315|M
+ORC|RE||ORD720|||||20260408
+RXE||325850^Amoxicillin 500mg^NDC|1||CAP^Capsule|||||0
+RXR|PO^Oral^HL70162

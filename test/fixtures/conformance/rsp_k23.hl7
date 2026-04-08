@@ -1,0 +1,5 @@
+MSH|^~\&|MPI|HOSP|HIS|HOSP|20260408170700||RSP^K23^RSP_K23|MSG107|P|2.5.1
+MSA|AA|MSG107REQ
+QAK|QRY107|OK|Allocate Identifiers^Allocate Identifiers^HL7|1|1|0
+QPD|Allocate Identifiers^Allocate Identifiers^HL7|QRY107|@PID.5.1^Smith
+PID|1||98765^^^MRN^MR||Smith^John||19800315|M

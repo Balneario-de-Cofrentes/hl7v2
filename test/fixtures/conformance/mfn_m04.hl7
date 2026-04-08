@@ -1,0 +1,5 @@
+MSH|^~\&|BIL|HOSP|CDM|HOSP|20260408091500||MFN^M04^MFN_M04|MSG102|P|2.5.1
+MFI|CDM^Charge Description Master^HL70175||UPD|||AL
+MFE|MAD|MSG102|20260408|CHG500^IV Push^LOCAL|CE
+CDM|CHG500^IV Push^LOCAL||IV Push Admin|IV Push Administration Service
+NTE|1||New charge code for IV push administration

@@ -1,0 +1,5 @@
+MSH|^~\&|LAB|HOSP|LIS|HOSP|20260408090000||MFN^M03^MFN_M03|MSG101|P|2.5.1
+MFI|OMx^Observation Master^HL70175||UPD|||AL
+MFE|MAD|MSG101|20260408|GLUC^Glucose^LN|CE
+OM1|1|GLUC^Glucose^LN||N|LAB^Clinical Lab^HL70361|||Glucose^Blood Sugar||||||||||A
+NTE|1||Routine glucose observation definition

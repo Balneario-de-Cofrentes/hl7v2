@@ -246,6 +246,238 @@ defmodule HL7v2.Conformance.RoundTripTest do
     test "SSU_U03 (specimen status update)" do
       assert_fixture_round_trip("ssu_u03.hl7")
     end
+
+    test "ADT_A12 (cancel transfer)" do
+      assert_fixture_round_trip("adt_a12.hl7")
+    end
+
+    test "ADT_A15 (pending transfer)" do
+      assert_fixture_round_trip("adt_a15.hl7")
+    end
+
+    test "ADT_A20 (bed status update)" do
+      assert_fixture_round_trip("adt_a20.hl7")
+    end
+
+    test "ADT_A21 (patient leave of absence)" do
+      assert_fixture_round_trip("adt_a21.hl7")
+    end
+
+    test "ADT_A24 (link patient information)" do
+      assert_fixture_round_trip("adt_a24.hl7")
+    end
+
+    test "ADT_A30 (merge person information)" do
+      assert_fixture_round_trip("adt_a30.hl7")
+    end
+
+    test "ADT_A37 (unlink patient information)" do
+      assert_fixture_round_trip("adt_a37.hl7")
+    end
+
+    test "ADT_A39 (merge patient — patient ID)" do
+      assert_fixture_round_trip("adt_a39.hl7")
+    end
+
+    test "ADT_A43 (move patient info — identifier list)" do
+      assert_fixture_round_trip("adt_a43.hl7")
+    end
+
+    test "ADT_A54 (change attending doctor)" do
+      assert_fixture_round_trip("adt_a54.hl7")
+    end
+
+    test "ADT_A61 (change consulting doctor)" do
+      assert_fixture_round_trip("adt_a61.hl7")
+    end
+
+    test "DFT_P11 (post detail financial transaction — new)" do
+      assert_fixture_round_trip("dft_p11.hl7")
+    end
+
+    test "QBP_Q11 (segment pattern query)" do
+      assert_fixture_round_trip("qbp_q11.hl7")
+    end
+
+    test "QBP_Q13 (tabular query)" do
+      assert_fixture_round_trip("qbp_q13.hl7")
+    end
+
+    test "QBP_Q15 (display-based query)" do
+      assert_fixture_round_trip("qbp_q15.hl7")
+    end
+
+    test "QBP_Z73 (pending events query)" do
+      assert_fixture_round_trip("qbp_z73.hl7")
+    end
+
+    test "RSP_K11 (segment pattern response)" do
+      assert_fixture_round_trip("rsp_k11.hl7")
+    end
+
+    test "RSP_K13 (tabular response)" do
+      assert_fixture_round_trip("rsp_k13.hl7")
+    end
+
+    test "RSP_K15 (display-based response)" do
+      assert_fixture_round_trip("rsp_k15.hl7")
+    end
+
+    test "RSP_K23 (allocate identifiers response)" do
+      assert_fixture_round_trip("rsp_k23.hl7")
+    end
+
+    test "RSP_K25 (personnel information response)" do
+      assert_fixture_round_trip("rsp_k25.hl7")
+    end
+
+    test "RSP_K31 (pharmacy dispense response)" do
+      assert_fixture_round_trip("rsp_k31.hl7")
+    end
+
+    test "RSP_Q11 (segment pattern response — query Q11)" do
+      assert_fixture_round_trip("rsp_q11.hl7")
+    end
+
+    test "RSP_Z82 (dispense history response)" do
+      assert_fixture_round_trip("rsp_z82.hl7")
+    end
+
+    test "RSP_Z86 (pharmacy information comprehensive response)" do
+      assert_fixture_round_trip("rsp_z86.hl7")
+    end
+
+    test "RSP_Z88 (pharmacy encoded order response)" do
+      assert_fixture_round_trip("rsp_z88.hl7")
+    end
+
+    test "RSP_Z90 (lab results history response)" do
+      assert_fixture_round_trip("rsp_z90.hl7")
+    end
+
+    test "MFN_M03 (test/observation master file)" do
+      assert_fixture_round_trip("mfn_m03.hl7")
+    end
+
+    test "MFN_M04 (charge description master)" do
+      assert_fixture_round_trip("mfn_m04.hl7")
+    end
+
+    test "MFN_M05 (patient location master)" do
+      assert_fixture_round_trip("mfn_m05.hl7")
+    end
+
+    test "MFN_M06 (clinical study with phases)" do
+      assert_fixture_round_trip("mfn_m06.hl7")
+    end
+
+    test "MFN_M07 (clinical study schedule)" do
+      assert_fixture_round_trip("mfn_m07.hl7")
+    end
+
+    test "MFN_M08 (test/observation numeric)" do
+      assert_fixture_round_trip("mfn_m08.hl7")
+    end
+
+    test "MFN_M09 (test/observation categorical)" do
+      assert_fixture_round_trip("mfn_m09.hl7")
+    end
+
+    test "MFN_M10 (test/observation batteries)" do
+      assert_fixture_round_trip("mfn_m10.hl7")
+    end
+
+    test "MFN_M11 (test/calculated observations)" do
+      assert_fixture_round_trip("mfn_m11.hl7")
+    end
+
+    test "MFN_M12 (master file charge override)" do
+      assert_fixture_round_trip("mfn_m12.hl7")
+    end
+
+    test "MFN_M13 (master file inventory item)" do
+      assert_fixture_round_trip("mfn_m13.hl7")
+    end
+
+    test "MFN_M15 (inventory item enhanced)" do
+      assert_fixture_round_trip("mfn_m15.hl7")
+    end
+
+    test "BAR_P10 (transmit ambulance billing)" do
+      assert_fixture_round_trip("bar_p10.hl7")
+    end
+
+    test "BAR_P12 (update diagnosis/procedure)" do
+      assert_fixture_round_trip("bar_p12.hl7")
+    end
+
+    test "OML_O33 (lab order — multiple orders per specimen)" do
+      assert_fixture_round_trip("oml_o33.hl7")
+    end
+
+    test "OML_O35 (lab order — multiple orders per container)" do
+      assert_fixture_round_trip("oml_o35.hl7")
+    end
+
+    test "OML_O39 (specimen shipment order)" do
+      assert_fixture_round_trip("oml_o39.hl7")
+    end
+
+    test "PMU_B03 (delete personnel record)" do
+      assert_fixture_round_trip("pmu_b03.hl7")
+    end
+
+    test "PMU_B04 (active practicing person)" do
+      assert_fixture_round_trip("pmu_b04.hl7")
+    end
+
+    test "PMU_B07 (grant certificate/permission)" do
+      assert_fixture_round_trip("pmu_b07.hl7")
+    end
+
+    test "PMU_B08 (revoke certificate/permission)" do
+      assert_fixture_round_trip("pmu_b08.hl7")
+    end
+
+    test "OMB_O27 (blood product order)" do
+      assert_fixture_round_trip("omb_o27.hl7")
+    end
+
+    test "OMD_O03 (dietary order)" do
+      assert_fixture_round_trip("omd_o03.hl7")
+    end
+
+    test "OMG_O19 (general clinical order)" do
+      assert_fixture_round_trip("omg_o19.hl7")
+    end
+
+    test "OMN_O07 (non-stock requisition)" do
+      assert_fixture_round_trip("omn_o07.hl7")
+    end
+
+    test "OMP_O09 (pharmacy/treatment order)" do
+      assert_fixture_round_trip("omp_o09.hl7")
+    end
+
+    test "ORB_O28 (blood product order acknowledgment)" do
+      assert_fixture_round_trip("orb_o28.hl7")
+    end
+
+    test "ORD_O04 (dietary order acknowledgment)" do
+      assert_fixture_round_trip("ord_o04.hl7")
+    end
+
+    test "ORF_R04 (observation response)" do
+      assert_fixture_round_trip("orf_r04.hl7")
+    end
+
+    test "ORG_O20 (general clinical order response)" do
+      assert_fixture_round_trip("org_o20.hl7")
+    end
+
+    test "ORL_O22 (general laboratory order response)" do
+      assert_fixture_round_trip("orl_o22.hl7")
+    end
   end
 
   describe "non-default delimiters" do

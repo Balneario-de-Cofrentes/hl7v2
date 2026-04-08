@@ -1,0 +1,6 @@
+MSH|^~\&|LAB|HOSP|LIS|HOSP|20260408110000||MFN^M11^MFN_M11|MSG109|P|2.5.1
+MFI|OMx^Observation Master^HL70175||UPD|||AL
+MFE|MAD|MSG109|20260408|ANIONGAP^Anion Gap^LN|CE
+OM1|1|ANIONGAP^Anion Gap^LN||N|LAB^Clinical Lab^HL70361|||Anion Gap^Calculated Anion Gap||||||||||A
+OM6|(NA + K) - (CL + CO2)
+OM2|1|mmol/L^millimoles per liter^UCUM|1|mmol/L^millimoles per liter^UCUM

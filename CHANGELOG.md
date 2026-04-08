@@ -2,6 +2,56 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.3.0 — 2026-04-08
+
+### Fixes
+
+- **MFN canonicalization bug** — `MFN^M03` through `MFN^M13` (except M05) were
+  incorrectly collapsed to `MFN_M01` in `HL7v2.MessageDefinition.canonical_structure/2`,
+  even though all 14 MFN structures are registered. Each trigger now resolves
+  to its own structure for strict validation. This was exposed by the v3.3.0
+  corpus expansion — fixtures for MFN_M03/M04/M06..M13 failed strict validation
+  until the canonical map was corrected.
+
+### Added
+
+**58 new conformance fixtures covering 58 new canonical structures** — corpus
+expansion from 43 to 101 unique canonical structures (**54.3% of 186 official
+v2.5.1 structures**):
+
+- **ADT variants** (11): A12, A15, A20, A21, A24, A30, A37, A39, A43, A54, A61
+- **Financial** (3): DFT_P11, BAR_P10, BAR_P12
+- **Queries & responses** (15): QBP_Q11/Q13/Q15/Z73, RSP_K11/K13/K15/K23/K25/K31/Q11/Z82/Z86/Z88/Z90
+- **Master files** (12): MFN_M03 through MFN_M15 (11 MFN structures + MFK coverage)
+- **Lab orders** (3): OML_O33, OML_O35, OML_O39
+- **Order variants** (5): OMB_O27, OMD_O03, OMG_O19, OMN_O07, OMP_O09
+- **Order responses** (5): ORB_O28, ORD_O04, ORF_R04, ORG_O20, ORL_O22
+- **Personnel management** (4): PMU_B03, PMU_B04, PMU_B07, PMU_B08
+
+All new fixtures pass **strict-clean validation** (`mode: :strict`) with zero
+warnings. Fixture round-trip suite has 105 explicit test cases; strict-clean
+suite auto-discovers all 110 fixture files via `Path.wildcard`.
+
+### Corpus Growth
+
+| | v3.2.0 | v3.3.0 |
+|---|---|---|
+| Wire fixtures | 52 | **110** (+58) |
+| Unique canonical structures | 43 | **101** (+58) |
+| % of 186 official | 23.1% | **54.3%** (+31.2pp) |
+
+### Method
+
+This release was produced by a **Forge loop**: fresh-context audit selected
+60 highest-value targets, then iterative tranches (A: ADT+DFT, B: RSP+QBP,
+C: MFN, D+E: orders & personnel) each fed back through strict validation.
+The MFN canonicalization bug was uncovered by Tranche C and fixed in the
+same iteration.
+
+### Stats
+
+4,763 tests (472 doctests + 32 properties + 4,259 tests), 0 failures
+
 ## v3.2.0 — 2026-04-08
 
 ### Added

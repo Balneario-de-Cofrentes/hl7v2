@@ -1,0 +1,5 @@
+MSH|^~\&|LAB|HOSP|LIS|HOSP|20260408111500||MFN^M12^MFN_M12|MSG110|P|2.5.1
+MFI|OMx^Observation Master^HL70175||UPD|||AL
+MFE|MAD|MSG110|20260408|CBC^Complete Blood Count^LN|CE
+OM1|1|CBC^Complete Blood Count^LN||Y|LAB^Clinical Lab^HL70361|||CBC^Complete Blood Count||||||||||A
+OM7|1|CBC^Complete Blood Count^LN|HEM^Hematology^LOCAL|Hematology category for CBC panel|Hematology|20260101000000|20301231235959|30|min^minute^UCUM

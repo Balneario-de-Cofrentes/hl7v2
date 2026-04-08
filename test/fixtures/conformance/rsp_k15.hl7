@@ -1,0 +1,7 @@
+MSH|^~\&|MPI|HOSP|HIS|HOSP|20260408170600||RSP^K15^RSP_K15|MSG106|P|2.5.1
+MSA|AA|MSG102
+QAK|QRY102|OK|Display Patient Query^Display Query^HL7|1|1|0
+QPD|Display Patient Query^Display Query^HL7|QRY102|@PID.5.1^Smith
+DSP|1|1|Patient: Smith, John (MRN 12345)
+DSP|2|1|DOB: 1980-03-15  Sex: M
+DSP|3|1|Status: Active

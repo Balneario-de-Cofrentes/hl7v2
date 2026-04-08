@@ -1,0 +1,10 @@
+MSH|^~\&|LAB|HOSP|HIS|HOSP|20260408171400||RSP^Z90^RSP_Z90|MSG114|P|2.5.1
+MSA|AA|MSG114REQ
+QAK|QRY114|OK|Lab Results History^Lab Results History^HL7|1|1|0
+QPD|Lab Results History^Lab Results History^HL7|QRY114|@PID.3^12345
+RCP|I|50^RD
+PID|1||12345^^^MRN^MR||Smith^John||19800315|M
+ORC|RE||ORD740|||||20260408
+OBR|1||ORD740|CBC^Complete Blood Count^LN|||20260408
+OBX|1|NM|WBC^White Blood Cell^LN||7.5|10*3/uL|4.0-11.0|N|||F
+OBX|2|NM|HGB^Hemoglobin^LN||14.2|g/dL|12.0-17.0|N|||F

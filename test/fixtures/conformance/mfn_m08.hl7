@@ -1,0 +1,7 @@
+MSH|^~\&|LAB|HOSP|LIS|HOSP|20260408101500||MFN^M08^MFN_M08|MSG106|P|2.5.1
+MFI|OMx^Observation Master^HL70175||UPD|||AL
+MFE|MAD|MSG106|20260408|K^Potassium^LN|CE
+OM1|1|K^Potassium^LN||Y|LAB^Clinical Lab^HL70361|||Potassium^K||||||||||A
+OM2|1|mmol/L^millimoles per liter^UCUM|2|mmol/L^millimoles per liter^UCUM
+OM3|1|LN^LOINC^HL70396
+OM4|1|N|EDTA Tube|10|mL^milliliter^UCUM

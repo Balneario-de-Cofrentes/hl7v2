@@ -1,0 +1,6 @@
+MSH|^~\&|LAB|HOSP|LIS|HOSP|20260408104500||MFN^M10^MFN_M10|MSG108|P|2.5.1
+MFI|OMx^Observation Master^HL70175||UPD|||AL
+MFE|MAD|MSG108|20260408|BMP^Basic Metabolic Panel^LN|CE
+OM1|1|BMP^Basic Metabolic Panel^LN||Y|LAB^Clinical Lab^HL70361|||BMP^Chem 7 Panel||||||||||A
+OM5|1|NA^Sodium^LN~K^Potassium^LN~CL^Chloride^LN~CO2^Carbon Dioxide^LN~BUN^Urea Nitrogen^LN~CREA^Creatinine^LN~GLUC^Glucose^LN|BMP
+OM4|1|N|SST Tube|5|mL^milliliter^UCUM

@@ -1,0 +1,5 @@
+MSH|^~\&|HR|HOSP|HIS|HOSP|20260408170800||RSP^K25^RSP_K25|MSG108|P|2.5.1
+MSA|AA|MSG108REQ
+QAK|QRY108|OK|Personnel Information^Personnel Information^HL7|1|1|0
+QPD|Personnel Information^Personnel Information^HL7|QRY108|@STF.2^STAFF001
+STF|KEY001^Dr Smith|STAFF001^^^HOSP^MR|Smith^Robert^J||M
