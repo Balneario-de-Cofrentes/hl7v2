@@ -1,7 +1,7 @@
 defmodule HL7v2.MixProject do
   use Mix.Project
 
-  @version "2.10.0"
+  @version "2.11.0"
   @source_url "https://github.com/Balneario-de-Cofrentes/hl7v2"
 
   def project do
@@ -53,7 +53,7 @@ defmodule HL7v2.MixProject do
         "Docs" => "https://hexdocs.pm/hl7v2",
         "Changelog" => "#{@source_url}/blob/main/CHANGELOG.md"
       },
-      files: ~w(lib .formatter.exs mix.exs README.md LICENSE CHANGELOG.md guides)
+      files: ~w(lib .formatter.exs mix.exs README.md LICENSE CHANGELOG.md guides docs/reference)
     ]
   end
 
@@ -64,7 +64,16 @@ defmodule HL7v2.MixProject do
         "README.md",
         "CHANGELOG.md",
         "LICENSE",
-        "guides/getting-started.md"
+        "guides/getting-started.md",
+        "docs/reference/segments.md",
+        "docs/reference/data-types.md",
+        "docs/reference/message-structures.md",
+        "docs/reference/encoding-rules.md",
+        "docs/reference/encoding-specification.md"
+      ],
+      groups_for_extras: [
+        Guides: ~r/guides\//,
+        Reference: ~r/docs\/reference\//
       ],
       source_ref: System.get_env("SOURCE_REF") || "v#{@version}",
       groups_for_modules: [

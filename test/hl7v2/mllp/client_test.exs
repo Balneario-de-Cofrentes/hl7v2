@@ -121,33 +121,36 @@ defmodule HL7v2.MLLP.ClientTest do
     Listener.stop(short_listener)
   end
 
-  test "multi-frame: extra frames in one TCP payload are not lost", %{port: _port} do
+  @tag capture_log: true
+  test "multi-frame: stale frames from misbehaving peer are drained before send", %{port: _port} do
     # Stand up a raw TCP server that sends two MLLP frames in a single write
-    # in response to each client request.
+    # in response to each client request. This violates MLLP's 1:1 contract.
     {:ok, listen} = :gen_tcp.listen(0, [:binary, active: false, reuseaddr: true])
     {:ok, tcp_port} = :inet.port(listen)
 
     spawn_link(fn ->
       {:ok, sock} = :gen_tcp.accept(listen, 5_000)
 
-      # Read two requests, each time replying with two MLLP frames in one write
-      for _ <- 1..2 do
-        {:ok, _data} = recv_mllp_frame(sock)
-        ack1 = HL7v2.MLLP.frame("ACK1")
-        ack2 = HL7v2.MLLP.frame("ACK2")
-        :ok = :gen_tcp.send(sock, <<ack1::binary, ack2::binary>>)
-      end
+      # Reply to request 1 with two frames (protocol violation: extra ACK2)
+      {:ok, _data} = recv_mllp_frame(sock)
+      ack1 = HL7v2.MLLP.frame("ACK1")
+      ack2 = HL7v2.MLLP.frame("STALE")
+      :ok = :gen_tcp.send(sock, <<ack1::binary, ack2::binary>>)
+
+      # Reply to request 2 with its own single response
+      {:ok, _data} = recv_mllp_frame(sock)
+      :ok = :gen_tcp.send(sock, HL7v2.MLLP.frame("ACK2"))
 
       :gen_tcp.close(sock)
     end)
 
-    # Connect — this triggers the accept in the spawned process
     {:ok, client} = Client.start_link(host: "127.0.0.1", port: tcp_port)
 
-    # First send_message should get ACK1 from the first two-frame response
+    # First send_message gets ACK1 (the first of the two-frame response)
     assert {:ok, "ACK1"} = Client.send_message(client, "req1")
 
-    # Second send_message should consume the buffered ACK2 (from first response)
+    # Second send_message drains the stale STALE frame, sends req2,
+    # and gets ACK2 — the true response to req2 (1:1 pairing maintained)
     assert {:ok, "ACK2"} = Client.send_message(client, "req2")
 
     Client.close(client)

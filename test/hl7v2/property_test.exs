@@ -235,7 +235,7 @@ defmodule HL7v2.PropertyTest do
   # ---------------------------------------------------------------------------
 
   describe "typed message round-trip" do
-    property "typed parse then encode preserves message identity" do
+    property "typed canonicalization is idempotent (type + segment count preserved)" do
       check all(text <- gen_hl7_message(), max_runs: 50) do
         {:ok, raw} = Parser.parse(text)
         {:ok, typed} = Parser.parse(text, mode: :typed)

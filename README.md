@@ -179,7 +179,7 @@ Validation is opt-in (`HL7v2.validate/2`) and layered:
  Structural  positional order/group/cardinality for all 186 official structures
  Fields      required-field checks, bounded repetition enforcement
  Tables      189 HL7 coded-value tables, 255 field bindings (opt-in: validate_tables: true)
- Conditional 25 segment-specific inter-field rules (all segments with :c fields)
+ Conditional 25 segment-local inter-field rules (see Known Limitations)
 ```
 
 ### Transport
@@ -192,6 +192,23 @@ Validation is opt-in (`HL7v2.validate/2`) and layered:
 
 **HL7 v2.5.1** schema with best-effort adjacent-version tolerance (v2.3 through v2.8.x
 messages parse and round-trip; version-specific deltas are not semantically enforced).
+
+## Known Limitations
+
+**Typed mode canonicalizes wire values.** Trailing empty components are trimmed during
+encoding (`Smith^John^^^^^` becomes `Smith^John`). Parse → encode is idempotent but
+not identity-preserving against the original wire form.
+
+**Three fields remain raw-typed.** OBX-5 (observation value) is `VARIES` per the spec
+and dispatched at runtime via OBX-2 (41 value types supported). QPD-3 (user parameters)
+and RDT-1 (column value) are query-specific and cannot be statically typed. These are
+the three remaining standard gaps in the typed coverage model.
+
+**Conditional validation is segment-local.** The 25 conditional rules approximate HL7
+inter-field conditions without access to the message trigger event. Rules that depend
+on trigger context (e.g., PV2 transfer events, AIS/AIG modification events) use
+heuristic checks and emit warnings rather than errors. Pass `mode: :strict` for
+error-level enforcement.
 
 - Every v2.5.1 segment and data type has a typed Elixir module
 - Raw mode is lossless after successful MSH/separator detection

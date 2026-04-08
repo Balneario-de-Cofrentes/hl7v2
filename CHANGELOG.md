@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.11.0 — 2026-04-08
+
+### Fixes
+
+- **MLLP request/response desync** — stale frames from misbehaving peers are
+  now drained before each send, maintaining strict 1:1 request/response pairing.
+  Previously, buffered extra frames would be returned as the response to a
+  subsequent request, mispairing ACKs with outbound messages.
+- **~h sigil** — now validates repetition legality (non-repeating field +
+  repetition selector = compile error) and component bounds against typed
+  field metadata at compile time.
+- **Typed round-trip contract** — tests and docs now correctly describe typed
+  encode/parse as "canonicalization is idempotent" rather than
+  "identity-preserving" (trailing empty components are trimmed per HL7 encoding
+  rules).
+
+### Added
+
+- **Reference docs in HexDocs** — segments, data types, message structures, and
+  encoding rules are now included in the published documentation.
+- **Known Limitations** section in README — documents the 3 raw field holes
+  (OBX-5 VARIES, QPD-3, RDT-1), segment-local conditional validation, and typed
+  canonicalization behavior.
+
+### Stats
+
+3,875 tests (472 doctests + 32 properties + 3,371 tests), 0 failures
+
 ## v2.10.0 — 2026-04-07
 
 ### Fixes

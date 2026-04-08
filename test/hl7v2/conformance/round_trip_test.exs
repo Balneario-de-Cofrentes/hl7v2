@@ -29,7 +29,7 @@ defmodule HL7v2.Conformance.RoundTripTest do
     {:ok, raw2} = HL7v2.parse(re_encoded)
     assert HL7v2.encode(raw2) == re_encoded
 
-    # Typed round-trip preserves identity
+    # Typed canonicalization is idempotent (trailing empties are trimmed)
     typed_encoded = HL7v2.encode(typed)
     {:ok, typed2} = HL7v2.parse(typed_encoded, mode: :typed)
     assert HL7v2.encode(typed2) == typed_encoded
