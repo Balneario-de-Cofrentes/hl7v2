@@ -7,8 +7,8 @@
 
 152/152 v2.5.1 segments, 90 types, 222 message structures (186/186 official),
 189 tables, 255 field bindings, 25 conditional rule sets (trigger-aware for
-scheduling and transfer events), 32 conformance fixtures covering 30% of
-official structures. 2 true raw gaps (QPD-3, RDT-1) plus 1 runtime-dispatched
+scheduling and transfer events), 32 conformance fixtures (28 unique canonical
+structures, 15% of 186 official). 2 true raw gaps (QPD-3, RDT-1) plus 1 runtime-dispatched
 (OBX-5 VARIES via 41-type OBXValue dispatch). See README Known Limitations.
 Run `mix hl7v2.coverage` for exact counts.
 

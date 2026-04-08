@@ -3,4 +3,4 @@ PID|1||33333^^^MRN^MR||Johnson^Patricia^A||19650430|F
 PV1|1|I|OR^101^A
 ORC|NW|ORD900||||||20260408
 BPO|1|E0277^Packed Red Blood Cells^ISBT128||2
-BPX|1|RA^Ready for Administration^HL70510|A|20260408200000|W1234567890|||E0277^Packed Red Blood Cells^ISBT128||||||2
+BPX|1|RA^Ready for Administration^HL70510|A|20260408200000|W1234567890|E0277^Packed Red Blood Cells^ISBT128||||||||2

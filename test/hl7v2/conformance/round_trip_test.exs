@@ -34,11 +34,27 @@ defmodule HL7v2.Conformance.RoundTripTest do
     {:ok, typed2} = HL7v2.parse(typed_encoded, mode: :typed)
     assert HL7v2.encode(typed2) == typed_encoded
 
-    # Validation passes
+    # Lenient validation passes (warnings allowed)
     case HL7v2.validate(typed) do
       :ok -> :ok
       {:ok, _warnings} -> :ok
       {:error, errors} -> flunk("Validation failed: #{inspect(errors)}")
+    end
+  end
+
+  defp assert_fixture_strict_clean(file) do
+    wire = read_fixture(file)
+    assert {:ok, typed} = HL7v2.parse(wire, mode: :typed)
+
+    case HL7v2.validate(typed, mode: :strict) do
+      :ok ->
+        :ok
+
+      {:ok, warnings} ->
+        flunk("Strict validation produced warnings: #{inspect(Enum.map(warnings, & &1.message))}")
+
+      {:error, errors} ->
+        flunk("Strict validation failed: #{inspect(Enum.map(errors, & &1.message))}")
     end
   end
 
@@ -197,6 +213,18 @@ defmodule HL7v2.Conformance.RoundTripTest do
       re_encoded = HL7v2.encode(typed)
       assert re_encoded =~ "extra20"
       assert re_encoded =~ "extra22"
+    end
+  end
+
+  # Strict-clean suite: every fixture must pass strict validation with zero
+  # warnings. This is the real conformance proof — not just round-trip fidelity.
+  describe "strict-clean conformance" do
+    for file <- Path.wildcard(Path.join(@fixture_dir, "*.hl7")) do
+      name = Path.basename(file, ".hl7")
+
+      test "#{name} passes strict validation" do
+        assert_fixture_strict_clean(unquote(name) <> ".hl7")
+      end
     end
   end
 end

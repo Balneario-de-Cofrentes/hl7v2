@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.0.2 — 2026-04-08
+
+### Fixes
+
+- **PV2 transfer rule respects strict mode** — `prior_pending_location` check
+  now escalates to `:error` in strict mode for transfer triggers. Previously
+  hardcoded to `:warning` regardless of mode.
+- **All 32 fixtures pass strict-clean validation** — fixtures fixed: NTE ordering
+  in ADT_A01, PV2-1 populated in ADT_A02, BPX donation/commercial path in
+  BPS_O29. Zero warnings under `mode: :strict`.
+- **Fixture coverage percentage corrected** — 32 files map to 28 unique canonical
+  structures (15.1% of 186 official), not 30% as previously claimed.
+
+### Added
+
+- **Strict-clean conformance suite** — new test describe block runs every fixture
+  under `mode: :strict` and fails on any warning. Lenient round-trip suite is
+  preserved separately.
+
+### Stats
+
+3,938 tests (472 doctests + 32 properties + 3,434 tests), 0 failures
+
 ## v3.0.1 — 2026-04-08
 
 ### Fixes
@@ -43,8 +66,8 @@ All notable changes to this project will be documented in this file.
   heuristic fallback is preserved for backwards compatibility.
 - **14 new conformance fixtures** — ADT_A02/A04/A08/A17, ORU_R01 multi-OBR,
   ORU_R30, OML_O21, OMI_O23, OMS_O05, RDS_O13, RAS_O17, BPS_O29, MFN_M01,
-  SIU_S14. Total: 32 fixture round-trips covering 30% of official structures
-  (up from 17%).
+  SIU_S14. 32 fixture files covering 28 unique canonical structures (15% of
+  186 official). All pass strict-clean validation.
 - **OBX-5 runtime-dispatched** in coverage reporting — `mix hl7v2.coverage`
   now distinguishes between true raw gaps (QPD-3, RDT-1) and intentionally
   runtime-typed fields (OBX-5 VARIES via OBXValue dispatch).

@@ -1044,7 +1044,7 @@ defmodule HL7v2.Validation.FieldRules do
            semantic_blank?(pv2.prior_pending_location) do
         [
           %{
-            level: :warning,
+            level: cond_level,
             location: location,
             field: :prior_pending_location,
             message:
