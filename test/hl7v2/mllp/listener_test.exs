@@ -17,7 +17,11 @@ defmodule HL7v2.MLLP.ListenerTest do
     port = Listener.port(listener)
 
     on_exit(fn ->
-      if Process.alive?(listener), do: Listener.stop(listener)
+      try do
+        if Process.alive?(listener), do: Listener.stop(listener)
+      catch
+        :exit, _ -> :ok
+      end
     end)
 
     %{listener: listener, port: port}
