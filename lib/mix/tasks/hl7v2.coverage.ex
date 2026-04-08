@@ -73,6 +73,22 @@ defmodule Mix.Tasks.Hl7v2.Coverage do
     end
 
     Mix.shell().info("")
+    print_fixture_coverage()
+  end
+
+  defp print_fixture_coverage do
+    case HL7v2.Conformance.Fixtures.coverage() do
+      %{files: 0} ->
+        :ok
+
+      %{files: files, canonical: canonical, total_official: total, pct: pct} ->
+        Mix.shell().info("""
+          Fixture Corpus:
+            #{files} wire fixtures
+            #{canonical} unique canonical structures
+            #{pct}% of #{total} official v2.5.1 structures
+        """)
+    end
   end
 
   defp runtime_dispatched_label(%{runtime_dispatched_count: 0}), do: ""

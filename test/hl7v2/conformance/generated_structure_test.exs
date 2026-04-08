@@ -13,8 +13,9 @@ defmodule HL7v2.Conformance.GeneratedStructureTest do
      at least one ordering/missing error (skipped for structures where every
      required segment can legitimately appear at multiple positions).
   4. **Non-repeating overflow**: a duplicated non-repeating required segment ->
-     validator reports a cardinality error (skipped when no suitable segment
-     exists).
+     validator flags it (may be reported as cardinality, out-of-order, or
+     unexpected depending on structure shape; this test only asserts *some*
+     diagnostic is emitted). Skipped when no suitable segment exists.
   5. **Extra unknown segment**: an unknown segment ID injected -> validator
      either flags it or ignores it gracefully (regression guard against
      crashes on unrecognized IDs).

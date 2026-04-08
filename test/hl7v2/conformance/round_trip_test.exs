@@ -216,9 +216,12 @@ defmodule HL7v2.Conformance.RoundTripTest do
     end
   end
 
-  # Strict-clean suite: every fixture must pass strict validation with zero
-  # warnings. This is the real conformance proof — not just round-trip fidelity.
-  describe "strict-clean conformance" do
+  # Strict-clean fixture corpus: every wire fixture on disk must pass strict
+  # validation with zero warnings. This is stronger than round-trip fidelity
+  # (it exercises structural + field + conditional checks end-to-end), but its
+  # breadth is bounded by the corpus — currently far narrower than the full
+  # 186 official v2.5.1 structures. See `mix hl7v2.coverage` for exact breadth.
+  describe "strict-clean fixture corpus" do
     for file <- Path.wildcard(Path.join(@fixture_dir, "*.hl7")) do
       name = Path.basename(file, ".hl7")
 

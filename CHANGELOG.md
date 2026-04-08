@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.1.1 — 2026-04-08
+
+### Fixes
+
+- **Fixture coverage counts computed live from disk** — `HL7v2.Conformance.Fixtures`
+  module is now the single source of truth. `mix hl7v2.coverage` reads the
+  fixture directory and reports current file count, unique canonical structures,
+  and percentage of 186 official. Prevents doc drift.
+- **Strict-clean suite wording** — describe block renamed from "real conformance
+  proof" to "strict-clean fixture corpus" with a comment noting its breadth is
+  bounded by the on-disk corpus, not the full standard.
+- **Generated non-repeating test wording** — moduledoc no longer claims the
+  assertion checks specifically for a "cardinality error"; the test asserts only
+  that the validator emits *some* diagnostic (cardinality, out-of-order, or
+  unexpected) for the duplicated segment.
+
+### Added
+
+- `HL7v2.Conformance.Fixtures.coverage/0` — returns `%{files, canonical,
+  total_official, pct}` computed from the fixture directory.
+- `HL7v2.Conformance.Fixtures.list_fixtures/0` — sorted list of .hl7 files.
+- `HL7v2.Conformance.Fixtures.unique_canonical_structures/1` — deduplicated
+  canonical structures covered by the corpus.
+
+### Current Fixture Corpus
+
+37 wire fixtures, 28 unique canonical structures, 15.1% of 186 official v2.5.1.
+
+### Stats
+
+4,621 tests (472 doctests + 32 properties + 4,117 tests), 0 failures
+
 ## v3.1.0 — 2026-04-08
 
 ### Fixes
