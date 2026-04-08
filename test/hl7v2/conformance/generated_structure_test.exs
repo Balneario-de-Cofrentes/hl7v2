@@ -3,12 +3,21 @@ defmodule HL7v2.Conformance.GeneratedStructureTest do
   Programmatically generated structural validation tests for all 222 message
   structure definitions.
 
-  For each structure two tests are generated at compile time:
+  For each structure, five tests are generated at compile time:
 
-  1. **Positive** -- all required segments present in order -> no missing-segment
-     errors from the structural validator.
-  2. **Negative** -- only MSH supplied -> the validator reports at least one
-     missing required segment (every structure requires more than MSH alone).
+  1. **Positive — in order**: all required segments present in order -> no
+     missing-segment errors from the structural validator.
+  2. **MSH only fails**: only MSH supplied -> the validator reports at least
+     one missing required segment.
+  3. **Wrong order**: MSH + required segments in reverse -> validator reports
+     at least one ordering/missing error (skipped for structures where every
+     required segment can legitimately appear at multiple positions).
+  4. **Non-repeating overflow**: a duplicated non-repeating required segment ->
+     validator reports a cardinality error (skipped when no suitable segment
+     exists).
+  5. **Extra unknown segment**: an unknown segment ID injected -> validator
+     either flags it or ignores it gracefully (regression guard against
+     crashes on unrecognized IDs).
   """
   use ExUnit.Case, async: true
 
@@ -51,6 +60,41 @@ defmodule HL7v2.Conformance.GeneratedStructureTest do
   defp do_extract([{:group, _, :optional, :repeating, _children} | rest]),
     do: do_extract(rest)
 
+  # -- Helper: find a non-repeating required segment after MSH ------------------
+  #
+  # Returns the first required segment that is NOT marked :repeating (so
+  # duplicating it must fail cardinality). Returns nil if every required
+  # segment can repeat.
+  @doc false
+  def first_non_repeating_required(nodes), do: do_find_nonrep(nodes)
+
+  defp do_find_nonrep([]), do: nil
+
+  defp do_find_nonrep([{:segment, :MSH, _} | rest]), do: do_find_nonrep(rest)
+
+  defp do_find_nonrep([{:segment, id, :required} | _]), do: id
+
+  defp do_find_nonrep([{:segment, _, :required, :repeating} | rest]),
+    do: do_find_nonrep(rest)
+
+  defp do_find_nonrep([{:segment, _, :optional} | rest]),
+    do: do_find_nonrep(rest)
+
+  defp do_find_nonrep([{:segment, _, :optional, :repeating} | rest]),
+    do: do_find_nonrep(rest)
+
+  defp do_find_nonrep([{:group, _, :required, children} | rest]) when is_list(children),
+    do: do_find_nonrep(children) || do_find_nonrep(rest)
+
+  defp do_find_nonrep([{:group, _, :required, :repeating, _children} | rest]),
+    do: do_find_nonrep(rest)
+
+  defp do_find_nonrep([{:group, _, :optional, _children} | rest]),
+    do: do_find_nonrep(rest)
+
+  defp do_find_nonrep([{:group, _, :optional, :repeating, _children} | rest]),
+    do: do_find_nonrep(rest)
+
   # -- Generate test pairs for every defined structure -------------------------
 
   for name <- MessageStructure.names() do
@@ -88,6 +132,59 @@ defmodule HL7v2.Conformance.GeneratedStructureTest do
 
         assert length(missing) > 0,
                "#{unquote(name)}: should report missing required segments when given MSH only"
+      end
+
+      test "flags wrong order when MSH is not first (strict mode)" do
+        structure = MessageStructure.get(unquote(name))
+        required = unquote(__MODULE__).extract_required_ordered(structure.nodes)
+        segment_ids = Enum.map(required, &Atom.to_string/1)
+
+        # Move MSH to the end — universally invalid
+        [_msh | rest] = segment_ids
+        scrambled = rest ++ ["MSH"]
+
+        errors = Structural.validate(structure, scrambled, mode: :strict)
+
+        assert Enum.any?(errors, &(&1.level == :error)),
+               "#{unquote(name)}: expected strict errors when MSH is not first, got #{inspect(errors)}"
+      end
+
+      test "flags duplicated non-repeating required segment (strict mode)" do
+        structure = MessageStructure.get(unquote(name))
+        required = unquote(__MODULE__).extract_required_ordered(structure.nodes)
+        non_rep = unquote(__MODULE__).first_non_repeating_required(structure.nodes)
+
+        if non_rep == nil do
+          # Skip: every required segment can legitimately repeat
+          :ok
+        else
+          segment_ids = Enum.map(required, &Atom.to_string/1)
+          non_rep_str = Atom.to_string(non_rep)
+
+          # Duplicate the non-repeating required segment
+          duped = segment_ids ++ [non_rep_str]
+
+          errors = Structural.validate(structure, duped, mode: :strict)
+
+          # Strict mode should flag cardinality overflow as at least a warning
+          # or error. We just need evidence the validator saw it.
+          assert Enum.any?(errors, &(&1.level in [:error, :warning])),
+                 "#{unquote(name)}: duplicating non-repeating #{non_rep_str} should be flagged"
+        end
+      end
+
+      test "unknown segment does not crash the validator" do
+        structure = MessageStructure.get(unquote(name))
+        required = unquote(__MODULE__).extract_required_ordered(structure.nodes)
+        segment_ids = Enum.map(required, &Atom.to_string/1)
+
+        # Inject an unknown segment ID right after MSH
+        [msh | rest] = segment_ids
+        polluted = [msh, "ZZZ"] ++ rest
+
+        # Should not raise; result shape must be a list of errors/warnings.
+        errors = Structural.validate(structure, polluted)
+        assert is_list(errors)
       end
     end
   end

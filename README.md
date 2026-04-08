@@ -194,8 +194,10 @@ Validation is opt-in (`HL7v2.validate/2`) and layered:
 
 ## Scope
 
-**HL7 v2.5.1** schema with best-effort adjacent-version tolerance (v2.3 through v2.8.x
-messages parse and round-trip; version-specific deltas are not semantically enforced).
+**HL7 v2.5.1** schema. Parser/encoder tolerance for adjacent versions (v2.3
+through v2.8.x) is limited to round-trip fidelity — a small version-matrix
+fixture slice exercises ADT_A01 at each version, but version-specific schema
+deltas, new/deprecated fields, and trigger events are not semantically enforced.
 
 ## Known Limitations
 

@@ -269,6 +269,21 @@ defmodule HL7v2.ValidationTest do
       end
     end
 
+    test "ACK^A01^ACK_A01 falls back to bare ACK structure" do
+      # ACK_A01 is not a registered structure — should fall back to ACK
+      wire =
+        "MSH|^~\\&|S|F||R|20260408||ACK^A01^ACK_A01|1|P|2.5.1\r" <>
+          "MSA|AA|MSG001\r"
+
+      {:ok, typed} = HL7v2.parse(wire, mode: :typed)
+
+      case HL7v2.validate(typed) do
+        :ok -> :ok
+        {:ok, warnings} -> refute Enum.any?(warnings, &(&1.message =~ "structure not checked"))
+        {:error, errors} -> flunk("Validation failed: #{inspect(errors)}")
+      end
+    end
+
     test "ADT^A28^ADT_A28 alias resolves to ADT_A05 for structural validation" do
       wire =
         "MSH|^~\\&|S|F||R|20260408||ADT^A28^ADT_A28|1|P|2.5.1\r" <>

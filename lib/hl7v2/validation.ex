@@ -120,12 +120,19 @@ defmodule HL7v2.Validation do
   defp canonicalize_structure(code, event) when is_binary(code) and is_binary(event) do
     resolved = MessageDefinition.canonical_structure(code, event)
 
-    # If canonical_structure returned the literal "CODE_EVENT" fallback,
-    # check whether it actually exists in the structure registry.
-    if HL7v2.Standard.MessageStructure.get(resolved) != nil do
-      resolved
-    else
-      nil
+    cond do
+      # Canonical resolution found a registered structure
+      HL7v2.Standard.MessageStructure.get(resolved) != nil ->
+        resolved
+
+      # Fallback: the bare message_code is itself a registered structure.
+      # Handles cases like ACK^A01^ACK_A01 — ACK_A01 isn't registered, but
+      # ACK is. Also covers ACK^A02^ACK_A02, ACK^A08^ACK_A08, etc.
+      HL7v2.Standard.MessageStructure.get(code) != nil ->
+        code
+
+      true ->
+        nil
     end
   end
 

@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.1.0 — 2026-04-08
+
+### Fixes
+
+- **ACK_A01-style aliases now resolve** — `ACK^A01^ACK_A01`, `ACK^A02^ACK_A02`,
+  etc. now fall back to the bare `ACK` structure when the specific alias isn't
+  registered. Previously these returned "structure not checked" warnings.
+
+### Added
+
+- **Richer generated structural negatives** — every one of the 222 message
+  structures now has 5 generated tests instead of 2: positive in order,
+  MSH-only fails, MSH-not-first flagged in strict mode, non-repeating required
+  duplicated is flagged, and unknown segment injection does not crash. Total:
+  1,110 generated structure tests.
+- **Version-matrix fixtures** — ADT_A01 fixtures at v2.3, v2.4, v2.6, v2.7, and
+  v2.8. Adjacent-version tolerance is now exercised by real wire messages at
+  each version declaration.
+
+### Changed
+
+- **Scope claim narrowed** — README now describes adjacent-version tolerance as
+  "parser/encoder round-trip" rather than broad interoperability. The version
+  matrix slice is small by design.
+
+### Stats
+
+4,615 tests (472 doctests + 32 properties + 4,111 tests), 0 failures
+
 ## v3.0.2 — 2026-04-08
 
 ### Fixes

@@ -227,4 +227,28 @@ defmodule HL7v2.Conformance.RoundTripTest do
       end
     end
   end
+
+  # Adjacent-version tolerance: same ADT^A01 wire structure at v2.3, v2.4,
+  # v2.6, v2.7, v2.8. Verifies the parser/encoder round-trip across non-2.5.1
+  # version declarations in MSH-12.
+  describe "adjacent-version tolerance" do
+    for version <- ~w(2.3 2.4 2.6 2.7 2.8) do
+      fixture = "adt_a01_v#{String.replace(version, ".", "")}.hl7"
+
+      test "ADT_A01 at v#{version} round-trips" do
+        wire = read_fixture(unquote(fixture))
+
+        {:ok, raw} = HL7v2.parse(wire)
+        assert HL7v2.encode(raw) |> byte_size() > 0
+
+        {:ok, typed} = HL7v2.parse(wire, mode: :typed)
+        msh = hd(typed.segments)
+        assert msh.version_id.version_id == unquote(version)
+
+        typed_encoded = HL7v2.encode(typed)
+        {:ok, typed2} = HL7v2.parse(typed_encoded, mode: :typed)
+        assert HL7v2.encode(typed2) == typed_encoded
+      end
+    end
+  end
 end
