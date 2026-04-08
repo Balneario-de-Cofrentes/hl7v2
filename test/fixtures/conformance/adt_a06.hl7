@@ -1,0 +1,5 @@
+MSH|^~\&|ADM|HOSP|LAB|LAB|20260409080000||ADT^A06^ADT_A06|MSG044|P|2.5.1
+EVN|A06|20260409080000
+PID|1||55667^^^MRN^MR||Brooks^Allison^M||19820419|F|||77 Cedar Way^^Denver^CO^80202||555-5566
+PV1|1|I|W^512^A^^^N||||3344^Reyes^Manuel|||MED|||A0
+DG1|1||J18.9^Pneumonia unspecified organism^I10|||A

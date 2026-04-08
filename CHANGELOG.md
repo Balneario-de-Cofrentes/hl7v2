@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.2.0 — 2026-04-08
+
+### Added
+
+- **15 new conformance fixtures covering 15 new canonical structures**:
+  ADT_A03 (discharge), ADT_A06 (change outpatient to inpatient), ADT_A09
+  (patient departing tracking), ADT_A16 (pending discharge), ADT_A18 (merge
+  patient info), ADT_A38 (cancel pre-admit), ADT_A45 (move visit info),
+  ADT_A50 (change visit number), ADT_A60 (update allergy info), BAR_P02
+  (purge patient accounts), DOC_T12 (document response), MDM_T01 (original
+  document notification), MFK_M01 (master file application ack), QRY_A19
+  (patient demographics query), SSU_U03 (specimen status update).
+- All new fixtures pass strict-clean validation with zero warnings.
+- Fixture round-trip suite now has 47 explicit test cases; strict-clean
+  suite auto-discovers all 52 fixture files via `Path.wildcard`.
+
+### Corpus Growth
+
+**52 wire fixtures, 43 unique canonical structures, 23.1% of 186 official
+v2.5.1** (up from 37 / 28 / 15.1% in v3.1.1).
+
+### Stats
+
+4,651 tests (472 doctests + 32 properties + 4,147 tests), 0 failures
+
 ## v3.1.1 — 2026-04-08
 
 ### Fixes

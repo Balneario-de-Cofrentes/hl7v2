@@ -1,0 +1,5 @@
+MSH|^~\&|ADM|HOSP|LAB|LAB|20260408220000||ADT^A03^ADT_A03|MSG043|P|2.5.1
+EVN|A03|20260408220000
+PID|1||44455^^^MRN^MR||Henderson^Margaret^L||19450712|F|||50 Maple Ln^^Albany^NY^12203||555-4445
+PV1|1|I|W^410^2^^^N||||7890^Stewart^Daniel|||MED|||A0||||||7890^Stewart^Daniel||||||||||||||||||||||20260401120000|20260408140000
+DG1|1||I50.9^Heart failure unspecified^I10|||F

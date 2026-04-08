@@ -186,6 +186,66 @@ defmodule HL7v2.Conformance.RoundTripTest do
     test "SIU_S14 (modify appointment)" do
       assert_fixture_round_trip("siu_s14.hl7")
     end
+
+    test "ADT_A03 (discharge patient)" do
+      assert_fixture_round_trip("adt_a03.hl7")
+    end
+
+    test "ADT_A06 (change outpatient to inpatient)" do
+      assert_fixture_round_trip("adt_a06.hl7")
+    end
+
+    test "ADT_A09 (patient departing tracking)" do
+      assert_fixture_round_trip("adt_a09.hl7")
+    end
+
+    test "ADT_A16 (pending discharge)" do
+      assert_fixture_round_trip("adt_a16.hl7")
+    end
+
+    test "ADT_A18 (merge patient information)" do
+      assert_fixture_round_trip("adt_a18.hl7")
+    end
+
+    test "ADT_A38 (cancel pre-admit)" do
+      assert_fixture_round_trip("adt_a38.hl7")
+    end
+
+    test "ADT_A45 (move visit info — visit number)" do
+      assert_fixture_round_trip("adt_a45.hl7")
+    end
+
+    test "ADT_A50 (change visit number)" do
+      assert_fixture_round_trip("adt_a50.hl7")
+    end
+
+    test "ADT_A60 (update allergy information)" do
+      assert_fixture_round_trip("adt_a60.hl7")
+    end
+
+    test "BAR_P02 (purge patient accounts)" do
+      assert_fixture_round_trip("bar_p02.hl7")
+    end
+
+    test "DOC_T12 (document response)" do
+      assert_fixture_round_trip("doc_t12.hl7")
+    end
+
+    test "MDM_T01 (original document notification)" do
+      assert_fixture_round_trip("mdm_t01.hl7")
+    end
+
+    test "MFK_M01 (master file application ack)" do
+      assert_fixture_round_trip("mfk_m01.hl7")
+    end
+
+    test "QRY_A19 (patient demographics query)" do
+      assert_fixture_round_trip("qry_a19.hl7")
+    end
+
+    test "SSU_U03 (specimen status update)" do
+      assert_fixture_round_trip("ssu_u03.hl7")
+    end
   end
 
   describe "non-default delimiters" do
