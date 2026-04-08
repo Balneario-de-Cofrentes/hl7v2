@@ -43,22 +43,27 @@ defmodule HL7v2.Conformance.PackagingTest do
 
   describe "built tarball includes conformance corpus" do
     @tag timeout: 60_000
-    test "mix hex.build tarball contains exactly the frozen fixture count" do
+    test "mix hex.build tarball .hl7 count matches frozen fixture count" do
+      # Build into a temp dir so we never mutate the project root.
+      tmp_dir = Path.join(System.tmp_dir!(), "hl7v2_pkg_test_#{:rand.uniform(1_000_000)}")
+      File.mkdir_p!(tmp_dir)
+
       project_dir = Mix.Project.config()[:lockfile] |> Path.dirname()
       version = Mix.Project.config()[:version]
-      expected_tarball = "hl7v2-#{version}.tar"
 
-      {_output, 0} = System.cmd("mix", ["hex.build"], cd: project_dir)
-
-      tarball_path = Path.join(project_dir, expected_tarball)
+      tarball_path = Path.join(tmp_dir, "hl7v2-#{version}.tar")
+      {_output, 0} = System.cmd("mix", ["hex.build", "--output", tarball_path], cd: project_dir)
 
       assert File.exists?(tarball_path),
-             "expected #{expected_tarball} but it was not produced by mix hex.build"
+             "expected #{tarball_path} but mix hex.build did not produce it"
 
-      # Extract contents.tar.gz from outer tar, then list its entries
-      tmp = Path.join(System.tmp_dir!(), "hl7v2_pkg_#{:rand.uniform(1_000_000)}.tar.gz")
-      {_, 0} = System.cmd("sh", ["-c", "tar -xOf #{tarball_path} contents.tar.gz > #{tmp}"])
-      {listing, 0} = System.cmd("tar", ["-tzf", tmp])
+      # Extract contents.tar.gz using argument lists (safe for paths with spaces)
+      contents_gz = Path.join(tmp_dir, "contents.tar.gz")
+      {_, 0} = System.cmd("tar", ["-xf", tarball_path, "-C", tmp_dir, "contents.tar.gz"])
+
+      assert File.exists?(contents_gz), "contents.tar.gz not found inside tarball"
+
+      {listing, 0} = System.cmd("tar", ["-tzf", contents_gz])
 
       hl7_count =
         listing
@@ -69,9 +74,8 @@ defmodule HL7v2.Conformance.PackagingTest do
 
       frozen_count = length(HL7v2.Conformance.Fixtures.list_fixtures())
 
-      # Clean up
-      File.rm(tmp)
-      File.rm(tarball_path)
+      # Clean up temp dir — never touches the project root
+      File.rm_rf!(tmp_dir)
 
       assert hl7_count == frozen_count,
              "tarball contains #{hl7_count} .hl7 files but frozen list has #{frozen_count}"
