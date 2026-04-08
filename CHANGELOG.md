@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.4.0 — 2026-04-09
+
+### Fixes
+
+- **Conditional rule test proves each clause exists** — each of the 24
+  segment-specific rules is now triggered with data that MUST produce
+  non-empty output. A blank struct hitting the default catch-all would
+  fail. Previously only tested `is_list(errors)`.
+- **Raw gap identities pinned** — `Coverage.raw_holes()` asserted as
+  exact tuples `[{"QPD", ...}, {"RDT", ...}]` and `runtime_dispatched()`
+  as `[{"OBX", ...}]`. A swap to different fields fails CI.
+- **Tarball test is safe and exact** — builds into temp dir (`--output`),
+  uses `System.cmd` argument lists (safe for paths with spaces), derives
+  tarball name from `Mix.Project.config()[:version]`, asserts `.hl7`
+  count == frozen fixture count (exact equality). Never mutates the
+  project root.
+- **Zero test noise** — `@moduletag capture_log: true` on ConnectionTest,
+  `@tag capture_log: true` on timeout tests in ListenerTest and ClientTest,
+  named `&handle_telemetry_event/4` replaces anonymous handler lambdas.
+  Test output is pure dots.
+- **ListenerTest teardown flake fixed** — `on_exit` wraps `Listener.stop/1`
+  in `try/catch :exit` to handle concurrent-client tests where the listener
+  exits before cleanup.
+- **All overclaims narrowed** — PackagingTest moduledoc, Fixtures moduledoc,
+  README, and CHANGELOG wording aligned to what CI actually proves (tarball
+  file count equality, not compile-and-compare coverage map parity).
+
+### Stats
+
+4,688 tests (472 doctests + 32 properties + 4,184 tests), 0 failures.
+Zero noise in test output.
+
 ## v3.3.6 — 2026-04-09
 
 ### Fixes
