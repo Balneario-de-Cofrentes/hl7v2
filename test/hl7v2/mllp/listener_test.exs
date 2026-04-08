@@ -172,6 +172,7 @@ defmodule HL7v2.MLLP.ListenerTest do
     end
   end
 
+  @tag capture_log: true
   test "connection timeout for idle connections" do
     # Start a listener with a very short timeout
     {:ok, listener} =

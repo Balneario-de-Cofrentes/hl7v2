@@ -1,9 +1,9 @@
 defmodule HL7v2.Conformance.PackagingTest do
   @moduledoc """
-  Verifies the Hex package configuration ships the conformance fixture
-  corpus so installed artifacts report the same coverage stats as the
-  source tree. Catches mix.exs `package()[:files]` regressions before
-  they reach Hex users.
+  Verifies the Hex package ships the conformance fixture corpus and that
+  the built tarball's `.hl7` file count matches the compile-time frozen
+  list. Catches `mix.exs` `package()[:files]` regressions before they
+  reach Hex users.
   """
   use ExUnit.Case, async: true
 

@@ -96,6 +96,7 @@ defmodule HL7v2.MLLP.ClientTest do
     Client.close(client)
   end
 
+  @tag capture_log: true
   test "recv error when server closes during receive", %{port: _port} do
     # Start a listener with a very short timeout so it closes connections quickly.
     # Use 1ms timeout + 300ms wait for a 300x margin to eliminate flake.
