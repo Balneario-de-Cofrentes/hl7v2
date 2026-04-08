@@ -192,6 +192,23 @@ Validation is opt-in (`HL7v2.validate/2`) and layered:
  MLLP        Ranch 2.x listener, GenServer client, TLS/mTLS, telemetry
 ```
 
+### Conformance Corpus
+
+Real-wire fixtures validated end-to-end (raw parse → typed parse → round-trip →
+strict validation with zero warnings):
+
+```
+ Fixtures    110 wire files covering 101 unique canonical structures
+ Breadth     101 of 186 official v2.5.1 structures (54.3%)
+ Families    ADT, ORU, ORM, OML, OMI, OMB, OMD, OMG, OMN, OMP, OMS, ORB,
+             ORD, ORF, ORG, ORI, ORL, RAS, RDE, RDS, RGV, BPS, BAR, DFT,
+             MDM, MFN, MFK, DOC, PMU, PPR, QBP, QRY, RSP, REF, SIU, SRM,
+             SSU, VXU, ACK, and more
+```
+
+Run `mix hl7v2.coverage` for the live count — `HL7v2.Conformance.Fixtures`
+is the single source of truth and reads the fixture directory at runtime.
+
 ## Scope
 
 **HL7 v2.5.1** schema. Parser/encoder tolerance for adjacent versions (v2.3
