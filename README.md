@@ -204,8 +204,7 @@ strict validation with zero warnings):
 
 The corpus is computed at **compile time** from the fixture directory and
 frozen into `HL7v2.Conformance.Fixtures`. The fixture files themselves
-(`test/fixtures/conformance/*.hl7`) ship inside the Hex package, so installed
-artifacts compile against the same corpus as the source tree. A CI-level
+(`test/fixtures/conformance/*.hl7`) ship inside the Hex package. A CI-level
 tarball test verifies that the built `.tar` contains exactly the same number
 of `.hl7` files as the frozen compile-time list.
 

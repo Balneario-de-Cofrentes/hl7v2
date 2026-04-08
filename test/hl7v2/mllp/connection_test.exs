@@ -1,6 +1,10 @@
 defmodule HL7v2.MLLP.ConnectionTest do
   use ExUnit.Case, async: true
 
+  # Suppress expected handler error/warning/timeout logs. These tests
+  # intentionally exercise error paths that emit log output.
+  @moduletag capture_log: true
+
   alias HL7v2.MLLP.{Client, Listener}
 
   # Named handler function to avoid telemetry "local function" warnings.
