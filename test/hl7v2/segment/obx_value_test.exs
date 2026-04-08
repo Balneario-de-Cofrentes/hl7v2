@@ -281,6 +281,10 @@ defmodule HL7v2.Segment.OBXValueTest do
       types = OBXValue.known_types()
       refute "FAKE" in types
     end
+
+    test "exact count matches published README claim (41 types)" do
+      assert length(OBXValue.known_types()) == 41
+    end
   end
 
   describe "integration: full OBX parse with typed dispatch" do

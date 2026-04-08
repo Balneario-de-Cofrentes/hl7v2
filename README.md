@@ -183,7 +183,7 @@ Validation is opt-in (`HL7v2.validate/2`) and layered:
  Structural  positional order/group/cardinality for all 186 official structures
  Fields      required-field checks, bounded repetition enforcement
  Tables      189 HL7 coded-value tables, 255 field bindings (opt-in: validate_tables: true)
- Conditional 25 segment-local inter-field rules (see Known Limitations)
+ Conditional 24 segment-local inter-field rules (see Known Limitations)
 ```
 
 ### Transport
@@ -247,7 +247,7 @@ and dispatched at runtime via OBX-2 (41 value types supported). QPD-3 (user para
 and RDT-1 (column value) are query-specific and cannot be statically typed. These are
 the three remaining standard gaps in the typed coverage model.
 
-**Conditional validation is mostly segment-local.** The 25 conditional rules check HL7
+**Conditional validation is mostly segment-local.** The 24 conditional rules check HL7
 inter-field dependencies. Scheduling segments (AIS, AIG, AIL, AIP, RGS) and PV2
 transfer rules are trigger-aware: when the message trigger event is available (extracted
 from MSH-9), modification triggers (S03-S11) and transfer triggers (A02, A06, A07, etc.)

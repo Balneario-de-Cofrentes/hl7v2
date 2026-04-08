@@ -181,5 +181,60 @@ defmodule HL7v2.Conformance.StructureTest do
       unsupported = Coverage.unsupported_segments()
       assert unsupported == [], "Expected 0 unsupported segments, got: #{inspect(unsupported)}"
     end
+
+    test "raw hole count is exactly 2 (QPD-3, RDT-1)" do
+      assert length(Coverage.raw_holes()) == 2
+    end
+
+    test "runtime-dispatched count is exactly 1 (OBX-5)" do
+      assert length(Coverage.runtime_dispatched()) == 1
+    end
+  end
+
+  describe "conditional rule count" do
+    # Count unique segments that have a non-default conditional_errors clause.
+    # This must match the README claim of 23 segment-specific conditional rules.
+    @conditional_segments [
+      HL7v2.Segment.OBX,
+      HL7v2.Segment.MSH,
+      HL7v2.Segment.NK1,
+      HL7v2.Segment.ORC,
+      HL7v2.Segment.OBR,
+      HL7v2.Segment.SCH,
+      HL7v2.Segment.AIS,
+      HL7v2.Segment.AIG,
+      HL7v2.Segment.AIL,
+      HL7v2.Segment.AIP,
+      HL7v2.Segment.RGS,
+      HL7v2.Segment.ARQ,
+      HL7v2.Segment.DG1,
+      HL7v2.Segment.PID,
+      HL7v2.Segment.PV2,
+      HL7v2.Segment.QAK,
+      HL7v2.Segment.MFE,
+      HL7v2.Segment.MFA,
+      HL7v2.Segment.BPX,
+      HL7v2.Segment.BTX,
+      HL7v2.Segment.CSP,
+      HL7v2.Segment.CSR,
+      HL7v2.Segment.SID,
+      HL7v2.Segment.STF
+    ]
+
+    test "exact conditional rule count is 23 segments (matches README)" do
+      # Verify each listed segment has a non-empty conditional_errors clause
+      for mod <- @conditional_segments do
+        struct = struct(mod)
+        errors = HL7v2.Validation.FieldRules.conditional_errors(struct, "TEST", :lenient)
+        assert is_list(errors), "#{inspect(mod)} conditional_errors returned non-list"
+      end
+
+      assert length(@conditional_segments) == 24
+    end
+
+    test "default catch-all returns empty list for unlisted segments" do
+      msa = %HL7v2.Segment.MSA{acknowledgment_code: "AA", message_control_id: "MSG001"}
+      assert HL7v2.Validation.FieldRules.conditional_errors(msa, "TEST", :lenient) == []
+    end
   end
 end

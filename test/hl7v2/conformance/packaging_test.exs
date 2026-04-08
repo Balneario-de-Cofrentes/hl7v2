@@ -40,4 +40,40 @@ defmodule HL7v2.Conformance.PackagingTest do
                "Recompile HL7v2.Conformance.Fixtures after adding/removing fixtures."
     end
   end
+
+  describe "built tarball includes conformance corpus" do
+    @tag timeout: 60_000
+    test "mix hex.build tarball contains .hl7 fixture files" do
+      project_dir = Mix.Project.config()[:lockfile] |> Path.dirname()
+      {_output, 0} = System.cmd("mix", ["hex.build"], cd: project_dir)
+
+      # Find the built tarball
+      tarball =
+        project_dir
+        |> File.ls!()
+        |> Enum.find(&String.match?(&1, ~r/^hl7v2-.*\.tar$/))
+
+      assert tarball, "mix hex.build did not produce a .tar file"
+      tarball_path = Path.join(project_dir, tarball)
+
+      # Pipe: extract contents.tar.gz from outer tar, then list its entries
+      tmp = Path.join(System.tmp_dir!(), "hl7v2_pkg_#{:rand.uniform(1_000_000)}.tar.gz")
+      {_, 0} = System.cmd("sh", ["-c", "tar -xOf #{tarball_path} contents.tar.gz > #{tmp}"])
+      {listing, 0} = System.cmd("tar", ["-tzf", tmp])
+
+      hl7_count =
+        listing
+        |> String.split("\n")
+        |> Enum.count(fn line ->
+          String.contains?(line, "conformance/") and String.ends_with?(line, ".hl7")
+        end)
+
+      # Clean up
+      File.rm(tmp)
+      File.rm(tarball_path)
+
+      assert hl7_count >= 110,
+             "tarball contains #{hl7_count} .hl7 files, expected >= 110"
+    end
+  end
 end

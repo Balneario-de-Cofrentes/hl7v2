@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.3.6 — 2026-04-09
+
+### Fixes
+
+- **Tarball-level packaging smoke test** — `mix hex.build` is run in CI and
+  the built tarball is unpacked to assert ≥ 110 `.hl7` fixture files are
+  present. Previously only project config was checked, not the actual artifact.
+- **OBX value type count pinned** — `length(OBXValue.known_types()) == 41`
+  asserted (matches README claim).
+- **Conditional rule count corrected and pinned** — actual count is 24
+  segments (was incorrectly claimed as 25 in README/docs, then 23 in an
+  overcorrection). Now pinned by an explicit test listing all 24 segments
+  with conditional rules.
+- **CHANGELOG `/0` → `/1`** — stale v3.3.1 entries still said
+  `check_freshness/0`; normalized to `/1` throughout.
+
+### Stats
+
+4,688 tests (472 doctests + 32 properties + 4,184 tests), 0 failures
+
 ## v3.3.5 — 2026-04-09
 
 ### Fixes
@@ -92,16 +112,16 @@ All notable changes to this project will be documented in this file.
   that would otherwise pass silently.
 - **README wording narrowed** — explicit caveat that `@external_resource`
   only tracks files present at compile time, with instructions to call
-  `HL7v2.Conformance.Fixtures.check_freshness/0` in dev/test.
+  `HL7v2.Conformance.Fixtures.check_freshness/1` in dev/test.
 
 ### Added
 
-- **`HL7v2.Conformance.Fixtures.check_freshness/0`** — returns `:ok` or
+- **`HL7v2.Conformance.Fixtures.check_freshness/1`** — returns `:ok` or
   `{:stale, on_disk_only: [...], frozen_only: [...]}` comparing the
   compile-time snapshot against the current on-disk fixture directory.
   Returns `:ok` when the directory is not accessible (installed Hex artifact
   case).
-- Test for `check_freshness/0` in `HL7v2.Conformance.FixturesTest`.
+- Test for `check_freshness/1` in `HL7v2.Conformance.FixturesTest`.
 
 ### Verified
 

@@ -6,7 +6,7 @@
 ## Current State
 
 152/152 v2.5.1 segments, 90 types, 222 message structures (186/186 official),
-189 tables, 255 field bindings, 25 conditional rule sets (trigger-aware for
+189 tables, 255 field bindings, 24 conditional rule sets (trigger-aware for
 scheduling and transfer events). Fixture corpus counts are computed live from
 disk — run `mix hl7v2.coverage` for the exact current numbers. 2 true raw gaps (QPD-3, RDT-1) plus 1 runtime-dispatched
 (OBX-5 VARIES via 41-type OBXValue dispatch). See README Known Limitations.
