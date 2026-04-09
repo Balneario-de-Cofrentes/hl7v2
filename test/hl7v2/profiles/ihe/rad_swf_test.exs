@@ -153,11 +153,15 @@ defmodule HL7v2.Profiles.IHE.RadSwfTest do
       assert profile.required_fields[{"IPC", 5}] == :required
     end
 
-    test "forbids deprecated ORC-7 and OBR-15/27" do
+    test "forbids deprecated ORC-7 and OBR-27 (but NOT OBR-15)" do
       profile = RadSwf.rad_4_procedure_scheduled_omi()
       assert MapSet.member?(profile.forbidden_fields, {"ORC", 7})
-      assert MapSet.member?(profile.forbidden_fields, {"OBR", 15})
       assert MapSet.member?(profile.forbidden_fields, {"OBR", 27})
+
+      # Regression for iter-7 audit #4: RAD-SWF does NOT forbid
+      # OBR-15 (Specimen Source) — image-guided biopsy and IR
+      # workflows populate it. Only LAB transactions forbid it.
+      refute MapSet.member?(profile.forbidden_fields, {"OBR", 15})
     end
 
     test "valid RAD-4 OMI passes" do

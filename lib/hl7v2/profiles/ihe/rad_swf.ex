@@ -90,6 +90,10 @@ defmodule HL7v2.Profiles.IHE.RadSwf do
   - IPC-4 Scheduled Procedure Step ID
   - IPC-5 Modality
 
+  NOTE: Unlike LAB-1/LAB-3, RAD-4 does NOT forbid OBR-15
+  (Specimen Source). Image-guided biopsy and interventional
+  radiology workflows legitimately populate OBR-15.
+
   Source: IHE RAD TF-2 §4.4 (v2.5.1 Option).
   """
   @spec rad_4_procedure_scheduled_omi() :: Profile.t()
@@ -124,7 +128,6 @@ defmodule HL7v2.Profiles.IHE.RadSwf do
     |> Profile.require_field("IPC", 4)
     |> Profile.require_field("IPC", 5)
     |> Profile.forbid_field("ORC", 7)
-    |> Profile.forbid_field("OBR", 15)
     |> Profile.forbid_field("OBR", 27)
     |> Profile.add_value_constraint("ORC", 1, &orc_1_is_new/1)
     |> Profile.add_value_constraint("ORC", 5, &orc_5_is_scheduled/1)

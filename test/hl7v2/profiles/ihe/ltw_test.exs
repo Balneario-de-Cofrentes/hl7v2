@@ -163,6 +163,24 @@ defmodule HL7v2.Profiles.IHE.LTWTest do
                e.rule == :value_constraint and e.location == "ORC"
              end)
     end
+
+    test "missing PV1 segment fires :require_segment (regression: iter-7 audit #2)" do
+      profile = LTW.lab_1_placer_oml_o21()
+      assert "PV1" in Profile.required_segments?(profile)
+
+      no_pv1 =
+        "MSH|^~\\&|HIS|HOSP|LAB|HOSP|20260409120000||OML^O21^OML_O21|MSG|P|2.5.1\r" <>
+          "PID|1||12345^^^HOSP_MRN&1.2.3&ISO^MR||Smith^John\r" <>
+          orc([{1, "NW"}, {2, "ORD001"}, {9, "20260409120000"}]) <>
+          obr([{1, "1"}, {2, "ORD001"}, {4, "CBC^^LN"}, {16, "ORD^^MD"}])
+
+      msg = parse!(no_pv1)
+      errors = ProfileRules.check(msg, profile)
+
+      assert Enum.any?(errors, fn e ->
+               e.rule == :require_segment and e.location == "PV1"
+             end)
+    end
   end
 
   # --- LAB-3 Order Results Management -----------------------------------
@@ -213,6 +231,11 @@ defmodule HL7v2.Profiles.IHE.LTWTest do
       assert Enum.any?(errors, fn e ->
                e.rule == :value_constraint and e.location == "OBR"
              end)
+    end
+
+    test "missing PV1 segment fires :require_segment (regression: iter-7 audit #2)" do
+      profile = LTW.lab_3_results_oru_r01()
+      assert "PV1" in Profile.required_segments?(profile)
     end
   end
 

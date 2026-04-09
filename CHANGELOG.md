@@ -2,6 +2,133 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.9.0 — 2026-04-09
+
+### Added — IHE Profile Pack
+
+22 pre-built IHE conformance profiles covering the most common
+HL7 v2.x transactions from IHE ITI, IHE PaLM (Lab), and IHE RAD
+Technical Frameworks. `HL7v2.Profiles.IHE.*` lets integrators
+validate IHE conformance in three lines:
+
+```elixir
+profile = HL7v2.Profiles.IHE.PAM.iti_31_adt_a01()
+{:ok, msg} = HL7v2.parse(wire, mode: :typed)
+HL7v2.validate(msg, profile: profile)
+```
+
+**PAM** (`HL7v2.Profiles.IHE.PAM`) — Patient Administration
+Management. Source: IHE ITI TF-2b §3.30/§3.31.
+
+- `iti_31_adt_a01` Admit Inpatient
+- `iti_31_adt_a03` Discharge
+- `iti_31_adt_a04` Register Outpatient
+- `iti_31_adt_a08` Update Patient Information
+- `iti_30_adt_a28` Create Patient (no visit)
+- `iti_30_adt_a31` Update Patient (no visit)
+- `iti_30_adt_a40` Merge Patient ID List
+
+**PIX** (`HL7v2.Profiles.IHE.PIX`) — Patient Identifier
+Cross-Reference. Source: IHE ITI TF-2 §3.8/§3.9/§3.10.
+
+- `iti_8_feed_a01/a04/a08/a40` Patient Identity Feed (v2.3.1)
+- `iti_9_query` PIX Query `QBP^Q23`
+- `iti_9_response` PIX Response `RSP^K23`
+- `iti_10_update` PIX Update Notification `ADT^A31`
+
+**PDQ** (`HL7v2.Profiles.IHE.PDQ`) — Patient Demographics Query.
+Source: IHE ITI TF-2 §3.21/§3.22.
+
+- `iti_21_query` Demographics Query `QBP^Q22`
+- `iti_21_response` Demographics Response `RSP^K22`
+- `iti_22_query` Demographics + Visit Query `QBP^ZV1`
+- `iti_22_response` Visit Response `RSP^ZV2`
+
+**LTW** (`HL7v2.Profiles.IHE.LTW`) — Laboratory Testing Workflow.
+Source: IHE PaLM TF-2a §3.1/§3.3 (Rev 11.0, 2024-04-08).
+
+- `lab_1_placer_oml_o21` Placer Order Management `OML^O21`
+- `lab_3_results_oru_r01` Order Results Management `ORU^R01`
+
+**RAD-SWF** (`HL7v2.Profiles.IHE.RadSwf`) — Radiology Scheduled
+Workflow. Source: IHE RAD TF-2 Rev 13.0 §4.1/§4.4.
+
+- `rad_1_registration_a01` Patient Registration `ADT^A01` (v2.3.1)
+- `rad_4_procedure_scheduled_omi` Procedure Scheduled `OMI^O23` (v2.5.1)
+
+**Shared building blocks** in `HL7v2.Profiles.IHE.Common`:
+
+- `msh_pam_core/1` — MSH-9/10/11/12 required, MSH-8 forbidden
+- `evn_core/1` — EVN-2 required
+- `pid_core/1` — PID-5 required + `:pid3_identity` custom rule
+  that validates every PID-3 repetition has CX-1 (ID Number)
+  and CX-4 (Assigning Authority) populated
+- `pin_patient_class/2` — sugar for ITI-30/ITI-10 PV1-2 = "N"
+
+**Mixed HL7 versions are supported**: ITI-8 PIX Feed and RAD-1 use
+v2.3.1 (the earliest IHE profiles, never rebased), while ITI-9/10,
+PDQ, LTW, and RAD-4 use v2.5 or v2.5.1. Profile version enforcement
+gates each profile so cross-version mismatches are silently skipped
+rather than flagged as false positives.
+
+**Top-level catalog**: `HL7v2.Profiles.IHE.all/0` returns all 22
+profiles keyed by IHE transaction code. Sub-catalogs exposed as
+`pam/0`, `pix/0`, `pdq/0`, `ltw/0`, `rad_swf/0`.
+
+### Added — DSL extension: `Profile.forbid_field/3`
+
+IHE profiles frequently mark base-HL7 fields as "X" (not
+supported). `HL7v2.Profile` gains a new builder:
+
+```elixir
+HL7v2.Profile.new("p")
+|> HL7v2.Profile.forbid_field("MSH", 8)   # MSH-8 Security forbidden
+|> HL7v2.Profile.forbid_field("EVN", 1)
+```
+
+The matching `:forbid_field` rule in `HL7v2.Validation.ProfileRules`
+fires when the named field is present with a non-blank value.
+Missing segments are silently ignored (use `require_segment/2` if
+absence should also be an error).
+
+### Changed (breaking) — Profile version enforcement is now active
+
+`HL7v2.Profile.version` was previously stored but never enforced —
+an ITI-8 v2.3.1 profile would silently validate a v2.5 feed,
+producing false-positive errors because field sequence numbers can
+drift between versions. `ProfileRules.check/2` now compares
+`profile.version` against the message's MSH-12 version; mismatched
+versions cause the profile to return `[]` (not applicable) instead
+of running its rules.
+
+**Migration**: if your code depended on the old silent-ignore
+behavior, either pass a profile with `version: nil` (wildcard) or
+match the profile version to your sender.
+
+### Changed (breaking) — Custom rule exceptions surface as errors
+
+A custom rule added via `Profile.add_rule/3` that raises no longer
+silently returns `[]`. It now surfaces as a
+`%{rule: :custom_rule_exception}` error containing the rule name
+and the exception message, preventing buggy rules from silently
+passing every message.
+
+**Migration**: if you had a test asserting `ProfileRules.check/2`
+returned `[]` for a raising rule (indicating the rule was swallowed),
+update it to assert the synthetic error is present.
+
+### Guides
+
+New [`guides/ihe-profiles.md`](guides/ihe-profiles.md) walks
+through the pack with usage examples, a transaction coverage
+table, deployment caveats for the catalog dispatch patterns, and
+a list of IHE TF sources.
+
+### Stats
+
+5,102 tests (505 doctests + 32 properties + 4,565 tests),
+0 failures.
+
 ## v3.8.0 — 2026-04-09
 
 ### Added — v2.6 Materials Management Segments

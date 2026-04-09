@@ -307,6 +307,7 @@ Guides:
 
 - [Getting Started](guides/getting-started.md) — parsing, building, ACK, MLLP
 - [Conformance Profiles](guides/conformance-profiles.md) — organization-specific validation
+- [IHE Profile Pack](guides/ihe-profiles.md) — 22 pre-built IHE profiles (PAM, PIX, PDQ, LTW, RAD-SWF)
 - [Migration Guide](guides/migration.md) — moving from `elixir_hl7`, HAPI v2, or HL7apy
 
 ## Part of the Balneario Healthcare Toolkit
