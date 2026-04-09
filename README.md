@@ -316,6 +316,40 @@ Three pure-Elixir libraries covering the core protocol surface of healthcare IT.
 
 Together they give Elixir the same healthcare protocol coverage that Java has with dcm4che + HAPI, or C++ with DCMTK — on the BEAM.
 
+## How hl7v2 Compares
+
+The HL7 v2 open-source landscape, as of April 2026. Entries for other libraries
+are based on their current official docs and READMEs — corrections welcome via
+PR.
+
+| Library | Lang | Core model | Validation | Version scope | MLLP/TLS | Best fit |
+|---------|------|-----------|-----------|--------------|----------|----------|
+| **hl7v2** (this) | Elixir | Typed segment structs + raw round-trip | Structural + field + conditional (24 rules, trigger-aware) + optional tables + **version-aware** | v2.5.1 baseline with **version-aware validation for v2.3–v2.8** (B-field exemptions, v2.7+ field additions) | Built-in Ranch 2.x listener/client + TLS/mTLS | BEAM-native typed parsing, builder, validation, and transport in one package |
+| [HAPI HL7v2](https://hapifhir.github.io/hapi-hl7v2/) | Java | Object-oriented message model | Validator + conformance profiles + TestPanel | Full v2.1–v2.8.1 schema trees | LLP/MLLP server/client; TLS-capable | Most complete mature OSS option, especially for Java shops |
+| [nHapi](https://github.com/nHapiNET/nHapi) | .NET | HAPI-style HL7 object model | Core encoding validation; richer helpers via NHapiTools | v2.1–v2.8.1 | Via NHapiTools (separate) | Best .NET analogue to HAPI |
+| [HL7apy](https://hl7apy.readthedocs.io/) | Python | Structured messages/groups/segments/fields | STRICT/TOLERANT + message-profile validation | Through v2.8.2 | `to_mllp()` + `hl7apy.mllp` server | Python with real schema-aware validation + profiles |
+| [elixir_hl7](https://hex.pm/packages/elixir_hl7) + [mllp](https://hex.pm/packages/mllp) | Elixir | Delimiter/text-oriented with path access | Minimal by design | Tolerant v2.x text handling | Via separate `mllp` package | Pragmatic Elixir option for tolerant parsing and simple routing |
+| [medparse](https://pkg.go.dev/github.com/medparse/medparse) | Go | Message/segment/field hierarchy + terser paths | Message validation API | General v2.x, not strongly versioned | MLLP framing helpers | Lean, fast Go parsing/manipulation |
+| [nodehl7](https://github.com/Loksly/nodehl7) | Node.js/TS | Parsed message object with typed segments | Limited | General v2.x | Built-in MLLP server/client + TLS | Node environments needing parser + transport quickly |
+
+**Quick read**
+
+- **Broadest and most mature OSS HL7 v2 platform**: HAPI
+- **Closest .NET equivalent to HAPI**: nHapi
+- **Python with real schema-aware validation**: HL7apy
+- **Elixir, tolerant parsing and simple routing**: elixir_hl7 + mllp
+- **Elixir with typed structs, builder, validation, transport in one package**: hl7v2
+- **Lean Go parser with ACK helpers**: medparse
+
+**Where hl7v2 fits**
+
+hl7v2 is differentiated if you want *typed HL7 v2 on the BEAM with integrated
+transport and version-aware validation*. It is not yet a HAPI replacement in
+absolute schema breadth — HAPI still wins on per-version schema trees and
+ecosystem maturity; HL7apy still wins on Python-side conformance profile
+support. On the BEAM, hl7v2 is the only package with typed structs, builder,
+structural + conditional + version-aware validation, and MLLP/TLS in one place.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
