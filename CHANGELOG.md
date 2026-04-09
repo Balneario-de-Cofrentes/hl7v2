@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.10.1 — 2026-04-09
+
+### Fixed
+
+- `mix docs` now builds cleanly. `HL7v2.Profile.ComponentAccess`
+  was marked `@moduledoc false` in v3.10.0 but referenced from
+  public docstrings in `HL7v2.Profile.require_component/5`,
+  `HL7v2.Profile.bind_table/4`, `guides/conformance-profiles.md`,
+  and the v3.10.0 CHANGELOG entry — producing "documentation
+  references module ... but it is hidden" warnings on every
+  docs build. Promoted `ComponentAccess` to a public module with
+  a full `@moduledoc` that lists the registered composite types
+  (CX, HD, CE, CWE) and explains how to extend the registry.
+  Zero behavior change.
+
 ## v3.10.0 — 2026-04-09
 
 ### Profile DSL polish release

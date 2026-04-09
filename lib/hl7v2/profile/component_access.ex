@@ -1,22 +1,56 @@
 defmodule HL7v2.Profile.ComponentAccess do
-  @moduledoc false
+  @moduledoc """
+  Positional component access for HL7 composite data type structs.
 
-  # Canonical component field order for composite HL7 data types.
-  #
-  # `HL7v2.Profile.require_component/5` uses positional (integer)
-  # component indices to match the IHE TF conventions — e.g.
-  # "PID-3 repetition N, CX-4". To extract the Nth component from a
-  # parsed struct, we need the defstruct field order at runtime, which
-  # Elixir does not expose reliably for structs larger than a trivial
-  # size. This module hardcodes the order for the composite types
-  # that appear in the shipped IHE profiles.
-  #
-  # Adding a new type: add an entry to `@component_fields` matching
-  # the defstruct order declared in the corresponding `HL7v2.Type.*`
-  # module. If a type is referenced by a profile but missing here,
-  # `component_at/2` returns `{:error, {:unknown_composite_type, mod}}`
-  # and the profile check will emit a clean error that points at the
-  # gap.
+  `HL7v2.Profile.require_component/5` and `bind_table/4`'s
+  struct-unwrap path both use 1-indexed component positions to match
+  the IHE TF conventions — e.g. "PID-3 CX-4" targets component 4 of
+  the `CX` composite. To extract the Nth component from a parsed
+  struct, we need the canonical defstruct field order at runtime,
+  which Elixir does not expose reliably for arbitrary structs. This
+  module hardcodes the order for the composite types referenced by
+  the shipped profiles.
+
+  ## Registered types
+
+  - `HL7v2.Type.CX` — 10 components (id, check_digit, ...
+    assigning_authority, identifier_type_code, ...)
+  - `HL7v2.Type.HD` — 3 components (namespace_id, universal_id,
+    universal_id_type)
+  - `HL7v2.Type.CE` — 6 components (identifier, text,
+    name_of_coding_system, ...)
+  - `HL7v2.Type.CWE` — 9 components (identifier, text,
+    name_of_coding_system, ... original_text)
+
+  ## Extending the registry
+
+  To add a new composite type, append an entry to the internal
+  `@component_fields` map with the struct fields listed in the exact
+  order declared by the type module's `defstruct`. A compile-time
+  guard raises if the declared fields do not match the type's actual
+  defstruct keys, so typos and drift are caught immediately.
+
+  Unknown types produce `{:error, {:unknown_composite_type, module}}`
+  from `component_at/2`, which the profile rules surface as a clean
+  error pointing at the gap. Open an issue or PR if you hit one.
+
+  ## Example
+
+      iex> HL7v2.Profile.ComponentAccess.component_at(
+      ...>   %HL7v2.Type.HD{namespace_id: "MRN", universal_id: "1.2.3"},
+      ...>   1
+      ...> )
+      {:ok, "MRN"}
+
+      iex> HL7v2.Profile.ComponentAccess.component_at(
+      ...>   %HL7v2.Type.CX{id: "12345", assigning_authority: %HL7v2.Type.HD{namespace_id: "MRN"}},
+      ...>   4
+      ...> )
+      {:ok, %HL7v2.Type.HD{namespace_id: "MRN"}}
+
+      iex> HL7v2.Profile.ComponentAccess.component_at(nil, 1)
+      {:error, :nil_struct}
+  """
 
   @component_fields %{
     HL7v2.Type.CX => [
