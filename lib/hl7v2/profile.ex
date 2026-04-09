@@ -46,6 +46,7 @@ defmodule HL7v2.Profile do
           required_segments: MapSet.t(segment_id()),
           forbidden_segments: MapSet.t(segment_id()),
           required_fields: %{{segment_id(), field_seq()} => :required},
+          forbidden_fields: MapSet.t({segment_id(), field_seq()}),
           field_table_bindings: %{{segment_id(), field_seq()} => table_id()},
           cardinality_constraints: %{segment_id() => cardinality()},
           value_constraints: %{
@@ -61,6 +62,7 @@ defmodule HL7v2.Profile do
             required_segments: nil,
             forbidden_segments: nil,
             required_fields: %{},
+            forbidden_fields: nil,
             field_table_bindings: %{},
             cardinality_constraints: %{},
             value_constraints: %{},
@@ -94,7 +96,8 @@ defmodule HL7v2.Profile do
       version: Keyword.get(opts, :version),
       description: Keyword.get(opts, :description, ""),
       required_segments: MapSet.new(),
-      forbidden_segments: MapSet.new()
+      forbidden_segments: MapSet.new(),
+      forbidden_fields: MapSet.new()
     }
   end
 
@@ -136,6 +139,31 @@ defmodule HL7v2.Profile do
       when is_binary(segment_id) and is_integer(field_seq) and field_seq > 0 do
     key = {segment_id, field_seq}
     %{profile | required_fields: Map.put(profile.required_fields, key, :required)}
+  end
+
+  @doc """
+  Forbids a specific field within a segment from being populated.
+
+  IHE profiles routinely mark base-HL7 fields as "X" (not supported). For
+  example, MSH-8 (Security) and EVN-1 (Event Type Code) are forbidden in
+  IHE PAM; ORC-7 (Quantity/Timing) is forbidden in IHE LAB in favor of TQ1.
+
+  The rule fires only when the field is present with a non-blank value. A
+  missing segment is silently ignored (use `require_segment/2` if absence
+  should also be an error).
+
+  ## Examples
+
+      iex> HL7v2.Profile.new("p")
+      ...> |> HL7v2.Profile.forbid_field("MSH", 8)
+      ...> |> Map.get(:forbidden_fields)
+      ...> |> MapSet.to_list()
+      [{"MSH", 8}]
+  """
+  @spec forbid_field(t(), segment_id(), field_seq()) :: t()
+  def forbid_field(%__MODULE__{} = profile, segment_id, field_seq)
+      when is_binary(segment_id) and is_integer(field_seq) and field_seq > 0 do
+    %{profile | forbidden_fields: MapSet.put(profile.forbidden_fields, {segment_id, field_seq})}
   end
 
   @doc """

@@ -530,4 +530,199 @@ defmodule HL7v2.ProfileTest do
       assert a.field_table_bindings == b.field_table_bindings
     end
   end
+
+  describe "forbid_field/3" do
+    alias HL7v2.Validation.ProfileRules
+
+    test "stores forbidden fields in MapSet" do
+      profile =
+        Profile.new("p")
+        |> Profile.forbid_field("MSH", 8)
+        |> Profile.forbid_field("EVN", 1)
+
+      assert %MapSet{} = profile.forbidden_fields
+      assert MapSet.member?(profile.forbidden_fields, {"MSH", 8})
+      assert MapSet.member?(profile.forbidden_fields, {"EVN", 1})
+    end
+
+    test "deduplicates repeat calls for the same field" do
+      profile =
+        Profile.new("p")
+        |> Profile.forbid_field("MSH", 8)
+        |> Profile.forbid_field("MSH", 8)
+
+      assert MapSet.size(profile.forbidden_fields) == 1
+    end
+
+    test "raises on invalid arguments" do
+      assert_raise FunctionClauseError, fn ->
+        Profile.forbid_field(Profile.new("p"), "MSH", 0)
+      end
+
+      assert_raise FunctionClauseError, fn ->
+        Profile.forbid_field(Profile.new("p"), :msh, 1)
+      end
+    end
+
+    test "ProfileRules emits :forbid_field error when forbidden field is populated" do
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000|SECURE|ADT^A01^ADT_A01|MSG001|P|2.5\r" <>
+          "EVN|A01|20260409120000\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|I|ICU^101\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("IHE_PAM_style", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.forbid_field("MSH", 8)
+
+      errors = ProfileRules.check(msg, profile)
+
+      assert [
+               %{
+                 rule: :forbid_field,
+                 location: "MSH",
+                 field: :security,
+                 profile: "IHE_PAM_style"
+               } = err
+             ] = errors
+
+      assert err.message =~ "MSH-8"
+    end
+
+    test "ProfileRules does not fire when forbidden field is absent" do
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG001|P|2.5\r" <>
+          "EVN|A01|20260409120000\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|I|ICU^101\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("IHE_PAM_style", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.forbid_field("MSH", 8)
+
+      assert ProfileRules.check(msg, profile) == []
+    end
+
+    test "ProfileRules is silent when the segment itself is missing" do
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG001|P|2.5\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.forbid_field("EVN", 1)
+
+      # No EVN segment present; forbid_field is silent, use require_segment
+      # if absence should also fire an error.
+      refute Enum.any?(ProfileRules.check(msg, profile), &(&1.rule == :forbid_field))
+    end
+  end
+
+  describe "version enforcement in ProfileRules.check/2" do
+    alias HL7v2.Validation.ProfileRules
+
+    @v25_wire "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG001|P|2.5\r" <>
+                "EVN|A01|20260409120000\r" <>
+                "PID|1||12345^^^MRN||Smith^John\r" <>
+                "PV1|1|I|ICU^101\r"
+
+    @v231_wire "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG001|P|2.3.1\r" <>
+                 "EVN|A01|20260409120000\r" <>
+                 "PID|1||12345^^^MRN||Smith^John\r" <>
+                 "PV1|1|I|ICU^101\r"
+
+    test "profile with matching version applies" do
+      {:ok, msg} = HL7v2.parse(@v25_wire, mode: :typed)
+
+      profile =
+        Profile.new("v25_profile", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.require_segment("OBR")
+
+      # OBR is missing so check should fire the :require_segment rule,
+      # which proves the profile applied.
+      assert [%{rule: :require_segment, location: "OBR"}] = ProfileRules.check(msg, profile)
+    end
+
+    test "profile with mismatched version does not apply" do
+      {:ok, msg} = HL7v2.parse(@v231_wire, mode: :typed)
+
+      profile =
+        Profile.new("v25_profile", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.require_segment("OBR")
+
+      # v2.5 profile should NOT match a v2.3.1 message — no errors fire.
+      assert ProfileRules.check(msg, profile) == []
+    end
+
+    test "profile with nil version matches any message version" do
+      {:ok, msg_v25} = HL7v2.parse(@v25_wire, mode: :typed)
+      {:ok, msg_v231} = HL7v2.parse(@v231_wire, mode: :typed)
+
+      profile =
+        Profile.new("any_version", message_type: {"ADT", "A01"})
+        |> Profile.require_segment("OBR")
+
+      assert [%{rule: :require_segment}] = ProfileRules.check(msg_v25, profile)
+      assert [%{rule: :require_segment}] = ProfileRules.check(msg_v231, profile)
+    end
+  end
+
+  describe "custom_rule exception handling in ProfileRules.check/2" do
+    alias HL7v2.Validation.ProfileRules
+
+    test "a raising custom rule produces a :custom_rule_exception error" do
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG001|P|2.5\r" <>
+          "EVN|A01|20260409120000\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|I|ICU^101\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("buggy_profile", message_type: {"ADT", "A01"})
+        |> Profile.add_rule(:broken_rule, fn _msg ->
+          raise "intentional failure"
+        end)
+
+      errors = ProfileRules.check(msg, profile)
+
+      assert [%{rule: :custom_rule_exception, profile: "buggy_profile"} = err] = errors
+      assert err.message =~ "broken_rule"
+      assert err.message =~ "intentional failure"
+    end
+
+    test "a well-behaved custom rule still runs normally" do
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG001|P|2.5\r" <>
+          "EVN|A01|20260409120000\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|I|ICU^101\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("good_profile", message_type: {"ADT", "A01"})
+        |> Profile.add_rule(:good_rule, fn _msg ->
+          [
+            %{
+              level: :error,
+              location: "PID",
+              field: :patient_name,
+              message: "custom failure"
+            }
+          ]
+        end)
+
+      errors = ProfileRules.check(msg, profile)
+
+      assert [%{rule: :good_rule, profile: "good_profile", location: "PID"}] = errors
+    end
+  end
 end

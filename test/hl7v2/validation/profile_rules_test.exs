@@ -319,12 +319,16 @@ defmodule HL7v2.Validation.ProfileRulesTest do
       assert error.level == :warning
     end
 
-    test "rule that raises is caught safely and returns no errors", %{msg: msg} do
+    test "rule that raises surfaces as :custom_rule_exception error", %{msg: msg} do
       profile =
         Profile.new("p")
         |> Profile.add_rule(:crash, fn _ -> raise "boom!" end)
 
-      assert ProfileRules.check(msg, profile) == []
+      errors = ProfileRules.check(msg, profile)
+
+      assert [%{rule: :custom_rule_exception, profile: "p"} = err] = errors
+      assert err.message =~ "crash"
+      assert err.message =~ "boom!"
     end
   end
 

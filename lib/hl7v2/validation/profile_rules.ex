@@ -19,12 +19,23 @@ defmodule HL7v2.Validation.ProfileRules do
   2. `forbid_segment` — no segment in `profile.forbidden_segments` may appear
   3. `require_field`  — every `{seg_id, field_seq}` must be populated when its
      segment is present; missing segment is also an error
-  4. `require_cardinality` — segment occurrence counts must fall within `{min, max}`
-  5. `value_constraint` — custom predicate on a field value (only when field present)
-  6. `custom_rule` — arbitrary function returning error maps
+  4. `forbid_field` — every `{seg_id, field_seq}` in `profile.forbidden_fields`
+     must be blank or absent
+  5. `require_cardinality` — segment occurrence counts must fall within `{min, max}`
+  6. `value_constraint` — custom predicate on a field value (only when field present)
+  7. `custom_rule` — arbitrary function returning error maps
 
   Custom rule errors are tagged with `:rule` (the rule name) and `:profile`
-  (the profile name) if the rule did not set them.
+  (the profile name) if the rule did not set them. If a custom rule raises,
+  a synthetic `:custom_rule_exception` error is emitted — exceptions are
+  never silently swallowed.
+
+  ## Applicability
+
+  A profile is applied only when its `:message_type` tuple matches the
+  typed message's code/event AND (when declared) its `:version` matches
+  the version in MSH-12. A profile with nil `:message_type` matches any
+  type; a profile with nil `:version` matches any version.
   """
 
   alias HL7v2.{Profile, TypedMessage}
@@ -51,17 +62,19 @@ defmodule HL7v2.Validation.ProfileRules do
   """
   @spec check(TypedMessage.t(), Profile.t()) :: [error()]
   def check(%TypedMessage{} = msg, %Profile{} = profile) do
-    if Profile.applies_to?(profile, extract_code_event(msg.type)) do
+    with true <- Profile.applies_to?(profile, extract_code_event(msg.type)),
+         true <- version_matches?(profile, msg) do
       []
       |> check_required_segments(msg, profile)
       |> check_forbidden_segments(msg, profile)
       |> check_required_fields(msg, profile)
+      |> check_forbidden_fields(msg, profile)
       |> check_cardinality(msg, profile)
       |> check_value_constraints(msg, profile)
       |> check_custom_rules(msg, profile)
       |> Enum.reverse()
     else
-      []
+      _ -> []
     end
   end
 
@@ -70,6 +83,29 @@ defmodule HL7v2.Validation.ProfileRules do
   defp extract_code_event({code, event}), do: {code, event}
   defp extract_code_event({code, event, _structure}), do: {code, event}
   defp extract_code_event(_), do: nil
+
+  # A profile with nil :version matches any message version. Otherwise the
+  # first component of MSH-12 (the VID version_id string) must equal the
+  # profile's declared version. If MSH or MSH-12 can't be located, the
+  # profile does not apply (avoids false positives against malformed input).
+  defp version_matches?(%Profile{version: nil}, _msg), do: true
+
+  defp version_matches?(%Profile{version: version}, %TypedMessage{segments: segments}) do
+    case find_msh_version(segments) do
+      {:ok, ^version} -> true
+      _ -> false
+    end
+  end
+
+  defp find_msh_version(segments) do
+    case Enum.find(segments, &match?(%HL7v2.Segment.MSH{}, &1)) do
+      %HL7v2.Segment.MSH{version_id: %HL7v2.Type.VID{version_id: v}} when is_binary(v) ->
+        {:ok, v}
+
+      _ ->
+        :error
+    end
+  end
 
   # --- require_segment ---
 
@@ -155,6 +191,36 @@ defmodule HL7v2.Validation.ProfileRules do
             )
             | acc
           ]
+      end
+    end)
+  end
+
+  # --- forbid_field ---
+
+  defp check_forbidden_fields(errors, msg, profile) do
+    Enum.reduce(profile.forbidden_fields, errors, fn {seg_id, field_seq}, acc ->
+      case find_segment_field(msg.segments, seg_id, field_seq) do
+        {:ok, value, field_name} ->
+          if blank?(value) do
+            acc
+          else
+            [
+              profile_error(
+                profile,
+                :forbid_field,
+                seg_id,
+                field_name,
+                "profile forbids #{seg_id}-#{field_seq} but it is populated"
+              )
+              | acc
+            ]
+          end
+
+        :segment_missing ->
+          acc
+
+        :field_not_defined ->
+          acc
       end
     end)
   end
@@ -263,7 +329,7 @@ defmodule HL7v2.Validation.ProfileRules do
   defp check_custom_rules(errors, msg, profile) do
     Enum.reduce(profile.custom_rules, errors, fn {rule_name, fun}, acc ->
       case safe_apply_rule(fun, msg) do
-        rule_errors when is_list(rule_errors) ->
+        {:ok, rule_errors} when is_list(rule_errors) ->
           tagged =
             Enum.map(rule_errors, fn err ->
               err
@@ -276,6 +342,18 @@ defmodule HL7v2.Validation.ProfileRules do
             end)
 
           Enum.reduce(tagged, acc, fn err, inner -> [err | inner] end)
+
+        {:exception, message} ->
+          [
+            profile_error(
+              profile,
+              :custom_rule_exception,
+              "",
+              nil,
+              "custom rule #{inspect(rule_name)} raised: #{message}"
+            )
+            | acc
+          ]
 
         _ ->
           acc
@@ -356,9 +434,9 @@ defmodule HL7v2.Validation.ProfileRules do
   end
 
   defp safe_apply_rule(fun, msg) do
-    fun.(msg)
+    {:ok, fun.(msg)}
   rescue
-    _ -> []
+    e -> {:exception, Exception.message(e)}
   end
 
   # --- helpers: error construction ---
