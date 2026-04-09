@@ -9,6 +9,21 @@ defmodule HL7v2.ValidationTest.BoundedSegment do
     ]
 end
 
+# Test-only segment that models a v2.7 deprecation target. Exposes segment id
+# "PID" with a single `:r`-marked field at sequence 13 so we can exercise
+# `HL7v2.Standard.VersionDeltas.exempt?/3` through the real FieldRules path
+# without depending on the production PID schema (which already marks PID-13
+# as `:o` in the current library). The goal is to prove the exemption is
+# wired through `required_errors/6`, so the test only needs a single
+# sequence/optionality pair to assert on.
+defmodule HL7v2.ValidationTest.DeprecatedPidSegment do
+  use HL7v2.Segment,
+    id: "PID",
+    fields: [
+      {13, :phone_number_home, HL7v2.Type.XTN, :r, :unbounded}
+    ]
+end
+
 defmodule HL7v2.ValidationTest do
   use ExUnit.Case, async: true
 
@@ -321,6 +336,118 @@ defmodule HL7v2.ValidationTest do
       # extracts (sanity check on the fixture itself).
       [msh | _] = typed.segments
       assert msh.version_id.version_id == "2.7"
+    end
+  end
+
+  describe "version-aware required-field deprecations (VersionDeltas)" do
+    # These tests drive `HL7v2.ValidationTest.DeprecatedPidSegment`, a test-only
+    # segment that mirrors segment_id "PID" and marks field 13 as `:r`. They
+    # prove that `FieldRules.check/2` skips the required-field error for known
+    # v2.7 deprecations when the validation context declares a v2.7+ message.
+    #
+    # We cannot exercise this on the real PID/OBR/ORC structs shipped with the
+    # library because the baseline v2.5.1 schema marks every v2.7-deprecated
+    # field as `:o` — so there is no error to exempt. The exemption is kept as
+    # forward-looking infrastructure in case the baseline schema is tightened.
+
+    test "flags deprecated field when no version context is supplied" do
+      segment = %HL7v2.ValidationTest.DeprecatedPidSegment{phone_number_home: nil}
+
+      errors = FieldRules.check(segment)
+
+      assert Enum.any?(errors, fn err ->
+               err.level == :error and err.field == :phone_number_home and
+                 err.message =~ "required field phone_number_home is missing"
+             end)
+    end
+
+    test "flags deprecated field at v2.5.1" do
+      segment = %HL7v2.ValidationTest.DeprecatedPidSegment{phone_number_home: nil}
+
+      errors = FieldRules.check(segment, context: %{version: "2.5.1"})
+
+      assert Enum.any?(errors, fn err ->
+               err.level == :error and err.field == :phone_number_home
+             end)
+    end
+
+    test "skips deprecated field error at v2.7" do
+      segment = %HL7v2.ValidationTest.DeprecatedPidSegment{phone_number_home: nil}
+
+      errors = FieldRules.check(segment, context: %{version: "2.7"})
+
+      refute Enum.any?(errors, &(&1.field == :phone_number_home))
+    end
+
+    test "skips deprecated field error at v2.8" do
+      segment = %HL7v2.ValidationTest.DeprecatedPidSegment{phone_number_home: nil}
+
+      errors = FieldRules.check(segment, context: %{version: "2.8"})
+
+      refute Enum.any?(errors, &(&1.field == :phone_number_home))
+    end
+
+    test "still flags the field when populated value is semantically blank at v2.5.1" do
+      # Sanity: populating the field keeps validation green even on the baseline.
+      segment = %HL7v2.ValidationTest.DeprecatedPidSegment{
+        phone_number_home: [%HL7v2.Type.XTN{telecom_use_code: "PRN"}]
+      }
+
+      errors = FieldRules.check(segment, context: %{version: "2.5.1"})
+      refute Enum.any?(errors, &(&1.field == :phone_number_home))
+    end
+
+    test "non-deprecated required fields are still enforced on real segments at v2.7" do
+      # PID-3 (patient_identifier_list) is :r and is NOT in the deprecation
+      # list — it must still be flagged when missing, even for a v2.7 message.
+      pid = %HL7v2.Segment.PID{
+        patient_identifier_list: nil,
+        patient_name: [%HL7v2.Type.XPN{family_name: %HL7v2.Type.FN{surname: "Smith"}}]
+      }
+
+      errors = FieldRules.check(pid, context: %{version: "2.7"})
+
+      assert Enum.any?(errors, fn err ->
+               err.level == :error and err.field == :patient_identifier_list
+             end)
+    end
+
+    test "OBR conditional rule still fires at v2.7 (exemption only covers :r)" do
+      # OBR has a conditional rule: at least one of placer_order_number (OBR-2)
+      # or filler_order_number (OBR-3) must be populated. Neither OBR-2 nor
+      # OBR-3 is in the v2.7 deprecation list, and conditional errors are not
+      # version-gated at all — they should still fire.
+      obr = %HL7v2.Segment.OBR{
+        universal_service_identifier: %HL7v2.Type.CE{identifier: "CBC"},
+        placer_order_number: nil,
+        filler_order_number: nil
+      }
+
+      errors = FieldRules.check(obr, context: %{version: "2.7"})
+
+      assert Enum.any?(errors, fn err ->
+               err.field == :placer_order_number and
+                 err.message =~ "at least one of placer_order_number"
+             end)
+    end
+
+    test "version context flows end-to-end through HL7v2.validate/1 without regressions" do
+      # End-to-end smoke test using the real library on a v2.7 message: the
+      # baseline PID schema marks PID-13/14 as :o, so there should be no new
+      # errors introduced by threading the version down into FieldRules.
+      wire =
+        "MSH|^~\\&|S|F||R|20260408||ADT^A01^ADT_A01|1|P|2.7\r" <>
+          "EVN|A01|20260408\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|O\r"
+
+      {:ok, typed} = HL7v2.parse(wire, mode: :typed)
+
+      case HL7v2.validate(typed) do
+        :ok -> :ok
+        {:ok, _warnings} -> :ok
+        {:error, errors} -> flunk("v2.7 validation regressed: #{inspect(errors)}")
+      end
     end
   end
 

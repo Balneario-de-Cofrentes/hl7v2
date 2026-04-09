@@ -9,6 +9,7 @@ defmodule HL7v2.Validation.FieldRules do
   """
 
   alias HL7v2.Standard.Tables
+  alias HL7v2.Standard.VersionDeltas
 
   # Mapping of {segment_id, field_name} to HL7 table ID.
   # Only fields where we know the canonical table binding are listed.
@@ -479,12 +480,13 @@ defmodule HL7v2.Validation.FieldRules do
     validate_tables? = Keyword.get(opts, :validate_tables, false)
     mode = Keyword.get(opts, :mode, :lenient)
     context = Keyword.get(opts, :context, %{})
+    version = Map.get(context, :version)
 
     field_errors =
-      Enum.flat_map(field_defs, fn {_seq, name, _type, optionality, max_reps} ->
+      Enum.flat_map(field_defs, fn {seq, name, _type, optionality, max_reps} ->
         value = Map.get(segment, name)
 
-        required_errors(location, name, optionality, value) ++
+        required_errors(location, seq, name, optionality, value, version) ++
           max_reps_errors(location, name, max_reps, value, mode) ++
           table_errors(location, name, value, validate_tables?)
       end)
@@ -492,22 +494,27 @@ defmodule HL7v2.Validation.FieldRules do
     field_errors ++ conditional_errors(segment, location, mode, context)
   end
 
-  defp required_errors(location, name, :r, value) do
-    if semantic_blank?(value) do
-      [
-        %{
-          level: :error,
-          location: location,
-          field: name,
-          message: "required field #{name} is missing"
-        }
-      ]
-    else
-      []
+  defp required_errors(location, seq, name, :r, value, version) do
+    cond do
+      not semantic_blank?(value) ->
+        []
+
+      VersionDeltas.exempt?(location, seq, version) ->
+        []
+
+      true ->
+        [
+          %{
+            level: :error,
+            location: location,
+            field: name,
+            message: "required field #{name} is missing"
+          }
+        ]
     end
   end
 
-  defp required_errors(_location, _name, _optionality, _value), do: []
+  defp required_errors(_location, _seq, _name, _optionality, _value, _version), do: []
 
   # A value is semantically blank if it's nil, an empty list, or a struct
   # where every field is nil (e.g., %XPN{} with all nil fields).
