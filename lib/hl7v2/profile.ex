@@ -301,6 +301,28 @@ defmodule HL7v2.Profile do
 
   @doc """
   Binds a coded field to a specific HL7 table, overriding any base binding.
+
+  The field's value is validated against `HL7v2.Standard.Tables` at
+  check time. `table_id` may be an integer (`69`), a zero-padded
+  string (`"0069"`), or a non-padded numeric string (`"69"`). Unknown
+  table IDs silently pass — consistent with
+  `HL7v2.Standard.Tables.validate/2`.
+
+  For struct-valued fields (CE, CWE, etc.), the binding validates the
+  `identifier` component. Raw string fields are validated directly.
+  Use `add_value_constraint/4` for more elaborate shapes.
+
+  > Before v3.10.0, this builder stored the binding but never
+  > enforced it. Profiles that relied on the silent behavior now
+  > produce `:bind_table` errors at validation time. Flag as a
+  > breaking change when upgrading.
+
+  ## Examples
+
+      iex> HL7v2.Profile.new("p")
+      ...> |> HL7v2.Profile.bind_table("PV1", 14, "0069")
+      ...> |> Map.get(:field_table_bindings)
+      %{{"PV1", 14} => "0069"}
   """
   @spec bind_table(t(), segment_id(), field_seq(), table_id()) :: t()
   def bind_table(%__MODULE__{} = profile, segment_id, field_seq, table_id)

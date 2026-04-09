@@ -25,9 +25,11 @@ defmodule HL7v2.Validation.ProfileRules do
      (from `Profile.require_value/5` or `Profile.require_value_in/5`)
   6. `require_component` — a declarative component/subcomponent pin on a
      composite field (from `Profile.require_component/5`)
-  7. `require_cardinality` — segment occurrence counts must fall within `{min, max}`
-  8. `value_constraint` — custom predicate on a field value (only when field present)
-  9. `custom_rule` — arbitrary function returning error maps
+  7. `bind_table` — a field's value must be in a specific HL7 table
+     (from `Profile.bind_table/4`)
+  8. `require_cardinality` — segment occurrence counts must fall within `{min, max}`
+  9. `value_constraint` — custom predicate on a field value (only when field present)
+  10. `custom_rule` — arbitrary function returning error maps
 
   Custom rule errors are tagged with `:rule` (the rule name) and `:profile`
   (the profile name) if the rule did not set them. If a custom rule raises,
@@ -75,6 +77,7 @@ defmodule HL7v2.Validation.ProfileRules do
       |> check_forbidden_fields(msg, profile)
       |> check_required_values(msg, profile)
       |> check_required_components(msg, profile)
+      |> check_table_bindings(msg, profile)
       |> check_cardinality(msg, profile)
       |> check_value_constraints(msg, profile)
       |> check_custom_rules(msg, profile)
@@ -522,6 +525,98 @@ defmodule HL7v2.Validation.ProfileRules do
         ]
     end
   end
+
+  # --- bind_table ---
+
+  defp check_table_bindings(errors, msg, profile) do
+    Enum.reduce(profile.field_table_bindings, errors, fn {{seg_id, field_seq}, table_id}, acc ->
+      case find_segment_field(msg.segments, seg_id, field_seq) do
+        {:ok, value, field_name} ->
+          validate_against_table(acc, profile, seg_id, field_seq, field_name, value, table_id)
+
+        _ ->
+          acc
+      end
+    end)
+  end
+
+  defp validate_against_table(errors, _profile, _seg_id, _field_seq, _field_name, nil, _table) do
+    errors
+  end
+
+  defp validate_against_table(errors, profile, seg_id, field_seq, field_name, value, table_id) do
+    code = extract_coded_value(value)
+
+    cond do
+      blank?(code) ->
+        errors
+
+      not is_binary(code) ->
+        errors
+
+      true ->
+        case parse_table_id(table_id) do
+          {:ok, table_int} ->
+            case HL7v2.Standard.Tables.get(table_int) do
+              nil ->
+                # Unknown table — silently pass, matching
+                # HL7v2.Standard.Tables.validate/2 semantics.
+                errors
+
+              %{codes: codes} ->
+                if Map.has_key?(codes, code) do
+                  errors
+                else
+                  [
+                    profile_error(
+                      profile,
+                      :bind_table,
+                      seg_id,
+                      field_name,
+                      "profile binds #{seg_id}-#{field_seq} to table " <>
+                        "#{format_table_id(table_id)}, but value " <>
+                        "#{inspect(code)} is not in that table"
+                    )
+                    | errors
+                  ]
+                end
+            end
+
+          :unknown ->
+            # Table id not parseable — silently pass.
+            errors
+        end
+    end
+  end
+
+  # Struct-valued coded fields (CE, CWE) carry their code in the
+  # identifier component. Raw binaries are taken as-is.
+  defp extract_coded_value(%HL7v2.Type.CE{identifier: id}), do: id
+  defp extract_coded_value(%HL7v2.Type.CWE{identifier: id}), do: id
+  defp extract_coded_value(value) when is_binary(value), do: value
+  defp extract_coded_value(_), do: nil
+
+  # Accept: integer 69, string "69", string "0069", atom :"0069".
+  defp parse_table_id(id) when is_integer(id) and id >= 0, do: {:ok, id}
+
+  defp parse_table_id(id) when is_binary(id) do
+    case Integer.parse(id) do
+      {int, ""} -> {:ok, int}
+      _ -> :unknown
+    end
+  end
+
+  defp parse_table_id(id) when is_atom(id) do
+    id |> Atom.to_string() |> parse_table_id()
+  end
+
+  defp parse_table_id(_), do: :unknown
+
+  defp format_table_id(id) when is_integer(id),
+    do: "#{id |> Integer.to_string() |> String.pad_leading(4, "0")}"
+
+  defp format_table_id(id) when is_binary(id), do: id
+  defp format_table_id(id), do: inspect(id)
 
   # --- require_cardinality ---
 

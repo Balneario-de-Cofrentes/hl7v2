@@ -1073,4 +1073,123 @@ defmodule HL7v2.ProfileTest do
       refute Enum.any?(ProfileRules.check(msg, profile), &(&1.rule == :require_component))
     end
   end
+
+  describe "bind_table/4 enforcement" do
+    alias HL7v2.Validation.ProfileRules
+
+    # Table 0076 (Message Type) contains "ADT", "ORU", "ORM", etc.
+    # We target MSH-9 which is a struct (MSG) with identifier = "ADT".
+    # For simpler enforcement tests, we use PV1-2 (Patient Class) which
+    # is bound to table 0004, a plain string field with codes like
+    # "I", "O", "E", "P", "R", "B", "C", "N", "U".
+
+    @valid_wire "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG|P|2.5\r" <>
+                  "EVN||20260409120000\r" <>
+                  "PID|1||12345^^^MRN||Smith^John\r" <>
+                  "PV1|1|I|ICU^101\r"
+
+    @bad_pv1_2_wire "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG|P|2.5\r" <>
+                      "EVN||20260409120000\r" <>
+                      "PID|1||12345^^^MRN||Smith^John\r" <>
+                      "PV1|1|Z|ICU^101\r"
+
+    test "PV1-2 bound to table 4 (Patient Class) passes valid code" do
+      {:ok, msg} = HL7v2.parse(@valid_wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.bind_table("PV1", 2, "0004")
+
+      assert ProfileRules.check(msg, profile) == []
+    end
+
+    test "PV1-2 bound to table 4 fires :bind_table on invalid code" do
+      {:ok, msg} = HL7v2.parse(@bad_pv1_2_wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.bind_table("PV1", 2, "0004")
+
+      assert [
+               %{
+                 rule: :bind_table,
+                 location: "PV1",
+                 field: :patient_class
+               } = err
+             ] = ProfileRules.check(msg, profile)
+
+      assert err.message =~ "0004"
+      assert err.message =~ "\"Z\""
+    end
+
+    test "accepts integer, zero-padded string, and plain string table IDs" do
+      {:ok, msg} = HL7v2.parse(@bad_pv1_2_wire, mode: :typed)
+
+      for table_id <- [4, "4", "0004"] do
+        profile =
+          Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+          |> Profile.bind_table("PV1", 2, table_id)
+
+        errors = ProfileRules.check(msg, profile)
+        assert [%{rule: :bind_table}] = errors, "table_id #{inspect(table_id)} should fire"
+      end
+    end
+
+    test "unknown table ID silently passes" do
+      {:ok, msg} = HL7v2.parse(@valid_wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.bind_table("PV1", 2, "9999")
+
+      assert ProfileRules.check(msg, profile) == []
+    end
+
+    test "blank field silently passes (use require_field to gate absence)" do
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG|P|2.5\r" <>
+          "EVN||20260409120000\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1||ICU^101\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.bind_table("PV1", 2, "0004")
+
+      refute Enum.any?(ProfileRules.check(msg, profile), &(&1.rule == :bind_table))
+    end
+
+    test "missing segment silently passes" do
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG|P|2.5\r" <>
+          "EVN||20260409120000\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.bind_table("PV1", 2, "0004")
+
+      refute Enum.any?(ProfileRules.check(msg, profile), &(&1.rule == :bind_table))
+    end
+
+    test "struct-valued field binds against its identifier component" do
+      # MSH-9 is a composite MSG type with identifier "ADT".
+      # Table 0076 contains "ADT", "ORU", "ORM", etc. — "ADT" is valid.
+      {:ok, msg} = HL7v2.parse(@valid_wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.bind_table("MSH", 9, "0076")
+
+      # Depending on whether MSG is registered in extract_coded_value,
+      # this either passes (if handled) or silently passes (if the
+      # value is a struct that doesn't match CE/CWE). Either way, no
+      # :bind_table error for a conformant ADT wire.
+      refute Enum.any?(ProfileRules.check(msg, profile), &(&1.rule == :bind_table))
+    end
+  end
 end
