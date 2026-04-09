@@ -2,19 +2,59 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## v3.5.0 — 2026-04-09
 
-### Added
+### Added — Version-Aware Validation (v2.3 → v2.8)
 
-- **Version-aware validation** — `HL7v2.validate/2` now reads MSH-12 (or accepts
-  an explicit `version:` option) to apply version-specific rules. v2.7+ messages
-  exempt B-field deprecations (PID-13/14, OBR-10/16, ORC-10/12).
-- **v2.7+ segment fields** — MSH fields 22-25, PID-40 (telecom replaces PID-13/14),
-  OBR-50, OBX 20-25 are now declared typed fields.
-- **`HL7v2.Standard.Version`** — normalize/compare/at_least?/supported? helpers
-  for HL7 version strings.
-- **`HL7v2.Standard.VersionDeltas`** — tracks field optionality changes between
-  versions (currently v2.7 B-field deprecations).
+HL7v2 now applies **version-specific rules** driven by MSH-12 (`version_id`).
+Previously the library enforced v2.5.1 rules on every message regardless of
+the declared version.
+
+- **`HL7v2.validate/2` is version-aware** — reads MSH-12 automatically, or
+  accepts an explicit `:version` override:
+  ```elixir
+  HL7v2.validate(msg)                       # reads MSH-12
+  HL7v2.validate(msg, version: "2.7")       # explicit override
+  ```
+  Invalid/unrecognized overrides silently fall back to MSH-12 (prevents
+  typos from weakening validation).
+
+- **v2.7+ segment fields** — MSH-22/23 (sending/receiving responsible
+  organization), MSH-24/25 (network addresses), PID-40 (telecommunication
+  information, replaces PID-13/14), OBR-50 (parent universal service
+  identifier), OBX 20-25 (observation site, instance ID, mood code,
+  performing organization) are now declared typed fields and round-trip
+  cleanly.
+
+- **B-field deprecation tracking** — v2.7+ messages exempt fields that
+  became backward-compatibility-only in v2.7: PID-13/14, OBR-10/16,
+  ORC-10/12. Required-field enforcement skips these when the message is
+  v2.7 or later, matching the HL7 conformance model.
+
+- **`HL7v2.Standard.Version`** — new public module with `normalize/1`,
+  `compare/2`, `at_least?/2`, and `supported?/1` for HL7 version strings.
+  Accepts `"2.7"`, `"v2.7"`, `"2.7.1"`, etc.
+
+- **`HL7v2.Standard.VersionDeltas`** — tracks field optionality changes
+  between versions. `exempt?/3` returns true when a field should not be
+  enforced as required at a given version.
+
+- **v2.7 extended fixture** — new `adt_a01_v27_extended.hl7` exercises
+  MSH-22/23 and PID-40 end-to-end. All 5 adjacent-version fixtures
+  (v2.3/v2.4/v2.6/v2.7/v2.8) now pass strict validation, not just
+  round-trip.
+
+### Changed
+
+- **README Scope section** — updated to describe the version-aware support
+  explicitly. v2.3-v2.8 messages parse, round-trip, and validate under
+  their declared version's rules.
+
+### Stats
+
+4,761 tests (499 doctests + 32 properties + 4,230 tests), 0 failures.
+
+## v3.4.0 — 2026-04-09
 
 ## v3.4.0 — 2026-04-09
 
