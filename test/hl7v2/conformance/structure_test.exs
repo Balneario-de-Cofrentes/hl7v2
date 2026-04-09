@@ -40,8 +40,8 @@ defmodule HL7v2.Conformance.StructureTest do
       end
     end
 
-    test "segment count is exactly 152 (v2.5.1)" do
-      assert Standard.segment_count() == 152
+    test "segment count is exactly 156 (152 v2.5.1 + 4 v2.6/v2.7: ARV, PRT, UAC, IAR)" do
+      assert Standard.segment_count() == 156
     end
   end
 
@@ -150,9 +150,9 @@ defmodule HL7v2.Conformance.StructureTest do
     test "coverage_summary returns valid structure with exact counts" do
       summary = Coverage.coverage_summary()
 
-      # Exact counts that match README claims
-      assert summary.typed_segment_count == 152
-      assert summary.total_segment_count == 152
+      # Exact counts that match README claims (152 v2.5.1 + 4 v2.6/v2.7)
+      assert summary.typed_segment_count == 156
+      assert summary.total_segment_count == 156
       assert summary.segment_coverage_pct == 100.0
       assert summary.typed_type_count == 90
       assert summary.total_type_count == 90

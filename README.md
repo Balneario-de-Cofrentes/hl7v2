@@ -170,7 +170,7 @@ Every official HL7 v2.5.1 segment, data type, and message structure has a typed
 Elixir module. Run `mix hl7v2.coverage --detail` for per-segment field completeness.
 
 ```
- Segments    152 of 152 v2.5.1 segments + generic ZXX
+ Segments    152 of 152 v2.5.1 + 4 v2.6/v2.7 (ARV, PRT, UAC, IAR) + generic ZXX
  Types       89 official v2.5.1 data types + legacy TN
  Structures  186 of 186 official v2.5.1 abstract structures (222 total with aliases)
 ```
@@ -237,8 +237,9 @@ The parser and encoder round-trip messages at any version in that range, and
 
 - v2.7+ messages exempt deprecated B-fields (PID-13/14, OBR-10/16, ORC-10/12)
 - MSH fields 22-25, PID-40, OBR-50, and OBX-20-25 are supported for v2.7+
-- New v2.6/v2.7/v2.8 segments (ARV, PRT, UAC, etc.) are not yet typed — they
-  parse as ZXX/extra_fields and round-trip cleanly.
+- PRT (Participation Information, v2.7+) is typed; other new v2.6/v2.7/v2.8
+  segments (ARV, UAC, etc.) are not yet typed — they parse as ZXX/extra_fields
+  and round-trip cleanly.
 
 ## Known Limitations
 

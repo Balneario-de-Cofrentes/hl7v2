@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.7.0 — 2026-04-09
+
+### Added — v2.6/v2.7 Typed Segments
+
+Four new typed segment modules for post-v2.5.1 segments. Messages at
+v2.7+ that use these segments now parse as typed structs instead of
+landing in `extra_fields`.
+
+- **`HL7v2.Segment.PRT`** (v2.7+) — Participation Information. 10
+  fields. Introduced in HL7 v2.7 to replace ROL in many messages;
+  captures the participation of a person, organization, location,
+  device, or other entity in an event.
+- **`HL7v2.Segment.ARV`** (v2.6+) — Access Restriction. 7 fields.
+  "Break the glass" emergency access, patient-requested
+  confidentiality, VIP flags.
+- **`HL7v2.Segment.UAC`** (v2.7+) — User Authentication Credential.
+  2 fields. Inter-system user authentication (Kerberos, SAML, etc.).
+- **`HL7v2.Segment.IAR`** (v2.7+) — Allergy Reaction. 5 fields.
+  Attaches to IAM to provide additional reaction details.
+
+Catalog grows from **152 → 156** typed segments (100% v2.5.1 + 4
+common v2.6/v2.7 additions).
+
+### Stats
+
+4,907 tests (504 doctests + 32 properties + 4,371 tests), 0 failures.
+
 ## v3.6.0 — 2026-04-09
 
 ### Added — Conformance Profiles
