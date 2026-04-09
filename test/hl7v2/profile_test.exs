@@ -725,4 +725,196 @@ defmodule HL7v2.ProfileTest do
       assert [%{rule: :good_rule, profile: "good_profile", location: "PID"}] = errors
     end
   end
+
+  describe "require_value/5" do
+    alias HL7v2.Validation.ProfileRules
+
+    test "stores an :eq spec" do
+      profile =
+        Profile.new("p")
+        |> Profile.require_value("PV1", 2, "N")
+
+      assert profile.required_values[{"PV1", 2}] == {:eq, "N", []}
+    end
+
+    test "stores an accessor in the spec" do
+      accessor = & &1.identifier
+
+      profile =
+        Profile.new("p")
+        |> Profile.require_value("QPD", 1, "IHE PIX Query", accessor: accessor)
+
+      assert {:eq, "IHE PIX Query", opts} = profile.required_values[{"QPD", 1}]
+      assert Keyword.fetch!(opts, :accessor) == accessor
+    end
+
+    test "raises on invalid arguments" do
+      assert_raise FunctionClauseError, fn ->
+        Profile.require_value(Profile.new("p"), "PV1", 0, "N")
+      end
+
+      assert_raise FunctionClauseError, fn ->
+        Profile.require_value(Profile.new("p"), :pv1, 2, "N")
+      end
+    end
+
+    test "ProfileRules fires :require_value on mismatch" do
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A28^ADT_A05|MSG|P|2.5\r" <>
+          "EVN||20260409120000\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|I\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A28"}, version: "2.5")
+        |> Profile.require_value("PV1", 2, "N")
+
+      assert [
+               %{
+                 rule: :require_value,
+                 location: "PV1",
+                 field: :patient_class
+               } = err
+             ] = ProfileRules.check(msg, profile)
+
+      assert err.message =~ "\"N\""
+      assert err.message =~ "\"I\""
+    end
+
+    test "ProfileRules passes when the value matches" do
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A28^ADT_A05|MSG|P|2.5\r" <>
+          "EVN||20260409120000\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|N\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A28"}, version: "2.5")
+        |> Profile.require_value("PV1", 2, "N")
+
+      assert ProfileRules.check(msg, profile) == []
+    end
+
+    test "ProfileRules fires :require_value when the field is blank" do
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A28^ADT_A05|MSG|P|2.5\r" <>
+          "EVN||20260409120000\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A28"}, version: "2.5")
+        |> Profile.require_value("PV1", 2, "N")
+
+      assert [%{rule: :require_value, message: msg_str}] = ProfileRules.check(msg, profile)
+      assert msg_str =~ "blank"
+    end
+
+    test "accessor targets a struct component (CE.identifier)" do
+      wire =
+        "MSH|^~\\&|REQ|HOSP|PIX|MGR|20260409120000||QBP^Q23^QBP_Q21|MSG|P|2.5\r" <>
+          "QPD|IHE PIX Query|QRY001|12345^^^MRN^MR\r" <>
+          "RCP|I\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("pix_query", message_type: {"QBP", "Q23"}, version: "2.5")
+        |> Profile.require_value("QPD", 1, "IHE PIX Query", accessor: & &1.identifier)
+
+      assert ProfileRules.check(msg, profile) == []
+    end
+
+    test "accessor mismatch fires :require_value" do
+      wire =
+        "MSH|^~\\&|REQ|HOSP|PIX|MGR|20260409120000||QBP^Q23^QBP_Q21|MSG|P|2.5\r" <>
+          "QPD|Wrong Name|QRY001|12345^^^MRN^MR\r" <>
+          "RCP|I\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("pix_query", message_type: {"QBP", "Q23"}, version: "2.5")
+        |> Profile.require_value("QPD", 1, "IHE PIX Query", accessor: & &1.identifier)
+
+      assert [%{rule: :require_value, location: "QPD"}] = ProfileRules.check(msg, profile)
+    end
+
+    test "integrates with other profile rules" do
+      # Combines require_segment + require_value to prove they compose.
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A28^ADT_A05|MSG|P|2.5\r" <>
+          "EVN||20260409120000\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|I\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A28"}, version: "2.5")
+        |> Profile.require_segment("NK1")
+        |> Profile.require_value("PV1", 2, "N")
+
+      errors = ProfileRules.check(msg, profile)
+      rules = errors |> Enum.map(& &1.rule) |> Enum.sort() |> Enum.uniq()
+
+      assert :require_segment in rules
+      assert :require_value in rules
+    end
+  end
+
+  describe "require_value_in/5" do
+    alias HL7v2.Validation.ProfileRules
+
+    test "stores an :in spec" do
+      profile =
+        Profile.new("p")
+        |> Profile.require_value_in("MSA", 1, ["AA", "AE", "AR"])
+
+      assert profile.required_values[{"MSA", 1}] == {:in, ["AA", "AE", "AR"], []}
+    end
+
+    test "ProfileRules passes when value is in the allowed list" do
+      wire =
+        "MSH|^~\\&|PIX|MGR|REQ|HOSP|20260409120000||RSP^K23^RSP_K23|MSG|P|2.5\r" <>
+          "MSA|AA|MSG001\r" <>
+          "QAK|QRY001|OK\r" <>
+          "QPD|IHE PIX Query|QRY001\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("rsp", message_type: {"RSP", "K23"}, version: "2.5")
+        |> Profile.require_value_in("MSA", 1, ["AA", "AE", "AR"])
+
+      assert ProfileRules.check(msg, profile) == []
+    end
+
+    test "ProfileRules fires when value is not in the allowed list" do
+      wire =
+        "MSH|^~\\&|PIX|MGR|REQ|HOSP|20260409120000||RSP^K23^RSP_K23|MSG|P|2.5\r" <>
+          "MSA|XX|MSG001\r" <>
+          "QAK|QRY001|OK\r" <>
+          "QPD|IHE PIX Query|QRY001\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("rsp", message_type: {"RSP", "K23"}, version: "2.5")
+        |> Profile.require_value_in("MSA", 1, ["AA", "AE", "AR"])
+
+      assert [
+               %{rule: :require_value, location: "MSA", field: :acknowledgment_code} = err
+             ] = ProfileRules.check(msg, profile)
+
+      assert err.message =~ "one of"
+      assert err.message =~ "\"XX\""
+    end
+  end
 end

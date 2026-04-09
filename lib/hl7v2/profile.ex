@@ -38,6 +38,10 @@ defmodule HL7v2.Profile do
 
   @type custom_rule :: (HL7v2.TypedMessage.t() -> [error()])
 
+  @type value_spec ::
+          {:eq, term(), keyword()}
+          | {:in, [term()], keyword()}
+
   @type t :: %__MODULE__{
           name: String.t(),
           message_type: {String.t(), String.t()} | nil,
@@ -47,6 +51,7 @@ defmodule HL7v2.Profile do
           forbidden_segments: MapSet.t(segment_id()),
           required_fields: %{{segment_id(), field_seq()} => :required},
           forbidden_fields: MapSet.t({segment_id(), field_seq()}),
+          required_values: %{{segment_id(), field_seq()} => value_spec()},
           field_table_bindings: %{{segment_id(), field_seq()} => table_id()},
           cardinality_constraints: %{segment_id() => cardinality()},
           value_constraints: %{
@@ -63,6 +68,7 @@ defmodule HL7v2.Profile do
             forbidden_segments: nil,
             required_fields: %{},
             forbidden_fields: nil,
+            required_values: %{},
             field_table_bindings: %{},
             cardinality_constraints: %{},
             value_constraints: %{},
@@ -139,6 +145,68 @@ defmodule HL7v2.Profile do
       when is_binary(segment_id) and is_integer(field_seq) and field_seq > 0 do
     key = {segment_id, field_seq}
     %{profile | required_fields: Map.put(profile.required_fields, key, :required)}
+  end
+
+  @doc """
+  Pins a field to a specific expected value.
+
+  Unlike `add_value_constraint/4`, which takes a closure, this stores
+  the expected value as data. Profiles built with `require_value/4`
+  remain introspectable — you can serialize, diff, or audit them
+  without executing functions.
+
+  ## Options
+
+  - `:accessor` — a 1-arity function applied to the parsed field value
+    before the equality check. Use this to target a struct component,
+    e.g. `accessor: & &1.identifier` to pin the first component of a CE.
+    Defaults to the identity function.
+
+  ## Examples
+
+      iex> HL7v2.Profile.new("p")
+      ...> |> HL7v2.Profile.require_value("PV1", 2, "N")
+      ...> |> Map.get(:required_values)
+      %{{"PV1", 2} => {:eq, "N", []}}
+
+      iex> accessor = & &1.identifier
+      iex> profile =
+      ...>   HL7v2.Profile.new("p")
+      ...>   |> HL7v2.Profile.require_value("QPD", 1, "IHE PIX Query", accessor: accessor)
+      iex> {:eq, "IHE PIX Query", opts} = profile.required_values[{"QPD", 1}]
+      iex> is_function(Keyword.fetch!(opts, :accessor), 1)
+      true
+  """
+  @spec require_value(t(), segment_id(), field_seq(), term(), keyword()) :: t()
+  def require_value(%__MODULE__{} = profile, segment_id, field_seq, expected, opts \\ [])
+      when is_binary(segment_id) and is_integer(field_seq) and field_seq > 0 do
+    key = {segment_id, field_seq}
+    %{profile | required_values: Map.put(profile.required_values, key, {:eq, expected, opts})}
+  end
+
+  @doc """
+  Pins a field to a set of allowed values.
+
+  Like `require_value/4` but accepts a list — the field's (possibly
+  accessor-transformed) value must be a member of `allowed`.
+
+  ## Options
+
+  - `:accessor` — 1-arity function applied before the membership test.
+
+  ## Examples
+
+      iex> HL7v2.Profile.new("p")
+      ...> |> HL7v2.Profile.require_value_in("MSA", 1, ["AA", "AE", "AR"])
+      ...> |> Map.get(:required_values)
+      %{{"MSA", 1} => {:in, ["AA", "AE", "AR"], []}}
+  """
+  @spec require_value_in(t(), segment_id(), field_seq(), [term()], keyword()) :: t()
+  def require_value_in(%__MODULE__{} = profile, segment_id, field_seq, allowed, opts \\ [])
+      when is_binary(segment_id) and is_integer(field_seq) and field_seq > 0 and
+             is_list(allowed) do
+    key = {segment_id, field_seq}
+    %{profile | required_values: Map.put(profile.required_values, key, {:in, allowed, opts})}
   end
 
   @doc """

@@ -21,9 +21,11 @@ defmodule HL7v2.Validation.ProfileRules do
      segment is present; missing segment is also an error
   4. `forbid_field` — every `{seg_id, field_seq}` in `profile.forbidden_fields`
      must be blank or absent
-  5. `require_cardinality` — segment occurrence counts must fall within `{min, max}`
-  6. `value_constraint` — custom predicate on a field value (only when field present)
-  7. `custom_rule` — arbitrary function returning error maps
+  5. `require_value` — a declarative equality or membership pin on a field
+     (from `Profile.require_value/5` or `Profile.require_value_in/5`)
+  6. `require_cardinality` — segment occurrence counts must fall within `{min, max}`
+  7. `value_constraint` — custom predicate on a field value (only when field present)
+  8. `custom_rule` — arbitrary function returning error maps
 
   Custom rule errors are tagged with `:rule` (the rule name) and `:profile`
   (the profile name) if the rule did not set them. If a custom rule raises,
@@ -69,6 +71,7 @@ defmodule HL7v2.Validation.ProfileRules do
       |> check_forbidden_segments(msg, profile)
       |> check_required_fields(msg, profile)
       |> check_forbidden_fields(msg, profile)
+      |> check_required_values(msg, profile)
       |> check_cardinality(msg, profile)
       |> check_value_constraints(msg, profile)
       |> check_custom_rules(msg, profile)
@@ -223,6 +226,116 @@ defmodule HL7v2.Validation.ProfileRules do
           acc
       end
     end)
+  end
+
+  # --- require_value / require_value_in ---
+
+  defp check_required_values(errors, msg, profile) do
+    Enum.reduce(profile.required_values, errors, fn {{seg_id, field_seq}, spec}, acc ->
+      case find_segment_field(msg.segments, seg_id, field_seq) do
+        {:ok, value, field_name} ->
+          apply_value_spec(acc, profile, seg_id, field_seq, field_name, value, spec)
+
+        :segment_missing ->
+          acc
+
+        :field_not_defined ->
+          acc
+      end
+    end)
+  end
+
+  defp apply_value_spec(acc, profile, seg_id, field_seq, field_name, value, {:eq, expected, opts}) do
+    actual = apply_accessor(value, opts)
+
+    cond do
+      blank?(actual) ->
+        [
+          profile_error(
+            profile,
+            :require_value,
+            seg_id,
+            field_name,
+            "profile requires #{seg_id}-#{field_seq} to equal #{inspect(expected)}, " <>
+              "but it is blank"
+          )
+          | acc
+        ]
+
+      actual == expected ->
+        acc
+
+      true ->
+        [
+          profile_error(
+            profile,
+            :require_value,
+            seg_id,
+            field_name,
+            "profile requires #{seg_id}-#{field_seq} to equal #{inspect(expected)}, " <>
+              "got #{inspect(actual)}"
+          )
+          | acc
+        ]
+    end
+  end
+
+  defp apply_value_spec(
+         acc,
+         profile,
+         seg_id,
+         field_seq,
+         field_name,
+         value,
+         {:in, allowed, opts}
+       ) do
+    actual = apply_accessor(value, opts)
+
+    cond do
+      blank?(actual) ->
+        [
+          profile_error(
+            profile,
+            :require_value,
+            seg_id,
+            field_name,
+            "profile requires #{seg_id}-#{field_seq} to be one of #{inspect(allowed)}, " <>
+              "but it is blank"
+          )
+          | acc
+        ]
+
+      actual in allowed ->
+        acc
+
+      true ->
+        [
+          profile_error(
+            profile,
+            :require_value,
+            seg_id,
+            field_name,
+            "profile requires #{seg_id}-#{field_seq} to be one of #{inspect(allowed)}, " <>
+              "got #{inspect(actual)}"
+          )
+          | acc
+        ]
+    end
+  end
+
+  defp apply_accessor(value, opts) do
+    case Keyword.get(opts, :accessor) do
+      fun when is_function(fun, 1) -> apply_accessor_safe(fun, value)
+      nil -> value
+    end
+  end
+
+  defp apply_accessor_safe(_fun, nil), do: nil
+
+  defp apply_accessor_safe(fun, value) do
+    fun.(value)
+  rescue
+    _ -> nil
   end
 
   # --- require_cardinality ---
