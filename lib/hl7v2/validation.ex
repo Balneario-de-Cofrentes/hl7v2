@@ -138,11 +138,27 @@ defmodule HL7v2.Validation do
 
   defp canonicalize_structure(_code, _event), do: nil
 
-  defp extract_trigger_context([%HL7v2.Segment.MSH{message_type: %HL7v2.Type.MSG{} = msg} | _]) do
-    %{trigger_event: msg.trigger_event, message_code: msg.message_code}
+  defp extract_trigger_context(
+         [%HL7v2.Segment.MSH{message_type: %HL7v2.Type.MSG{} = msg} | _] = segments
+       ) do
+    %{
+      trigger_event: msg.trigger_event,
+      message_code: msg.message_code,
+      version: extract_version(segments)
+    }
   end
 
   defp extract_trigger_context(_), do: %{}
+
+  # Extracts the HL7 version (MSH-12.1) from the first segment of a message.
+  # Returns a normalized canonical version string (e.g., "2.5.1", "2.7") or
+  # `nil` when the version cannot be determined.
+  defp extract_version([%HL7v2.Segment.MSH{version_id: %HL7v2.Type.VID{version_id: raw}} | _])
+       when is_binary(raw) do
+    HL7v2.Standard.Version.normalize(raw)
+  end
+
+  defp extract_version(_), do: nil
 
   defp extract_segment_ids(segments) do
     Enum.map(segments, fn

@@ -299,6 +299,29 @@ defmodule HL7v2.ValidationTest do
         {:error, errors} -> flunk("Validation failed: #{inspect(errors)}")
       end
     end
+
+    test "version is plumbed through validation for a v2.7 message without errors" do
+      wire =
+        "MSH|^~\\&|S|F||R|20260408||ADT^A01^ADT_A01|1|P|2.7\r" <>
+          "EVN|A01|20260408\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|O\r"
+
+      {:ok, typed} = HL7v2.parse(wire, mode: :typed)
+
+      # Smoke test: the version should flow through extract_trigger_context
+      # into FieldRules without changing existing validation behavior.
+      case HL7v2.validate(typed) do
+        :ok -> :ok
+        {:ok, _warnings} -> :ok
+        {:error, errors} -> flunk("Validation failed unexpectedly: #{inspect(errors)}")
+      end
+
+      # Confirm the parsed message exposes the v2.7 version that the plumbing
+      # extracts (sanity check on the fixture itself).
+      [msh | _] = typed.segments
+      assert msh.version_id.version_id == "2.7"
+    end
   end
 
   describe "FieldRules bounded max_reps" do
