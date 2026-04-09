@@ -45,7 +45,7 @@ defmodule HL7v2.Profiles.IHE do
   """
 
   alias HL7v2.Profile
-  alias HL7v2.Profiles.IHE.{PAM, PDQ, PIX}
+  alias HL7v2.Profiles.IHE.{LTW, PAM, PDQ, PIX, RadSwf}
 
   @doc """
   Returns the full IHE profile catalog as a map keyed by IHE
@@ -59,6 +59,8 @@ defmodule HL7v2.Profiles.IHE do
     pam()
     |> Map.merge(pix())
     |> Map.merge(pdq())
+    |> Map.merge(ltw())
+    |> Map.merge(rad_swf())
   end
 
   @doc """
@@ -83,4 +85,20 @@ defmodule HL7v2.Profiles.IHE do
   """
   @spec pdq() :: %{String.t() => Profile.t()}
   def pdq, do: PDQ.all()
+
+  @doc """
+  Returns the LTW (Laboratory Testing Workflow) profile catalog —
+  LAB-1 (Placer Order Management, v2.5.1) and LAB-3 (Order Results
+  Management, v2.5.1).
+  """
+  @spec ltw() :: %{String.t() => Profile.t()}
+  def ltw, do: LTW.all()
+
+  @doc """
+  Returns the RAD-SWF (Radiology Scheduled Workflow) profile
+  catalog — RAD-1 (Patient Registration, v2.3.1) and RAD-4
+  (Procedure Scheduled, v2.5.1 OMI^O23).
+  """
+  @spec rad_swf() :: %{String.t() => Profile.t()}
+  def rad_swf, do: RadSwf.all()
 end
