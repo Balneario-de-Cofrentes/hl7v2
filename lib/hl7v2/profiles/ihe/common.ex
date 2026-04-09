@@ -17,9 +17,13 @@ defmodule HL7v2.Profiles.IHE.Common do
   alias HL7v2.TypedMessage
 
   @doc """
-  Adds the IHE PAM/PIX MSH baseline — requires MSH-9/10/11/12,
-  forbids MSH-8 (Security) and MSH-14 (Continuation Pointer) which
-  IHE marks as deprecated/X.
+  Adds the IHE PAM/PIX MSH baseline — requires MSH-9/10/11/12 and
+  forbids MSH-8 (Security), which IHE marks as "X" (not supported).
+
+  NOTE: MSH-14 (Continuation Pointer) is deliberately NOT forbidden
+  here. ITI-9 PIX Query uses it for the continuation protocol; IHE
+  PAM leaves it as "not used" (O) rather than strictly forbidden,
+  and real-world wires from vendors occasionally populate it.
   """
   @spec msh_pam_core(Profile.t()) :: Profile.t()
   def msh_pam_core(%Profile{} = profile) do
@@ -29,70 +33,132 @@ defmodule HL7v2.Profiles.IHE.Common do
     |> Profile.require_field("MSH", 11)
     |> Profile.require_field("MSH", 12)
     |> Profile.forbid_field("MSH", 8)
-    |> Profile.forbid_field("MSH", 14)
   end
 
   @doc """
-  Requires EVN-2 (Recorded Date/Time) and forbids EVN-1 (deprecated
-  — use MSH-9). Used by all IHE ADT-based transactions.
+  Requires EVN-2 (Recorded Date/Time). Used by all IHE ADT-based
+  transactions.
+
+  NOTE: EVN-1 (Event Type Code) is NOT forbidden. Although the HL7
+  v2.5.1 base marks it as "B" (backwards compat) and the IHE PAM TF
+  recommends carrying the trigger in MSH-9 instead, real-world
+  systems (Epic, Cerner Millennium, Meditech, most Spanish HIS
+  products) still populate EVN-1 with the trigger event code.
+  Forbidding it would flag conformant messages.
   """
   @spec evn_core(Profile.t()) :: Profile.t()
   def evn_core(%Profile{} = profile) do
-    profile
-    |> Profile.require_field("EVN", 2)
-    |> Profile.forbid_field("EVN", 1)
+    Profile.require_field(profile, "EVN", 2)
   end
 
   @doc """
-  IHE patient identification baseline — requires PID-3 (Patient
-  Identifier List) and PID-5 (Patient Name), and adds a custom rule
-  that checks every PID-3 repetition has a populated Assigning
-  Authority (CX-4). This is the single most common IHE constraint
-  across PAM/PIX/PDQ/LAB/RAD-1.
+  IHE patient identification baseline — requires PID-5 (Patient
+  Name) and adds a single cross-field rule `:pid3_identity` that
+  validates PID-3 per the IHE TF:
+
+  - at least one CX repetition is present
+  - every non-empty CX carries CX-1 (ID Number)
+  - every non-empty CX carries CX-4 (Assigning Authority) with a
+    namespace ID or a universal ID
+
+  This is the single most common IHE constraint across
+  PAM/PIX/PDQ/LAB/RAD-1. The custom rule is authoritative for PID-3
+  presence and does NOT call `require_field("PID", 3)` — the rule
+  produces a single, targeted error rather than stacking a generic
+  "PID-3 missing" error on top of the CX-level checks.
   """
   @spec pid_core(Profile.t()) :: Profile.t()
   def pid_core(%Profile{} = profile) do
     profile
-    |> Profile.require_field("PID", 3)
     |> Profile.require_field("PID", 5)
-    |> Profile.add_rule(:pid3_assigning_authority, &pid3_assigning_authority_rule/1)
+    |> Profile.add_rule(:pid3_identity, &pid3_identity_rule/1)
   end
 
   @doc """
-  Custom rule: every PID-3 repetition in every PID segment must have
-  CX-4 (Assigning Authority) populated with at least a namespace ID
-  or a universal ID. Returns a list of error maps.
+  Custom rule: validates PID-3 per IHE identity requirements.
+  See `pid_core/1` for the contract. Returns a list of error maps.
   """
-  @spec pid3_assigning_authority_rule(TypedMessage.t()) :: [map()]
-  def pid3_assigning_authority_rule(%TypedMessage{segments: segments}) do
+  @spec pid3_identity_rule(TypedMessage.t()) :: [map()]
+  def pid3_identity_rule(%TypedMessage{segments: segments}) do
     segments
     |> Enum.filter(&match?(%PID{}, &1))
-    |> Enum.flat_map(&check_pid3_repetitions/1)
+    |> Enum.flat_map(&check_pid3_identity/1)
   end
 
-  defp check_pid3_repetitions(%PID{patient_identifier_list: nil}), do: []
-  defp check_pid3_repetitions(%PID{patient_identifier_list: []}), do: []
+  defp check_pid3_identity(%PID{patient_identifier_list: nil}),
+    do: [pid3_missing_error()]
 
-  defp check_pid3_repetitions(%PID{patient_identifier_list: ids}) when is_list(ids) do
-    ids
-    |> Enum.with_index(1)
-    |> Enum.flat_map(fn {cx, idx} ->
-      if assigning_authority_populated?(cx) do
-        []
-      else
-        [
-          %{
-            level: :error,
-            location: "PID",
-            field: :patient_identifier_list,
-            message: "IHE requires PID-3 repetition #{idx} to carry an Assigning Authority (CX-4)"
-          }
-        ]
-      end
-    end)
+  defp check_pid3_identity(%PID{patient_identifier_list: []}),
+    do: [pid3_missing_error()]
+
+  defp check_pid3_identity(%PID{patient_identifier_list: ids}) when is_list(ids) do
+    cond do
+      Enum.all?(ids, &empty_cx?/1) ->
+        [pid3_missing_error()]
+
+      true ->
+        ids
+        |> Enum.with_index(1)
+        |> Enum.flat_map(fn {cx, idx} -> check_cx(cx, idx) end)
+    end
   end
 
-  defp check_pid3_repetitions(_), do: []
+  defp check_pid3_identity(_), do: []
+
+  defp check_cx(%CX{} = cx, idx) do
+    # Skip entirely-empty CX (already counted as "missing" when all
+    # repetitions are empty; silently ignored here when other
+    # repetitions carry real data).
+    if empty_cx?(cx) do
+      []
+    else
+      id_errors =
+        if blank?(cx.id) do
+          [
+            %{
+              level: :error,
+              location: "PID",
+              field: :patient_identifier_list,
+              message: "IHE requires PID-3 repetition #{idx} to carry CX-1 (ID Number)"
+            }
+          ]
+        else
+          []
+        end
+
+      aa_errors =
+        if assigning_authority_populated?(cx) do
+          []
+        else
+          [
+            %{
+              level: :error,
+              location: "PID",
+              field: :patient_identifier_list,
+              message: "IHE requires PID-3 repetition #{idx} to carry CX-4 (Assigning Authority)"
+            }
+          ]
+        end
+
+      id_errors ++ aa_errors
+    end
+  end
+
+  defp check_cx(_, _), do: []
+
+  defp empty_cx?(%CX{} = cx),
+    do: blank?(cx.id) and not assigning_authority_populated?(cx)
+
+  defp empty_cx?(_), do: true
+
+  defp pid3_missing_error do
+    %{
+      level: :error,
+      location: "PID",
+      field: :patient_identifier_list,
+      message: "IHE requires PID-3 to carry at least one identifier with CX-1 and CX-4"
+    }
+  end
 
   defp assigning_authority_populated?(%CX{assigning_authority: %HD{} = hd}) do
     not (blank?(hd.namespace_id) and blank?(hd.universal_id))

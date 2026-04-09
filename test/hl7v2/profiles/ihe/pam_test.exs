@@ -45,7 +45,7 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
                        "PV1|1|I\r"
 
   # A01 whose PID-3 has no assigning authority — should fire the
-  # :pid3_assigning_authority custom rule.
+  # :pid3_identity custom rule.
   @a01_no_aa "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG007|P|2.5\r" <>
                "EVN||20260409120000\r" <>
                "PID|1||12345||Smith^John\r" <>
@@ -96,16 +96,17 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
 
       assert profile.required_fields[{"MSH", 9}] == :required
       assert profile.required_fields[{"EVN", 2}] == :required
-      assert profile.required_fields[{"PID", 3}] == :required
+      # PID-3 is validated by the :pid3_identity custom rule, not require_field
       assert profile.required_fields[{"PID", 5}] == :required
       assert profile.required_fields[{"PV1", 2}] == :required
       assert profile.required_fields[{"PV1", 3}] == :required
 
       assert MapSet.member?(profile.forbidden_fields, {"MSH", 8})
-      assert MapSet.member?(profile.forbidden_fields, {"EVN", 1})
+      refute MapSet.member?(profile.forbidden_fields, {"EVN", 1})
+      refute MapSet.member?(profile.forbidden_fields, {"MSH", 14})
 
       assert Enum.any?(profile.custom_rules, fn {rule, _} ->
-               rule == :pid3_assigning_authority
+               rule == :pid3_identity
              end)
     end
 
@@ -142,17 +143,17 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
              end)
     end
 
-    test "PID-3 without Assigning Authority triggers :pid3_assigning_authority" do
+    test "PID-3 without Assigning Authority triggers :pid3_identity" do
       msg = parse!(@a01_no_aa)
       errors = ProfileRules.check(msg, PAM.iti_31_adt_a01())
 
       aa_error =
         Enum.find(errors, fn e ->
-          e.rule == :pid3_assigning_authority and e.location == "PID"
+          e.rule == :pid3_identity and e.location == "PID" and
+            e.message =~ "Assigning Authority"
         end)
 
       assert aa_error != nil
-      assert aa_error.message =~ "Assigning Authority"
       assert aa_error.profile == "IHE_ITI-31_ADT_A01"
     end
 
@@ -232,18 +233,19 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
     end
   end
 
-  # --- ITI-31 ADT^A40 ---------------------------------------------------
+  # --- ITI-30 ADT^A40 (patient-level merge) -----------------------------
 
-  describe "iti_31_adt_a40/0" do
+  describe "iti_30_adt_a40/0" do
     test "returns a Profile struct with expected metadata" do
-      profile = PAM.iti_31_adt_a40()
+      profile = PAM.iti_30_adt_a40()
 
-      assert profile.name == "IHE_ITI-31_ADT_A40"
+      assert profile.name == "IHE_ITI-30_ADT_A40"
       assert profile.message_type == {"ADT", "A40"}
+      assert profile.description =~ "Identity Management"
     end
 
     test "requires MRG and forbids PV1" do
-      profile = PAM.iti_31_adt_a40()
+      profile = PAM.iti_30_adt_a40()
       assert "MRG" in Profile.required_segments?(profile)
       assert "PV1" in Profile.forbidden_segments?(profile)
       assert profile.required_fields[{"MRG", 1}] == :required
@@ -251,7 +253,7 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
 
     test "valid A40 merge passes" do
       msg = parse!(@valid_a40)
-      assert ProfileRules.check(msg, PAM.iti_31_adt_a40()) == []
+      assert ProfileRules.check(msg, PAM.iti_30_adt_a40()) == []
     end
   end
 
@@ -315,9 +317,9 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
       assert Map.has_key?(catalog, "ITI-31.A04")
       assert Map.has_key?(catalog, "ITI-31.A08")
       assert Map.has_key?(catalog, "ITI-31.A03")
-      assert Map.has_key?(catalog, "ITI-31.A40")
       assert Map.has_key?(catalog, "ITI-30.A28")
       assert Map.has_key?(catalog, "ITI-30.A31")
+      assert Map.has_key?(catalog, "ITI-30.A40")
 
       for {_code, profile} <- catalog do
         assert %Profile{} = profile

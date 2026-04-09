@@ -54,6 +54,18 @@ defmodule HL7v2.Profiles.IHE.PIXTest do
                           "QAK|QRY001|OK\r" <>
                           "QPD|IHE PIX Query|QRY001|12345^^^HOSP_MRN&1.2.3&ISO^MR\r"
 
+  # ITI-9 response with invalid MSA-1 value (not AA/AE/AR).
+  @iti_9_response_bad_msa "MSH|^~\\&|PIX|MGR|REQ|HOSP|20260409120000||RSP^K23^RSP_K23|MSG008|P|2.5\r" <>
+                            "MSA|XX|MSG005\r" <>
+                            "QAK|QRY001|OK\r" <>
+                            "QPD|IHE PIX Query|QRY001|12345^^^HOSP_MRN&1.2.3&ISO^MR\r"
+
+  # ITI-9 response with invalid QAK-2 value (not OK/NF/AE).
+  @iti_9_response_bad_qak "MSH|^~\\&|PIX|MGR|REQ|HOSP|20260409120000||RSP^K23^RSP_K23|MSG008|P|2.5\r" <>
+                            "MSA|AA|MSG005\r" <>
+                            "QAK|QRY001|GARBAGE\r" <>
+                            "QPD|IHE PIX Query|QRY001|12345^^^HOSP_MRN&1.2.3&ISO^MR\r"
+
   # Valid ITI-10 update — PV1-2 = "N", PID-3 with assigning authority.
   @valid_iti_10 "MSH|^~\\&|PIX|MGR|HIS|HOSP|20260409120000||ADT^A31^ADT_A05|MSG009|P|2.5\r" <>
                   "EVN||20260409120000\r" <>
@@ -91,10 +103,13 @@ defmodule HL7v2.Profiles.IHE.PIXTest do
       assert "PV1" in required
     end
 
-    test "requires PID-3 and PID-5" do
+    test "requires PID-5 and validates PID-3 via :pid3_identity rule" do
       profile = PIX.iti_8_feed_a01()
-      assert profile.required_fields[{"PID", 3}] == :required
       assert profile.required_fields[{"PID", 5}] == :required
+
+      assert Enum.any?(profile.custom_rules, fn {rule, _} ->
+               rule == :pid3_identity
+             end)
     end
 
     test "valid v2.3.1 ITI-8 A01 passes" do
@@ -217,6 +232,26 @@ defmodule HL7v2.Profiles.IHE.PIXTest do
     test "valid response passes" do
       msg = parse!(@valid_iti_9_response)
       assert ProfileRules.check(msg, PIX.iti_9_response()) == []
+    end
+
+    test "invalid MSA-1 value fires :value_constraint" do
+      msg = parse!(@iti_9_response_bad_msa)
+      errors = ProfileRules.check(msg, PIX.iti_9_response())
+
+      assert Enum.any?(errors, fn e ->
+               e.rule == :value_constraint and e.location == "MSA" and
+                 e.profile == "IHE_ITI-9_PIX_Response"
+             end)
+    end
+
+    test "invalid QAK-2 status fires :value_constraint" do
+      msg = parse!(@iti_9_response_bad_qak)
+      errors = ProfileRules.check(msg, PIX.iti_9_response())
+
+      assert Enum.any?(errors, fn e ->
+               e.rule == :value_constraint and e.location == "QAK" and
+                 e.profile == "IHE_ITI-9_PIX_Response"
+             end)
     end
   end
 

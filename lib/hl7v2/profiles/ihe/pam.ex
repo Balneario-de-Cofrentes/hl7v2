@@ -131,18 +131,25 @@ defmodule HL7v2.Profiles.IHE.PAM do
   end
 
   @doc """
-  ITI-31 ADT^A40 — Merge Patient — Patient ID List.
+  ITI-30 ADT^A40 — Merge Patient — Patient ID List.
 
-  Requires MSH, EVN, PID, MRG (PV1 is forbidden in A40 per ITI-31).
-  MRG-1 (Prior Patient Identifier List) is required and its
-  assigning authority must be populated.
+  Patient-level merge. Belongs to the IHE ITI-30 Patient Identity
+  Management transaction, NOT to ITI-31 Patient Encounter
+  Management. Requires MSH, EVN, PID, MRG. PV1 is forbidden because
+  ITI-30 operates outside a visit context.
 
-  Source: IHE ITI TF-2b §3.31 (Merge Option).
+  MRG-1 (Prior Patient Identifier List) is required; its Assigning
+  Authority should match PID-3's.
+
+  Source: IHE ITI TF-2b §3.30 (Merge Option).
   """
-  @spec iti_31_adt_a40() :: Profile.t()
-  def iti_31_adt_a40 do
-    "IHE_ITI-31_ADT_A40"
-    |> new_pam({"ADT", "A40"}, "IHE PAM Patient Encounter Management — Merge Patient ID List")
+  @spec iti_30_adt_a40() :: Profile.t()
+  def iti_30_adt_a40 do
+    "IHE_ITI-30_ADT_A40"
+    |> new_pam(
+      {"ADT", "A40"},
+      "IHE PAM Patient Identity Management — Merge Patient ID List"
+    )
     |> Profile.require_segment("EVN")
     |> Profile.require_segment("PID")
     |> Profile.require_segment("MRG")
@@ -212,9 +219,9 @@ defmodule HL7v2.Profiles.IHE.PAM do
       "ITI-31.A04" => iti_31_adt_a04(),
       "ITI-31.A08" => iti_31_adt_a08(),
       "ITI-31.A03" => iti_31_adt_a03(),
-      "ITI-31.A40" => iti_31_adt_a40(),
       "ITI-30.A28" => iti_30_adt_a28(),
-      "ITI-30.A31" => iti_30_adt_a31()
+      "ITI-30.A31" => iti_30_adt_a31(),
+      "ITI-30.A40" => iti_30_adt_a40()
     }
   end
 

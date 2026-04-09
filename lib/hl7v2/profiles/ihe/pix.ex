@@ -142,6 +142,8 @@ defmodule HL7v2.Profiles.IHE.PIX do
     |> Profile.require_field("MSA", 1)
     |> Profile.require_field("QAK", 1)
     |> Profile.require_field("QAK", 2)
+    |> Profile.add_value_constraint("MSA", 1, &msa_1_is_valid_ack/1)
+    |> Profile.add_value_constraint("QAK", 2, &qak_2_is_valid_status/1)
   end
 
   # ------------------------------------------------------------------
@@ -227,4 +229,21 @@ defmodule HL7v2.Profiles.IHE.PIX do
 
   defp rcp_1_is_immediate(other),
     do: {:error, "RCP-1 must be 'I' (Immediate) for IHE PIX Query, got #{inspect(other)}"}
+
+  # IHE ITI TF-2 §3.9.4.2 — valid MSA-1 Acknowledgment Code values
+  # for an RSP^K23 response are AA, AE, AR (Accept, Error, Reject).
+  @msa_ack_codes ~w(AA AE AR)
+  defp msa_1_is_valid_ack(code) when is_binary(code) and code in @msa_ack_codes, do: true
+
+  defp msa_1_is_valid_ack(other),
+    do: {:error, "MSA-1 must be one of #{inspect(@msa_ack_codes)}, got #{inspect(other)}"}
+
+  # IHE ITI TF-2 §3.9.4.2 — valid QAK-2 Query Response Status values
+  # for a PIX Query Response are OK (found), NF (not found), and AE
+  # (application error).
+  @qak_statuses ~w(OK NF AE)
+  defp qak_2_is_valid_status(code) when is_binary(code) and code in @qak_statuses, do: true
+
+  defp qak_2_is_valid_status(other),
+    do: {:error, "QAK-2 must be one of #{inspect(@qak_statuses)}, got #{inspect(other)}"}
 end
