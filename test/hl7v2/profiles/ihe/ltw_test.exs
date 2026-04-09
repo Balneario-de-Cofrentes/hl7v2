@@ -160,7 +160,7 @@ defmodule HL7v2.Profiles.IHE.LTWTest do
       errors = ProfileRules.check(msg, LTW.lab_1_placer_oml_o21())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "ORC"
+               e.rule == :require_value and e.location == "ORC"
              end)
     end
 
@@ -220,7 +220,7 @@ defmodule HL7v2.Profiles.IHE.LTWTest do
       errors = ProfileRules.check(msg, LTW.lab_3_results_oru_r01())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "OBX"
+               e.rule == :require_value and e.location == "OBX"
              end)
     end
 
@@ -229,7 +229,7 @@ defmodule HL7v2.Profiles.IHE.LTWTest do
       errors = ProfileRules.check(msg, LTW.lab_3_results_oru_r01())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "OBR"
+               e.rule == :require_value and e.location == "OBR"
              end)
     end
 

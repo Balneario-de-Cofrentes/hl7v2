@@ -55,8 +55,8 @@ defmodule HL7v2.Profiles.IHE.PDQ do
     |> Profile.require_field("QPD", 2)
     |> Profile.require_field("QPD", 3)
     |> Profile.require_field("RCP", 1)
-    |> Profile.add_value_constraint("QPD", 1, &qpd_1_matches_pdq_query/1)
-    |> Profile.add_value_constraint("RCP", 1, &rcp_1_is_immediate/1)
+    |> Profile.require_value("QPD", 1, "IHE PDQ Query", accessor: & &1.identifier)
+    |> Profile.require_value("RCP", 1, "I")
   end
 
   @doc """
@@ -86,8 +86,8 @@ defmodule HL7v2.Profiles.IHE.PDQ do
     |> Profile.require_field("MSA", 1)
     |> Profile.require_field("QAK", 1)
     |> Profile.require_field("QAK", 2)
-    |> Profile.add_value_constraint("MSA", 1, &msa_1_is_valid_ack/1)
-    |> Profile.add_value_constraint("QAK", 2, &qak_2_is_valid_status/1)
+    |> Profile.require_value_in("MSA", 1, ~w(AA AE AR))
+    |> Profile.require_value_in("QAK", 2, ~w(OK NF AE))
   end
 
   # ------------------------------------------------------------------
@@ -122,8 +122,8 @@ defmodule HL7v2.Profiles.IHE.PDQ do
     |> Profile.require_field("QPD", 2)
     |> Profile.require_field("QPD", 3)
     |> Profile.require_field("RCP", 1)
-    |> Profile.add_value_constraint("QPD", 1, &qpd_1_matches_pdq_query/1)
-    |> Profile.add_value_constraint("RCP", 1, &rcp_1_is_immediate/1)
+    |> Profile.require_value("QPD", 1, "IHE PDQ Query", accessor: & &1.identifier)
+    |> Profile.require_value("RCP", 1, "I")
   end
 
   @doc """
@@ -150,8 +150,8 @@ defmodule HL7v2.Profiles.IHE.PDQ do
     |> Profile.require_field("MSA", 1)
     |> Profile.require_field("QAK", 1)
     |> Profile.require_field("QAK", 2)
-    |> Profile.add_value_constraint("MSA", 1, &msa_1_is_valid_ack/1)
-    |> Profile.add_value_constraint("QAK", 2, &qak_2_is_valid_status/1)
+    |> Profile.require_value_in("MSA", 1, ~w(AA AE AR))
+    |> Profile.require_value_in("QAK", 2, ~w(OK NF AE))
   end
 
   @doc """
@@ -166,30 +166,4 @@ defmodule HL7v2.Profiles.IHE.PDQ do
       "ITI-22.Response" => iti_22_response()
     }
   end
-
-  # ------------------------------------------------------------------
-  # Value constraint helpers
-  # ------------------------------------------------------------------
-
-  defp qpd_1_matches_pdq_query(%HL7v2.Type.CE{identifier: "IHE PDQ Query"}), do: true
-
-  defp qpd_1_matches_pdq_query(other),
-    do: {:error, "QPD-1 must be CE with identifier 'IHE PDQ Query', got #{inspect(other)}"}
-
-  defp rcp_1_is_immediate("I"), do: true
-
-  defp rcp_1_is_immediate(other),
-    do: {:error, "RCP-1 must be 'I' (Immediate) for IHE PDQ Query, got #{inspect(other)}"}
-
-  @msa_ack_codes ~w(AA AE AR)
-  defp msa_1_is_valid_ack(code) when is_binary(code) and code in @msa_ack_codes, do: true
-
-  defp msa_1_is_valid_ack(other),
-    do: {:error, "MSA-1 must be one of #{inspect(@msa_ack_codes)}, got #{inspect(other)}"}
-
-  @qak_statuses ~w(OK NF AE)
-  defp qak_2_is_valid_status(code) when is_binary(code) and code in @qak_statuses, do: true
-
-  defp qak_2_is_valid_status(other),
-    do: {:error, "QAK-2 must be one of #{inspect(@qak_statuses)}, got #{inspect(other)}"}
 end

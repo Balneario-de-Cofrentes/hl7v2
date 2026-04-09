@@ -45,7 +45,7 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
                        "PV1|1|I\r"
 
   # A01 whose PID-3 has no assigning authority — should fire the
-  # :pid3_identity custom rule.
+  # :pid3_assigning_authority custom rule.
   @a01_no_aa "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG007|P|2.5\r" <>
                "EVN||20260409120000\r" <>
                "PID|1||12345||Smith^John\r" <>
@@ -96,7 +96,7 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
 
       assert profile.required_fields[{"MSH", 9}] == :required
       assert profile.required_fields[{"EVN", 2}] == :required
-      # PID-3 is validated by the :pid3_identity custom rule, not require_field
+      # PID-3 is validated by the :pid3_assigning_authority custom rule, not require_field
       assert profile.required_fields[{"PID", 5}] == :required
       assert profile.required_fields[{"PV1", 2}] == :required
       assert profile.required_fields[{"PV1", 3}] == :required
@@ -106,7 +106,7 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
       refute MapSet.member?(profile.forbidden_fields, {"MSH", 14})
 
       assert Enum.any?(profile.custom_rules, fn {rule, _} ->
-               rule == :pid3_identity
+               rule == :pid3_assigning_authority
              end)
     end
 
@@ -143,13 +143,13 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
              end)
     end
 
-    test "PID-3 without Assigning Authority triggers :pid3_identity" do
+    test "PID-3 without Assigning Authority triggers :pid3_assigning_authority" do
       msg = parse!(@a01_no_aa)
       errors = ProfileRules.check(msg, PAM.iti_31_adt_a01())
 
       aa_error =
         Enum.find(errors, fn e ->
-          e.rule == :pid3_identity and e.location == "PID" and
+          e.rule == :pid3_assigning_authority and e.location == "PID" and
             e.message =~ "Assigning Authority"
         end)
 
@@ -268,9 +268,9 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
       assert profile.version == "2.5"
     end
 
-    test "pins PV1-2 to 'N' via a value constraint" do
+    test "pins PV1-2 to 'N' via require_value" do
       profile = PAM.iti_30_adt_a28()
-      assert Map.has_key?(profile.value_constraints, {"PV1", 2})
+      assert profile.required_values[{"PV1", 2}] == {:eq, "N", []}
     end
 
     test "valid A28 with PV1-2=N passes" do
@@ -278,12 +278,12 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
       assert ProfileRules.check(msg, PAM.iti_30_adt_a28()) == []
     end
 
-    test "A28 with PV1-2=I triggers :value_constraint" do
+    test "A28 with PV1-2=I triggers :require_value" do
       msg = parse!(@a28_wrong_class)
       errors = ProfileRules.check(msg, PAM.iti_30_adt_a28())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "PV1" and
+               e.rule == :require_value and e.location == "PV1" and
                  e.profile == "IHE_ITI-30_ADT_A28"
              end)
     end
@@ -302,7 +302,7 @@ defmodule HL7v2.Profiles.IHE.PAMTest do
 
     test "pins PV1-2 to 'N' like A28" do
       profile = PAM.iti_30_adt_a31()
-      assert Map.has_key?(profile.value_constraints, {"PV1", 2})
+      assert profile.required_values[{"PV1", 2}] == {:eq, "N", []}
     end
   end
 

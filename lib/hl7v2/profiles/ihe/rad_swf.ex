@@ -129,8 +129,8 @@ defmodule HL7v2.Profiles.IHE.RadSwf do
     |> Profile.require_field("IPC", 5)
     |> Profile.forbid_field("ORC", 7)
     |> Profile.forbid_field("OBR", 27)
-    |> Profile.add_value_constraint("ORC", 1, &orc_1_is_new/1)
-    |> Profile.add_value_constraint("ORC", 5, &orc_5_is_scheduled/1)
+    |> Profile.require_value("ORC", 1, "NW")
+    |> Profile.require_value("ORC", 5, "SC")
   end
 
   @doc """
@@ -143,18 +143,4 @@ defmodule HL7v2.Profiles.IHE.RadSwf do
       "RAD-4" => rad_4_procedure_scheduled_omi()
     }
   end
-
-  # ------------------------------------------------------------------
-  # Value constraint helpers
-  # ------------------------------------------------------------------
-
-  defp orc_1_is_new("NW"), do: true
-
-  defp orc_1_is_new(other),
-    do: {:error, "ORC-1 must be 'NW' for RAD-4 Procedure Scheduled, got #{inspect(other)}"}
-
-  defp orc_5_is_scheduled("SC"), do: true
-
-  defp orc_5_is_scheduled(other),
-    do: {:error, "ORC-5 must be 'SC' for RAD-4 Procedure Scheduled, got #{inspect(other)}"}
 end

@@ -75,7 +75,11 @@ defmodule HL7v2.Profiles.IHE.LTW do
     |> Profile.forbid_field("OBR", 15)
     |> Profile.forbid_field("OBR", 22)
     |> Profile.forbid_field("OBR", 27)
-    |> Profile.add_value_constraint("ORC", 1, &orc_1_is_valid_lab_control/1)
+    |> Profile.require_value_in(
+      "ORC",
+      1,
+      ~w(NW OK UA SC CA CR UC OC SN NA RP RQ UM RU XO XR UX PR)
+    )
   end
 
   # ------------------------------------------------------------------
@@ -121,8 +125,8 @@ defmodule HL7v2.Profiles.IHE.LTW do
     |> Profile.forbid_field("OBX", 9)
     |> Profile.forbid_field("OBX", 10)
     |> Profile.forbid_field("OBX", 12)
-    |> Profile.add_value_constraint("OBR", 25, &obr_25_is_valid_status/1)
-    |> Profile.add_value_constraint("OBX", 11, &obx_11_is_valid_status/1)
+    |> Profile.require_value_in("OBR", 25, ~w(S I R P F C X))
+    |> Profile.require_value_in("OBX", 11, ~w(O I D R P F C X))
   end
 
   @doc """
@@ -135,34 +139,4 @@ defmodule HL7v2.Profiles.IHE.LTW do
       "LAB-3" => lab_3_results_oru_r01()
     }
   end
-
-  # ------------------------------------------------------------------
-  # Value constraint helpers
-  # ------------------------------------------------------------------
-
-  # Subset of HL7 table 0119 allowed by IHE PaLM TF-2a §3.1.4 for
-  # laboratory order control codes.
-  @orc_1_codes ~w(NW OK UA SC CA CR UC OC SN NA RP RQ UM RU XO XR UX PR)
-  defp orc_1_is_valid_lab_control(code) when is_binary(code) and code in @orc_1_codes,
-    do: true
-
-  defp orc_1_is_valid_lab_control(other),
-    do: {:error, "ORC-1 must be one of #{inspect(@orc_1_codes)}, got #{inspect(other)}"}
-
-  # IHE LAB-3 subset of HL7 table 0123 for OBR-25 Result Status.
-  @obr_25_codes ~w(S I R P F C X)
-  defp obr_25_is_valid_status(code) when is_binary(code) and code in @obr_25_codes,
-    do: true
-
-  defp obr_25_is_valid_status(other),
-    do: {:error, "OBR-25 must be one of #{inspect(@obr_25_codes)}, got #{inspect(other)}"}
-
-  # IHE LAB-3 subset of HL7 table 0085 for OBX-11 Observation
-  # Result Status. `U` is explicitly NOT allowed.
-  @obx_11_codes ~w(O I D R P F C X)
-  defp obx_11_is_valid_status(code) when is_binary(code) and code in @obx_11_codes,
-    do: true
-
-  defp obx_11_is_valid_status(other),
-    do: {:error, "OBX-11 must be one of #{inspect(@obx_11_codes)}, got #{inspect(other)}"}
 end

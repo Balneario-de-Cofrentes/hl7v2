@@ -174,7 +174,7 @@ defmodule HL7v2.Profiles.IHE.RadSwfTest do
       errors = ProfileRules.check(msg, RadSwf.rad_4_procedure_scheduled_omi())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "ORC"
+               e.rule == :require_value and e.location == "ORC"
              end)
     end
 

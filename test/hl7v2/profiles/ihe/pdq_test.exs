@@ -85,7 +85,7 @@ defmodule HL7v2.Profiles.IHE.PDQTest do
       errors = ProfileRules.check(msg, PDQ.iti_21_query())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "QPD" and
+               e.rule == :require_value and e.location == "QPD" and
                  e.profile == "IHE_ITI-21_PDQ_Query"
              end)
     end
@@ -95,7 +95,7 @@ defmodule HL7v2.Profiles.IHE.PDQTest do
       errors = ProfileRules.check(msg, PDQ.iti_21_query())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "RCP"
+               e.rule == :require_value and e.location == "RCP"
              end)
     end
   end
@@ -129,7 +129,7 @@ defmodule HL7v2.Profiles.IHE.PDQTest do
       errors = ProfileRules.check(msg, PDQ.iti_21_response())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "MSA" and
+               e.rule == :require_value and e.location == "MSA" and
                  e.profile == "IHE_ITI-21_PDQ_Response"
              end)
     end

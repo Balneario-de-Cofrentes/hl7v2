@@ -103,12 +103,12 @@ defmodule HL7v2.Profiles.IHE.PIXTest do
       assert "PV1" in required
     end
 
-    test "requires PID-5 and validates PID-3 via :pid3_identity rule" do
+    test "requires PID-5 and validates PID-3 via :pid3_assigning_authority rule" do
       profile = PIX.iti_8_feed_a01()
       assert profile.required_fields[{"PID", 5}] == :required
 
       assert Enum.any?(profile.custom_rules, fn {rule, _} ->
-               rule == :pid3_identity
+               rule == :pid3_assigning_authority
              end)
     end
 
@@ -196,7 +196,7 @@ defmodule HL7v2.Profiles.IHE.PIXTest do
       errors = ProfileRules.check(msg, PIX.iti_9_query())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "QPD" and
+               e.rule == :require_value and e.location == "QPD" and
                  e.profile == "IHE_ITI-9_PIX_Query"
              end)
     end
@@ -206,7 +206,7 @@ defmodule HL7v2.Profiles.IHE.PIXTest do
       errors = ProfileRules.check(msg, PIX.iti_9_query())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "RCP"
+               e.rule == :require_value and e.location == "RCP"
              end)
     end
   end
@@ -239,7 +239,7 @@ defmodule HL7v2.Profiles.IHE.PIXTest do
       errors = ProfileRules.check(msg, PIX.iti_9_response())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "MSA" and
+               e.rule == :require_value and e.location == "MSA" and
                  e.profile == "IHE_ITI-9_PIX_Response"
              end)
     end
@@ -249,7 +249,7 @@ defmodule HL7v2.Profiles.IHE.PIXTest do
       errors = ProfileRules.check(msg, PIX.iti_9_response())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "QAK" and
+               e.rule == :require_value and e.location == "QAK" and
                  e.profile == "IHE_ITI-9_PIX_Response"
              end)
     end
@@ -266,7 +266,7 @@ defmodule HL7v2.Profiles.IHE.PIXTest do
 
     test "pins PV1-2 to 'N'" do
       profile = PIX.iti_10_update()
-      assert Map.has_key?(profile.value_constraints, {"PV1", 2})
+      assert profile.required_values[{"PV1", 2}] == {:eq, "N", []}
     end
 
     test "valid update passes" do
@@ -274,12 +274,12 @@ defmodule HL7v2.Profiles.IHE.PIXTest do
       assert ProfileRules.check(msg, PIX.iti_10_update()) == []
     end
 
-    test "PV1-2 = 'I' (not N) fires :value_constraint" do
+    test "PV1-2 = 'I' (not N) fires :require_value" do
       msg = parse!(@iti_10_wrong_class)
       errors = ProfileRules.check(msg, PIX.iti_10_update())
 
       assert Enum.any?(errors, fn e ->
-               e.rule == :value_constraint and e.location == "PV1" and
+               e.rule == :require_value and e.location == "PV1" and
                  e.profile == "IHE_ITI-10_PIX_Update"
              end)
     end

@@ -53,112 +53,73 @@ defmodule HL7v2.Profiles.IHE.Common do
 
   @doc """
   IHE patient identification baseline — requires PID-5 (Patient
-  Name) and adds a single cross-field rule `:pid3_identity` that
-  validates PID-3 per the IHE TF:
+  Name), declaratively requires CX-1 (ID Number) for every PID-3
+  repetition via `Profile.require_component/5`, and adds a small
+  custom rule for the IHE Assigning Authority requirement:
 
-  - at least one CX repetition is present
-  - every non-empty CX carries CX-1 (ID Number)
-  - every non-empty CX carries CX-4 (Assigning Authority) with a
-    namespace ID or a universal ID
+  - every non-empty CX carries CX-4 (Assigning Authority) with
+    either a `namespace_id` OR a `universal_id` populated
+
+  The CX-4 OR semantics cannot be expressed with `require_component`
+  alone (which checks a single subcomponent), so the rule is kept as
+  a custom closure — but it is now ~25 lines instead of ~60, since
+  CX-1 handling moved to the declarative DSL.
 
   This is the single most common IHE constraint across
-  PAM/PIX/PDQ/LAB/RAD-1. The custom rule is authoritative for PID-3
-  presence and does NOT call `require_field("PID", 3)` — the rule
-  produces a single, targeted error rather than stacking a generic
-  "PID-3 missing" error on top of the CX-level checks.
+  PAM/PIX/PDQ/LAB/RAD-1.
   """
   @spec pid_core(Profile.t()) :: Profile.t()
   def pid_core(%Profile{} = profile) do
     profile
     |> Profile.require_field("PID", 5)
-    |> Profile.add_rule(:pid3_identity, &pid3_identity_rule/1)
+    |> Profile.require_component("PID", 3, 1, each_repetition: true)
+    |> Profile.add_rule(:pid3_assigning_authority, &pid3_assigning_authority_rule/1)
   end
 
   @doc """
-  Custom rule: validates PID-3 per IHE identity requirements.
-  See `pid_core/1` for the contract. Returns a list of error maps.
+  Custom rule: validates the IHE "PID-3 must have either
+  namespace_id or universal_id" OR semantics that cannot be
+  expressed with the declarative component DSL.
   """
-  @spec pid3_identity_rule(TypedMessage.t()) :: [map()]
-  def pid3_identity_rule(%TypedMessage{segments: segments}) do
+  @spec pid3_assigning_authority_rule(TypedMessage.t()) :: [map()]
+  def pid3_assigning_authority_rule(%TypedMessage{segments: segments}) do
     segments
     |> Enum.filter(&match?(%PID{}, &1))
-    |> Enum.flat_map(&check_pid3_identity/1)
+    |> Enum.flat_map(&check_cx_aa/1)
   end
 
-  defp check_pid3_identity(%PID{patient_identifier_list: nil}),
-    do: [pid3_missing_error()]
-
-  defp check_pid3_identity(%PID{patient_identifier_list: []}),
-    do: [pid3_missing_error()]
-
-  defp check_pid3_identity(%PID{patient_identifier_list: ids}) when is_list(ids) do
-    cond do
-      Enum.all?(ids, &empty_cx?/1) ->
-        [pid3_missing_error()]
-
-      true ->
-        ids
-        |> Enum.with_index(1)
-        |> Enum.flat_map(fn {cx, idx} -> check_cx(cx, idx) end)
-    end
+  defp check_cx_aa(%PID{patient_identifier_list: ids}) when is_list(ids) do
+    ids
+    |> Enum.with_index(1)
+    |> Enum.flat_map(fn
+      {%CX{} = cx, idx} -> check_single_cx_aa(cx, idx)
+      _ -> []
+    end)
   end
 
-  defp check_pid3_identity(_), do: []
+  defp check_cx_aa(_), do: []
 
-  defp check_cx(%CX{} = cx, idx) do
-    # Skip entirely-empty CX (already counted as "missing" when all
-    # repetitions are empty; silently ignored here when other
-    # repetitions carry real data).
-    if empty_cx?(cx) do
+  defp check_single_cx_aa(%CX{} = cx, idx) do
+    if empty_cx?(cx) or assigning_authority_populated?(cx) do
       []
     else
-      id_errors =
-        if blank?(cx.id) do
-          [
-            %{
-              level: :error,
-              location: "PID",
-              field: :patient_identifier_list,
-              message: "IHE requires PID-3 repetition #{idx} to carry CX-1 (ID Number)"
-            }
-          ]
-        else
-          []
-        end
-
-      aa_errors =
-        if assigning_authority_populated?(cx) do
-          []
-        else
-          [
-            %{
-              level: :error,
-              location: "PID",
-              field: :patient_identifier_list,
-              message: "IHE requires PID-3 repetition #{idx} to carry CX-4 (Assigning Authority)"
-            }
-          ]
-        end
-
-      id_errors ++ aa_errors
+      [
+        %{
+          level: :error,
+          location: "PID",
+          field: :patient_identifier_list,
+          message:
+            "IHE requires PID-3 repetition #{idx} to carry CX-4 " <>
+              "(Assigning Authority: namespace_id or universal_id)"
+        }
+      ]
     end
   end
-
-  defp check_cx(_, _), do: []
 
   defp empty_cx?(%CX{} = cx),
     do: blank?(cx.id) and not assigning_authority_populated?(cx)
 
   defp empty_cx?(_), do: true
-
-  defp pid3_missing_error do
-    %{
-      level: :error,
-      location: "PID",
-      field: :patient_identifier_list,
-      message: "IHE requires PID-3 to carry at least one identifier with CX-1 and CX-4"
-    }
-  end
 
   defp assigning_authority_populated?(%CX{assigning_authority: %HD{} = hd}) do
     not (blank?(hd.namespace_id) and blank?(hd.universal_id))
@@ -174,13 +135,12 @@ defmodule HL7v2.Profiles.IHE.Common do
   Pins PV1-2 (Patient Class) to a specific value. Used by IHE
   transactions that operate outside a visit context (ITI-30 A28/A31,
   ITI-10) where PV1-2 SHALL be `"N"` (Not Applicable).
+
+  Sugar for `Profile.require_value("PV1", 2, expected)`.
   """
   @spec pin_patient_class(Profile.t(), String.t()) :: Profile.t()
   def pin_patient_class(%Profile{} = profile, expected) when is_binary(expected) do
-    Profile.add_value_constraint(profile, "PV1", 2, fn
-      ^expected -> true
-      other -> {:error, "PV1-2 must be #{inspect(expected)}, got #{inspect(other)}"}
-    end)
+    Profile.require_value(profile, "PV1", 2, expected)
   end
 
   @doc """
