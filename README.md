@@ -198,7 +198,7 @@ Real-wire fixtures validated end-to-end (raw parse → typed parse → round-tri
 strict validation with zero warnings):
 
 ```
- Fixtures    110 wire files covering 101 unique canonical structures
+ Fixtures    111 wire files covering 101 unique canonical structures
  Breadth     101 of 186 official v2.5.1 structures (54.3%)
 ```
 

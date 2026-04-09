@@ -606,6 +606,41 @@ defmodule HL7v2.Conformance.RoundTripTest do
         {:ok, typed2} = HL7v2.parse(typed_encoded, mode: :typed)
         assert HL7v2.encode(typed2) == typed_encoded
       end
+
+      test "ADT_A01 at v#{version} passes strict validation" do
+        wire = read_fixture(unquote(fixture))
+        {:ok, typed} = HL7v2.parse(wire, mode: :typed)
+        assert :ok == HL7v2.validate(typed, mode: :strict)
+      end
+    end
+  end
+
+  describe "v2.7 extended fields (MSH-22/23, PID-40)" do
+    test "ADT_A01 v2.7 with MSH-22/23 and PID-40 round-trips and validates strict" do
+      wire = read_fixture("adt_a01_v27_extended.hl7")
+
+      {:ok, typed} = HL7v2.parse(wire, mode: :typed)
+      msh = hd(typed.segments)
+      pid = Enum.at(typed.segments, 2)
+
+      # MSH-22/23 v2.7+ responsible organization fields populated as XON
+      assert %HL7v2.Type.XON{organization_name: "HOSP_ORG"} =
+               msh.sending_responsible_organization
+
+      assert %HL7v2.Type.XON{organization_name: "LAB_ORG"} =
+               msh.receiving_responsible_organization
+
+      # PID-40 v2.7+ telecommunication (replaces deprecated PID-13/14)
+      assert [%HL7v2.Type.XTN{telephone_number: "5551234", telecom_use_code: "PRN"}] =
+               pid.patient_telecommunication_information
+
+      # Round-trips cleanly
+      re_encoded = HL7v2.encode(typed)
+      {:ok, typed2} = HL7v2.parse(re_encoded, mode: :typed)
+      assert HL7v2.encode(typed2) == re_encoded
+
+      # Passes strict validation with version-aware rules
+      assert :ok == HL7v2.validate(typed, mode: :strict)
     end
   end
 end

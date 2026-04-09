@@ -39,7 +39,7 @@ defmodule HL7v2.Conformance.FixturesTest do
   # celebrated, but removals fail loudly.
   describe "release-surface (headline numbers)" do
     # Minimums tracked in docs/README. Update when expanding the corpus.
-    @min_fixture_files 110
+    @min_fixture_files 111
     @min_canonical_structures 101
     @min_pct 54.3
 
@@ -75,7 +75,7 @@ defmodule HL7v2.Conformance.FixturesTest do
     # Exact pins — fail on BOTH shrinkage and expansion-without-doc-update.
     # When adding fixtures, update these constants AND the README/CHANGELOG
     # in the same commit.
-    @exact_fixture_files 110
+    @exact_fixture_files 111
     @exact_canonical 101
     @exact_pct 54.3
 
