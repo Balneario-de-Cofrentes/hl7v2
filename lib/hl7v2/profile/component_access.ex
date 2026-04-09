@@ -57,6 +57,31 @@ defmodule HL7v2.Profile.ComponentAccess do
     ]
   }
 
+  # Compile-time invariant: every declared field for a registered
+  # type must exist on that type's defstruct. If a type module
+  # renames or removes a field, this guard raises at compile time
+  # so the DSL consumer cannot silently pick the wrong component.
+  #
+  # Field ORDER is checked at runtime in the tests
+  # (component_access_test.exs) against the type module's `parse/1`
+  # behavior — a change in defstruct order would break parse/encode
+  # round-trip tests that already exist, giving us a second safety
+  # net.
+  for {type_module, expected_fields} <- @component_fields do
+    actual_fields =
+      type_module.__struct__()
+      |> Map.from_struct()
+      |> Map.keys()
+
+    missing = expected_fields -- actual_fields
+
+    if missing != [] do
+      raise "HL7v2.Profile.ComponentAccess: type #{inspect(type_module)} " <>
+              "is missing declared component fields #{inspect(missing)}. " <>
+              "Reconcile @component_fields with the type's defstruct."
+    end
+  end
+
   @doc """
   Returns `{:ok, value}` for the nth component (1-indexed) of a parsed
   composite struct, or an error tuple for unknown types or

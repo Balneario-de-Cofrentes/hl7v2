@@ -950,6 +950,23 @@ defmodule HL7v2.ProfileTest do
       assert length(profile.required_components) == 1
     end
 
+    test "dedupes calls with the same opts in different key order (audit MED-1)" do
+      profile =
+        Profile.new("p")
+        |> Profile.require_component("PID", 3, 4,
+          each_repetition: true,
+          subcomponent: 1
+        )
+        |> Profile.require_component("PID", 3, 4,
+          subcomponent: 1,
+          each_repetition: true
+        )
+
+      # Despite the keyword list order difference on the two calls,
+      # normalization via sort should collapse them to one entry.
+      assert length(profile.required_components) == 1
+    end
+
     test "raises on invalid arguments" do
       assert_raise FunctionClauseError, fn ->
         Profile.require_component(Profile.new("p"), "PID", 3, 0)

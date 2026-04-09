@@ -42,6 +42,26 @@ defmodule HL7v2.Validation.ProfileRules do
   typed message's code/event AND (when declared) its `:version` matches
   the version in MSH-12. A profile with nil `:message_type` matches any
   type; a profile with nil `:version` matches any version.
+
+  ## "Blank" semantics
+
+  Several rules (`require_field`, `forbid_field`, `require_value`,
+  `require_component`) share a single `blank?/1` helper that treats
+  any of the following as blank:
+
+  - `nil`
+  - `""`
+  - `[]`
+  - a list whose elements are all themselves blank
+  - a struct whose every field is blank (checked recursively)
+
+  The last clause means a composite field like `%HL7v2.Type.CE{}` with
+  every subcomponent set to `nil` is considered blank — which is the
+  right answer for "is PID-3 populated?" but may surprise callers who
+  consider a CE with only an `alternate_identifier` to be "empty" or
+  "populated" depending on their use case. If your rule needs
+  stricter semantics, prefer `require_value/5` with an accessor or
+  `require_component/5` targeting a specific subcomponent.
   """
 
   alias HL7v2.{Profile, TypedMessage}
@@ -589,11 +609,21 @@ defmodule HL7v2.Validation.ProfileRules do
     end
   end
 
-  # Struct-valued coded fields (CE, CWE) carry their code in the
-  # identifier component. Raw binaries are taken as-is.
-  defp extract_coded_value(%HL7v2.Type.CE{identifier: id}), do: id
-  defp extract_coded_value(%HL7v2.Type.CWE{identifier: id}), do: id
+  # Coded-field unwrapping: raw binaries pass through, and for any
+  # composite struct registered in ComponentAccess we take its 1st
+  # component (which for CE/CWE is :identifier, for CX is :id,
+  # for HD is :namespace_id, etc.). Unknown structs yield nil, which
+  # downstream means "silently pass" — bind_table does not crash on
+  # unfamiliar composite shapes.
   defp extract_coded_value(value) when is_binary(value), do: value
+
+  defp extract_coded_value(%_struct{} = composite) do
+    case HL7v2.Profile.ComponentAccess.component_at(composite, 1) do
+      {:ok, value} -> extract_coded_value(value)
+      {:error, _} -> nil
+    end
+  end
+
   defp extract_coded_value(_), do: nil
 
   # Accept: integer 69, string "69", string "0069", atom :"0069".

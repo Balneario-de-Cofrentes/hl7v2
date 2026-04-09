@@ -265,7 +265,8 @@ defmodule HL7v2.Profile do
   def require_component(%__MODULE__{} = profile, segment_id, field_seq, component, opts \\ [])
       when is_binary(segment_id) and is_integer(field_seq) and field_seq > 0 and
              is_integer(component) and component > 0 do
-    entry = {segment_id, field_seq, component, opts}
+    normalized_opts = Enum.sort_by(opts, fn {k, _v} -> k end)
+    entry = {segment_id, field_seq, component, normalized_opts}
 
     if Enum.member?(profile.required_components, entry) do
       profile
@@ -304,13 +305,18 @@ defmodule HL7v2.Profile do
 
   The field's value is validated against `HL7v2.Standard.Tables` at
   check time. `table_id` may be an integer (`69`), a zero-padded
-  string (`"0069"`), or a non-padded numeric string (`"69"`). Unknown
-  table IDs silently pass — consistent with
-  `HL7v2.Standard.Tables.validate/2`.
+  string (`"0069"`), or a non-padded numeric string (`"69"`).
+  Non-numeric table IDs (e.g. site-local codes like `"LOCAL_SEX"`)
+  are silently skipped — only the HL7 standard numeric tables are
+  currently enforced. Unknown numeric IDs also silently pass —
+  consistent with `HL7v2.Standard.Tables.validate/2`.
 
-  For struct-valued fields (CE, CWE, etc.), the binding validates the
-  `identifier` component. Raw string fields are validated directly.
-  Use `add_value_constraint/4` for more elaborate shapes.
+  For struct-valued fields (CE, CWE, CX, HD, and any other
+  composite type registered in `HL7v2.Profile.ComponentAccess`) the
+  binding validates the first component of the struct (the
+  identifier / id / namespace_id). Raw string fields are validated
+  directly. Structs of unfamiliar types silently pass. Use
+  `add_value_constraint/4` for more elaborate shapes.
 
   > Before v3.10.0, this builder stored the binding but never
   > enforced it. Profiles that relied on the silent behavior now
