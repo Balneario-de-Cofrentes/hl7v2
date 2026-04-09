@@ -46,11 +46,15 @@ defmodule HL7v2.Validation do
     violations are errors.
   - `:validate_tables` — `true` to check coded fields against HL7-defined
     tables. Defaults to `false`.
+  - `:version` — explicit HL7 version override (e.g. `"2.7"`). When provided,
+    version-specific rules (B-field exemptions, etc.) use this value instead
+    of the one extracted from MSH-12. Invalid or unrecognized versions fall
+    back to the MSH-12 value. Defaults to `nil` (read MSH-12).
   """
   @spec validate(TypedMessage.t(), keyword()) :: :ok | {:error, [map()]} | {:ok, [map()]}
   def validate(%TypedMessage{} = msg, opts \\ []) do
     mode = Keyword.get(opts, :mode, :lenient)
-    context = extract_trigger_context(msg.segments)
+    context = merge_version_override(extract_trigger_context(msg.segments), opts)
 
     field_opts =
       Keyword.take(opts, [:validate_tables, :mode])
@@ -149,6 +153,24 @@ defmodule HL7v2.Validation do
   end
 
   defp extract_trigger_context(_), do: %{}
+
+  # Applies an explicit `:version` override from caller options on top of the
+  # context extracted from MSH-12. When the caller passes a recognizable version
+  # string, it takes precedence. Unrecognized overrides fall through to the
+  # value already in `context` (typically the MSH-12 value) so callers can't
+  # accidentally disable version-aware rules by passing garbage.
+  defp merge_version_override(context, opts) do
+    case Keyword.get(opts, :version) do
+      nil ->
+        context
+
+      raw ->
+        case HL7v2.Standard.Version.normalize(raw) do
+          nil -> context
+          normalized -> Map.put(context, :version, normalized)
+        end
+    end
+  end
 
   # Extracts the HL7 version (MSH-12.1) from the first segment of a message.
   # Returns a normalized canonical version string (e.g., "2.5.1", "2.7") or

@@ -231,10 +231,14 @@ structure, not the unregistered `ACK_A01`.
 
 ## Scope
 
-**HL7 v2.5.1** schema. Parser/encoder tolerance for adjacent versions (v2.3
-through v2.8.x) is limited to round-trip fidelity — a small version-matrix
-fixture slice exercises ADT_A01 at each version, but version-specific schema
-deltas, new/deprecated fields, and trigger events are not semantically enforced.
+**HL7 v2.5.1** baseline schema with **version-aware validation** for v2.3 through v2.8.
+The parser and encoder round-trip messages at any version in that range, and
+`HL7v2.validate/2` extracts MSH-12 (`version_id`) to apply version-specific rules:
+
+- v2.7+ messages exempt deprecated B-fields (PID-13/14, OBR-10/16, ORC-10/12)
+- MSH fields 22-25, PID-40, OBR-50, and OBX-20-25 are supported for v2.7+
+- New v2.6/v2.7/v2.8 segments (ARV, PRT, UAC, etc.) are not yet typed — they
+  parse as ZXX/extra_fields and round-trip cleanly.
 
 ## Known Limitations
 

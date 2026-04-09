@@ -122,11 +122,19 @@ defmodule HL7v2 do
   a list of error/warning maps. Requires a `HL7v2.TypedMessage` -- raw messages
   return `{:error, :not_a_typed_message}`.
 
+  Version-aware rules (v2.7+ B-field exemptions, etc.) are driven by MSH-12
+  (`version_id`) by default. Pass `:version` to override this — useful for
+  validating messages that mis-declare their version or when cross-checking
+  a v2.5.1 payload against v2.7 conformance rules.
+
   ## Options
 
   - `:mode` -- `:lenient` (default) or `:strict`
   - `:validate_tables` -- `true` to check coded fields against HL7 tables
     (default `false`)
+  - `:version` -- explicit HL7 version override (e.g. `"2.7"`). When provided,
+    version-specific rules use this value instead of the one extracted from
+    MSH-12. Invalid or unrecognized versions fall back to the MSH-12 value.
 
   ## Examples
 
@@ -135,6 +143,9 @@ defmodule HL7v2 do
 
       # With table validation
       {:error, errors} = HL7v2.validate(msg, validate_tables: true)
+
+      # Override the version read from MSH-12 and apply v2.7 rules instead
+      :ok = HL7v2.validate(msg, version: "2.7")
 
   """
   @spec validate(term(), keyword()) ::

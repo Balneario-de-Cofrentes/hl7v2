@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Added
+
+- **Version-aware validation** — `HL7v2.validate/2` now reads MSH-12 (or accepts
+  an explicit `version:` option) to apply version-specific rules. v2.7+ messages
+  exempt B-field deprecations (PID-13/14, OBR-10/16, ORC-10/12).
+- **v2.7+ segment fields** — MSH fields 22-25, PID-40 (telecom replaces PID-13/14),
+  OBR-50, OBX 20-25 are now declared typed fields.
+- **`HL7v2.Standard.Version`** — normalize/compare/at_least?/supported? helpers
+  for HL7 version strings.
+- **`HL7v2.Standard.VersionDeltas`** — tracks field optionality changes between
+  versions (currently v2.7 B-field deprecations).
+
 ## v3.4.0 — 2026-04-09
 
 ### Fixes

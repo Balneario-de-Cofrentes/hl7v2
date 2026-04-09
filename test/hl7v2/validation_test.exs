@@ -449,6 +449,93 @@ defmodule HL7v2.ValidationTest do
         {:error, errors} -> flunk("v2.7 validation regressed: #{inspect(errors)}")
       end
     end
+
+    test "HL7v2.validate/2 :version option overrides MSH-12" do
+      # Build a TypedMessage whose MSH declares v2.5.1 but whose PID segment
+      # leaves the deprecated phone_number_home field blank. At the declared
+      # v2.5.1 version the test-only DeprecatedPidSegment marks that field as
+      # :r, so baseline validation must flag it. Passing `version: "2.7"`
+      # promotes the message into the B-field exemption window and the error
+      # must disappear, proving the override takes precedence over MSH-12.
+      msh_v251 = %HL7v2.Segment.MSH{
+        field_separator: "|",
+        encoding_characters: "^~\\&",
+        message_type: %HL7v2.Type.MSG{message_code: "ADT", trigger_event: "A01"},
+        message_control_id: "MSG-OVR-1",
+        processing_id: %HL7v2.Type.PT{processing_id: "P"},
+        version_id: %HL7v2.Type.VID{version_id: "2.5.1"},
+        date_time_of_message: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 9}
+        }
+      }
+
+      msg = %TypedMessage{
+        separators: HL7v2.Separator.default(),
+        type: {"ADT", "A01"},
+        segments: [
+          msh_v251,
+          %HL7v2.ValidationTest.DeprecatedPidSegment{phone_number_home: nil}
+        ]
+      }
+
+      baseline_errors =
+        case HL7v2.validate(msg) do
+          :ok -> []
+          {:ok, warnings} -> warnings
+          {:error, errors} -> errors
+        end
+
+      overridden_errors =
+        case HL7v2.validate(msg, version: "2.7") do
+          :ok -> []
+          {:ok, warnings} -> warnings
+          {:error, errors} -> errors
+        end
+
+      assert Enum.any?(
+               baseline_errors,
+               &(&1.level == :error and &1.field == :phone_number_home)
+             ),
+             "baseline v2.5.1 validation should flag deprecated :phone_number_home"
+
+      refute Enum.any?(overridden_errors, &(&1.field == :phone_number_home)),
+             "version: \"2.7\" override should exempt the deprecated field"
+
+      refute baseline_errors == overridden_errors,
+             "explicit :version override must produce a different result from MSH-12 extraction"
+    end
+
+    test "HL7v2.validate/2 ignores an unrecognized :version override" do
+      # Garbage overrides must not silently disable version-aware rules —
+      # the MSH-12 value keeps driving the pipeline.
+      msh_v251 = %HL7v2.Segment.MSH{
+        field_separator: "|",
+        encoding_characters: "^~\\&",
+        message_type: %HL7v2.Type.MSG{message_code: "ADT", trigger_event: "A01"},
+        message_control_id: "MSG-OVR-2",
+        processing_id: %HL7v2.Type.PT{processing_id: "P"},
+        version_id: %HL7v2.Type.VID{version_id: "2.5.1"},
+        date_time_of_message: %HL7v2.Type.TS{
+          time: %HL7v2.Type.DTM{year: 2026, month: 4, day: 9}
+        }
+      }
+
+      msg = %TypedMessage{
+        separators: HL7v2.Separator.default(),
+        type: {"ADT", "A01"},
+        segments: [
+          msh_v251,
+          %HL7v2.ValidationTest.DeprecatedPidSegment{phone_number_home: nil}
+        ]
+      }
+
+      {:error, errors} = HL7v2.validate(msg, version: "garbage")
+
+      assert Enum.any?(
+               errors,
+               &(&1.level == :error and &1.field == :phone_number_home)
+             )
+    end
   end
 
   describe "FieldRules bounded max_reps" do
