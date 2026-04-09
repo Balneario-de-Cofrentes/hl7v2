@@ -62,7 +62,7 @@ end
 ### Parse
 
 ```elixir
-# Raw mode — canonical round-trip, zero allocation overhead
+# Raw mode — canonical round-trip, minimal overhead
 {:ok, raw} = HL7v2.parse(text)
 raw.type  #=> {"ADT", "A01"}
 

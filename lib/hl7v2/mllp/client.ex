@@ -50,10 +50,12 @@ defmodule HL7v2.MLLP.Client do
   Sends an HL7v2 message and waits for the response.
 
   MLLP is strictly request/response — one message sent, one ACK received.
-  If any stale bytes (complete or partial frames) remain in the buffer from
-  a previous exchange, this returns `{:error, :protocol_desync}`, closes the
-  connection, and stops the client process. The caller must start a new client
-  to continue communicating.
+  Terminal errors that close the connection and stop the client:
+
+  - `{:error, :protocol_desync}` — stale bytes from a previous exchange
+  - `{:error, :message_too_large}` — response exceeded `:max_message_size`
+
+  After either error the caller must start a new client to continue.
 
   The message is MLLP-framed before sending. The response is returned
   with MLLP framing stripped.
@@ -127,6 +129,13 @@ defmodule HL7v2.MLLP.Client do
             {:ok, response, remaining} ->
               {:reply, {:ok, response}, %{state | buffer: remaining}}
 
+            {:error, :message_too_large} ->
+              # Oversized response contaminates the socket — close and stop.
+              require Logger
+              Logger.error("MLLP response exceeded max_message_size, closing connection")
+              transport_close(transport, socket)
+              {:stop, :normal, {:error, :message_too_large}, %{state | buffer: <<>>, socket: nil}}
+
             {:error, reason} ->
               {:reply, {:error, reason}, state}
           end
@@ -163,9 +172,15 @@ defmodule HL7v2.MLLP.Client do
   defp connect(host, port, tls_opts, timeout) do
     tcp_opts = [:binary, active: false, packet: :raw]
 
-    with {:ok, tcp_socket} <- :gen_tcp.connect(host, port, tcp_opts, timeout),
-         {:ok, ssl_socket} <- :ssl.connect(tcp_socket, tls_opts, timeout) do
-      {:ok, ssl_socket, :ssl}
+    with {:ok, tcp_socket} <- :gen_tcp.connect(host, port, tcp_opts, timeout) do
+      case :ssl.connect(tcp_socket, tls_opts, timeout) do
+        {:ok, ssl_socket} ->
+          {:ok, ssl_socket, :ssl}
+
+        {:error, reason} ->
+          :gen_tcp.close(tcp_socket)
+          {:error, reason}
+      end
     end
   end
 

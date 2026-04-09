@@ -183,9 +183,21 @@ defmodule HL7v2.Conformance.GeneratedStructureTest do
         [msh | rest] = segment_ids
         polluted = [msh, "ZZZ"] ++ rest
 
-        # Should not raise; result shape must be a list of errors/warnings.
-        errors = Structural.validate(structure, polluted)
+        # Must not crash, and the injected Z-segment should be flagged or
+        # silently ignored — either way the required segments should still pass.
+        errors = Structural.validate(structure, polluted, mode: :strict)
         assert is_list(errors)
+
+        # The unknown segment must NOT cause a false "missing required" error
+        # for segments that ARE present in the polluted list.
+        false_missing =
+          Enum.filter(errors, fn e ->
+            String.contains?(e.message, "missing") and
+              String.contains?(e.message, "ZZZ")
+          end)
+
+        assert false_missing == [],
+               "#{unquote(name)}: ZZZ injection caused false missing-segment errors"
       end
     end
   end

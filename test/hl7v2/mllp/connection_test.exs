@@ -314,12 +314,17 @@ defmodule HL7v2.MLLP.ConnectionTest do
         end
       end)
 
-      # Client with tiny max — the echoed response will exceed it
+      # Client with tiny max — the echoed response will exceed it.
+      # message_too_large is now terminal: it closes the connection and stops
+      # the client, so no Client.close needed.
+      Process.flag(:trap_exit, true)
       {:ok, client} = Client.start_link(host: "127.0.0.1", port: port, max_message_size: 4)
       result = Client.send_message(client, "this message is way too long for the limit")
       assert {:error, :message_too_large} = result
 
-      Client.close(client)
+      # Client should be stopped
+      Process.sleep(50)
+      refute Process.alive?(client)
     end
   end
 

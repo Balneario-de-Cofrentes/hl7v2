@@ -182,16 +182,13 @@ defmodule HL7v2.RealityCheckTest do
       assert {:error, _reason} = HL7v2.parse("MSH|^\r")
     end
 
-    test "minimal MSH (only encoding chars) parses without crash" do
-      result = HL7v2.parse("MSH|^~\\&|\r")
-      # Should either succeed or return a descriptive error — never crash
-      assert match?({:ok, _}, result) or match?({:error, _}, result)
+    test "minimal MSH (only encoding chars) returns a descriptive error" do
+      assert {:error, :missing_message_type} = HL7v2.parse("MSH|^~\\&|\r")
     end
 
-    test "segment with no fields does not crash" do
+    test "segment with no fields parses successfully" do
       text = "MSH|^~\\&|SEND|||RCV||20260322||ADT^A01|1|P|2.5\rPID\r"
-      result = HL7v2.parse(text)
-      assert match?({:ok, _}, result) or match?({:error, _}, result)
+      assert {:ok, %HL7v2.RawMessage{}} = HL7v2.parse(text)
     end
 
     test "segment with no fields round-trips" do

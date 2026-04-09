@@ -123,6 +123,34 @@ defmodule HL7v2.MLLP.ClientTest do
   end
 
   @tag capture_log: true
+  test "message_too_large closes connection and stops client", %{port: _port} do
+    {:ok, listen} = :gen_tcp.listen(0, [:binary, active: false, reuseaddr: true])
+    {:ok, tcp_port} = :inet.port(listen)
+
+    spawn_link(fn ->
+      {:ok, sock} = :gen_tcp.accept(listen, 5_000)
+      {:ok, _data} = recv_mllp_frame(sock)
+      # Send a response larger than max_message_size
+      big = HL7v2.MLLP.frame(String.duplicate("X", 200))
+      :ok = :gen_tcp.send(sock, big)
+      Process.sleep(1_000)
+      :gen_tcp.close(sock)
+    end)
+
+    Process.flag(:trap_exit, true)
+    # Set max_message_size to 100 bytes — the 200-byte response will exceed it
+    {:ok, client} = Client.start_link(host: "127.0.0.1", port: tcp_port, max_message_size: 100)
+
+    assert {:error, :message_too_large} = Client.send_message(client, "req")
+
+    # Client should be stopped — subsequent calls fail with :noproc
+    Process.sleep(50)
+    refute Process.alive?(client)
+
+    :gen_tcp.close(listen)
+  end
+
+  @tag capture_log: true
   test "protocol desync: stale bytes in buffer trigger error and close", %{port: _port} do
     # Server sends two MLLP frames in response to one request — protocol violation.
     {:ok, listen} = :gen_tcp.listen(0, [:binary, active: false, reuseaddr: true])
