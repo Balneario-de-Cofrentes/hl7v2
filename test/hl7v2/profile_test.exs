@@ -917,4 +917,160 @@ defmodule HL7v2.ProfileTest do
       assert err.message =~ "\"XX\""
     end
   end
+
+  describe "require_component/5" do
+    alias HL7v2.Validation.ProfileRules
+
+    test "stores a component spec" do
+      profile =
+        Profile.new("p")
+        |> Profile.require_component("PID", 3, 4, each_repetition: true)
+
+      assert profile.required_components == [{"PID", 3, 4, [each_repetition: true]}]
+    end
+
+    test "stores multiple distinct specs" do
+      profile =
+        Profile.new("p")
+        |> Profile.require_component("PID", 3, 1, each_repetition: true)
+        |> Profile.require_component("PID", 3, 4,
+          each_repetition: true,
+          subcomponent: 1
+        )
+
+      assert length(profile.required_components) == 2
+    end
+
+    test "dedupes identical calls" do
+      profile =
+        Profile.new("p")
+        |> Profile.require_component("PID", 3, 1, each_repetition: true)
+        |> Profile.require_component("PID", 3, 1, each_repetition: true)
+
+      assert length(profile.required_components) == 1
+    end
+
+    test "raises on invalid arguments" do
+      assert_raise FunctionClauseError, fn ->
+        Profile.require_component(Profile.new("p"), "PID", 3, 0)
+      end
+
+      assert_raise FunctionClauseError, fn ->
+        Profile.require_component(Profile.new("p"), :pid, 3, 1)
+      end
+    end
+
+    # Shared wire: single PID-3 repetition with both CX-1 and CX-4
+    # populated. Should satisfy any component rule on PID-3.
+    @valid_pid3 "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG|P|2.5\r" <>
+                  "EVN||20260409120000\r" <>
+                  "PID|1||12345^^^HOSP_MRN&1.2.3&ISO^MR||Smith^John\r" <>
+                  "PV1|1|I|ICU^101\r"
+
+    test "ProfileRules passes when CX-1 and CX-4 are populated" do
+      {:ok, msg} = HL7v2.parse(@valid_pid3, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.require_component("PID", 3, 1, each_repetition: true)
+        |> Profile.require_component("PID", 3, 4, each_repetition: true)
+
+      assert ProfileRules.check(msg, profile) == []
+    end
+
+    test "ProfileRules fires when CX-4 (Assigning Authority) is missing" do
+      # PID-3 with no assigning authority
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG|P|2.5\r" <>
+          "EVN||20260409120000\r" <>
+          "PID|1||12345^^^^MR||Smith^John\r" <>
+          "PV1|1|I|ICU^101\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.require_component("PID", 3, 4, each_repetition: true)
+
+      assert [%{rule: :require_component, location: "PID"} = err] =
+               ProfileRules.check(msg, profile)
+
+      assert err.message =~ "PID-3[1].4"
+    end
+
+    test "ProfileRules fires per-repetition when each_repetition is true" do
+      # Two PID-3 repetitions; only the first has an assigning authority
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG|P|2.5\r" <>
+          "EVN||20260409120000\r" <>
+          "PID|1||12345^^^HOSP_MRN&1.2.3&ISO^MR~67890^^^^SSN||Smith^John\r" <>
+          "PV1|1|I|ICU^101\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.require_component("PID", 3, 4, each_repetition: true)
+
+      errors = ProfileRules.check(msg, profile)
+
+      # Only the second repetition should fire the error
+      assert length(errors) == 1
+      [err] = errors
+      assert err.message =~ "PID-3[2].4"
+    end
+
+    test "subcomponent targets CX-4.1 (HD namespace_id)" do
+      {:ok, msg} = HL7v2.parse(@valid_pid3, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.require_component("PID", 3, 4,
+          each_repetition: true,
+          subcomponent: 1
+        )
+
+      # CX-4.1 = HD.namespace_id = "HOSP_MRN" → populated, no error
+      assert ProfileRules.check(msg, profile) == []
+    end
+
+    test "subcomponent fires when HD.namespace_id is absent" do
+      # CX-4 has only universal_id (sub 2), not namespace_id (sub 1)
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG|P|2.5\r" <>
+          "EVN||20260409120000\r" <>
+          "PID|1||12345^^^&1.2.3&ISO^MR||Smith^John\r" <>
+          "PV1|1|I|ICU^101\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.require_component("PID", 3, 4,
+          each_repetition: true,
+          subcomponent: 1
+        )
+
+      assert [%{rule: :require_component, location: "PID"} = err] =
+               ProfileRules.check(msg, profile)
+
+      assert err.message =~ "PID-3[1].4.1"
+    end
+
+    test "silent when the containing segment is missing" do
+      wire =
+        "MSH|^~\\&|HIS|HOSP|PHAOS|VNA|20260409120000||ADT^A01^ADT_A01|MSG|P|2.5\r" <>
+          "EVN||20260409120000\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+
+      profile =
+        Profile.new("p", message_type: {"ADT", "A01"}, version: "2.5")
+        |> Profile.require_component("PID", 3, 4, each_repetition: true)
+
+      # No PID segment → rule is silent. Use require_segment("PID")
+      # if the missing segment should also be flagged.
+      refute Enum.any?(ProfileRules.check(msg, profile), &(&1.rule == :require_component))
+    end
+  end
 end

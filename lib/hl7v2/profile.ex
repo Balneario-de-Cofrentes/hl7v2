@@ -42,6 +42,8 @@ defmodule HL7v2.Profile do
           {:eq, term(), keyword()}
           | {:in, [term()], keyword()}
 
+  @type component_spec :: {segment_id(), field_seq(), pos_integer(), keyword()}
+
   @type t :: %__MODULE__{
           name: String.t(),
           message_type: {String.t(), String.t()} | nil,
@@ -52,6 +54,7 @@ defmodule HL7v2.Profile do
           required_fields: %{{segment_id(), field_seq()} => :required},
           forbidden_fields: MapSet.t({segment_id(), field_seq()}),
           required_values: %{{segment_id(), field_seq()} => value_spec()},
+          required_components: [component_spec()],
           field_table_bindings: %{{segment_id(), field_seq()} => table_id()},
           cardinality_constraints: %{segment_id() => cardinality()},
           value_constraints: %{
@@ -69,6 +72,7 @@ defmodule HL7v2.Profile do
             required_fields: %{},
             forbidden_fields: nil,
             required_values: %{},
+            required_components: [],
             field_table_bindings: %{},
             cardinality_constraints: %{},
             value_constraints: %{},
@@ -207,6 +211,67 @@ defmodule HL7v2.Profile do
              is_list(allowed) do
     key = {segment_id, field_seq}
     %{profile | required_values: Map.put(profile.required_values, key, {:in, allowed, opts})}
+  end
+
+  @doc """
+  Requires a specific component (or subcomponent) within a field to
+  be populated.
+
+  This is the declarative replacement for bespoke `add_rule/3`
+  closures that walk into composite type structs to check individual
+  components (CX-1, CX-4, CE-3, HD.namespace_id, etc.). The rule
+  produces targeted error messages like:
+
+      IHE requires PID-3[2].CX-4 (Assigning Authority) to be populated
+
+  ## Options
+
+  - `:each_repetition` — when `true` and the target field is a
+    repeating field (list), the rule validates every repetition
+    (emitting one error per missing occurrence). When `false` (the
+    default), only the first repetition is validated.
+  - `:subcomponent` — 1-indexed subcomponent position within the
+    selected component. Use this when the component is itself a
+    composite struct (e.g. CX-4 Assigning Authority is an HD, so
+    `subcomponent: 1` targets HD.namespace_id).
+  - `:repetition` — 1-indexed single repetition to validate
+    (mutually exclusive with `:each_repetition`). Defaults to
+    repetition 1.
+
+  The rule is silent when the segment is missing or the field is
+  blank — compose with `require_segment/2` and/or `require_field/3`
+  if absence of the containing element should also be an error.
+
+  Currently supports composite types registered in
+  `HL7v2.Profile.ComponentAccess`: CX, HD, CE, CWE. Unknown types
+  produce a clean error pointing at the gap.
+
+  ## Examples
+
+      # "PID-3 repetition N must carry CX-1 (ID Number)"
+      iex> HL7v2.Profile.new("p")
+      ...> |> HL7v2.Profile.require_component("PID", 3, 1, each_repetition: true)
+      ...> |> Map.get(:required_components)
+      [{"PID", 3, 1, [each_repetition: true]}]
+
+      # "PID-3.4.1 (HD.namespace_id) required for every repetition"
+      iex> HL7v2.Profile.new("p")
+      ...> |> HL7v2.Profile.require_component("PID", 3, 4,
+      ...>      each_repetition: true, subcomponent: 1)
+      ...> |> Map.get(:required_components)
+      [{"PID", 3, 4, [each_repetition: true, subcomponent: 1]}]
+  """
+  @spec require_component(t(), segment_id(), field_seq(), pos_integer(), keyword()) :: t()
+  def require_component(%__MODULE__{} = profile, segment_id, field_seq, component, opts \\ [])
+      when is_binary(segment_id) and is_integer(field_seq) and field_seq > 0 and
+             is_integer(component) and component > 0 do
+    entry = {segment_id, field_seq, component, opts}
+
+    if Enum.member?(profile.required_components, entry) do
+      profile
+    else
+      %{profile | required_components: profile.required_components ++ [entry]}
+    end
   end
 
   @doc """

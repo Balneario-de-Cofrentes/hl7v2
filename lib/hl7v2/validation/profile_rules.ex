@@ -23,9 +23,11 @@ defmodule HL7v2.Validation.ProfileRules do
      must be blank or absent
   5. `require_value` — a declarative equality or membership pin on a field
      (from `Profile.require_value/5` or `Profile.require_value_in/5`)
-  6. `require_cardinality` — segment occurrence counts must fall within `{min, max}`
-  7. `value_constraint` — custom predicate on a field value (only when field present)
-  8. `custom_rule` — arbitrary function returning error maps
+  6. `require_component` — a declarative component/subcomponent pin on a
+     composite field (from `Profile.require_component/5`)
+  7. `require_cardinality` — segment occurrence counts must fall within `{min, max}`
+  8. `value_constraint` — custom predicate on a field value (only when field present)
+  9. `custom_rule` — arbitrary function returning error maps
 
   Custom rule errors are tagged with `:rule` (the rule name) and `:profile`
   (the profile name) if the rule did not set them. If a custom rule raises,
@@ -72,6 +74,7 @@ defmodule HL7v2.Validation.ProfileRules do
       |> check_required_fields(msg, profile)
       |> check_forbidden_fields(msg, profile)
       |> check_required_values(msg, profile)
+      |> check_required_components(msg, profile)
       |> check_cardinality(msg, profile)
       |> check_value_constraints(msg, profile)
       |> check_custom_rules(msg, profile)
@@ -336,6 +339,188 @@ defmodule HL7v2.Validation.ProfileRules do
     fun.(value)
   rescue
     _ -> nil
+  end
+
+  # --- require_component ---
+
+  defp check_required_components(errors, msg, profile) do
+    Enum.reduce(profile.required_components, errors, fn entry, acc ->
+      check_component_entry(acc, msg, profile, entry)
+    end)
+  end
+
+  defp check_component_entry(errors, msg, profile, {seg_id, field_seq, component, opts}) do
+    each_repetition? = Keyword.get(opts, :each_repetition, false)
+    subcomponent = Keyword.get(opts, :subcomponent)
+    fixed_repetition = Keyword.get(opts, :repetition, 1)
+
+    case find_segment_field(msg.segments, seg_id, field_seq) do
+      {:ok, nil, _field_name} ->
+        errors
+
+      {:ok, value, field_name} ->
+        occurrences = normalize_occurrences(value, each_repetition?, fixed_repetition)
+
+        Enum.reduce(occurrences, errors, fn {rep_struct, rep_idx}, acc ->
+          check_component_value(
+            acc,
+            profile,
+            seg_id,
+            field_seq,
+            field_name,
+            rep_struct,
+            rep_idx,
+            component,
+            subcomponent
+          )
+        end)
+
+      _ ->
+        errors
+    end
+  end
+
+  # Normalize field value into a list of {struct, repetition_index}
+  # tuples for uniform iteration.
+  defp normalize_occurrences(value, true = _each_repetition?, _fixed) when is_list(value) do
+    value
+    |> Enum.with_index(1)
+    |> Enum.map(fn {v, i} -> {v, i} end)
+  end
+
+  defp normalize_occurrences(value, true = _each_repetition?, _fixed), do: [{value, 1}]
+
+  defp normalize_occurrences(value, false, fixed_repetition) when is_list(value) do
+    case Enum.at(value, fixed_repetition - 1) do
+      nil -> []
+      v -> [{v, fixed_repetition}]
+    end
+  end
+
+  defp normalize_occurrences(value, false, _fixed_repetition), do: [{value, 1}]
+
+  defp check_component_value(
+         errors,
+         profile,
+         seg_id,
+         field_seq,
+         field_name,
+         rep_struct,
+         rep_idx,
+         component,
+         subcomponent
+       ) do
+    case HL7v2.Profile.ComponentAccess.component_at(rep_struct, component) do
+      {:ok, component_value} ->
+        check_subcomponent(
+          errors,
+          profile,
+          seg_id,
+          field_seq,
+          field_name,
+          rep_idx,
+          component,
+          component_value,
+          subcomponent
+        )
+
+      {:error, {:unknown_composite_type, mod}} ->
+        [
+          profile_error(
+            profile,
+            :require_component,
+            seg_id,
+            field_name,
+            "profile requires #{seg_id}-#{field_seq} component access for " <>
+              "#{inspect(mod)}, but that type is not registered in " <>
+              "HL7v2.Profile.ComponentAccess"
+          )
+          | errors
+        ]
+
+      {:error, reason} ->
+        [
+          profile_error(
+            profile,
+            :require_component,
+            seg_id,
+            field_name,
+            "profile requires #{seg_id}-#{field_seq} component #{component} but " <>
+              "access failed: #{inspect(reason)}"
+          )
+          | errors
+        ]
+    end
+  end
+
+  defp check_subcomponent(
+         errors,
+         profile,
+         seg_id,
+         field_seq,
+         field_name,
+         rep_idx,
+         component,
+         component_value,
+         nil = _subcomponent
+       ) do
+    if blank?(component_value) do
+      [
+        profile_error(
+          profile,
+          :require_component,
+          seg_id,
+          field_name,
+          "profile requires #{seg_id}-#{field_seq}[#{rep_idx}].#{component} to be populated"
+        )
+        | errors
+      ]
+    else
+      errors
+    end
+  end
+
+  defp check_subcomponent(
+         errors,
+         profile,
+         seg_id,
+         field_seq,
+         field_name,
+         rep_idx,
+         component,
+         component_value,
+         subcomponent
+       )
+       when is_integer(subcomponent) and subcomponent > 0 do
+    case HL7v2.Profile.ComponentAccess.component_at(component_value, subcomponent) do
+      {:ok, sub_value} ->
+        if blank?(sub_value) do
+          [
+            profile_error(
+              profile,
+              :require_component,
+              seg_id,
+              field_name,
+              "profile requires #{seg_id}-#{field_seq}[#{rep_idx}].#{component}.#{subcomponent} to be populated"
+            )
+            | errors
+          ]
+        else
+          errors
+        end
+
+      {:error, _reason} ->
+        [
+          profile_error(
+            profile,
+            :require_component,
+            seg_id,
+            field_name,
+            "profile requires #{seg_id}-#{field_seq}[#{rep_idx}].#{component}.#{subcomponent} to be populated"
+          )
+          | errors
+        ]
+    end
   end
 
   # --- require_cardinality ---
