@@ -538,6 +538,90 @@ defmodule HL7v2.ValidationTest do
     end
   end
 
+  describe "conformance profile integration (HL7v2.validate/2 :profile)" do
+    setup do
+      wire =
+        "MSH|^~\\&|S|F||R|20260409||ADT^A01^ADT_A01|1|P|2.5.1\r" <>
+          "EVN|A01|20260409\r" <>
+          "PID|1||12345^^^MRN||Smith^John\r" <>
+          "PV1|1|I\r"
+
+      {:ok, msg} = HL7v2.parse(wire, mode: :typed)
+      %{msg: msg}
+    end
+
+    test "validate/2 without :profile is unaffected (backwards compat)", %{msg: msg} do
+      assert :ok = HL7v2.validate(msg)
+    end
+
+    test "profile that matches is evaluated and violations are returned", %{msg: msg} do
+      # Message lacks ROL segment, profile requires it
+      profile =
+        HL7v2.Profile.new("Hospital_ADT_A01", message_type: {"ADT", "A01"})
+        |> HL7v2.Profile.require_segment("ROL")
+
+      assert {:error, errors} = HL7v2.validate(msg, profile: profile)
+
+      assert Enum.any?(errors, fn err ->
+               err.rule == :require_segment and
+                 err.location == "ROL" and
+                 err.profile == "Hospital_ADT_A01"
+             end)
+    end
+
+    test "profile with non-matching message_type is skipped", %{msg: msg} do
+      # Profile is for ORU_R01 but message is ADT_A01 — profile doesn't apply
+      profile =
+        HL7v2.Profile.new("ORU_Profile", message_type: {"ORU", "R01"})
+        |> HL7v2.Profile.require_segment("OBX")
+
+      assert :ok = HL7v2.validate(msg, profile: profile)
+    end
+
+    test "wildcard profile (nil message_type) applies to any message", %{msg: msg} do
+      profile =
+        HL7v2.Profile.new("Universal")
+        |> HL7v2.Profile.require_segment("Z99")
+
+      assert {:error, errors} = HL7v2.validate(msg, profile: profile)
+      assert Enum.any?(errors, &(&1.location == "Z99"))
+    end
+
+    test "list of profiles: all are evaluated", %{msg: msg} do
+      p1 =
+        HL7v2.Profile.new("P1") |> HL7v2.Profile.require_segment("XYZ")
+
+      p2 =
+        HL7v2.Profile.new("P2") |> HL7v2.Profile.require_segment("ABC")
+
+      assert {:error, errors} = HL7v2.validate(msg, profile: [p1, p2])
+      profiles_fired = errors |> Enum.map(& &1[:profile]) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+      assert "P1" in profiles_fired
+      assert "P2" in profiles_fired
+    end
+
+    test "profile passes alongside base validation", %{msg: msg} do
+      profile =
+        HL7v2.Profile.new("MinimalADT", message_type: {"ADT", "A01"})
+        |> HL7v2.Profile.require_segment("PID")
+        |> HL7v2.Profile.require_segment("PV1")
+
+      assert :ok = HL7v2.validate(msg, profile: profile)
+    end
+
+    test "profile cardinality constraint reports violations with segment location", %{msg: msg} do
+      profile =
+        HL7v2.Profile.new("ObxRequired")
+        |> HL7v2.Profile.require_cardinality("OBX", min: 1, max: 10)
+
+      assert {:error, errors} = HL7v2.validate(msg, profile: profile)
+
+      assert Enum.any?(errors, fn err ->
+               err.rule == :require_cardinality and err.location == "OBX"
+             end)
+    end
+  end
+
   describe "FieldRules bounded max_reps" do
     test "warns when bounded max_reps is exceeded" do
       segment = %HL7v2.ValidationTest.BoundedSegment{

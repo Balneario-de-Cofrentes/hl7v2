@@ -135,6 +135,12 @@ defmodule HL7v2 do
   - `:version` -- explicit HL7 version override (e.g. `"2.7"`). When provided,
     version-specific rules use this value instead of the one extracted from
     MSH-12. Invalid or unrecognized versions fall back to the MSH-12 value.
+  - `:profile` -- a `HL7v2.Profile` struct (or list of profiles) to validate
+    against in addition to the base schema. Profiles express organization-
+    specific constraints: required segments, required fields beyond the base
+    spec, table bindings, cardinality, value predicates, and custom rules.
+    Profile errors include a `:rule` (which rule type fired) and `:profile`
+    (profile name) for traceability.
 
   ## Examples
 
@@ -146,6 +152,14 @@ defmodule HL7v2 do
 
       # Override the version read from MSH-12 and apply v2.7 rules instead
       :ok = HL7v2.validate(msg, version: "2.7")
+
+      # Validate against a conformance profile
+      profile =
+        HL7v2.Profile.new("Hospital_ADT_A01", message_type: {"ADT", "A01"})
+        |> HL7v2.Profile.require_field("PID", 18)
+        |> HL7v2.Profile.require_cardinality("OBX", min: 1, max: 10)
+
+      HL7v2.validate(msg, profile: profile)
 
   """
   @spec validate(term(), keyword()) ::

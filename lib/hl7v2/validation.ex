@@ -54,6 +54,7 @@ defmodule HL7v2.Validation do
   @spec validate(TypedMessage.t(), keyword()) :: :ok | {:error, [map()]} | {:ok, [map()]}
   def validate(%TypedMessage{} = msg, opts \\ []) do
     mode = Keyword.get(opts, :mode, :lenient)
+    profile = Keyword.get(opts, :profile)
     context = merge_version_override(extract_trigger_context(msg.segments), opts)
 
     field_opts =
@@ -64,7 +65,8 @@ defmodule HL7v2.Validation do
     all =
       MessageRules.check(msg) ++
         structure_errors(msg, mode) ++
-        Enum.flat_map(msg.segments, &FieldRules.check(&1, field_opts))
+        Enum.flat_map(msg.segments, &FieldRules.check(&1, field_opts)) ++
+        profile_errors(msg, profile)
 
     errors = Enum.filter(all, &(&1.level == :error))
     warnings = Enum.filter(all, &(&1.level == :warning))
@@ -74,6 +76,19 @@ defmodule HL7v2.Validation do
       {[], warnings} -> {:ok, warnings}
       {errors, warnings} -> {:error, errors ++ warnings}
     end
+  end
+
+  defp profile_errors(_msg, nil), do: []
+
+  defp profile_errors(msg, %HL7v2.Profile{} = profile) do
+    HL7v2.Validation.ProfileRules.check(msg, profile)
+  end
+
+  defp profile_errors(msg, profiles) when is_list(profiles) do
+    Enum.flat_map(profiles, fn
+      %HL7v2.Profile{} = p -> HL7v2.Validation.ProfileRules.check(msg, p)
+      _ -> []
+    end)
   end
 
   defp structure_errors(%TypedMessage{segments: segments}, mode) do
