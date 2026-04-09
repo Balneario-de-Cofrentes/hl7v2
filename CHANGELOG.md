@@ -2,6 +2,57 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.8.0 — 2026-04-09
+
+### Added — v2.6 Materials Management Segments
+
+Eight new typed segment modules covering HL7 v2.6 Chapter 17
+(Materials Management). Supply-chain and sterilization flows that
+arrive with these segments now parse as typed structs instead of
+landing in `extra_fields`.
+
+- **`HL7v2.Segment.ITM`** — Material Item Master. 18 fields.
+  Canonical material item identity, manufacturer, category,
+  regulatory flags, and cost data.
+- **`HL7v2.Segment.IVT`** — Material Location. 26 fields.
+  Per-location stocking policy: bin, par levels, reorder points,
+  reusable/consignment flags, substitutes.
+- **`HL7v2.Segment.ILT`** — Material Lot. 10 fields. Lot-level
+  tracking — expiration, received date/quantity, on-hand quantity,
+  lot cost — complementing ITM.
+- **`HL7v2.Segment.PKG`** — Item Packaging. 7 fields. Packaging unit
+  definitions and pricing per packaging level (each, box, case).
+- **`HL7v2.Segment.VND`** — Purchasing Vendor. 10 fields. Vendor
+  master: identifier, name, contact, contract, regulatory approvals.
+- **`HL7v2.Segment.STZ`** — Sterilization Parameter. 3 fields.
+  Sterilization type, cycle, and maintenance cycle for reusable
+  medical devices. Complements SCD and SCP.
+- **`HL7v2.Segment.SCP`** — Sterilizer Configuration. 8 fields.
+  Device configuration for a sterilizer: number of devices, labor
+  calculation, date format, identification, type, lot control.
+- **`HL7v2.Segment.SLT`** — Sterilization Lot. 5 fields. Ties a
+  sterilization batch to the device that processed it.
+
+Catalog grows from **156 → 164** typed segments (152 v2.5.1 baseline
++ 12 common v2.6/v2.7 additions).
+
+### Added — Migration Guide
+
+New [`guides/migration.md`](guides/migration.md) for developers
+moving from another HL7 v2 library. Covers:
+
+- **`elixir_hl7`** (main Elixir alternative) — installation, parse,
+  field access, builder, validation, ACK, MLLP, and a pitfalls
+  section (empty-string vs nil, repeating fields, separator handling,
+  version-aware rules). Includes a step-by-step adoption checklist.
+- **HAPI v2 (Java)** — method-by-method mental-model mapping.
+- **HL7apy (Python)** — attribute-traversal mental-model mapping.
+- **Feature comparison table** — `hl7v2` vs the other three.
+
+### Stats
+
+4,997 tests (504 doctests + 32 properties + 4,461 tests), 0 failures.
+
 ## v3.7.0 — 2026-04-09
 
 ### Added — v2.6/v2.7 Typed Segments

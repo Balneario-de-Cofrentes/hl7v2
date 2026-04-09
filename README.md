@@ -170,7 +170,9 @@ Every official HL7 v2.5.1 segment, data type, and message structure has a typed
 Elixir module. Run `mix hl7v2.coverage --detail` for per-segment field completeness.
 
 ```
- Segments    152 of 152 v2.5.1 + 4 v2.6/v2.7 (ARV, PRT, UAC, IAR) + generic ZXX
+ Segments    152 v2.5.1 + 12 v2.6/v2.7 extensions + generic ZXX
+             Access/auth:   ARV PRT UAC IAR
+             Materials mgmt: ITM IVT ILT PKG VND STZ SCP SLT
  Types       89 official v2.5.1 data types + legacy TN
  Structures  186 of 186 official v2.5.1 abstract structures (222 total with aliases)
 ```
@@ -301,7 +303,11 @@ understand, and forward the rest unchanged. No schema registration required.
 
 Full API docs: [hexdocs.pm/hl7v2](https://hexdocs.pm/hl7v2)
 
-Getting started guide included.
+Guides:
+
+- [Getting Started](guides/getting-started.md) — parsing, building, ACK, MLLP
+- [Conformance Profiles](guides/conformance-profiles.md) — organization-specific validation
+- [Migration Guide](guides/migration.md) — moving from `elixir_hl7`, HAPI v2, or HL7apy
 
 ## Part of the Balneario Healthcare Toolkit
 
