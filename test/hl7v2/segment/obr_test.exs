@@ -6,7 +6,7 @@ defmodule HL7v2.Segment.OBRTest do
 
   describe "fields/0" do
     test "returns 49 field definitions" do
-      assert length(OBR.fields()) == 49
+      assert length(OBR.fields()) == 50
     end
   end
 

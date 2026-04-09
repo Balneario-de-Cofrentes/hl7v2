@@ -6,7 +6,7 @@ defmodule HL7v2.Segment.PIDTest do
 
   describe "fields/0" do
     test "returns 39 field definitions" do
-      assert length(PID.fields()) == 39
+      assert length(PID.fields()) == 40
     end
   end
 

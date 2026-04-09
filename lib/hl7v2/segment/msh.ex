@@ -1,12 +1,14 @@
 defmodule HL7v2.Segment.MSH do
   @moduledoc """
-  Message Header (MSH) segment — HL7v2 v2.5.1.
+  Message Header (MSH) segment — HL7v2 v2.5.1, with v2.7+ extensions.
 
   The first segment of every HL7v2 message. MSH-1 and MSH-2 receive special
   treatment: MSH-1 is the field separator character itself, and MSH-2 is the
   encoding characters literal string.
 
-  21 fields per HL7 v2.5.1 specification.
+  21 fields per HL7 v2.5.1 specification, plus v2.7+ optional fields 22-25:
+  sending/receiving responsible organization (XON) and sending/receiving
+  network address (HD).
   """
 
   use HL7v2.Segment,
@@ -32,7 +34,12 @@ defmodule HL7v2.Segment.MSH do
       {18, :character_set, HL7v2.Type.ID, :o, :unbounded},
       {19, :principal_language_of_message, HL7v2.Type.CE, :o, 1},
       {20, :alternate_character_set_handling_scheme, HL7v2.Type.ID, :o, 1},
-      {21, :message_profile_identifier, HL7v2.Type.EI, :o, :unbounded}
+      {21, :message_profile_identifier, HL7v2.Type.EI, :o, :unbounded},
+      # v2.7+ fields
+      {22, :sending_responsible_organization, HL7v2.Type.XON, :o, 1},
+      {23, :receiving_responsible_organization, HL7v2.Type.XON, :o, 1},
+      {24, :sending_network_address, HL7v2.Type.HD, :o, 1},
+      {25, :receiving_network_address, HL7v2.Type.HD, :o, 1}
     ]
 
   @doc """

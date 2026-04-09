@@ -5,7 +5,7 @@ defmodule HL7v2.Segment.MSHTest do
 
   describe "fields/0" do
     test "returns 21 field definitions" do
-      assert length(MSH.fields()) == 21
+      assert length(MSH.fields()) == 25
     end
   end
 

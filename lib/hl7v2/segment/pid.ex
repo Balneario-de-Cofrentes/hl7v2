@@ -1,8 +1,10 @@
 defmodule HL7v2.Segment.PID do
   @moduledoc """
-  Patient Identification (PID) segment — HL7v2 v2.5.1.
+  Patient Identification (PID) segment — HL7v2 v2.5.1, with v2.7+ extensions.
 
-  Primary patient demographics segment. 39 fields per HL7 v2.5.1 specification.
+  Primary patient demographics segment. 39 fields per HL7 v2.5.1 specification,
+  plus v2.7+ optional field 40 (patient_telecommunication_information), which
+  replaces the deprecated PID-13/PID-14 in v2.7.
   """
 
   use HL7v2.Segment,
@@ -46,6 +48,8 @@ defmodule HL7v2.Segment.PID do
       {36, :breed_code, HL7v2.Type.CE, :c, 1},
       {37, :strain, HL7v2.Type.ST, :o, 1},
       {38, :production_class_code, HL7v2.Type.CE, :o, 1},
-      {39, :tribal_citizenship, HL7v2.Type.CWE, :o, :unbounded}
+      {39, :tribal_citizenship, HL7v2.Type.CWE, :o, :unbounded},
+      # v2.7+ field (replaces deprecated PID-13/PID-14)
+      {40, :patient_telecommunication_information, HL7v2.Type.XTN, :o, :unbounded}
     ]
 end

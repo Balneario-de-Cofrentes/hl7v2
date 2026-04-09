@@ -11,13 +11,13 @@ defmodule HL7v2.Segment.ExtraFieldsTest do
     end
 
     test "OBX with no extra fields has extra_fields: []" do
-      raw = Enum.map(0..18, fn _ -> nil end)
+      raw = Enum.map(0..24, fn _ -> nil end)
       obx = OBX.parse(raw)
       assert obx.extra_fields == []
     end
 
     test "OBR with no extra fields has extra_fields: []" do
-      raw = Enum.map(0..48, fn _ -> nil end)
+      raw = Enum.map(0..49, fn _ -> nil end)
       obr = OBR.parse(raw)
       assert obr.extra_fields == []
     end
@@ -29,10 +29,10 @@ defmodule HL7v2.Segment.ExtraFieldsTest do
     end
   end
 
-  describe "OBX extra fields (fields 20-25)" do
-    test "captures fields 20-25 into extra_fields" do
-      # OBX defines 19 fields (sequences 1-19).
-      # Fields at positions 20-25 (0-indexed: 19-24) should be captured.
+  describe "OBX v2.7+ fields (20-25) are declared typed fields" do
+    test "fields 20-25 populate struct fields, not extra_fields" do
+      # OBX now defines 25 fields (sequences 1-25).
+      # Fields 20-25 (0-indexed: 19-24) are declared typed fields.
       raw =
         Enum.map(0..18, fn
           0 -> "1"
@@ -42,14 +42,22 @@ defmodule HL7v2.Segment.ExtraFieldsTest do
           10 -> "F"
           _ -> nil
         end) ++
-          ["extra20", "extra21", nil, "extra23", nil, "extra25"]
+          [["CHEST", "Chest", "SCT"], ["OBS001", "NS1"], nil, "ORG_NAME", nil, nil]
 
       obx = OBX.parse(raw)
 
       assert obx.set_id == 1
       assert obx.value_type == "ST"
       assert obx.observation_result_status == "F"
-      assert obx.extra_fields == ["extra20", "extra21", nil, "extra23", nil, "extra25"]
+      assert obx.extra_fields == []
+
+      # v2.7+ fields are now struct fields
+      assert [%HL7v2.Type.CWE{identifier: "CHEST", text: "Chest"}] = obx.observation_site
+
+      assert %HL7v2.Type.EI{entity_identifier: "OBS001", namespace_id: "NS1"} =
+               obx.observation_instance_identifier
+
+      assert %HL7v2.Type.XON{organization_name: "ORG_NAME"} = obx.performing_organization_name
     end
 
     test "round-trip: OBX with fields 20-25 preserves them through parse -> encode" do
@@ -62,29 +70,30 @@ defmodule HL7v2.Segment.ExtraFieldsTest do
           10 -> "F"
           _ -> nil
         end) ++
-          ["extra20", "extra21", nil, "extra23"]
+          [["SITE", "Site", "SCT"], ["OBS001", "NS1"], nil, "ORG_NAME"]
 
       encoded = raw |> OBX.parse() |> OBX.encode()
 
-      # Declared fields end at position 18 (index 18 = field 19).
-      # Extra fields start at index 19.
-      # trailing nil from "extra23" position may be trimmed, but "extra23" itself should be present.
-      assert Enum.at(encoded, 19) == "extra20"
-      assert Enum.at(encoded, 20) == "extra21"
-      # nil becomes "" via trim_trailing behavior — but extra23 is last non-empty
-      assert Enum.at(encoded, 22) == "extra23"
+      # Fields 20-25 are at indices 19-24 in the encoded list
+      assert Enum.at(encoded, 19) == ["SITE", "Site", "SCT"]
+      assert Enum.at(encoded, 20) == ["OBS001", "NS1"]
+      # mood_code (index 21) is nil, skipped in encoding
+      assert Enum.at(encoded, 22) == ["ORG_NAME"]
     end
   end
 
-  describe "OBR extra fields (field 50)" do
-    test "captures field 50 into extra_fields" do
-      # OBR defines 49 fields (sequences 1-49).
-      # Field 50 (0-indexed: 49) should be captured.
-      raw = Enum.map(0..48, fn _ -> nil end) ++ ["field50_value"]
+  describe "OBR field 50 is a declared typed field" do
+    test "field 50 populates parent_universal_service_identifier, not extra_fields" do
+      # OBR now defines 50 fields (sequences 1-50).
+      # Field 50 (0-indexed: 49) is parent_universal_service_identifier (CWE).
+      raw = Enum.map(0..48, fn _ -> nil end) ++ [["85025", "CBC", "CPT4"]]
 
       obr = OBR.parse(raw)
 
-      assert obr.extra_fields == ["field50_value"]
+      assert obr.extra_fields == []
+
+      assert %HL7v2.Type.CWE{identifier: "85025", text: "CBC", name_of_coding_system: "CPT4"} =
+               obr.parent_universal_service_identifier
     end
 
     test "round-trip: OBR with field 50 preserves it through parse -> encode" do
@@ -93,18 +102,19 @@ defmodule HL7v2.Segment.ExtraFieldsTest do
           0 -> "1"
           3 -> ["85025", "CBC", "CPT4"]
           _ -> nil
-        end) ++ ["field50_value"]
+        end) ++ [["99999", "Parent", "LN"]]
 
       encoded = raw |> OBR.parse() |> OBR.encode()
 
       # Field 50 at index 49
-      assert Enum.at(encoded, 49) == "field50_value"
+      assert Enum.at(encoded, 49) == ["99999", "Parent", "LN"]
     end
   end
 
   describe "full message round-trip with trailing fields" do
     test "OBX-23 survives typed round-trip through full parse -> encode pipeline" do
-      # Build a message with OBX that has fields up to position 23
+      # Build a message with OBX that has a value at field position 23
+      # (performing_organization_name, now a declared v2.7+ field)
       msg =
         "MSH|^~\\&|SEND|FAC|RCV|RFAC|20260322||ORU^R01|MSG001|P|2.5.1\r" <>
           "OBR|1|||85025^CBC^CPT4\r" <>
@@ -113,23 +123,22 @@ defmodule HL7v2.Segment.ExtraFieldsTest do
       {:ok, raw} = Parser.parse(msg)
       {:ok, typed} = TypedParser.convert(raw)
 
-      # Verify the extra field was captured
+      # Verify the field was captured as a declared struct field (not extra_fields)
       obx = Enum.at(typed.segments, 2)
       assert %OBX{} = obx
-      assert "extra23" in obx.extra_fields
+      assert %HL7v2.Type.XON{organization_name: "extra23"} = obx.performing_organization_name
+      assert obx.extra_fields == []
 
       # Round-trip back to wire format
       raw_again = TypedParser.to_raw(typed)
       encoded = Encoder.encode(raw_again)
 
-      # Re-parse as raw to verify OBX-23 is still present
+      # Re-parse as raw to verify OBX field 23 is still present
       {:ok, reparsed} = Parser.parse(encoded)
       {_name, obx_fields} = Enum.find(reparsed.segments, fn {n, _} -> n == "OBX" end)
 
-      # Find "extra23" — it should be in a field beyond index 18
-      trailing = Enum.drop(obx_fields, 19)
-      flat_trailing = List.flatten(trailing)
-      assert "extra23" in flat_trailing
+      # Field 23 is at 0-indexed position 22 in the field list
+      assert Enum.at(obx_fields, 22) == "extra23"
     end
 
     test "message with no extra fields round-trips cleanly" do

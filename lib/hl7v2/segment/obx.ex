@@ -1,9 +1,11 @@
 defmodule HL7v2.Segment.OBX do
   @moduledoc """
-  Observation/Result (OBX) segment -- HL7v2 v2.5.1.
+  Observation/Result (OBX) segment -- HL7v2 v2.5.1, with v2.7+ extensions.
 
   Carries a single observation value. OBX-5 type varies based on OBX-2 (Value Type).
-  19 fields per HL7 v2.5.1 specification.
+  19 fields per HL7 v2.5.1 specification, plus v2.7+ optional fields 20-25:
+  observation site (CWE), observation instance identifier (EI), mood code (CNE),
+  performing organization name (XON), address (XAD), and medical director (XCN).
 
   After base parsing, OBX-5 (observation_value) is re-parsed through
   `HL7v2.Segment.OBXValue` using the data type declared in OBX-2 (value_type).
@@ -32,7 +34,14 @@ defmodule HL7v2.Segment.OBX do
       {16, :responsible_observer, HL7v2.Type.XCN, :o, :unbounded},
       {17, :observation_method, HL7v2.Type.CE, :o, :unbounded},
       {18, :equipment_instance_identifier, HL7v2.Type.EI, :o, :unbounded},
-      {19, :date_time_of_the_analysis, HL7v2.Type.TS, :o, 1}
+      {19, :date_time_of_the_analysis, HL7v2.Type.TS, :o, 1},
+      # v2.7+ fields
+      {20, :observation_site, HL7v2.Type.CWE, :o, :unbounded},
+      {21, :observation_instance_identifier, HL7v2.Type.EI, :o, 1},
+      {22, :mood_code, HL7v2.Type.CNE, :o, 1},
+      {23, :performing_organization_name, HL7v2.Type.XON, :o, 1},
+      {24, :performing_organization_address, HL7v2.Type.XAD, :o, 1},
+      {25, :performing_organization_medical_director, HL7v2.Type.XCN, :o, 1}
     ]
 
   alias HL7v2.Segment.OBXValue

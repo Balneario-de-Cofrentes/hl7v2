@@ -1,9 +1,10 @@
 defmodule HL7v2.Segment.OBR do
   @moduledoc """
-  Observation Request (OBR) segment — HL7v2 v2.5.1.
+  Observation Request (OBR) segment — HL7v2 v2.5.1, with v2.7+ extensions.
 
   Transmits information specific to an observation/test/battery request.
-  49 fields per HL7 v2.5.1 specification.
+  49 fields per HL7 v2.5.1 specification, plus v2.7+ optional field 50
+  (parent_universal_service_identifier).
   """
 
   use HL7v2.Segment,
@@ -57,6 +58,8 @@ defmodule HL7v2.Segment.OBR do
       {46, :placer_supplemental_service_information, HL7v2.Type.CE, :o, :unbounded},
       {47, :filler_supplemental_service_information, HL7v2.Type.CE, :o, :unbounded},
       {48, :medically_necessary_duplicate_procedure_reason, HL7v2.Type.CWE, :o, 1},
-      {49, :result_handling, HL7v2.Type.IS, :o, 1}
+      {49, :result_handling, HL7v2.Type.IS, :o, 1},
+      # v2.7+ field
+      {50, :parent_universal_service_identifier, HL7v2.Type.CWE, :o, 1}
     ]
 end

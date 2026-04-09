@@ -6,7 +6,7 @@ defmodule HL7v2.Segment.OBXTest do
 
   describe "fields/0" do
     test "returns 19 field definitions" do
-      assert length(OBX.fields()) == 19
+      assert length(OBX.fields()) == 25
     end
   end
 
