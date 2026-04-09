@@ -2,6 +2,170 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.10.0 — 2026-04-09
+
+### Profile DSL polish release
+
+Closes the deferred HIGH and MEDIUM findings from the v3.9.0 iter-1
+audit that were worked around with custom-rule closures in the IHE
+Profile Pack. The DSL is now substantially more declarative —
+profiles built with v3.10 are introspectable, diffable, and (in
+principle) serializable. The IHE profile modules shipped with
+v3.9.0 have been migrated end-to-end and dropped ~135 net lines of
+bespoke helper code.
+
+### Added — declarative value pins
+
+- **`HL7v2.Profile.require_value/5`** — pin a field to an expected
+  equality value. Supports an optional `:accessor` 1-arity function
+  for struct-component matching (e.g. pinning the `identifier`
+  component of a CE without a closure).
+
+  ```elixir
+  profile
+  |> HL7v2.Profile.require_value("PV1", 2, "N")
+  |> HL7v2.Profile.require_value("QPD", 1, "IHE PIX Query",
+       accessor: & &1.identifier)
+  ```
+
+- **`HL7v2.Profile.require_value_in/5`** — pin a field to an
+  allowed-value list.
+
+  ```elixir
+  profile
+  |> HL7v2.Profile.require_value_in("MSA", 1, ["AA", "AE", "AR"])
+  ```
+
+Fires a new `:require_value` rule on mismatch or blank. Error
+messages include both expected and actual values. The rule is data
+— the profile's `required_values` field is a plain map, not a
+closure store.
+
+### Added — declarative component/subcomponent targeting
+
+- **`HL7v2.Profile.require_component/5`** — target a specific
+  component (and optionally subcomponent) within a composite field.
+  Supports `:each_repetition`, `:subcomponent`, and `:repetition`
+  options.
+
+  ```elixir
+  # "Every PID-3 repetition must carry CX-1 (ID Number)"
+  profile
+  |> HL7v2.Profile.require_component("PID", 3, 1,
+       each_repetition: true)
+
+  # "Every PID-3 repetition must carry CX-4.1 (HD namespace_id)"
+  profile
+  |> HL7v2.Profile.require_component("PID", 3, 4,
+       each_repetition: true, subcomponent: 1)
+  ```
+
+Fires a new `:require_component` rule. Error messages follow the
+`segment-field[repetition].component.subcomponent` format, e.g.
+`"profile requires PID-3[2].4.1 to be populated"`.
+
+Backed by a new `HL7v2.Profile.ComponentAccess` helper that maps
+composite type modules to their canonical component field order.
+Registered for **CX, HD, CE, CWE** — the composites referenced by
+the shipped IHE profiles. Adding a new composite type is a
+one-line entry. A compile-time guard raises if a declared field
+is missing from the type's defstruct, preventing silent drift.
+
+### Added — `bind_table/4` enforcement
+
+`Profile.bind_table/4` was stored-but-ignored before v3.10.
+Profiles declared table bindings that had no effect at validation
+time — documented-as-feature-but-silently-ignored. Now fully
+enforced against `HL7v2.Standard.Tables`:
+
+```elixir
+profile
+|> HL7v2.Profile.bind_table("PV1", 2, "0004")
+
+# At validation time, PV1-2 must be in HL7 table 0004
+# (Patient Class): I, O, E, P, R, B, C, N, U.
+# Anything else → :bind_table error.
+```
+
+- Table ID forms accepted: integer (`4`), plain string (`"4"`),
+  zero-padded string (`"0004"`), atom (`:"0004"`).
+- Coded-struct unwrapping: CE, CWE, CX, HD, and any other composite
+  registered in `HL7v2.Profile.ComponentAccess` have their first
+  component extracted before the table lookup.
+- Unknown numeric table IDs silently pass (matches the existing
+  `HL7v2.Standard.Tables.validate/2` semantics).
+- Non-numeric table IDs (site-local codes) are silently skipped —
+  only HL7 standard numeric tables are currently enforced.
+
+### Changed (breaking) — `bind_table/4` now fires errors
+
+Profiles that relied on the pre-v3.10 silent-success behavior will
+now produce `:bind_table` errors at validation time. If this is
+unwanted, delete the `bind_table` call from the profile definition.
+
+### Changed (breaking) — custom rule exceptions surface as errors
+
+Already landed in v3.9.0 but worth repeating for anyone skipping
+versions: a `Profile.add_rule/3` closure that raises no longer
+silently returns `[]`. It surfaces as a
+`%{rule: :custom_rule_exception}` error with the rule name and the
+exception message. Preserves the zero-silent-failures stance.
+
+### Internal — IHE Profile Pack migrated to the new DSL
+
+Every shipped `HL7v2.Profiles.IHE.*` module was migrated to use the
+new declarative builders. Net **-135 lines** across 5 modules,
+zero behavior change:
+
+- **`HL7v2.Profiles.IHE.Common.pid_core/1`** — the ~60-line
+  `pid3_identity_rule/1` custom rule was split: CX-1 (ID Number)
+  validation moved to `require_component`, a much smaller ~25-line
+  `:pid3_assigning_authority` custom rule remains for the
+  `HD.namespace_id` OR `HD.universal_id` disjunction. Rule atom
+  renamed to reflect the narrower scope.
+- **`HL7v2.Profiles.IHE.PIX`, `.PDQ`** — ITI-9/21/22 query/response
+  closures (`qpd_1_matches_*`, `rcp_1_is_immediate`,
+  `msa_1_is_valid_ack`, `qak_2_is_valid_status`) all replaced with
+  `require_value` / `require_value_in` calls. ~56 lines deleted
+  across both modules.
+- **`HL7v2.Profiles.IHE.LTW`** — LAB-1 ORC-1 and LAB-3 OBR-25 /
+  OBX-11 value constraint closures replaced with
+  `require_value_in`. ~25 lines deleted.
+- **`HL7v2.Profiles.IHE.RadSwf`** — RAD-4 ORC-1 = "NW" and
+  ORC-5 = "SC" closures replaced with `require_value`. ~12 lines
+  deleted.
+- **`HL7v2.Profiles.IHE.Common.pin_patient_class/2`** — now a
+  one-line wrapper around `Profile.require_value("PV1", 2, expected)`.
+
+### Documentation
+
+- **`guides/conformance-profiles.md`** — full DSL reference table
+  with examples for value pins, component targeting, and bind_table
+  enforcement. Escape-hatch section explains when to use
+  `add_value_constraint/4` vs `add_rule/3`.
+- **`HL7v2.Validation.ProfileRules` moduledoc** — added a
+  `## "Blank" semantics` section documenting the recursive
+  `blank?/1` contract that several rules share.
+
+### Deferred to v3.11
+
+- `require_component` with `each_repetition: false` default
+  silently validates only repetition 1 on a repeating field.
+  Changing the default is breaking; documented the foot-gun.
+- `custom_rules` LIFO execution order is undocumented.
+- `blank?/1` fallback treats unknown terms as populated.
+- `ProfileRules` is O(n²) — rebuilds the segment index per check.
+  Not a bottleneck for typical profile sizes.
+- Per-CX "namespace_id OR universal_id" disjunction — the one
+  remaining custom rule in the IHE Common module. Could be
+  expressed with a `require_any_of_components/3` primitive but
+  not worth the DSL surface for one rule.
+
+### Stats
+
+5,140 tests (511 doctests + 32 properties + 4,597 tests),
+0 failures.
+
 ## v3.9.0 — 2026-04-09
 
 ### Added — IHE Profile Pack

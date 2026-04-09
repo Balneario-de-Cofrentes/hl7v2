@@ -28,10 +28,84 @@ profile =
   |> HL7v2.Profile.require_field("PID", 18)
   |> HL7v2.Profile.require_cardinality("OBX", min: 1, max: 10)
   |> HL7v2.Profile.bind_table("PV1", 14, "0069")
-  |> HL7v2.Profile.add_value_constraint("PV1", 2, fn value ->
-       value in ["I", "O", "E"]
-     end)
+  |> HL7v2.Profile.require_value_in("PV1", 2, ["I", "O", "E"])
 ```
+
+### Declarative DSL builders (recommended)
+
+| Builder | Purpose |
+|---|---|
+| `require_segment/2` | segment must appear at least once |
+| `forbid_segment/2` | segment must not appear |
+| `require_field/3` | field must be populated when its segment is present |
+| `forbid_field/3` | field must be blank/absent when its segment is present |
+| `require_value/5` | field must equal a specific value (with optional `:accessor`) |
+| `require_value_in/5` | field must be in a specific allowed-value list |
+| `require_component/5` | composite field must have a specific component (or subcomponent) populated — supports `:each_repetition`, `:subcomponent`, `:repetition` |
+| `bind_table/4` | field value must be in a specific HL7 table (uses `HL7v2.Standard.Tables`) |
+| `require_cardinality/3` | segment must appear within a `{min, max}` range |
+
+All builders above store the constraint as **data** — no closures,
+no opaque function references. That means your profiles are:
+
+- **Introspectable**: `inspect(profile)` shows a full data tree
+- **Serializable**: the profile can be round-tripped through
+  JSON/YAML/etc. (minus the optional `:accessor` function)
+- **Diffable**: two profiles can be compared structurally
+- **Reusable**: a profile built by one module can be composed,
+  extended, or loaded by another without executing code
+
+### Custom rule escape hatches
+
+For cases the declarative DSL can't express (custom predicates,
+multi-field invariants, cross-segment rules), two escape hatches
+remain:
+
+- `add_value_constraint/4` — a 1-arity closure that receives the
+  field value and returns `true`, `false`, or `{:error, reason}`.
+- `add_rule/3` — a 1-arity closure that receives the whole
+  typed message and returns a list of error maps.
+
+Both still run as part of `HL7v2.Validation.ProfileRules.check/2`
+and are fully integrated with the evaluation pipeline. Use them
+sparingly — the declarative DSL is preferred because closures are
+opaque to tooling.
+
+### Value pinning examples
+
+```elixir
+# Simple equality pin
+profile
+|> HL7v2.Profile.require_value("PV1", 2, "N")
+
+# Allowed-values list
+profile
+|> HL7v2.Profile.require_value_in("MSA", 1, ["AA", "AE", "AR"])
+
+# Struct-component pin via :accessor
+# (QPD-1 is a CE — validate only its identifier component)
+profile
+|> HL7v2.Profile.require_value("QPD", 1, "IHE PIX Query",
+     accessor: & &1.identifier)
+```
+
+### Component targeting examples
+
+```elixir
+# "Every PID-3 repetition must carry CX-1 (ID Number)"
+profile
+|> HL7v2.Profile.require_component("PID", 3, 1,
+     each_repetition: true)
+
+# "Every PID-3 repetition must carry CX-4.1 (HD namespace_id)"
+profile
+|> HL7v2.Profile.require_component("PID", 3, 4,
+     each_repetition: true, subcomponent: 1)
+```
+
+`require_component` currently supports the composite types
+registered in `HL7v2.Profile.ComponentAccess`: CX, HD, CE, CWE.
+Additional types are a one-line addition — open an issue or PR.
 
 ## Validating with a profile
 
