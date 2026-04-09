@@ -45,7 +45,7 @@ defmodule HL7v2.Profiles.IHE do
   """
 
   alias HL7v2.Profile
-  alias HL7v2.Profiles.IHE.{PAM, PIX}
+  alias HL7v2.Profiles.IHE.{PAM, PDQ, PIX}
 
   @doc """
   Returns the full IHE profile catalog as a map keyed by IHE
@@ -58,6 +58,7 @@ defmodule HL7v2.Profiles.IHE do
   def all do
     pam()
     |> Map.merge(pix())
+    |> Map.merge(pdq())
   end
 
   @doc """
@@ -74,4 +75,12 @@ defmodule HL7v2.Profiles.IHE do
   """
   @spec pix() :: %{String.t() => Profile.t()}
   def pix, do: PIX.all()
+
+  @doc """
+  Returns the PDQ (Patient Demographics Query) profile catalog —
+  ITI-21 (Query/Response, v2.5) and ITI-22 (Visit Query/Response,
+  v2.5).
+  """
+  @spec pdq() :: %{String.t() => Profile.t()}
+  def pdq, do: PDQ.all()
 end
