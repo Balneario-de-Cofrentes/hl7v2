@@ -45,7 +45,7 @@ defmodule HL7v2.Profiles.IHE do
   """
 
   alias HL7v2.Profile
-  alias HL7v2.Profiles.IHE.PAM
+  alias HL7v2.Profiles.IHE.{PAM, PIX}
 
   @doc """
   Returns the full IHE profile catalog as a map keyed by IHE
@@ -56,7 +56,8 @@ defmodule HL7v2.Profiles.IHE do
   """
   @spec all() :: %{String.t() => Profile.t()}
   def all do
-    Map.merge(pam(), %{})
+    pam()
+    |> Map.merge(pix())
   end
 
   @doc """
@@ -65,4 +66,12 @@ defmodule HL7v2.Profiles.IHE do
   """
   @spec pam() :: %{String.t() => Profile.t()}
   def pam, do: PAM.all()
+
+  @doc """
+  Returns the PIX (Patient Identifier Cross-Reference) profile
+  catalog — ITI-8 (Feed, v2.3.1), ITI-9 (Query/Response, v2.5),
+  and ITI-10 (Update Notification, v2.5).
+  """
+  @spec pix() :: %{String.t() => Profile.t()}
+  def pix, do: PIX.all()
 end
