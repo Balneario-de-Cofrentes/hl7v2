@@ -2,6 +2,64 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.6.0 — 2026-04-09
+
+### Added — Conformance Profiles
+
+Second feature release closing the gap vs HAPI and HL7apy. HL7v2 now has
+**conformance profile validation**: user-defined constraints that extend the
+base HL7 schema with organization-specific rules.
+
+- **`HL7v2.Profile`** — pure functional builder for conformance profiles:
+  ```elixir
+  profile =
+    HL7v2.Profile.new("Hospital_ADT_A01", message_type: {"ADT", "A01"})
+    |> HL7v2.Profile.require_segment("NK1")
+    |> HL7v2.Profile.require_field("PID", 18)
+    |> HL7v2.Profile.require_cardinality("OBX", min: 1, max: 10)
+    |> HL7v2.Profile.bind_table("PV1", 14, "0069")
+    |> HL7v2.Profile.add_value_constraint("PV1", 2, &(&1 in ["I", "O", "E"]))
+    |> HL7v2.Profile.add_rule(:custom_check, &my_rule_fn/1)
+  ```
+  Eight builder functions: `new`, `require_segment`, `forbid_segment`,
+  `require_field`, `bind_table`, `require_cardinality`, `add_value_constraint`,
+  `add_rule`. Plus `applies_to?/2` for message-type gating.
+
+- **`HL7v2.Validation.ProfileRules`** — evaluates a profile against a typed
+  message and returns standard error maps with two extra keys (`:rule` and
+  `:profile`) for traceability.
+
+- **`HL7v2.validate/2` `:profile` option** — validates against one profile
+  or a list of profiles alongside the base schema:
+  ```elixir
+  HL7v2.validate(msg, profile: profile)
+  HL7v2.validate(msg, profile: [p1, p2, p3])
+  ```
+  Profiles with a specific `:message_type` are silently skipped for
+  non-matching messages.
+
+- **`HL7v2.Profiles.Examples`** — ships two example profiles as starting
+  points for integrators:
+  - `hospital_adt_a01/0` — strict hospital profile (NK1 + DG1 + PID-18 +
+    PV1-3 required, patient_class constrained to I/O/E)
+  - `ihe_lab_oru_r01/0` — IHE-style lab results (OBR + OBX required,
+    observation_result_status constrained to HL7 table 0085 codes)
+
+- **`guides/conformance-profiles.md`** — user guide covering concepts,
+  DSL builders, validation integration, error shape, and custom rules.
+  Included in HexDocs.
+
+### Changed
+
+- **README comparative table** — hl7v2 Validation cell updated to include
+  **conformance profiles**. On the BEAM, hl7v2 is now the only package
+  with typed structs + builder + structural + conditional + version-aware
+  + profile validation + MLLP/TLS.
+
+### Stats
+
+4,864 tests (504 doctests + 32 properties + 4,328 tests), 0 failures.
+
 ## v3.5.0 — 2026-04-09
 
 ### Added — Version-Aware Validation (v2.3 → v2.8)

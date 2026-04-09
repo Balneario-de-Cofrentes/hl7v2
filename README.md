@@ -324,7 +324,7 @@ PR.
 
 | Library | Lang | Core model | Validation | Version scope | MLLP/TLS | Best fit |
 |---------|------|-----------|-----------|--------------|----------|----------|
-| **hl7v2** (this) | Elixir | Typed segment structs + raw round-trip | Structural + field + conditional (24 rules, trigger-aware) + optional tables + **version-aware** | v2.5.1 baseline with **version-aware validation for v2.3–v2.8** (B-field exemptions, v2.7+ field additions) | Built-in Ranch 2.x listener/client + TLS/mTLS | BEAM-native typed parsing, builder, validation, and transport in one package |
+| **hl7v2** (this) | Elixir | Typed segment structs + raw round-trip | Structural + field + conditional (24 rules, trigger-aware) + optional tables + version-aware + **conformance profiles** | v2.5.1 baseline with **version-aware validation for v2.3–v2.8** (B-field exemptions, v2.7+ field additions) | Built-in Ranch 2.x listener/client + TLS/mTLS | BEAM-native typed parsing, builder, validation, and transport in one package |
 | [HAPI HL7v2](https://hapifhir.github.io/hapi-hl7v2/) | Java | Object-oriented message model | Validator + conformance profiles + TestPanel | Full v2.1–v2.8.1 schema trees | LLP/MLLP server/client; TLS-capable | Most complete mature OSS option, especially for Java shops |
 | [nHapi](https://github.com/nHapiNET/nHapi) | .NET | HAPI-style HL7 object model | Core encoding validation; richer helpers via NHapiTools | v2.1–v2.8.1 | Via NHapiTools (separate) | Best .NET analogue to HAPI |
 | [HL7apy](https://hl7apy.readthedocs.io/) | Python | Structured messages/groups/segments/fields | STRICT/TOLERANT + message-profile validation | Through v2.8.2 | `to_mllp()` + `hl7apy.mllp` server | Python with real schema-aware validation + profiles |

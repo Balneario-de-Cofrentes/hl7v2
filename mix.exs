@@ -1,7 +1,7 @@
 defmodule HL7v2.MixProject do
   use Mix.Project
 
-  @version "3.5.0"
+  @version "3.6.0"
   @source_url "https://github.com/Balneario-de-Cofrentes/hl7v2"
 
   def project do
@@ -66,6 +66,7 @@ defmodule HL7v2.MixProject do
         "CHANGELOG.md",
         "LICENSE",
         "guides/getting-started.md",
+        "guides/conformance-profiles.md",
         "docs/reference/segments.md",
         "docs/reference/data-types.md",
         "docs/reference/message-structures.md",
