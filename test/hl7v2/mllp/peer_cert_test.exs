@@ -22,15 +22,8 @@ defmodule HL7v2.MLLP.PeerCertTest do
     test "carries the client certificate DER on a mutual-TLS connection" do
       %{server: server_tls, client: client_tls, client_cert: client_cert} = tls_configs()
 
-      {:ok, listener} =
-        Listener.start_link(
-          port: 0,
-          handler: CapturingHandler,
-          handler_state: self(),
-          tls: server_tls
-        )
-
-      port = Listener.port(listener)
+      server_tls = server_tls ++ [verify: :verify_peer, fail_if_no_peer_cert: true]
+      port = start_listener!(tls: server_tls)
 
       {:ok, client} = Client.start_link(host: "localhost", port: port, tls: client_tls)
       assert {:ok, _ack} = Client.send_message(client, @sample, timeout: 5_000)
@@ -38,31 +31,58 @@ defmodule HL7v2.MLLP.PeerCertTest do
 
       assert_receive {:meta, %{peer_cert: der}}
       assert der == client_cert
+    end
 
-      Listener.stop(listener)
+    test "is nil on a TLS connection where the client presents no certificate" do
+      %{server: server_tls, client: client_tls} = tls_configs()
+
+      # The server asks for a client certificate but does not require one;
+      # the client has none to offer, so `:ssl.peercert/1` returns an error.
+      server_tls = server_tls ++ [verify: :verify_peer, fail_if_no_peer_cert: false]
+      client_tls = Keyword.drop(client_tls, [:cert, :key])
+      port = start_listener!(tls: server_tls)
+
+      {:ok, client} = Client.start_link(host: "localhost", port: port, tls: client_tls)
+      assert {:ok, _ack} = Client.send_message(client, @sample, timeout: 5_000)
+      Client.close(client)
+
+      assert_receive {:meta, %{peer_cert: nil}}
     end
 
     test "is nil on a plain TCP connection" do
-      {:ok, listener} =
-        Listener.start_link(port: 0, handler: CapturingHandler, handler_state: self())
-
-      port = Listener.port(listener)
+      port = start_listener!([])
 
       {:ok, client} = Client.start_link(host: "localhost", port: port)
       assert {:ok, _ack} = Client.send_message(client, @sample, timeout: 5_000)
       Client.close(client)
 
       assert_receive {:meta, %{peer_cert: nil}}
-
-      Listener.stop(listener)
     end
+  end
+
+  # Starts a listener on an ephemeral port with the capturing handler and
+  # stops it when the test exits, even after a failed assertion.
+  defp start_listener!(opts) do
+    {:ok, listener} =
+      Listener.start_link([port: 0, handler: CapturingHandler, handler_state: self()] ++ opts)
+
+    on_exit(fn ->
+      try do
+        if Process.alive?(listener), do: Listener.stop(listener)
+      catch
+        :exit, _ -> :ok
+      end
+    end)
+
+    Listener.port(listener)
   end
 
   # In-memory test chains from OTP itself (no fixtures, no extra deps):
   # a server chain and a client chain, each with its own root, so the server
   # verifies the client against the client root and vice versa. RSA keys:
   # the EC defaults fail the TLS 1.3 handshake on recent OTP
-  # (`unable_to_supply_acceptable_cert`).
+  # (`unable_to_supply_acceptable_cert`). Verification mode is left to each
+  # test.
   defp tls_configs do
     rsa = {:rsa, 2048, 17}
 
@@ -83,9 +103,7 @@ defmodule HL7v2.MLLP.PeerCertTest do
     client_config = Map.fetch!(data, :client_config)
 
     %{
-      server:
-        server_config ++
-          [verify: :verify_peer, fail_if_no_peer_cert: true, versions: [:"tlsv1.2", :"tlsv1.3"]],
+      server: server_config ++ [versions: [:"tlsv1.2", :"tlsv1.3"]],
       client:
         client_config ++
           [
