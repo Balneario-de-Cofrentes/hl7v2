@@ -84,7 +84,8 @@ defmodule HL7v2.MLLP.Connection do
       %{ref: ref, peer: peer}
     )
 
-    meta = %{peer: peer, ref: ref, handler_state: handler_state}
+    peer_cert = peer_cert(transport, socket)
+    meta = %{peer: peer, peer_cert: peer_cert, ref: ref, handler_state: handler_state}
 
     config = %{
       handler: handler,
@@ -291,4 +292,15 @@ defmodule HL7v2.MLLP.Connection do
       {:error, _} -> {{0, 0, 0, 0}, 0}
     end
   end
+
+  # The client certificate (DER) on TLS connections, so handlers can tell
+  # mutual-TLS clients apart. `:ranch_ssl` hands us a plain `:ssl` socket.
+  defp peer_cert(:ranch_ssl, socket) do
+    case :ssl.peercert(socket) do
+      {:ok, der} when is_binary(der) -> der
+      {:error, _} -> nil
+    end
+  end
+
+  defp peer_cert(_transport, _socket), do: nil
 end

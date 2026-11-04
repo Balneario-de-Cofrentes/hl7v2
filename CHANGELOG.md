@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Added
+
+- MLLP: the handler `meta` now includes `:peer_cert` — the client
+  certificate as a DER binary on TLS listeners (`:ssl.peercert/1`), `nil`
+  on plain TCP or when no certificate was presented. Lets handlers
+  identify mutual-TLS clients (e.g. by subject CN) without access to the
+  socket. No behaviour change for existing handlers.
+
 ## v3.10.1 — 2026-04-09
 
 ### Fixed

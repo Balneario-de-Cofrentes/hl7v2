@@ -24,6 +24,11 @@ defmodule HL7v2.MLLP.Handler do
   The `meta` map contains:
 
   - `:peer` — `{address, port}` of the remote client
+  - `:peer_cert` — the client certificate as a DER-encoded binary when the
+    listener runs TLS and the client presented one (`:ssl.peercert/1`),
+    otherwise `nil` (plain TCP, or no client certificate). Lets a handler
+    tell mutual-TLS clients apart (e.g. by subject CN via
+    `:public_key.pkix_decode_cert/2`) without touching the socket.
   - `:ref` — the Ranch listener reference
   - `:handler_state` — the value passed as `:handler_state` to the listener
 
@@ -31,6 +36,7 @@ defmodule HL7v2.MLLP.Handler do
 
   @type meta :: %{
           peer: {:inet.ip_address(), :inet.port_number()},
+          peer_cert: binary() | nil,
           ref: :ranch.ref(),
           handler_state: term()
         }
