@@ -7,8 +7,8 @@ defmodule HL7v2.Conformance.FixturesTest do
     test "returns a map with files, canonical, total_official, and pct" do
       cov = Fixtures.coverage()
 
-      assert is_integer(cov.files) and cov.files > 0
-      assert is_integer(cov.canonical) and cov.canonical > 0
+      assert cov.files > 0
+      assert cov.canonical > 0
       assert cov.total_official == 186
       assert is_float(cov.pct)
     end

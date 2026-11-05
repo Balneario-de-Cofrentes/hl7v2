@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Changed
+
+- Compile without warnings on Elixir 1.20 / OTP 29: unreachable clauses
+  flagged by the type checker were removed. No behaviour change.
+
 ## v3.11.1 — 2026-11-05
 
 ### Changed

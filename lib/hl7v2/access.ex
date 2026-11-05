@@ -257,17 +257,11 @@ defmodule HL7v2.Access do
   defp resolve_field(_, _), do: nil
 
   # Unwrap repeating fields and select component
-  defp unwrap_and_select(nil, max_reps, %{repetition: rep, component: comp}) do
-    # Even for nil values, validate that selectors are legal
+  defp unwrap_and_select(nil, max_reps, %{repetition: rep}) do
+    # Even for nil values, validate that the repetition selector is legal
     case select_repetition(nil, max_reps, rep) do
-      :invalid_repetition ->
-        :invalid_repetition
-
-      _ ->
-        case select_component(nil, comp) do
-          :invalid_component -> :invalid_component
-          _ -> nil
-        end
+      :invalid_repetition -> :invalid_repetition
+      _ -> nil
     end
   end
 
