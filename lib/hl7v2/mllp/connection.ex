@@ -46,6 +46,18 @@ defmodule HL7v2.MLLP.Connection do
     - Measurements: `%{duration: integer()}`
     - Metadata: `%{ref: term(), peer: {address, port}, kind: term(), reason: term(), stacktrace: list()}`
 
+  ## Logging
+
+  Log lines never carry the raw error term. A TLS error from `:ssl` can embed
+  the peer certificate subject, and a handler exception can embed message
+  content, so the connection logs a closed set of tags instead: the atom
+  reason, `{:tls_alert, alert_type}`, the exception module, or
+  `{:handler_crash, ExceptionModule | :throw}` (Erlang error terms are
+  normalised to their Elixir module, e.g. `MatchError`). The raw term is still
+  returned
+  and still reaches the telemetry metadata above, for consumers that run
+  in-process and can redact it themselves.
+
   """
 
   @behaviour :ranch_protocol
@@ -165,7 +177,7 @@ defmodule HL7v2.MLLP.Connection do
         :closed
 
       {error_tag, ^socket, reason} when error_tag in [:tcp_error, :ssl_error] ->
-        Logger.warning("MLLP connection error: #{inspect(reason)}")
+        Logger.warning("MLLP connection error: #{inspect(log_tag(reason))}")
         {:error, reason}
     after
       config.timeout ->
@@ -217,7 +229,7 @@ defmodule HL7v2.MLLP.Connection do
           )
 
         {:error, reason} ->
-          Logger.warning("MLLP handler error: #{inspect(reason)}")
+          Logger.warning("MLLP handler error: #{inspect(log_tag(reason))}")
 
           duration = System.monotonic_time() - msg_start
 
@@ -249,7 +261,7 @@ defmodule HL7v2.MLLP.Connection do
           }
         )
 
-        Logger.error("MLLP handler raised: #{inspect(e)}")
+        Logger.error("MLLP handler raised: #{inspect(log_tag(e))}")
     end
   end
 
@@ -262,7 +274,7 @@ defmodule HL7v2.MLLP.Connection do
 
     {pid, mon} =
       spawn_monitor(fn ->
-        send(parent, {ref, handler.handle_message(message, meta)})
+        send(parent, {ref, safe_handle(handler, message, meta)})
       end)
 
     receive do
@@ -285,6 +297,41 @@ defmodule HL7v2.MLLP.Connection do
         end
     end
   end
+
+  # Catches whatever the handler raises, throws or exits with, so the handler
+  # process ends normally and the runtime emits no crash report (which would
+  # print the exception — and with it any message content it carries — at
+  # error level). The result is the same `{:handler_crash, exit_reason}` the
+  # DOWN branch above produces for an uncaught exit, so callers see one shape.
+  defp safe_handle(handler, message, meta) do
+    handler.handle_message(message, meta)
+  catch
+    :exit, reason -> {:error, {:handler_crash, reason}}
+    :throw, value -> {:error, {:handler_crash, {{:nocatch, value}, __STACKTRACE__}}}
+    :error, reason -> {:error, {:handler_crash, {reason, __STACKTRACE__}}}
+  end
+
+  # The closed set of tags that may appear in a log line. The raw term stays
+  # in the return value and in the telemetry metadata; it never reaches a log.
+  # A crash keeps its exception module so an operator can tell a parser crash
+  # from a timeout without seeing the message or the stack frames.
+  # The alert type is a fixed OTP atom (:unknown_ca, :certificate_expired,
+  # ...) with no peer data in it; the text next to it names the peer
+  # certificate in prose and is dropped.
+  defp log_tag({:tls_alert, {alert, _text}}) when is_atom(alert), do: {:tls_alert, alert}
+  defp log_tag({:tls_alert, _}), do: :tls_alert
+  defp log_tag({:handler_crash, {{:nocatch, _}, _stacktrace}}), do: {:handler_crash, :throw}
+
+  # Exception structs come back unchanged; Erlang error terms (:badarg,
+  # {:badmatch, term}, :function_clause) get their Elixir module without the
+  # term itself reaching the log.
+  defp log_tag({:handler_crash, {reason, stacktrace}}) when is_list(stacktrace),
+    do: {:handler_crash, Exception.normalize(:error, reason, stacktrace).__struct__}
+
+  defp log_tag({:handler_crash, _}), do: :handler_crash
+  defp log_tag(%{__struct__: module}), do: module
+  defp log_tag(reason) when is_atom(reason), do: reason
+  defp log_tag(_other), do: :other
 
   defp peer_info(transport, socket) do
     case transport.peername(socket) do
