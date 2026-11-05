@@ -11,6 +11,10 @@ defmodule HL7v2.Test.ErrorHandler do
     raise "handler_exploded"
   end
 
+  def handle_message("throw", _meta) do
+    throw("handler_threw")
+  end
+
   def handle_message(message, _meta) do
     {:ok, message}
   end

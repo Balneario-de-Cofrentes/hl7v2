@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Changed
+
+- MLLP: `HL7v2.MLLP.Connection` no longer interpolates raw error terms
+  into its log lines. `:ssl` error terms can carry the peer certificate
+  subject and a handler exception can carry message content, so the
+  connection-error, handler-error and handler-raised lines now log a
+  closed set of tags instead (`:tls_alert`, the exception module,
+  `{:handler_crash, RuntimeError}`, `{:handler_crash, :throw}`, ...).
+  A handler that raises or throws is now caught inside the handler
+  process rather than left to crash it, so the runtime emits no crash
+  report with the exception; the result is the same
+  `{:error, {:handler_crash, exit_reason}}` as before. Return values and
+  telemetry metadata are unchanged and still carry the raw terms.
+
 ## v3.11.0 — 2026-11-04
 
 ### Added
