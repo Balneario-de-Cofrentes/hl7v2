@@ -54,9 +54,8 @@ defmodule HL7v2.MLLP.Connection do
   reason, `{:tls_alert, alert_type}`, the exception module, or
   `{:handler_crash, ExceptionModule | :throw}` (Erlang error terms are
   normalised to their Elixir module, e.g. `MatchError`). The raw term is still
-  returned
-  and still reaches the telemetry metadata above, for consumers that run
-  in-process and can redact it themselves.
+  returned and still reaches the telemetry metadata above, for consumers that
+  run in-process and can redact it themselves.
 
   """
 
