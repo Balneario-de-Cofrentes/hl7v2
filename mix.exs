@@ -17,12 +17,12 @@ defmodule HL7v2.MixProject do
         "Pure Elixir HL7 v2.x toolkit — schema-driven parsing, typed segments, message builder, MLLP transport",
       package: package(),
       docs: docs(),
-      source_url: @source_url,
-      preferred_cli_env: [
-        test: :test,
-        "test.all": :test
-      ]
+      source_url: @source_url
     ]
+  end
+
+  def cli do
+    [preferred_envs: [test: :test, "test.all": :test]]
   end
 
   def application do

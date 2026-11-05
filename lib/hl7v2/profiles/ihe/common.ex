@@ -119,8 +119,6 @@ defmodule HL7v2.Profiles.IHE.Common do
   defp empty_cx?(%CX{} = cx),
     do: blank?(cx.id) and not assigning_authority_populated?(cx)
 
-  defp empty_cx?(_), do: true
-
   defp assigning_authority_populated?(%CX{assigning_authority: %HD{} = hd}) do
     not (blank?(hd.namespace_id) and blank?(hd.universal_id))
   end

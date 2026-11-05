@@ -21,10 +21,14 @@ defmodule HL7v2.Conformance.StructureTest do
 
     test "all typed segments have a module with segment_id/0" do
       for seg_id <- Standard.typed_segment_ids() do
-        module = Standard.segment_module(seg_id)
-        assert module != nil, "No module for typed segment #{seg_id}"
-        Code.ensure_loaded!(module)
-        assert module.segment_id() == seg_id
+        case Standard.segment_module(seg_id) do
+          nil ->
+            flunk("No module for typed segment #{seg_id}")
+
+          module ->
+            Code.ensure_loaded!(module)
+            assert module.segment_id() == seg_id
+        end
       end
     end
 

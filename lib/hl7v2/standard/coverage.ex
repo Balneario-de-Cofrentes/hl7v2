@@ -36,9 +36,8 @@ defmodule HL7v2.Standard.Coverage do
   """
   @spec segment_completeness() :: [{binary(), non_neg_integer(), non_neg_integer(), float()}]
   def segment_completeness do
-    Standard.typed_segment_ids()
-    |> Enum.map(fn seg_id ->
-      module = Standard.segment_module(seg_id)
+    typed_segment_modules()
+    |> Enum.map(fn {seg_id, module} ->
       fields = module.fields()
       total = length(fields)
       typed = Enum.count(fields, fn {_, _, type, _, _} -> type != :raw end)
@@ -119,14 +118,18 @@ defmodule HL7v2.Standard.Coverage do
   # Returns every `:raw` field across typed segments, without filtering.
   @spec all_raw_holes() :: [{binary(), atom(), pos_integer()}]
   defp all_raw_holes do
-    Standard.typed_segment_ids()
-    |> Enum.flat_map(fn seg_id ->
-      module = Standard.segment_module(seg_id)
-
+    typed_segment_modules()
+    |> Enum.flat_map(fn {seg_id, module} ->
       module.fields()
       |> Enum.filter(fn {_seq, _name, type, _opt, _max} -> type == :raw end)
       |> Enum.map(fn {seq, name, _type, _opt, _max} -> {seg_id, name, seq} end)
     end)
+  end
+
+  defp typed_segment_modules do
+    for seg_id <- Standard.typed_segment_ids(),
+        module when not is_nil(module) <- [Standard.segment_module(seg_id)],
+        do: {seg_id, module}
   end
 
   @doc """

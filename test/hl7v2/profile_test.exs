@@ -57,7 +57,7 @@ defmodule HL7v2.ProfileTest do
     end
 
     test "raises on non-binary name" do
-      assert_raise FunctionClauseError, fn -> Profile.new(:not_a_binary) end
+      assert_raise FunctionClauseError, fn -> apply(Profile, :new, [:not_a_binary]) end
     end
   end
 
@@ -333,7 +333,7 @@ defmodule HL7v2.ProfileTest do
 
     test "rejects zero-arity functions" do
       assert_raise FunctionClauseError, fn ->
-        Profile.add_value_constraint(Profile.new("p"), "PID", 8, fn -> true end)
+        apply(Profile, :add_value_constraint, [Profile.new("p"), "PID", 8, fn -> true end])
       end
     end
   end
@@ -381,13 +381,13 @@ defmodule HL7v2.ProfileTest do
 
     test "rejects non-atom rule names" do
       assert_raise FunctionClauseError, fn ->
-        Profile.add_rule(Profile.new("p"), "not_an_atom", fn _ -> [] end)
+        apply(Profile, :add_rule, [Profile.new("p"), "not_an_atom", fn _ -> [] end])
       end
     end
 
     test "rejects non-arity-1 rule functions" do
       assert_raise FunctionClauseError, fn ->
-        Profile.add_rule(Profile.new("p"), :bad, fn -> [] end)
+        apply(Profile, :add_rule, [Profile.new("p"), :bad, fn -> [] end])
       end
     end
   end
@@ -560,7 +560,7 @@ defmodule HL7v2.ProfileTest do
       end
 
       assert_raise FunctionClauseError, fn ->
-        Profile.forbid_field(Profile.new("p"), :msh, 1)
+        apply(Profile, :forbid_field, [Profile.new("p"), :msh, 1])
       end
     end
 
@@ -754,7 +754,7 @@ defmodule HL7v2.ProfileTest do
       end
 
       assert_raise FunctionClauseError, fn ->
-        Profile.require_value(Profile.new("p"), :pv1, 2, "N")
+        apply(Profile, :require_value, [Profile.new("p"), :pv1, 2, "N"])
       end
     end
 
@@ -973,7 +973,7 @@ defmodule HL7v2.ProfileTest do
       end
 
       assert_raise FunctionClauseError, fn ->
-        Profile.require_component(Profile.new("p"), :pid, 3, 1)
+        apply(Profile, :require_component, [Profile.new("p"), :pid, 3, 1])
       end
     end
 
