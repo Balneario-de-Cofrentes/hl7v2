@@ -51,8 +51,10 @@ defmodule HL7v2.MLLP.Connection do
   Log lines never carry the raw error term. A TLS error from `:ssl` can embed
   the peer certificate subject, and a handler exception can embed message
   content, so the connection logs a closed set of tags instead: the atom
-  reason, `:tls_alert`, the exception module, or
-  `{:handler_crash, ExceptionModule | :throw}`. The raw term is still returned
+  reason, `{:tls_alert, alert_type}`, the exception module, or
+  `{:handler_crash, ExceptionModule | :throw}` (Erlang error terms are
+  normalised to their Elixir module, e.g. `MatchError`). The raw term is still
+  returned
   and still reaches the telemetry metadata above, for consumers that run
   in-process and can redact it themselves.
 
@@ -313,12 +315,19 @@ defmodule HL7v2.MLLP.Connection do
   # in the return value and in the telemetry metadata; it never reaches a log.
   # A crash keeps its exception module so an operator can tell a parser crash
   # from a timeout without seeing the message or the stack frames.
+  # The alert type is a fixed OTP atom (:unknown_ca, :certificate_expired,
+  # ...) with no peer data in it; the text next to it names the peer
+  # certificate in prose and is dropped.
+  defp log_tag({:tls_alert, {alert, _text}}) when is_atom(alert), do: {:tls_alert, alert}
   defp log_tag({:tls_alert, _}), do: :tls_alert
-
-  defp log_tag({:handler_crash, {%{__struct__: module}, _stacktrace}}),
-    do: {:handler_crash, module}
-
   defp log_tag({:handler_crash, {{:nocatch, _}, _stacktrace}}), do: {:handler_crash, :throw}
+
+  # Exception structs come back unchanged; Erlang error terms (:badarg,
+  # {:badmatch, term}, :function_clause) get their Elixir module without the
+  # term itself reaching the log.
+  defp log_tag({:handler_crash, {reason, stacktrace}}) when is_list(stacktrace),
+    do: {:handler_crash, Exception.normalize(:error, reason, stacktrace).__struct__}
+
   defp log_tag({:handler_crash, _}), do: :handler_crash
   defp log_tag(%{__struct__: module}), do: module
   defp log_tag(reason) when is_atom(reason), do: reason

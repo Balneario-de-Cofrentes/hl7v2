@@ -15,6 +15,11 @@ defmodule HL7v2.Test.ErrorHandler do
     throw("handler_threw")
   end
 
+  # The value comes from `meta` so the compiler cannot see the mismatch.
+  def handle_message("badmatch", meta) do
+    {:ok, _} = Map.get(meta, :no_such_key, {:error, "handler_badmatch"})
+  end
+
   def handle_message(message, _meta) do
     {:ok, message}
   end

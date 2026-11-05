@@ -14,6 +14,7 @@ defmodule HL7v2.MLLP.ConnectionLogTest do
   # parse quotes the segment it choked on), so no log line may contain them.
   @raise_marker "handler_exploded"
   @throw_marker "handler_threw"
+  @badmatch_marker "handler_badmatch"
 
   setup :start_listener
 
@@ -50,6 +51,21 @@ defmodule HL7v2.MLLP.ConnectionLogTest do
       refute log =~ @throw_marker
     end
 
+    test "logs the Elixir module of an Erlang error and never the matched term", %{port: port} do
+      socket = connect!(port)
+
+      log =
+        capture_log(fn ->
+          :gen_tcp.send(socket, frame("badmatch"))
+          assert_echo(socket, "ok")
+          Process.sleep(50)
+        end)
+
+      assert log =~ "MLLP handler error: {:handler_crash, MatchError}"
+      refute log =~ @badmatch_marker
+      refute log =~ "badmatch"
+    end
+
     test "keeps the exit reason shape in the telemetry metadata", %{port: port} do
       ref = make_ref()
       handler_id = "conn-log-telemetry-#{inspect(ref)}"
@@ -79,7 +95,7 @@ defmodule HL7v2.MLLP.ConnectionLogTest do
   end
 
   describe "connection error" do
-    test "logs :tls_alert and never the alert text", %{port: port, ref: ref} do
+    test "logs the alert type and never the alert text", %{port: port, ref: ref} do
       socket = connect!(port)
       # One round trip guarantees the connection process is up and reading.
       assert_echo(socket, "hello")
@@ -103,9 +119,9 @@ defmodule HL7v2.MLLP.ConnectionLogTest do
           assert {:error, :closed} = :gen_tcp.recv(socket, 0, 2_000)
         end)
 
-      assert log =~ "MLLP connection error: :tls_alert"
-      refute log =~ "unknown_ca"
+      assert log =~ "MLLP connection error: {:tls_alert, :unknown_ca}"
       refute log =~ "secret-partner"
+      refute log =~ "Hospital"
     end
   end
 
